@@ -5,7 +5,13 @@ import chisel3.util._
 class NPCB extends Module{
     val io = IO(new Bundle{
         val halt = Output((Bool()))
+        val currentPC = Output(UInt(64.W))
         val instIn = Input(UInt(32.W))
+
+        val memRW = Output(Bool())
+        val memAddr = Output(UInt(64.W))
+        val memMem2LSU = Input(UInt(64.W))
+        val memLSU2Mem = Output(UInt(64.W))
     })
     val GPR = Mem(32, UInt(64.W))
     val PC = RegInit(0.U(64.W))
