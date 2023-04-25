@@ -82,14 +82,11 @@ class WBU extends Module{
         WBU_I_EXUresult = Input(UInt(64.W))
         WBU_I_LSUresult = Input(UInt(64.W))
         WBU_I_LSUenable = Input(Bool())
-        WBU_I_EXUsnpcNEQdnpc = Input(Bool())
-        WBU_I_IDUsnpcISdnpc = Input(Bool())
         WBU_I_rd = Input(UInt(5.W))
-        WBU_I_nextPC = Input(UInt(64.W))
-        WBU_O_nextPC = Output(UInt(64.W))
         WBU_O_GPRidx = Output(UInt(5.W))
         WBU_O_GPRWriteBack = Output(UInt(64.W))
     })
+    io.WBU_O_GPRidx := io.WBU_I_rd
     Mux(io.WBU_I_LSUenable, io.WBU_O_GPRWriteBack := io.WBU_I_LSUresult, io.WBU_O_GPRWriteBack := io.WBU_I_EXUresult)
     // Mux(io.WBU_I_IDUsnpcISdnpc, io.WBU_O_nextPC := io.WBU_I_currentPC + 4.U, Mux(io.WBU_I_EXUsnpcNEQdnpc, io.WBU_O_nextPC := io.WBU_I_nextPC))
 }
