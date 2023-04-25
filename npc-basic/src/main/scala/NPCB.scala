@@ -17,7 +17,7 @@ class IFU extends Module{
 class IDU extends Module{
     val io = IO(new Bundle{
         IDU_I_inst = Input(UInt(32.W))
-        IDU_O_OperateMem = Output(Bool())
+        IDU_O_ModifyMem = Output(Bool())
         IDU_O_rs1 = Output(UInt(5.W))
         IDU_I_src1 = Input(UInt(64.W))
         IDU_O_src1 = Input(UInt(64.W))
@@ -55,6 +55,8 @@ class LSU extends Module{
         LSU_I_EXUresult = Input(UInt(64.W))
         LSU_I_opcode = Input(UInt(4.W))
         LSU_I_enableLSU = Input(Bool())
+        LSU_I_ModifyMem = Input(Bool())
+        LSU_O_result = Output(UInt(64.W))
         // Following signals are pulled to top
         LSU_O_memAddr = Output(UInt(64.W))
         LSU_O_memRW = Output(Bool()) // Low: Read, High: Write
@@ -66,6 +68,7 @@ class LSU extends Module{
 class WBU extends Module{
     val io = IO(new Bundle{
         WBU_I_EXUresult = Input(UInt(64.W))
+        WBU_I_LSUresult = Input(UInt(64.W))
         WBU_I_EXUsnpcNEQdnpc = Input(Bool())
         WBU_I_IDUsnpcISdnpc = Input(Bool())
         WBU_I_rd = Input(Bool())
@@ -95,4 +98,25 @@ class NPCB extends Module{
 
     val npcb_IDU = Module(new IDU)
     npcb_IDU.io.IDU_I_inst := npcb_IFU.io.IFU_I_inst
+
+    val npcb_EXU = Module(new EXU)
+    npcb_EXU.io.EXU_I_src1 := npcb_IDU.io.IDU_O_src1
+    npcb_EXU.io.EXU_I_src2 := npcb_IDU.io.IDU_O_src2
+    npcb_EXU.io.EXU_I_opcode := npcb_IDU.io.IDU_O_EXUopcode
+    npcb_EXU.io.EXU_I_enableEXU := npcb_IDU.IDU_O_enableEXU
+
+    val npcb_LSU = Module(new LSU)
+    npcb_LSU.io.LSU_I_src1 := npcb_IDU.io.IDU_O_src1
+    npcb_LSU.io.LSU_I_src2 := npcb_IDU.io.IDU_O_src2
+    npcb_LSU.io.LSU_I_EXUresult := npcb_EXU.io.EXU_O_result
+    npcb_LSU.io.LSU_I_ModifyMem := npcb_IDU.io.IDU_O_ModifyMem
+    npcb_LSU.io.LSU_I_enableLSU := npcb_IDU.io.IDU_O_enableLSU
+    npcb_LSU.io.LSU_I_opcode := npcb_IDU.io.IDU_O_LSUopcode
+
+    val npcb_WBU = Module(new WBU)
+    npcb_WBU.io.WBU_I_EXUresult := npcb_EXU.io.EXU_O_result
+    npcb_WBU.io.WBU_I_LSUresult := npcb_LSU.io.LSU_O_result
+    npcb_WBU.io.WBU_I_EXUsnpcNEQdnpc := npcb_EXU.io.EXU_O_snpcNEQdnpc
+    npcb_WBU.io.WBU_I_rd := npcb_IDU.io.IDU_O_rd
+    npcb_WBU.io.WBU_I_IDUsnpcISdnpc := npcb_IDU.io.IDU_O_snpcISdnpc
 }
