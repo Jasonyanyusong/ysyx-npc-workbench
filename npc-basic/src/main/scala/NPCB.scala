@@ -102,8 +102,25 @@ class IDU extends Module{
         IDU_O_GPRneedWriteBack = Output(Bool())
         IDU_O_imm = Output(UInt(64.W))
     })
+
+    io.IDU_O_rs1 := io.IDU_I_inst(19, 15) // Cut rs1 from BITS(i, 19, 15)
+    io.IDU_O_rs2 := io.IDU_I_inst(24, 20) // Cut rs2 from BITS(i, 24, 20)
+    io.IDU_O_rd := io.IDU_I_inst(11, 7) // Cut rd from BITS(i, 11, 7)
     io.IDU_O_src1 := io.IDU_I_src1
     io.IDU_O_src2 := io.IDU_I_src2
+
+    val immI = io.IDU_I_inst(31, 20)
+    val SignExtend_immI = Cat(Fill(52, immI(11)), immI)
+    val immS = Cat(io.IDU_I_inst(31, 25), io.IDU_I_inst(11, 7))
+    val SignExtend_immS = Cat(Fill(52, immS(11)), immS)
+    val immB = Cat(io.IDU_I_inst(31, 31), io.IDU_I_inst(7, 7), io.IDU_I_inst(30, 25), io.IDU_I_inst(11, 8), 0.U)
+    val SignExtend_immB = Cat(Fill(51, immB(12)), immB)
+    val immU = Cat(io.IDU_I_inst(31, 12), Fill(12, 0.U))
+    val SignExtend_immU = Cat(Fill(32, immU(31)), immU)
+    val immJ = Cat(io.IDU_I_inst(31, 31), io.IDU_I_inst(19, 12), io.IDU_I_inst(20, 20), io.IDU_I_inst(30, 21), 0.U)
+    val SignExtend_immJ = Cat(Fill(43, immJ(20)), immJ)
+    val immR = 0.U
+    val SignExtend_immR = Cat(Fill(63, immR(0)), immJ)
 }
 
 class EXU extends Module{
