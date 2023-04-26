@@ -94,11 +94,9 @@ class IDU extends Module{
         IDU_I_src2 = Input(UInt(64.W))
         IDU_O_src2 = Input(UInt(64.W))
         IDU_O_rd = Output(UInt(5.W))
-        IDU_O_EXUopcode = Output(UInt(4.W))
-        IDU_O_LSUopcode = Output(UInt(4.W))
+        IDU_O_EXUopcode = Output(UInt(6.W))
+        IDU_O_LSUopcode = Output(UInt(6.W))
         IDU_O_snpcISdnpc = Output(Bool())
-        IDU_O_enableEXU = Output(Bool())
-        IDU_O_enableLSU = Output(Bool())
         IDU_O_GPRneedWriteBack = Output(Bool())
         IDU_O_imm = Output(UInt(64.W))
     })
@@ -127,8 +125,7 @@ class EXU extends Module{
     val io = IO(new Bundle{
         EXU_I_src1 = Input(UInt(64.W))
         EXU_I_src2 = Input(UInt(64.W))
-        EXU_I_opcode = Input(UInt(4.W))
-        EXU_I_enableEXU = Input(Bool())
+        EXU_I_opcode = Input(UInt(6.W))
         EXU_O_result = Output(UInt(64.W))
         EXU_O_carry = Output(UInt(1.W))
         EXU_O_overflow = Output(UInt(1.W))
@@ -151,8 +148,7 @@ class LSU extends Module{
         LSU_I_src1 = Input(UInt(64.W))
         LSU_I_src2 = Input(UInt(64.W))
         LSU_I_EXUresult = Input(UInt(64.W))
-        LSU_I_opcode = Input(UInt(4.W))
-        LSU_I_enableLSU = Input(Bool())
+        LSU_I_opcode = Input(UInt(6.W))
         LSU_I_ModifyMem = Input(Bool())
         LSU_O_result = Output(UInt(64.W))
         // Following signals are pulled to top
@@ -209,7 +205,6 @@ class NPCB extends Module{
     npcb_EXU.io.EXU_I_src1 := npcb_IDU.io.IDU_O_src1
     npcb_EXU.io.EXU_I_src2 := npcb_IDU.io.IDU_O_src2
     npcb_EXU.io.EXU_I_opcode := npcb_IDU.io.IDU_O_EXUopcode
-    npcb_EXU.io.EXU_I_enableEXU := npcb_IDU.IDU_O_enableEXU
 
     // Step IV: LSU execution (we access memory using Verilator, NEMU and AM's debug interfaces)
     val npcb_LSU = Module(new LSU)
@@ -217,7 +212,6 @@ class NPCB extends Module{
     npcb_LSU.io.LSU_I_src2 := npcb_IDU.io.IDU_O_src2
     npcb_LSU.io.LSU_I_EXUresult := npcb_EXU.io.EXU_O_result
     npcb_LSU.io.LSU_I_ModifyMem := npcb_IDU.io.IDU_O_ModifyMem
-    npcb_LSU.io.LSU_I_enableLSU := npcb_IDU.io.IDU_O_enableLSU
     npcb_LSU.io.LSU_I_opcode := npcb_IDU.io.IDU_O_LSUopcode
 
     // Step V: Write back data to a GPR and PC
