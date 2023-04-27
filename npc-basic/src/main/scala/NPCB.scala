@@ -2,6 +2,15 @@ package npcb
 import chisel3._
 import chisel3.util._
 
+object inst_types{
+    def inst_R = BitPat("b000")
+    def inst_I = BitPat("b001")
+    def inst_S = BitPat("b010")
+    def inst_B = BitPat("b011")
+    def inst_U = BitPat("b100")
+    def inst_J = BitPat("b101")
+}
+
 object EXU_opcode{
     // EXU needs to do something for every instruction except EBREAK
     def EXU_DoNothing = BitPat("b000000")
@@ -159,9 +168,11 @@ class IFU extends Module{
         IFU_O_PC = Output(UInt(64.W))
         IFU_I_inst = Input(UInt(32.W))
         IFU_O_inst = Output(UInt(32.W))
+        IFU_O_error = Output(Bool())
     })
     io.IFU_O_inst := io.IFU_I_inst
     io.IFU_O_PC := io.IFU_I_PC
+    io.IFU_O_error := false.B
 }
 
 class IDU extends Module{
@@ -181,6 +192,7 @@ class IDU extends Module{
         IDU_O_GPRneedWriteBack = Output(Bool())
         IDU_O_imm = Output(UInt(64.W))
         IDU_O_halt = Output(Bool())
+        IDU_O_error = Output(Bool())
     })
 
     io.IDU_O_rs1 := io.IDU_I_inst(19, 15) // Cut rs1 from BITS(i, 19, 15)
@@ -190,6 +202,7 @@ class IDU extends Module{
     io.IDU_O_src2 := io.IDU_I_src2
 
     io.IDU_O_halt := false.B
+    io.IDU_O_error := false.B
 
     val immI = io.IDU_I_inst(31, 20)
     val SignExtend_immI = Cat(Fill(52, immI(11)), immI)
@@ -214,7 +227,9 @@ class EXU extends Module{
         EXU_O_carry = Output(UInt(1.W))
         EXU_O_overflow = Output(UInt(1.W))
         EXU_O_snpcNEQdnpc = Output(Bool())
+        EXU_O_error = Output(Bool())
     })
+    io.EXU_O_error := false.B
 }
 
 class PCU extends Module{
@@ -224,9 +239,11 @@ class PCU extends Module{
         PCU_I_willJump = Input(Bool())
         PCU_O_DynamicNextPC = Output(UInt(64.W))
         PCU_O_StaticNextPC = Output(UInt(64.W))
+        PCU_O_error = Output(Bool())
     })
     io.PCU_O_StaticNextPC := io.PCU_I_CurrentPC + 4.U
     io.PCU_O_DynamicNextPC := Mux(io.PCU_I_willJump, io.PCU_I_CurrentPC + io.PCU_I_imm, io.PCU_I_CurrentPC + 4.U)
+    io.PCU_O_error := false.B
 }
 
 class LSU extends Module{
@@ -242,7 +259,9 @@ class LSU extends Module{
         LSU_O_memRW = Output(Bool()) // Low: Read, High: Write
         LSU_I_memR = Input(UInt(64.W))
         LSU_I_memW = Output(UInt(64.W))
+        LSU_O_error = Output(Bool())
     })
+    io.LSU_O_error := false.B
 }
 
 class WBU extends Module{
@@ -253,10 +272,12 @@ class WBU extends Module{
         WBU_I_rd = Input(UInt(5.W))
         WBU_O_GPRidx = Output(UInt(5.W))
         WBU_O_GPRWriteBack = Output(UInt(64.W))
+        WBU_O_error = Output(Bool())
     })
     io.WBU_O_GPRidx := io.WBU_I_rd
     Mux(io.WBU_I_LSUenable, io.WBU_O_GPRWriteBack := io.WBU_I_LSUresult, io.WBU_O_GPRWriteBack := io.WBU_I_EXUresult)
     // Mux(io.WBU_I_IDUsnpcISdnpc, io.WBU_O_nextPC := io.WBU_I_currentPC + 4.U, Mux(io.WBU_I_EXUsnpcNEQdnpc, io.WBU_O_nextPC := io.WBU_I_nextPC))
+    io.WBU_O_error := false.B
 }
 
 class NPCB extends Module{
@@ -270,6 +291,7 @@ class NPCB extends Module{
 
         NPC_GPRchanged = Output(Bool())
         NPC_halt = Output(Bool())
+        NPC_error = Output(Bool())
     })
 
     val PC = RegInit(0.U(64.W))
