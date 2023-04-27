@@ -5,7 +5,7 @@ import chisel3.util._
 object EXU_opcode{
     // EXU needs to do something for every instruction except EBREAK
     def EXU_DoNothing = BitPat("b000000")
-    def EXU_LUI       = BitPat("b000001")
+    // def EXU_LUI       = BitPat("b000001")
     def EXU_AUIPC     = BitPat("b000010")
     def EXU_JAL       = BitPat("b000011")
     def EXU_JALR      = BitPat("b000100")
@@ -83,7 +83,7 @@ object LSU_opcode{
 }
 
 object RV_Inst{
-    // All Insts except EBREAK requrie EXU
+    // All Insts except EBREAK, LUI requrie EXU
     // RV64I Instructions
     def LUI       = BitPat("b???????_?????_?????_???_?????_01101_11") // U
     def AUIPC     = BitPat("b???????_?????_?????_???_?????_00101_11") // U
