@@ -3,21 +3,91 @@ import chisel3._
 import chisel3.util._
 
 object EXU_opcode{
+    // EXU needs to do something for every instruction except EBREAK
     def EXU_DoNothing = BitPat("b000000")
     def EXU_LUI       = BitPat("b000001")
     def EXU_AUIPC     = BitPat("b000010")
     def EXU_JAL       = BitPat("b000011")
+    def EXU_JALR      = BitPat("b000100")
+    def EXU_BEQ       = BitPat("b000101")
+    def EXU_BNE       = BitPat("b000110")
+    def EXU_BGE       = BitPat("b000111")
+    def EXU_BLTU      = BitPat("b001000")
+    def EXU_BGEU      = BitPat("b001001")
+    def EXU_LB        = BitPat("b001010")
+    def EXU_LH        = BitPat("b001011")
+    def EXU_LW        = BitPat("b001100")
+    def EXU_LBU       = BitPat("b001101")
+    def EXU_LHU       = BitPat("b001110")
+    def EXU_SB        = BitPat("b001111")
+    def EXU_SH        = BitPat("b010000")
+    def EXU_SW        = BitPat("b010001")
+    def EXU_ADDI      = BitPat("b010010")
+    def EXU_SLTI      = BitPat("b010011")
+    def EXU_SLTIU     = BitPat("b010100")
+    def EXU_XORI      = BitPat("b010101")
+    def EXU_ORI       = BitPat("b010110")
+    def EXU_ANDI      = BitPat("b010111")
+    def EXU_SLLI      = BitPat("b011000")
+    def EXU_SRLI      = BitPat("b011001")
+    def EXU_SRAI      = BitPat("b011010")
+    def EXU_ADD       = BitPat("b011011")
+    def EXU_SUB       = BitPat("b011100")
+    def EXU_SLL       = BitPat("b011101")
+    def EXU_SLT       = BitPat("b011110")
+    def EXU_SLTU      = BitPat("b011111")
+    def EXU_XOR       = BitPat("b100000")
+    def EXU_SRL       = BitPat("b100001")
+    def EXU_SRA       = BitPat("b100010")
+    def EXU_OR        = BitPat("b100011")
+    def EXU_AND       = BitPat("b100100")
+    def EXU_LWU       = BitPat("b100101")
+    def EXU_LD        = BitPat("b100110")
+    def EXU_SD        = BitPat("b100111")
+    def EXU_ADDIW     = BitPat("b101000")
+    def EXU_SLLIW     = BitPat("b101001")
+    def EXU_SRLIW     = BitPat("b101010")
+    def EXU_SRAIW     = BitPat("b101011")
+    def EXU_ADDW      = BitPat("b101100")
+    def EXU_SUBW      = BitPat("b101101")
+    def EXU_SLLW      = BitPat("b101110")
+    def EXU_SRLW      = BitPat("b101111")
+    def EXU_SRAW      = BitPat("b110000")
+    def EXU_MUL       = BitPat("b110001")
+    def EXU_MULH      = BitPat("b110010")
+    def EXU_MULHSU    = BitPat("b110011")
+    def EXU_MULHU     = BitPat("b110100")
+    def EXU_DIV       = BitPat("b110101")
+    def EXU_DIVU      = BitPat("b110110")
+    def EXU_REM       = BitPat("b110111")
+    def EXU_REMU      = BitPat("b111000")
+    def EXU_MULW      = BitPat("b111001")
+    def EXU_DIVW      = BitPat("b111010")
+    def EXU_DIVUW     = BitPat("b111011")
+    def EXU_REMW      = BitPat("b111100")
+    def EXU_REMUW     = BitPat("b111101")
 }
 
 object LSU_opcode{
     def LSU_DoNothing = BitPat("b000000")
+    def LSU_LB        = BitPat("b000001")
+    def LSU_LBU       = BitPat("b000010")
+    def LSU_LH        = BitPat("b000011")
+    def LSU_LHU       = BitPat("b000100")
+    def LSU_LW        = BitPat("b000101")
+    def LSU_LD        = BitPat("b000110")
+    def LSU_SB        = BitPat("b000111")
+    def LSU_SH        = BitPat("b001000")
+    def LSU_SW        = BitPat("b001001")
+    def LSU_SD        = BitPat("b001010")
 }
 
 object RV_Inst{
+    // All Insts except EBREAK requrie EXU
     // RV64I Instructions
-    def LUI       = BitPat("b???????_?????_?????_???_?????_01101_11") // U EXU
-    def AUIPC     = BitPat("b???????_?????_?????_???_?????_00101_11") // U EXU
-    def JAL       = BitPat("b???????_?????_?????_???_?????_11011_11") // J EXU
+    def LUI       = BitPat("b???????_?????_?????_???_?????_01101_11") // U
+    def AUIPC     = BitPat("b???????_?????_?????_???_?????_00101_11") // U
+    def JAL       = BitPat("b???????_?????_?????_???_?????_11011_11") // J
     def JALR      = BitPat("b???????_?????_?????_000_?????_11001_11") // I
     def BEQ       = BitPat("b???????_?????_?????_000_?????_11000_11") // B
     def BNE       = BitPat("b???????_?????_?????_001_?????_11000_11") // B
@@ -25,14 +95,14 @@ object RV_Inst{
     def BGE       = BitPat("b???????_?????_?????_101_?????_11000_11") // B
     def BLTU      = BitPat("b???????_?????_?????_110_?????_11000_11") // B
     def BGEU      = BitPat("b???????_?????_?????_111_?????_11000_11") // B
-    def LB        = BitPat("b???????_?????_?????_000_?????_00000_11") // I
-    def LH        = BitPat("b???????_?????_?????_001_?????_00000_11") // I
-    def LW        = BitPat("b???????_?????_?????_010_?????_00000_11") // I
-    def LBU       = BitPat("b???????_?????_?????_100_?????_00000_11") // I
-    def LHU       = BitPat("b???????_?????_?????_101_?????_00000_11") // I
-    def SB        = BitPat("b???????_?????_?????_000_?????_01000_11") // S
-    def SH        = BitPat("b???????_?????_?????_001_?????_01000_11") // S
-    def SW        = BitPat("b???????_?????_?????_010_?????_01000_11") // S
+    def LB        = BitPat("b???????_?????_?????_000_?????_00000_11") // I LSU
+    def LH        = BitPat("b???????_?????_?????_001_?????_00000_11") // I LSU
+    def LW        = BitPat("b???????_?????_?????_010_?????_00000_11") // I LSU
+    def LBU       = BitPat("b???????_?????_?????_100_?????_00000_11") // I LSU
+    def LHU       = BitPat("b???????_?????_?????_101_?????_00000_11") // I LSU
+    def SB        = BitPat("b???????_?????_?????_000_?????_01000_11") // S LSU
+    def SH        = BitPat("b???????_?????_?????_001_?????_01000_11") // S LSU
+    def SW        = BitPat("b???????_?????_?????_010_?????_01000_11") // S LSU
     def ADDI      = BitPat("b???????_?????_?????_000_?????_00100_11") // I
     def SLTI      = BitPat("b???????_?????_?????_010_?????_00100_11") // I
     def SLTIU     = BitPat("b???????_?????_?????_011_?????_00100_11") // I
@@ -54,8 +124,8 @@ object RV_Inst{
     def AND       = BitPat("b0000000_?????_?????_111_?????_01100_11") // R
     def EBREAK    = BitPat("b0000000_00001_00000_000_00000_11100_11") // N
     def LWU       = BitPat("b???????_?????_?????_110_?????_00000_11") // I
-    def LD        = BitPat("b???????_?????_?????_011_?????_00000_11") // I
-    def SD        = BitPat("b???????_?????_?????_011_?????_01000_11") // S
+    def LD        = BitPat("b???????_?????_?????_011_?????_00000_11") // I LSU
+    def SD        = BitPat("b???????_?????_?????_011_?????_01000_11") // S LSU
     def ADDIW     = BitPat("b???????_?????_?????_000_?????_00110_11") // I
     def SLLIW     = BitPat("b0000000_?????_?????_001_?????_00110_11") // R
     def SRLIW     = BitPat("b0000000_?????_?????_101_?????_00110_11") // R
@@ -110,6 +180,7 @@ class IDU extends Module{
         IDU_O_snpcISdnpc = Output(Bool())
         IDU_O_GPRneedWriteBack = Output(Bool())
         IDU_O_imm = Output(UInt(64.W))
+        IDU_O_halt = Output(Bool())
     })
 
     io.IDU_O_rs1 := io.IDU_I_inst(19, 15) // Cut rs1 from BITS(i, 19, 15)
@@ -117,6 +188,8 @@ class IDU extends Module{
     io.IDU_O_rd := io.IDU_I_inst(11, 7) // Cut rd from BITS(i, 11, 7)
     io.IDU_O_src1 := io.IDU_I_src1
     io.IDU_O_src2 := io.IDU_I_src2
+
+    io.IDU_O_halt := false.B
 
     val immI = io.IDU_I_inst(31, 20)
     val SignExtend_immI = Cat(Fill(52, immI(11)), immI)
@@ -149,9 +222,11 @@ class PCU extends Module{
         PCU_I_CurrentPC = Input(UInt(64.W))
         PCU_I_imm = Input(UInt(64.W))
         PCU_I_willJump = Input(Bool())
-        PCU_O_NextPC = Output(UInt(64.W))
+        PCU_O_DynamicNextPC = Output(UInt(64.W))
+        PCU_O_StaticNextPC = Output(UInt(64.W))
     })
-    io.PCU_O_NextPC := Mux(io.PCU_I_willJump, io.PCU_I_CurrentPC + io.PCU_I_imm, io.PCU_I_CurrentPC + 4.U)
+    io.PCU_O_StaticNextPC := io.PCU_I_CurrentPC + 4.U
+    io.PCU_O_DynamicNextPC := Mux(io.PCU_I_willJump, io.PCU_I_CurrentPC + io.PCU_I_imm, io.PCU_I_CurrentPC + 4.U)
 }
 
 class LSU extends Module{
@@ -194,6 +269,7 @@ class NPCB extends Module{
         NPC_LSU_I_memW = Output(UInt(64.W))
 
         NPC_GPRchanged = Output(Bool())
+        NPC_halt = Output(Bool())
     })
 
     val PC = RegInit(0.U(64.W))
@@ -210,6 +286,7 @@ class NPCB extends Module{
     npcb_IDU.io.IDU_I_inst := npcb_IFU.io.IFU_I_inst
     npcb_IDU.io.IDU_I_src1 := GPR_read(npcb_IDU.io.IDU_O_rs1)
     npcb_IDU.io.IDU_I_src2 := GPR_read(npcb_IDU.io.IDU_O_rs2)
+    io.NPC_halt := npcb_IDU.io.IDU_O_halt
 
     // Step III: ALU execution
     val npcb_EXU = Module(new EXU)
@@ -238,5 +315,5 @@ class NPCB extends Module{
     npcb_WBU.io.WBU_I_IDUsnpcISdnpc := npcb_IDU.io.IDU_O_snpcISdnpc
     NPC_GPRchanged := true.B
     Mux(npcb_IDU.io.IDU_O_GPRneedWriteBack, GPR(npcb_WBU.io.WBU_O_GPRidx) := npcb_WBU.io.WBU_O_GPRWriteBack, NPC_GPRchanged := false.B)
-    PC := npcb_PCU.io.PCU_O_NextPC
+    PC := npcb_PCU.io.PCU_O_DynamicNextPC
 }
