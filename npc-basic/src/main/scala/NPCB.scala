@@ -267,28 +267,28 @@ class IDU extends Module{
         RV_Inst.LWU      -> List(inst_types.inst_I    , 0.U, EXU_opcode.EXU_LWU      , LSU_opcode.LSU_LWU      , 1.U, 1.U, 0.U, 0.U),
         RV_Inst.LD       -> List(inst_types.inst_I    , 0.U, EXU_opcode.EXU_LD       , LSU_opcode.LSU_LD       , 1.U, 1.U, 0.U, 0.U),
         RV_Inst.SD       -> List(inst_types.inst_S    , 1.U, EXU_opcode.EXU_SD       , LSU_opcode.LSU_SD       , 1.U, 0.U, 0.U, 0.U),
-        RV_Inst.ADDIW    -> List(inst_types.inst_I    . 0.U, EXU_opcode.EXU_ADDIW    , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.SLLIW    -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_SLLIW    , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.SRLIW    -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_SRLIW    , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.SRAIW    -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_SRAIW    , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.ADDW     -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_ADDW     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.ADDIW    -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_ADDIW    , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.SUBW     -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_SUBW     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.SLLW     -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_SLLW     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.SRAW     -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_SRAW     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.MUL      -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_MUL      , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.MULH     -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_MULH     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.MULHSU   -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_MULHSU   , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.MULHU    -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_MULHU    , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.DIV      -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_DIV      , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.DIVU     -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_DIVU     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.REM      -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_REM      , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.REMU     -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_REMU     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.MULW     -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_MULW     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.DIVW     -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_DIVW     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.DIVUW    -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_DIVUW    , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.REMW     -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_REMW     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.REMUW    -> List(inst_types.inst_R    . 0.U, EXU_opcode.EXU_REMUW    , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U)
+        RV_Inst.ADDIW    -> List(inst_types.inst_I    , 0.U, EXU_opcode.EXU_ADDIW    , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.SLLIW    -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_SLLIW    , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.SRLIW    -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_SRLIW    , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.SRAIW    -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_SRAIW    , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.ADDW     -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_ADDW     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.ADDIW    -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_ADDIW    , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.SUBW     -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_SUBW     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.SLLW     -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_SLLW     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.SRAW     -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_SRAW     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.MUL      -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_MUL      , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.MULH     -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_MULH     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.MULHSU   -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_MULHSU   , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.MULHU    -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_MULHU    , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.DIV      -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_DIV      , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.DIVU     -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_DIVU     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.REM      -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_REM      , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.REMU     -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_REMU     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.MULW     -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_MULW     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.DIVW     -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_DIVW     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.DIVUW    -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_DIVUW    , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.REMW     -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_REMW     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
+        RV_Inst.REMUW    -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_REMUW    , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U)
         )
 
     val IDU_inst_type          = IDU_opcodes(0)
@@ -316,6 +316,7 @@ class EXU extends Module{
     val io = IO(new Bundle{
         EXU_I_src1 = Input(UInt(64.W))
         EXU_I_src2 = Input(UInt(64.W))
+        EXU_I_imm = Input(UInt(64.W))
         EXU_I_opcode = Input(UInt(6.W))
         EXU_O_result = Output(UInt(64.W))
         EXU_O_carry = Output(UInt(1.W))
@@ -408,6 +409,7 @@ class NPCB extends Module{
     val npcb_EXU = Module(new EXU)
     npcb_EXU.io.EXU_I_src1 := npcb_IDU.io.IDU_O_src1
     npcb_EXU.io.EXU_I_src2 := npcb_IDU.io.IDU_O_src2
+    npcb_EXU.io.EXU_I_imm := npcb_IDU.io.IDU_O_imm
     npcb_EXU.io.EXU_I_opcode := npcb_IDU.io.IDU_O_EXUopcode
 
     // Step IV: LSU execution (we access memory using Verilator, NEMU and AM's debug interfaces)
