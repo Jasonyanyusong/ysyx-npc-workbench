@@ -179,13 +179,13 @@ class IDU extends Module{
     val io = IO(new Bundle{
         IDU_I_inst = Input(UInt(32.W))
         IDU_O_ModifyMem = Output(Bool())
-        IDU_O_rs1 = Output(UInt(5.W))
+        IDU_O_rs1 = Output(UInt(5.W)) // Same for all
         IDU_I_src1 = Input(UInt(64.W))
-        IDU_O_src1 = Input(UInt(64.W))
-        IDU_O_rs2 = Output(UInt(5.W))
+        IDU_O_src1 = Input(UInt(64.W)) // Same for all
+        IDU_O_rs2 = Output(UInt(5.W)) // Same for all
         IDU_I_src2 = Input(UInt(64.W))
-        IDU_O_src2 = Input(UInt(64.W))
-        IDU_O_rd = Output(UInt(5.W))
+        IDU_O_src2 = Input(UInt(64.W)) // Same for all
+        IDU_O_rd = Output(UInt(5.W)) // Same for all
         IDU_O_EXUopcode = Output(UInt(6.W))
         IDU_O_LSUopcode = Output(UInt(6.W))
         IDU_O_snpcISdnpc = Output(Bool())
@@ -215,7 +215,11 @@ class IDU extends Module{
     val immJ = Cat(io.IDU_I_inst(31, 31), io.IDU_I_inst(19, 12), io.IDU_I_inst(20, 20), io.IDU_I_inst(30, 21), 0.U)
     val SignExtend_immJ = Cat(Fill(43, immJ(20)), immJ)
     val immR = 0.U
-    val SignExtend_immR = Cat(Fill(63, immR(0)), immJ)
+    val SignExtend_immR = Cat(Fill(63, immR(0)), immJ) // When we found error in decoding, we will automatically return this imm value since it is 0, this will reduce the cause of bugs
+
+    ListLookup(
+        /*Compare Item: */io.IDU_I_inst,
+        /*Default: */ io.IDU_O_ModifyMem := false.B; io.IDU_O_EXUopcode := EXU_opcode.EXU_DoNothing; io.IDU_O_LSUopcode := LSU_opcode.LSU_DoNothing; io.IDU_O_snpcISdnpc := true.B; io.IDU_O_GPRneedWriteBack := false.B; io.IDU_O_error := true.B; io.IDU_O_halt := true.B,)
 }
 
 class EXU extends Module{
