@@ -14,7 +14,7 @@ object inst_types{
 object EXU_opcode{
     // EXU needs to do something for every instruction except EBREAK
     def EXU_DoNothing = BitPat("b000000")
-    // def EXU_LUI       = BitPat("b000001")
+    def EXU_LUI       = BitPat("b000001")
     def EXU_AUIPC     = BitPat("b000010")
     def EXU_JAL       = BitPat("b000011")
     def EXU_JALR      = BitPat("b000100")
@@ -92,7 +92,7 @@ object LSU_opcode{
 }
 
 object RV_Inst{
-    // All Insts except EBREAK, LUI requrie EXU
+    // All Insts except EBREAK requrie EXU
     // RV64I Instructions
     def LUI       = BitPat("b???????_?????_?????_???_?????_01101_11") // U
     def AUIPC     = BitPat("b???????_?????_?????_???_?????_00101_11") // U
@@ -217,9 +217,14 @@ class IDU extends Module{
     val immR = 0.U
     val SignExtend_immR = Cat(Fill(63, immR(0)), immJ) // When we found error in decoding, we will automatically return this imm value since it is 0, this will reduce the cause of bugs
 
-    ListLookup(
+    // We use a List called IDU_opcodes to record operats, the list have structure:
+    // List(ModifyMem(12, 12), EXUopcode(11, 6), LSUopcode(9, 4), snpcISdnpc(3, 3), GPRneedWriteBack(2, 2), error(1, 1), halt(0, 0))
+    // 
+
+    val IDU_opcodes = ListLookup(
         /*Compare Item: */io.IDU_I_inst,
-        /*Default: */ io.IDU_O_ModifyMem := false.B; io.IDU_O_EXUopcode := EXU_opcode.EXU_DoNothing; io.IDU_O_LSUopcode := LSU_opcode.LSU_DoNothing; io.IDU_O_snpcISdnpc := true.B; io.IDU_O_GPRneedWriteBack := false.B; io.IDU_O_error := true.B; io.IDU_O_halt := true.B,)
+        /*Default: */       List(0.U, EXU_opcode.EXU_DoNothing, LSU_opcode.LSU_DoNothing, 1.U, 0.U, 1.U, 1.U),
+        RV_Inst.LUI      -> List(0.U, EXU_opcode.EXU_LUI      , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U))
 }
 
 class EXU extends Module{
