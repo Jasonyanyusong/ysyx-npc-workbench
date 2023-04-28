@@ -376,6 +376,9 @@ class EXU extends Module{
         EXU_opcode.SRA           -> List(EXU_src1_signed >> EXU_src2_signed(5, 0)                         , 0.U                                                  , 0.U),
         EXU_opcode.OR            -> List(EXU_src1_unsigned | EXU_src2_unsigned                            , 0.U                                                  , 0.U),
         EXU_opcode.AND           -> List(EXU_src1_unsigned & EXU_src2_unsigned                            , 0.U                                                  , 0.U),
+        EXU_opcode.LWU           -> List(EXU_src1_unsigned + EXU_imm_unsigned                             , 0.U                                                  , 0.U),
+        EXU_opcode.LD            -> List(EXU_src1_unsigned + EXU_imm_unsigned                             , 0.U                                                  , 0.U),
+        EXU_opcode.SD            -> List(EXU_src1_unsigned + EXU_imm_unsigned                             , 0.U                                                  , 0.U),
     )
 
     io.EXU_O_result := EXU_output(0)
