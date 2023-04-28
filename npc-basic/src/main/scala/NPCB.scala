@@ -319,12 +319,16 @@ class EXU extends Module{
         EXU_I_imm = Input(UInt(64.W))
         EXU_I_opcode = Input(UInt(6.W))
         EXU_O_result = Output(UInt(64.W))
-        EXU_O_carry = Output(UInt(1.W))
-        EXU_O_overflow = Output(UInt(1.W))
         EXU_O_snpcNEQdnpc = Output(Bool())
         EXU_O_error = Output(Bool())
     })
     io.EXU_O_error := false.B
+    val EXU_src1_signed = io.EXU_I_src1.asSInt
+    val EXU_src1_unsigned = io.EXU_I_src1.asUInt
+    val EXU_src2_signed = io.EXU_I_src2.asSInt
+    val EXU_src2_unsigned = io.EXU_I_src2.asUInt
+    val EXU_imm_signed = io.EXU_I_imm.asSInt
+    val EXU_imm_unsigned = io.EXU_I_imm.asUInt
 }
 
 class PCU extends Module{
