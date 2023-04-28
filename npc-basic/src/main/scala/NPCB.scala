@@ -433,7 +433,7 @@ class NPCB extends Module{
 
     // Step IV: LSU execution (we access memory using Verilator, NEMU and AM's debug interfaces)
     val npcb_LSU = Module(new LSU)
-    npcb_LSU.io.LSU_I_src1 := npcb_IDU.io.IDU_O_src1
+    npcb_LSU.io.LSU_I_src1 := npcb_EXU.io.EXU_O_result // LSU will get src1 + imm from EXU's result
     npcb_LSU.io.LSU_I_src2 := npcb_IDU.io.IDU_O_src2
     npcb_LSU.io.LSU_I_EXUresult := npcb_EXU.io.EXU_O_result
     npcb_LSU.io.LSU_I_ModifyMem := npcb_IDU.io.IDU_O_ModifyMem
