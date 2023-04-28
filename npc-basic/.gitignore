@@ -1,0 +1,6 @@
+*
+!.gitignore
+!build.sbt
+!build.sc
+!src/
+!project/
