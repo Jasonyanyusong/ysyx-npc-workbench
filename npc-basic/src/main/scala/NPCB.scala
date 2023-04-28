@@ -329,6 +329,19 @@ class EXU extends Module{
     val EXU_src2_unsigned = io.EXU_I_src2.asUInt
     val EXU_imm_signed = io.EXU_I_imm.asSInt
     val EXU_imm_unsigned = io.EXU_I_imm.asUInt
+
+    // We use a list to manage the output of EXU
+    // List(result(65, 2), snpcNEQdnpc(1), error(0))
+
+    var EXU_output = ListLookup(
+        /*Compare Item: */ io.EXU_I_opcode,
+        /*Default: */           List(0.U(64.W), 1.U, 1.U), // If none of the opcodes are matched, we set result to 0, with static next pc and raise error
+        EXU_opcode.LUI       -> List(io.EXU_I_imm, 1.U, 0.U),
+    )
+
+    io.EXU_O_result := EXU_output(0)
+    io.EXU_O_snpcNEQdnpc := EXU_output(1)
+    io.EXU_O_error := EXU_output(2)
 }
 
 class PCU extends Module{
@@ -357,8 +370,9 @@ class LSU extends Module{
         LSU_O_memAddr = Output(UInt(64.W))
         LSU_O_memRW = Output(Bool()) // Low: Read, High: Write
         LSU_I_memR = Input(UInt(64.W))
-        LSU_I_memW = Output(UInt(64.W))
+        LSU_O_memW = Output(UInt(64.W))
         LSU_O_error = Output(Bool())
+        LSU_O_len = Output(UInt(2.W)) // 00: Bit 01: Half 10: Word 11: Double Word
     })
     io.LSU_O_error := false.B
 }
@@ -386,7 +400,8 @@ class NPCB extends Module{
         NPC_LSU_O_memAddr = Output(UInt(64.W))
         NPC_LSU_O_memRW = Output(Bool()) // Low: Read, High: Write
         NPC_LSU_I_memR = Input(UInt(64.W))
-        NPC_LSU_I_memW = Output(UInt(64.W))
+        NPC_LSU_O_memW = Output(UInt(64.W))
+        NPC_LSU_O_lem = Output(UInt(2.W))
 
         NPC_GPRchanged = Output(Bool())
         NPC_halt = Output(Bool())
