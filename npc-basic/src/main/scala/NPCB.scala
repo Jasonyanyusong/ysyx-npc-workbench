@@ -318,6 +318,7 @@ class EXU extends Module{
         EXU_I_src2 = Input(UInt(64.W))
         EXU_I_imm = Input(UInt(64.W))
         EXU_I_opcode = Input(UInt(6.W))
+        EXU_I_currentPC = Input(UInt(64.W))
         EXU_O_result = Output(UInt(64.W))
         EXU_O_snpcNEQdnpc = Output(Bool())
         EXU_O_error = Output(Bool())
@@ -335,8 +336,26 @@ class EXU extends Module{
 
     var EXU_output = ListLookup(
         /*Compare Item: */ io.EXU_I_opcode,
-        /*Default: */           List(0.U(64.W), 1.U, 1.U), // If none of the opcodes are matched, we set result to 0, with static next pc and raise error
-        EXU_opcode.LUI       -> List(io.EXU_I_imm, 1.U, 0.U),
+        // If none of the opcodes are matched, we set result to 0, with static next pc and raise error
+        /*Default: */           List(0.U(64.W)                                            , 1.U                                                  , 1.U),
+        EXU_opcode.LUI       -> List(EXU_imm_unsigned                                     , 1.U                                                  , 0.U),
+        EXU_opcode.AUIPC     -> List(io.EXU_I_currentPC + EXU_imm_unsigned                , 1.U                                                  , 0.U),
+        EXU_opcode.JAL       -> List(io.EXU_I_currentPC + EXU_imm_unsigned                , 0.U                                                  , 0.U),
+        EXU_opcode.JALR      -> List((EXU_src1_unsigned + EXU_src2_unsigned) & ~1         , 0.U                                                  , 0.U),
+        EXU_opcode.BEQ       -> List(io.EXU_I_currentPC + EXU_imm_unsigned                , (!(EXU_src1_unsigned === EXU_src2_unsigned)).asUInt  , 0.U),
+        EXU_opcode.BNE       -> List(io.EXU_I_currentPC + EXU_imm_unsigned                , (!(EXU_src1_unsigned =/= EXU_src2_unsigned)).asUInt  , 0.U),
+        EXU_opcode.BLT       -> List(io.EXU_I_currentPC + EXU_imm_unsigned                , (!(EXU_src1_signed < EXU_src2_signed)).asUInt        , 0.U),
+        EXU_opcode.BGE       -> List(io.EXU_I_currentPC + EXU_imm_unsigned                , (!(EXU_src1_signed >= EXU_src2_signed)).asUInt       , 0.U),
+        EXU_opcode.BLTU      -> List(io.EXU_I_currentPC + EXU_imm_unsigned                , (!(EXU_src1_unsigned < EXU_src2_unsigned)).asUInt    , 0.U),
+        EXU_opcode.BGEU      -> List(io.EXU_I_currentPC + EXU_imm_unsigned                , (!(EXU_src1_unsigned >= EXU_src2_unsigned)).asUInt   , 0.U),
+        EXU_opcode.LB        -> List(EXU_src1_unsigned + EXU_imm_unsigned                 , 0.U                                                  , 0.U),
+        EXU_opcode.LH        -> List(EXU_src1_unsigned + EXU_imm_unsigned                 , 0.U                                                  , 0.U),
+        EXU_opcode.LW        -> List(EXU_src1_unsigned + EXU_imm_unsigned                 , 0.U                                                  , 0.U),
+        EXU_opcode.LBU       -> List(EXU_src1_unsigned + EXU_imm_unsigned                 , 0.U                                                  , 0.U),
+        EXU_opcode.LHU       -> List(EXU_src1_unsigned + EXU_imm_unsigned                 , 0.U                                                  , 0.U),
+        EXU_opcode.SB        -> List(EXU_src1_unsigned + EXU_imm_unsigned                 , 0.U                                                  , 0.U),
+        EXU_opcode.SH        -> List(EXU_src1_unsigned + EXU_imm_unsigned                 , 0.U                                                  , 0.U),
+        EXU_opcode.SW        -> List(EXU_src1_unsigned + EXU_imm_unsigned                 , 0.U                                                  , 0.U),
     )
 
     io.EXU_O_result := EXU_output(0)
@@ -430,6 +449,7 @@ class NPCB extends Module{
     npcb_EXU.io.EXU_I_src2 := npcb_IDU.io.IDU_O_src2
     npcb_EXU.io.EXU_I_imm := npcb_IDU.io.IDU_O_imm
     npcb_EXU.io.EXU_I_opcode := npcb_IDU.io.IDU_O_EXUopcode
+    npcb_EXU.io.EXU_I_currentPC := PC
 
     // Step IV: LSU execution (we access memory using Verilator, NEMU and AM's debug interfaces)
     val npcb_LSU = Module(new LSU)
