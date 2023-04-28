@@ -86,6 +86,7 @@ object LSU_opcode{
     def LSU_LH        = BitPat("b000011")
     def LSU_LHU       = BitPat("b000100")
     def LSU_LW        = BitPat("b000101")
+    def LSU_LWU       = BitPat("b001011")
     def LSU_LD        = BitPat("b000110")
     def LSU_SB        = BitPat("b000111")
     def LSU_SH        = BitPat("b001000")
@@ -426,7 +427,7 @@ class LSU extends Module{
     val io = IO(new Bundle{
         LSU_I_src1 = Input(UInt(64.W))
         LSU_I_src2 = Input(UInt(64.W))
-        LSU_I_EXUresult = Input(UInt(64.W))
+        //LSU_I_EXUresult = Input(UInt(64.W))
         LSU_I_opcode = Input(UInt(6.W))
         LSU_I_ModifyMem = Input(Bool())
         LSU_O_result = Output(UInt(64.W))
@@ -439,6 +440,33 @@ class LSU extends Module{
         LSU_O_len = Output(UInt(2.W)) // 00: Bit 01: Half 10: Word 11: Double Word
     })
     io.LSU_O_error := false.B
+
+    // We use a list to manage the output of LSU
+    // List(result, memAddr, memRW, memW, error, len)
+
+    var LSU_output = ListLookup(
+        /*Compare Item: */ io.LSU_I_opcode,
+        /*Default: */               List(0.U(64.W)                                        , 0.U(64.W)     , 0.U, 0.U(64.W)     , 1.U , "b00".U),
+        LSU_opcode.LSU_DoNothing -> List(0.U(64.W)                                        , 0.U(64.W)     , 0.U, 0.U(64.W)     , 0.U , "b00".U),
+        LSU_opcode.LSU_LB        -> List(Cat(Fill(56, io.LSU_I_memR(7)) , io.LSU_I_memR)  , io.LSU_I_src1 , 0.U, 0.U(64.W)     , 0.U , "b00".U),
+        LSU_opcode.LSU_LBU       -> List(Cat(Fill(56, 0) , io.LSU_I_memR)                 , io.LSU_I_src1 , 0.U, 0.U(64.W)     , 0.U , "b00".U),
+        LSU_opcode.LSU_LH        -> List(Cat(Fill(48, io.LSU_I_memR(15)) , io.LSU_I_memR) , io.LSU_I_src1 , 0.U, 0.U(64.W)     , 0.U , "b01".U),
+        LSU_opcode.LSU_LHU       -> List(Cat(Fill(48, 0) , io.LSU_I_memR)                 , io.LSU_I_src1 , 0.U, 0.U(64.W)     , 0.U , "b01".U),
+        LSU_opcode.LSU_LW        -> List(Cat(Fill(32, io.LSU_I_memR(31)) , io.LSU_I_memR) , io.LSU_I_src1 , 0.U, 0.U(64.W)     , 0.U , "b10".U),
+        LSU_opcode.LSU_LWU       -> List(Cat(Fill(32, 0) , io.LSU_I_memR)                 , io.LSU_I_src1 , 0.U, 0.U(64.W)     , 0.U , "b10".U),
+        LSU_opcode.LSU_LD        -> List(Cat(Fill(32, io.LSU_I_memR(31)) , io.LSU_I_memR) , io.LSU_I_src1 , 0.U, 0.U(64.W)     , 0.U , "b11".U),
+        LSU_opcode.LSU_SB        -> List(0.U(64.W)                                        , io.LSU_I_src1 , 1.U, io.LSU_I_src2 , 0.U , "b00".U),
+        LSU_opcode.LSU_SH        -> List(0.U(64.W)                                        , io.LSU_I_src1 , 1.U, io.LSU_I_src2 , 0.U , "b01".U),
+        LSU_opcode.LSU_SW        -> List(0.U(64.W)                                        , io.LSU_I_src1 , 1.U, io.LSU_I_src2 , 0.U , "b10".U),
+        LSU_opcode.LSU_SD        -> List(0.U(64.W)                                        , io.LSU_I_src1 , 1.U, io.LSU_I_src2 , 0.U , "b11".U),
+    )
+
+    io.LSU_O_result := LSU_output(0)
+    io.LSU_O_memAddr := LSU_output(1)
+    io.LSU_O_memRW := LSU_output(2)
+    io.LSU_O_memW := LSU_output(3)
+    io.LSU_O_error := LSU_output(4)
+    io.LSU_O_len := LSU_output(5)
 }
 
 class WBU extends Module{
@@ -500,7 +528,7 @@ class NPCB extends Module{
     val npcb_LSU = Module(new LSU)
     npcb_LSU.io.LSU_I_src1 := npcb_EXU.io.EXU_O_result // LSU will get src1 + imm from EXU's result
     npcb_LSU.io.LSU_I_src2 := npcb_IDU.io.IDU_O_src2
-    npcb_LSU.io.LSU_I_EXUresult := npcb_EXU.io.EXU_O_result
+    //npcb_LSU.io.LSU_I_EXUresult := npcb_EXU.io.EXU_O_result
     npcb_LSU.io.LSU_I_ModifyMem := npcb_IDU.io.IDU_O_ModifyMem
     npcb_LSU.io.LSU_I_opcode := npcb_IDU.io.IDU_O_LSUopcode
 
