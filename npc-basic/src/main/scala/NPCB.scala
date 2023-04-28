@@ -366,6 +366,16 @@ class EXU extends Module{
         EXU_opcode.SLLI          -> List(EXU_src1_unsigned << EXU_imm_unsigned(5, 0)                      , 0.U                                                  , 0.U),
         EXU_opcode.SRLI          -> List(EXU_src1_unsigned >> EXU_imm_unsigned(5, 0)                      , 0.U                                                  , 0.U),
         EXU_opcode.SRAI          -> List(EXU_src1_signed >> EXU_imm_unsigned(5, 0)                        , 0.U                                                  , 0.U),
+        EXU_opcode.ADD           -> List(EXU_src1_unsigned + EXU_src2_unsigned                            , 0.U                                                  , 0.U),
+        EXU_opcode.SUB           -> List(EXU_src1_unsigned - EXU_src2_unsigned                            , 0.U                                                  , 0.U),
+        EXU_opcode.SLL           -> List(EXU_src1_unsigned << EXU_src2_unsigned(5, 0)                     , 0.U                                                  , 0.U),
+        EXU_opcode.SLT           -> List(Mux(EXU_src1_signed < EXU_src2_signed, 1.U(64.W), 0.U(64.W))     , 0.U                                                  , 0.U),
+        EXU_opcode.SLTU          -> List(Mux(EXU_src1_unsigned < EXU_src2_unsigned, 1.U(64.W), 0.U(64.W)) , 0.U                                                  , 0.U),
+        EXU_opcode.XOR           -> List(EXU_src1_unsigned ^ EXU_src2_unsigned                            , 0.U                                                  , 0.U),
+        EXU_opcode.SRL           -> List(EXU_src1_unsigned >> EXU_src2_unsigned(5, 0)                     , 0.U                                                  , 0.U),
+        EXU_opcode.SRA           -> List(EXU_src1_signed >> EXU_src2_signed(5, 0)                         , 0.U                                                  , 0.U),
+        EXU_opcode.OR            -> List(EXU_src1_unsigned | EXU_src2_unsigned                            , 0.U                                                  , 0.U),
+        EXU_opcode.AND           -> List(EXU_src1_unsigned & EXU_src2_unsigned                            , 0.U                                                  , 0.U),
     )
 
     io.EXU_O_result := EXU_output(0)
