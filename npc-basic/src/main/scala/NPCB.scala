@@ -317,15 +317,15 @@ class IDU extends Module{
     io.IDU_O_error            := IDU_opcodes(6)
     io.IDU_O_halt             := IDU_opcodes(7)
 
-    io.IDU_O_imm := MuxCase(SignExtend_immR, Array(
-        IDU_inst_type == inst_types.inst_error -> SignExtend_immR,
-        IDU_inst_type == inst_types.inst_N     -> SignExtend_immR,
-        IDU_inst_type == inst_types.inst_R     -> SignExtend_immR,
-        IDU_inst_type == inst_types.inst_I     -> SignExtend_immI,
-        IDU_inst_type == inst_types.inst_S     -> SignExtend_immS,
-        IDU_inst_type == inst_types.inst_B     -> SignExtend_immB,
-        IDU_inst_type == inst_types.inst_U     -> SignExtend_immU,
-        IDU_inst_type == inst_types.inst_J     -> SignExtend_immJ
+    io.IDU_O_imm := MuxCase(SignExtend_immR, Seq(
+        (IDU_inst_type === inst_types.inst_error) -> SignExtend_immR,
+        (IDU_inst_type === inst_types.inst_N)     -> SignExtend_immR,
+        (IDU_inst_type === inst_types.inst_R)     -> SignExtend_immR,
+        (IDU_inst_type === inst_types.inst_I)     -> SignExtend_immI,
+        (IDU_inst_type === inst_types.inst_S)     -> SignExtend_immS,
+        (IDU_inst_type === inst_types.inst_B)     -> SignExtend_immB,
+        (IDU_inst_type === inst_types.inst_U)     -> SignExtend_immU,
+        (IDU_inst_type === inst_types.inst_J)     -> SignExtend_immJ
     ))
 }
 
@@ -559,7 +559,7 @@ class NPCB extends Module{
     npcb_PCU.io.PCU_I_imm := npcb_IDU.io.IDU_O_imm
     npcb_WBU.io.WBU_I_rd := npcb_IDU.io.IDU_O_rd
     npcb_WBU.io.WBU_I_IDUsnpcISdnpc := npcb_IDU.io.IDU_O_snpcISdnpc
-    NPC_GPRchanged := true.B
-    Mux(npcb_IDU.io.IDU_O_GPRneedWriteBack, GPR(npcb_WBU.io.WBU_O_GPRidx) := npcb_WBU.io.WBU_O_GPRWriteBack, NPC_GPRchanged := false.B)
+    io.NPC_GPRchanged := true.B
+    Mux(npcb_IDU.io.IDU_O_GPRneedWriteBack, GPR(npcb_WBU.io.WBU_O_GPRidx) := npcb_WBU.io.WBU_O_GPRWriteBack, io.NPC_GPRchanged := false.B)
     PC := npcb_PCU.io.PCU_O_DynamicNextPC
 }
