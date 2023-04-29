@@ -553,12 +553,10 @@ class NPCB extends Module{
     val npcb_PCU = Module(new PCU)
     npcb_WBU.io.WBU_I_EXUresult := npcb_EXU.io.EXU_O_result
     npcb_WBU.io.WBU_I_LSUresult := npcb_LSU.io.LSU_O_result
-    npcb_WBU.io.WBU_I_EXUsnpcNEQdnpc := npcb_EXU.io.EXU_O_snpcNEQdnpc
     npcb_PCU.io.PCU_I_CurrentPC := PC
     npcb_PCU.io.PCU_I_willJump := (! npcb_IDU.io.IDU_O_snpcISdnpc) && npcb_EXU.io.EXU_O_snpcNEQdnpc
     npcb_PCU.io.PCU_I_imm := npcb_IDU.io.IDU_O_imm
     npcb_WBU.io.WBU_I_rd := npcb_IDU.io.IDU_O_rd
-    npcb_WBU.io.WBU_I_IDUsnpcISdnpc := npcb_IDU.io.IDU_O_snpcISdnpc
     io.NPC_GPRchanged := true.B
     Mux(npcb_IDU.io.IDU_O_GPRneedWriteBack, GPR(npcb_WBU.io.WBU_O_GPRidx) := npcb_WBU.io.WBU_O_GPRWriteBack, io.NPC_GPRchanged := false.B)
     PC := npcb_PCU.io.PCU_O_DynamicNextPC
