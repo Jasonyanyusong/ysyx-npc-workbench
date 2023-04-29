@@ -318,14 +318,14 @@ class IDU extends Module{
     io.IDU_O_halt             := IDU_opcodes(7)
 
     io.IDU_O_imm := MuxCase(SignExtend_immR, Array(
-        IDU_inst_type === inst_types.inst_error -> SignExtend_immR,
-        IDU_inst_type === inst_types.inst_N     -> SignExtend_immR,
-        IDU_inst_type === inst_types.inst_R     -> SignExtend_immR,
-        IDU_inst_type === inst_types.inst_I     -> SignExtend_immI,
-        IDU_inst_type === inst_types.inst_S     -> SignExtend_immS,
-        IDU_inst_type === inst_types.inst_B     -> SignExtend_immB,
-        IDU_inst_type === inst_types.inst_U     -> SignExtend_immU,
-        IDU_inst_type === inst_types.inst_J     -> SignExtend_immJ
+        IDU_inst_type == inst_types.inst_error -> SignExtend_immR,
+        IDU_inst_type == inst_types.inst_N     -> SignExtend_immR,
+        IDU_inst_type == inst_types.inst_R     -> SignExtend_immR,
+        IDU_inst_type == inst_types.inst_I     -> SignExtend_immI,
+        IDU_inst_type == inst_types.inst_S     -> SignExtend_immS,
+        IDU_inst_type == inst_types.inst_B     -> SignExtend_immB,
+        IDU_inst_type == inst_types.inst_U     -> SignExtend_immU,
+        IDU_inst_type == inst_types.inst_J     -> SignExtend_immJ
     ))
 }
 
@@ -359,7 +359,7 @@ class EXU extends Module{
         EXU_opcode.EXU_LUI           -> List(EXU_imm_unsigned                                                                                                          , 1.U                                                  , 0.U),
         EXU_opcode.EXU_AUIPC         -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , 1.U                                                  , 0.U),
         EXU_opcode.EXU_JAL           -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , 0.U                                                  , 0.U),
-        EXU_opcode.EXU_JALR          -> List((EXU_src1_unsigned + EXU_src2_unsigned) & ~1                                                                              , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_JALR          -> List((EXU_src1_unsigned + EXU_src2_unsigned) & ~1.U                                                                            , 0.U                                                  , 0.U),
         EXU_opcode.EXU_BEQ           -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , (!(EXU_src1_unsigned === EXU_src2_unsigned)).asUInt  , 0.U),
         EXU_opcode.EXU_BNE           -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , (!(EXU_src1_unsigned =/= EXU_src2_unsigned)).asUInt  , 0.U),
         EXU_opcode.EXU_BLT           -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , (!(EXU_src1_signed < EXU_src2_signed)).asUInt        , 0.U),
@@ -374,7 +374,7 @@ class EXU extends Module{
         EXU_opcode.EXU_SB            -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
         EXU_opcode.EXU_SH            -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
         EXU_opcode.EXU_SW            -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
-        EXU_opcode.EXU_ADDI          -> List(EXU_src1_unsigned + EXU+EXU_imm_unsigned                                                                                  , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_ADDI          -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
         EXU_opcode.EXU_SLTI          -> List(Mux(EXU_src1_signed < EXU_imm_signed, 1.U(64.W), 0.U(64.W))                                                               , 0.U                                                  , 0.U),
         EXU_opcode.EXU_SLTIU         -> List(Mux(EXU_src1_unsigned < EXU_imm_unsigned, 1.U(64.W), 0.U(64.W))                                                           , 0.U                                                  , 0.U),
         EXU_opcode.EXU_XORI          -> List(EXU_src1_unsigned ^ EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
@@ -465,11 +465,11 @@ class LSU extends Module{
         /*Default: */               List(0.U(64.W)                                        , 0.U(64.W)     , 0.U, 0.U(64.W)     , 1.U , "b00".U), Array(
         LSU_opcode.LSU_DoNothing -> List(0.U(64.W)                                        , 0.U(64.W)     , 0.U, 0.U(64.W)     , 0.U , "b00".U),
         LSU_opcode.LSU_LB        -> List(Cat(Fill(56, io.LSU_I_memR(7)) , io.LSU_I_memR)  , io.LSU_I_src1 , 0.U, 0.U(64.W)     , 0.U , "b00".U),
-        LSU_opcode.LSU_LBU       -> List(Cat(Fill(56, 0) , io.LSU_I_memR)                 , io.LSU_I_src1 , 0.U, 0.U(64.W)     , 0.U , "b00".U),
+        LSU_opcode.LSU_LBU       -> List(Cat(Fill(56, 0.U) , io.LSU_I_memR)               , io.LSU_I_src1 , 0.U, 0.U(64.W)     , 0.U , "b00".U),
         LSU_opcode.LSU_LH        -> List(Cat(Fill(48, io.LSU_I_memR(15)) , io.LSU_I_memR) , io.LSU_I_src1 , 0.U, 0.U(64.W)     , 0.U , "b01".U),
-        LSU_opcode.LSU_LHU       -> List(Cat(Fill(48, 0) , io.LSU_I_memR)                 , io.LSU_I_src1 , 0.U, 0.U(64.W)     , 0.U , "b01".U),
+        LSU_opcode.LSU_LHU       -> List(Cat(Fill(48, 0.U) , io.LSU_I_memR)               , io.LSU_I_src1 , 0.U, 0.U(64.W)     , 0.U , "b01".U),
         LSU_opcode.LSU_LW        -> List(Cat(Fill(32, io.LSU_I_memR(31)) , io.LSU_I_memR) , io.LSU_I_src1 , 0.U, 0.U(64.W)     , 0.U , "b10".U),
-        LSU_opcode.LSU_LWU       -> List(Cat(Fill(32, 0) , io.LSU_I_memR)                 , io.LSU_I_src1 , 0.U, 0.U(64.W)     , 0.U , "b10".U),
+        LSU_opcode.LSU_LWU       -> List(Cat(Fill(32, 0.U) , io.LSU_I_memR)               , io.LSU_I_src1 , 0.U, 0.U(64.W)     , 0.U , "b10".U),
         LSU_opcode.LSU_LD        -> List(Cat(Fill(32, io.LSU_I_memR(31)) , io.LSU_I_memR) , io.LSU_I_src1 , 0.U, 0.U(64.W)     , 0.U , "b11".U),
         LSU_opcode.LSU_SB        -> List(0.U(64.W)                                        , io.LSU_I_src1 , 1.U, io.LSU_I_src2 , 0.U , "b00".U),
         LSU_opcode.LSU_SH        -> List(0.U(64.W)                                        , io.LSU_I_src1 , 1.U, io.LSU_I_src2 , 0.U , "b01".U),
