@@ -92,6 +92,7 @@ object EXU_opcode{
     def EXU_DIVUW     = BitPat("b111011")
     def EXU_REMW      = BitPat("b111100")
     def EXU_REMUW     = BitPat("b111101")
+    def EXU_BLT       = BitPat("b111111")
 }
 
 object LSU_opcode{
@@ -182,11 +183,11 @@ object RV_Inst{
 class IFU extends Module{
     // Now we make IFU just a passthrough because we do not fetch instruction from memory directly
     val io = IO(new Bundle{
-        IFU_I_PC = Input(UInt(64.W))
-        IFU_O_PC = Output(UInt(64.W))
-        IFU_I_inst = Input(UInt(32.W))
-        IFU_O_inst = Output(UInt(32.W))
-        IFU_O_error = Output(Bool())
+        val IFU_I_PC = Input(UInt(64.W))
+        val IFU_O_PC = Output(UInt(64.W))
+        val IFU_I_inst = Input(UInt(32.W))
+        val IFU_O_inst = Output(UInt(32.W))
+        val IFU_O_error = Output(Bool())
     })
     io.IFU_O_inst := io.IFU_I_inst
     io.IFU_O_PC := io.IFU_I_PC
@@ -195,22 +196,22 @@ class IFU extends Module{
 
 class IDU extends Module{
     val io = IO(new Bundle{
-        IDU_I_inst = Input(UInt(32.W))
-        IDU_O_ModifyMem = Output(Bool())
-        IDU_O_rs1 = Output(UInt(5.W)) // Same for all
-        IDU_I_src1 = Input(UInt(64.W))
-        IDU_O_src1 = Input(UInt(64.W)) // Same for all
-        IDU_O_rs2 = Output(UInt(5.W)) // Same for all
-        IDU_I_src2 = Input(UInt(64.W))
-        IDU_O_src2 = Input(UInt(64.W)) // Same for all
-        IDU_O_rd = Output(UInt(5.W)) // Same for all
-        IDU_O_EXUopcode = Output(UInt(6.W))
-        IDU_O_LSUopcode = Output(UInt(6.W))
-        IDU_O_snpcISdnpc = Output(Bool())
-        IDU_O_GPRneedWriteBack = Output(Bool())
-        IDU_O_imm = Output(UInt(64.W))
-        IDU_O_halt = Output(Bool())
-        IDU_O_error = Output(Bool())
+        val IDU_I_inst = Input(UInt(32.W))
+        val IDU_O_ModifyMem = Output(Bool())
+        val IDU_O_rs1 = Output(UInt(5.W)) // Same for all
+        val IDU_I_src1 = Input(UInt(64.W))
+        val IDU_O_src1 = Input(UInt(64.W)) // Same for all
+        val IDU_O_rs2 = Output(UInt(5.W)) // Same for all
+        val IDU_I_src2 = Input(UInt(64.W))
+        val IDU_O_src2 = Input(UInt(64.W)) // Same for all
+        val IDU_O_rd = Output(UInt(5.W)) // Same for all
+        val IDU_O_EXUopcode = Output(UInt(6.W))
+        val IDU_O_LSUopcode = Output(UInt(6.W))
+        val IDU_O_snpcISdnpc = Output(Bool())
+        val IDU_O_GPRneedWriteBack = Output(Bool())
+        val IDU_O_imm = Output(UInt(64.W))
+        val IDU_O_halt = Output(Bool())
+        val IDU_O_error = Output(Bool())
     })
 
     io.IDU_O_rs1 := io.IDU_I_inst(19, 15) // Cut rs1 from BITS(i, 19, 15)
@@ -241,7 +242,7 @@ class IDU extends Module{
 
     var IDU_opcodes = ListLookup(
         /*Compare Item: */io.IDU_I_inst,
-        /*Default: */       List(inst_types.inst_error, 0.U, EXU_opcode.EXU_DoNothing, LSU_opcode.LSU_DoNothing, 1.U, 0.U, 1.U, 1.U),
+        /*Default: */       List(inst_types.inst_error, 0.U, EXU_opcode.EXU_DoNothing, LSU_opcode.LSU_DoNothing, 1.U, 0.U, 1.U, 1.U), Array(
         RV_Inst.LUI      -> List(inst_types.inst_U    , 0.U, EXU_opcode.EXU_LUI      , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
         RV_Inst.AUIPC    -> List(inst_types.inst_U    , 0.U, EXU_opcode.EXU_AUIPC    , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
         RV_Inst.JAL      -> List(inst_types.inst_J    , 0.U, EXU_opcode.EXU_JAL      , LSU_opcode.LSU_DoNothing, 0.U, 1.U, 0.U, 0.U),
@@ -304,7 +305,7 @@ class IDU extends Module{
         RV_Inst.DIVW     -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_DIVW     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
         RV_Inst.DIVUW    -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_DIVUW    , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
         RV_Inst.REMW     -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_REMW     , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U),
-        RV_Inst.REMUW    -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_REMUW    , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U)
+        RV_Inst.REMUW    -> List(inst_types.inst_R    , 0.U, EXU_opcode.EXU_REMUW    , LSU_opcode.LSU_DoNothing, 1.U, 1.U, 0.U, 0.U))
         )
 
     val IDU_inst_type          = IDU_opcodes(0)
@@ -330,14 +331,14 @@ class IDU extends Module{
 
 class EXU extends Module{
     val io = IO(new Bundle{
-        EXU_I_src1 = Input(UInt(64.W))
-        EXU_I_src2 = Input(UInt(64.W))
-        EXU_I_imm = Input(UInt(64.W))
-        EXU_I_opcode = Input(UInt(6.W))
-        EXU_I_currentPC = Input(UInt(64.W))
-        EXU_O_result = Output(UInt(64.W))
-        EXU_O_snpcNEQdnpc = Output(Bool())
-        EXU_O_error = Output(Bool())
+        val EXU_I_src1 = Input(UInt(64.W))
+        val EXU_I_src2 = Input(UInt(64.W))
+        val EXU_I_imm = Input(UInt(64.W))
+        val EXU_I_opcode = Input(UInt(6.W))
+        val EXU_I_currentPC = Input(UInt(64.W))
+        val EXU_O_result = Output(UInt(64.W))
+        val EXU_O_snpcNEQdnpc = Output(Bool())
+        val EXU_O_error = Output(Bool())
     })
     io.EXU_O_error := false.B
     val EXU_src1_signed = io.EXU_I_src1.asSInt
@@ -353,70 +354,70 @@ class EXU extends Module{
     var EXU_output = ListLookup(
         /*Compare Item: */ io.EXU_I_opcode,
         // If none of the opcodes are matched, we set result to 0, with static next pc and raise error
-        /*Default: */               List(0.U(64.W)                                                                                                                 , 1.U                                                  , 1.U),
-        EXU_opcode.EXU_DoNothing -> List(0.U(64.W)                                                                                                                 , 1.U                                                  , 0.U),
-        EXU_opcode.LUI           -> List(EXU_imm_unsigned                                                                                                          , 1.U                                                  , 0.U),
-        EXU_opcode.AUIPC         -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , 1.U                                                  , 0.U),
-        EXU_opcode.JAL           -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , 0.U                                                  , 0.U),
-        EXU_opcode.JALR          -> List((EXU_src1_unsigned + EXU_src2_unsigned) & ~1                                                                              , 0.U                                                  , 0.U),
-        EXU_opcode.BEQ           -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , (!(EXU_src1_unsigned === EXU_src2_unsigned)).asUInt  , 0.U),
-        EXU_opcode.BNE           -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , (!(EXU_src1_unsigned =/= EXU_src2_unsigned)).asUInt  , 0.U),
-        EXU_opcode.BLT           -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , (!(EXU_src1_signed < EXU_src2_signed)).asUInt        , 0.U),
-        EXU_opcode.BGE           -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , (!(EXU_src1_signed >= EXU_src2_signed)).asUInt       , 0.U),
-        EXU_opcode.BLTU          -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , (!(EXU_src1_unsigned < EXU_src2_unsigned)).asUInt    , 0.U),
-        EXU_opcode.BGEU          -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , (!(EXU_src1_unsigned >= EXU_src2_unsigned)).asUInt   , 0.U),
-        EXU_opcode.LB            -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
-        EXU_opcode.LH            -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
-        EXU_opcode.LW            -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
-        EXU_opcode.LBU           -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
-        EXU_opcode.LHU           -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
-        EXU_opcode.SB            -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
-        EXU_opcode.SH            -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
-        EXU_opcode.SW            -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
-        EXU_opcode.ADDI          -> List(EXU_src1_unsigned + EXU+EXU_imm_unsigned                                                                                  , 0.U                                                  , 0.U),
-        EXU_opcode.SLTI          -> List(Mux(EXU_src1_signed < EXU_imm_signed, 1.U(64.W), 0.U(64.W))                                                               , 0.U                                                  , 0.U),
-        EXU_opcode.SLTIU         -> List(Mux(EXU_src1_unsigned < EXU_imm_unsigned, 1.U(64.W), 0.U(64.W))                                                           , 0.U                                                  , 0.U),
-        EXU_opcode.XORI          -> List(EXU_src1_unsigned ^ EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
-        EXU_opcode.ORI           -> List(EXU_src1_unsigned | EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
-        EXU_opcode.ANDI          -> List(EXU_src1_unsigned & EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
-        EXU_opcode.SLLI          -> List(EXU_src1_unsigned << EXU_imm_unsigned(5, 0)                                                                               , 0.U                                                  , 0.U),
-        EXU_opcode.SRLI          -> List(EXU_src1_unsigned >> EXU_imm_unsigned(5, 0)                                                                               , 0.U                                                  , 0.U),
-        EXU_opcode.SRAI          -> List(EXU_src1_signed >> EXU_imm_unsigned(5, 0)                                                                                 , 0.U                                                  , 0.U),
-        EXU_opcode.ADD           -> List(EXU_src1_unsigned + EXU_src2_unsigned                                                                                     , 0.U                                                  , 0.U),
-        EXU_opcode.SUB           -> List(EXU_src1_unsigned - EXU_src2_unsigned                                                                                     , 0.U                                                  , 0.U),
-        EXU_opcode.SLL           -> List(EXU_src1_unsigned << EXU_src2_unsigned(5, 0)                                                                              , 0.U                                                  , 0.U),
-        EXU_opcode.SLT           -> List(Mux(EXU_src1_signed < EXU_src2_signed, 1.U(64.W), 0.U(64.W))                                                              , 0.U                                                  , 0.U),
-        EXU_opcode.SLTU          -> List(Mux(EXU_src1_unsigned < EXU_src2_unsigned, 1.U(64.W), 0.U(64.W))                                                          , 0.U                                                  , 0.U),
-        EXU_opcode.XOR           -> List(EXU_src1_unsigned ^ EXU_src2_unsigned                                                                                     , 0.U                                                  , 0.U),
-        EXU_opcode.SRL           -> List(EXU_src1_unsigned >> EXU_src2_unsigned(5, 0)                                                                              , 0.U                                                  , 0.U),
-        EXU_opcode.SRA           -> List(EXU_src1_signed >> EXU_src2_signed(5, 0)                                                                                  , 0.U                                                  , 0.U),
-        EXU_opcode.OR            -> List(EXU_src1_unsigned | EXU_src2_unsigned                                                                                     , 0.U                                                  , 0.U),
-        EXU_opcode.AND           -> List(EXU_src1_unsigned & EXU_src2_unsigned                                                                                     , 0.U                                                  , 0.U),
-        EXU_opcode.LWU           -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
-        EXU_opcode.LD            -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
-        EXU_opcode.SD            -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
-        EXU_opcode.ADDIW         -> List(Cat(Fill(32, (EXU_src1_unsigned + EXU_imm_unsigned)(31)), (EXU_src1_unsigned + EXU_imm_unsigned)(31, 0))                  , 0.U                                                  , 0.U),
-        EXU_opcode.SLLIW         -> List(Cat(Fill(32, (EXU_src1_unsigned << EXU_imm_unsigned(4, 0))(31)), (EXU_src1_unsigned << EXU_imm_unsigned(4, 0))(31, 0))    , 0.U                                                  , 0.U),
-        EXU_opcode.SRLIW         -> List(Cat(Fill(32, (EXU_src1_unsigned >> EXU_imm_unsigned(4, 0))(31)), (EXU_src1_unsigned >> EXU_imm_unsigned(4, 0))(31, 0))    , 0.U                                                  , 0.U),
-        EXU_opcode.SRAIW         -> List(Cat(Fill(32, (EXU_src1_signed >> EXU_imm_unsigned(4, 0))(31)), (EXU_src1_signed >> EXU_imm_signed(4, 0))(31, 0))          , 0.U                                                  , 0.U),
-        EXU_opcode.ADDW          -> List(Cat(Fill(32, (EXU_src1_unsigned + EXU_src2_unsigned)(31)), (EXU_src1_unsigned + EXU_src2_unsigned)(31, 0))                , 0.U                                                  , 0.U),
-        EXU_opcode.SUBW          -> List(Cat(Fill(32, (EXU_src1_unsigned - EXU_src2_unsigned)(31)), (EXU_src1_unsigned + EXU_src2_unsigned)(31, 0))                , 0.U                                                  , 0.U),
-        EXU_opcode.SLLW          -> List(Cat(Fill(32, (EXU_src1_unsigned << EXU_src2_unsigned(4, 0))(31)), (EXU_src1_unsigned << EXU_imm_unsigned(4, 0))(31, 0))   , 0.U                                                  , 0.U),
-        EXU_opcode.SRLW          -> List(Cat(Fill(32, (EXU_src1_unsigned >> EXU_src2_unsigned(4, 0))(31)), (EXU_src1_unsigned >> EXU_imm_unsigned(4, 0))(31, 0))   , 0.U                                                  , 0.U),
-        EXU_opcode.SRAW          -> List(Cat(Fill(32, (EXU_src1_signed >> EXU_src2_unsigned(4, 0))(31)), (EXU_src1_signed >> EXU_imm_signed(4, 0))(31, 0))         , 0.U                                                  , 0.U),
-        EXU_opcode.MUL           -> List((EXU_src1_unsigned * EXU_src2_unsigned)(63, 0)                                                                            , 0.U                                                  , 0.U),
-        EXU_opcode.MULH          -> List((EXU_src1_signed * EXU_src2_signed)(127, 64)                                                                              , 0.U                                                  , 0.U),
-        EXU_opcode.MULHSU        -> List((EXU_src1_signed * EXU_src2_unsigned)(127, 64)                                                                            , 0.U                                                  , 0.U),
-        EXU_opcode.MULHU         -> List((EXU_src1_unsigned * EXU_src2_unsigned)(127, 64)                                                                          , 0.U                                                  , 0.U),
-        EXU_opcode.DIV           -> List((EXU_src1_signed / EXU_src2_signed)                                                                                       , 0.U                                                  , 0.U),
-        EXU_opcode.DIVU          -> List((EXU_src1_unsigned / EXU_src2_unsigned)                                                                                   , 0.U                                                  , 0.U),
-        EXU_opcode.REM           -> List((EXU_src1_signed % EXU_src2_signed)                                                                                       , 0.U                                                  , 0.U),
-        EXU_opcode.REMU          -> List((EXU_src1_unsigned % EXU_src2_unsigned)                                                                                   , 0.U                                                  , 0.U),
-        EXU_opcode.MULW          -> List(Cat(Fill(32, (EXU_src1_unsigned * EXU_src2_unsigned)(31)), (EXU_src1_unsigned * EXU_src2_unsigned)(31, 0))                , 0.U                                                  , 0.U),
-        EXU_opcode.DIVW          -> List(Cat(Fill(32, (EXU_src1_signed / EXU_src2_signed)(31)), (EXU_src1_signed / EXU_src2_signed)(31, 0))                        , 0.U                                                  , 0.U),
-        EXU_opcode.DIVUW         -> List(Cat(Fill(32, (EXU_src1_unsigned / EXU_src2_unsigned)(31)), (EXU_src1_unsigned / EXU_src2_unsigned)(31, 0))                , 0.U                                                  , 0.U),
-        EXU_opcode.REMW          -> List(Cat(Fill(32, (EXU_src1_signed % EXU_src2_signed)(31)), (EXU_src1_signed % EXU_src2_signed)(31, 0))                        , 0.U                                                  , 0.U),
-        EXU_opcode.REMUW         -> List(Cat(Fill(32, (EXU_src1_unsigned % EXU_src2_unsigned)(31)), (EXU_src1_unsigned % EXU_src2_unsigned)(31, 0))                , 0.U                                                  , 0.U)
+        /*Default: */                   List(0.U(64.W)                                                                                                                 , 1.U                                                  , 1.U), Array(
+        EXU_opcode.EXU_DoNothing     -> List(0.U(64.W)                                                                                                                 , 1.U                                                  , 0.U),
+        EXU_opcode.EXU_LUI           -> List(EXU_imm_unsigned                                                                                                          , 1.U                                                  , 0.U),
+        EXU_opcode.EXU_AUIPC         -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , 1.U                                                  , 0.U),
+        EXU_opcode.EXU_JAL           -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_JALR          -> List((EXU_src1_unsigned + EXU_src2_unsigned) & ~1                                                                              , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_BEQ           -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , (!(EXU_src1_unsigned === EXU_src2_unsigned)).asUInt  , 0.U),
+        EXU_opcode.EXU_BNE           -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , (!(EXU_src1_unsigned =/= EXU_src2_unsigned)).asUInt  , 0.U),
+        EXU_opcode.EXU_BLT           -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , (!(EXU_src1_signed < EXU_src2_signed)).asUInt        , 0.U),
+        EXU_opcode.EXU_BGE           -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , (!(EXU_src1_signed >= EXU_src2_signed)).asUInt       , 0.U),
+        EXU_opcode.EXU_BLTU          -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , (!(EXU_src1_unsigned < EXU_src2_unsigned)).asUInt    , 0.U),
+        EXU_opcode.EXU_BGEU          -> List(io.EXU_I_currentPC + EXU_imm_unsigned                                                                                     , (!(EXU_src1_unsigned >= EXU_src2_unsigned)).asUInt   , 0.U),
+        EXU_opcode.EXU_LB            -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_LH            -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_LW            -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_LBU           -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_LHU           -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SB            -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SH            -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SW            -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_ADDI          -> List(EXU_src1_unsigned + EXU+EXU_imm_unsigned                                                                                  , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SLTI          -> List(Mux(EXU_src1_signed < EXU_imm_signed, 1.U(64.W), 0.U(64.W))                                                               , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SLTIU         -> List(Mux(EXU_src1_unsigned < EXU_imm_unsigned, 1.U(64.W), 0.U(64.W))                                                           , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_XORI          -> List(EXU_src1_unsigned ^ EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_ORI           -> List(EXU_src1_unsigned | EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_ANDI          -> List(EXU_src1_unsigned & EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SLLI          -> List(EXU_src1_unsigned << EXU_imm_unsigned(5, 0)                                                                               , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SRLI          -> List(EXU_src1_unsigned >> EXU_imm_unsigned(5, 0)                                                                               , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SRAI          -> List(EXU_src1_signed >> EXU_imm_unsigned(5, 0)                                                                                 , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_ADD           -> List(EXU_src1_unsigned + EXU_src2_unsigned                                                                                     , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SUB           -> List(EXU_src1_unsigned - EXU_src2_unsigned                                                                                     , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SLL           -> List(EXU_src1_unsigned << EXU_src2_unsigned(5, 0)                                                                              , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SLT           -> List(Mux(EXU_src1_signed < EXU_src2_signed, 1.U(64.W), 0.U(64.W))                                                              , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SLTU          -> List(Mux(EXU_src1_unsigned < EXU_src2_unsigned, 1.U(64.W), 0.U(64.W))                                                          , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_XOR           -> List(EXU_src1_unsigned ^ EXU_src2_unsigned                                                                                     , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SRL           -> List(EXU_src1_unsigned >> EXU_src2_unsigned(5, 0)                                                                              , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SRA           -> List(EXU_src1_signed >> EXU_src2_signed(5, 0)                                                                                  , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_OR            -> List(EXU_src1_unsigned | EXU_src2_unsigned                                                                                     , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_AND           -> List(EXU_src1_unsigned & EXU_src2_unsigned                                                                                     , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_LWU           -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_LD            -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SD            -> List(EXU_src1_unsigned + EXU_imm_unsigned                                                                                      , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_ADDIW         -> List(Cat(Fill(32, (EXU_src1_unsigned + EXU_imm_unsigned)(31)), (EXU_src1_unsigned + EXU_imm_unsigned)(31, 0))                  , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SLLIW         -> List(Cat(Fill(32, (EXU_src1_unsigned << EXU_imm_unsigned(4, 0))(31)), (EXU_src1_unsigned << EXU_imm_unsigned(4, 0))(31, 0))    , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SRLIW         -> List(Cat(Fill(32, (EXU_src1_unsigned >> EXU_imm_unsigned(4, 0))(31)), (EXU_src1_unsigned >> EXU_imm_unsigned(4, 0))(31, 0))    , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SRAIW         -> List(Cat(Fill(32, (EXU_src1_signed >> EXU_imm_unsigned(4, 0))(31)), (EXU_src1_signed >> EXU_imm_signed(4, 0))(31, 0))          , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_ADDW          -> List(Cat(Fill(32, (EXU_src1_unsigned + EXU_src2_unsigned)(31)), (EXU_src1_unsigned + EXU_src2_unsigned)(31, 0))                , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SUBW          -> List(Cat(Fill(32, (EXU_src1_unsigned - EXU_src2_unsigned)(31)), (EXU_src1_unsigned + EXU_src2_unsigned)(31, 0))                , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SLLW          -> List(Cat(Fill(32, (EXU_src1_unsigned << EXU_src2_unsigned(4, 0))(31)), (EXU_src1_unsigned << EXU_imm_unsigned(4, 0))(31, 0))   , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SRLW          -> List(Cat(Fill(32, (EXU_src1_unsigned >> EXU_src2_unsigned(4, 0))(31)), (EXU_src1_unsigned >> EXU_imm_unsigned(4, 0))(31, 0))   , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_SRAW          -> List(Cat(Fill(32, (EXU_src1_signed >> EXU_src2_unsigned(4, 0))(31)), (EXU_src1_signed >> EXU_imm_signed(4, 0))(31, 0))         , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_MUL           -> List((EXU_src1_unsigned * EXU_src2_unsigned)(63, 0)                                                                            , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_MULH          -> List((EXU_src1_signed * EXU_src2_signed)(127, 64)                                                                              , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_MULHSU        -> List((EXU_src1_signed * EXU_src2_unsigned)(127, 64)                                                                            , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_MULHU         -> List((EXU_src1_unsigned * EXU_src2_unsigned)(127, 64)                                                                          , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_DIV           -> List((EXU_src1_signed / EXU_src2_signed)                                                                                       , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_DIVU          -> List((EXU_src1_unsigned / EXU_src2_unsigned)                                                                                   , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_REM           -> List((EXU_src1_signed % EXU_src2_signed)                                                                                       , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_REMU          -> List((EXU_src1_unsigned % EXU_src2_unsigned)                                                                                   , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_MULW          -> List(Cat(Fill(32, (EXU_src1_unsigned * EXU_src2_unsigned)(31)), (EXU_src1_unsigned * EXU_src2_unsigned)(31, 0))                , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_DIVW          -> List(Cat(Fill(32, (EXU_src1_signed / EXU_src2_signed)(31)), (EXU_src1_signed / EXU_src2_signed)(31, 0))                        , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_DIVUW         -> List(Cat(Fill(32, (EXU_src1_unsigned / EXU_src2_unsigned)(31)), (EXU_src1_unsigned / EXU_src2_unsigned)(31, 0))                , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_REMW          -> List(Cat(Fill(32, (EXU_src1_signed % EXU_src2_signed)(31)), (EXU_src1_signed % EXU_src2_signed)(31, 0))                        , 0.U                                                  , 0.U),
+        EXU_opcode.EXU_REMUW         -> List(Cat(Fill(32, (EXU_src1_unsigned % EXU_src2_unsigned)(31)), (EXU_src1_unsigned % EXU_src2_unsigned)(31, 0))                , 0.U                                                  , 0.U))
     )
 
     io.EXU_O_result := EXU_output(0)
@@ -426,12 +427,12 @@ class EXU extends Module{
 
 class PCU extends Module{
     val io = IO(new Bundle{
-        PCU_I_CurrentPC = Input(UInt(64.W))
-        PCU_I_imm = Input(UInt(64.W))
-        PCU_I_willJump = Input(Bool())
-        PCU_O_DynamicNextPC = Output(UInt(64.W))
-        PCU_O_StaticNextPC = Output(UInt(64.W))
-        PCU_O_error = Output(Bool())
+        val PCU_I_CurrentPC = Input(UInt(64.W))
+        val PCU_I_imm = Input(UInt(64.W))
+        val PCU_I_willJump = Input(Bool())
+        val PCU_O_DynamicNextPC = Output(UInt(64.W))
+        val PCU_O_StaticNextPC = Output(UInt(64.W))
+        val PCU_O_error = Output(Bool())
     })
     io.PCU_O_StaticNextPC := io.PCU_I_CurrentPC + 4.U
     io.PCU_O_DynamicNextPC := Mux(io.PCU_I_willJump, io.PCU_I_CurrentPC + io.PCU_I_imm, io.PCU_I_CurrentPC + 4.U)
@@ -440,19 +441,19 @@ class PCU extends Module{
 
 class LSU extends Module{
     val io = IO(new Bundle{
-        LSU_I_src1 = Input(UInt(64.W))
-        LSU_I_src2 = Input(UInt(64.W))
+        val LSU_I_src1 = Input(UInt(64.W))
+        val LSU_I_src2 = Input(UInt(64.W))
         //LSU_I_EXUresult = Input(UInt(64.W))
-        LSU_I_opcode = Input(UInt(6.W))
-        LSU_I_ModifyMem = Input(Bool())
-        LSU_O_result = Output(UInt(64.W))
+        val LSU_I_opcode = Input(UInt(6.W))
+        val LSU_I_ModifyMem = Input(Bool())
+        val LSU_O_result = Output(UInt(64.W))
         // Following signals are pulled to top
-        LSU_O_memAddr = Output(UInt(64.W))
-        LSU_O_memRW = Output(Bool()) // Low: Read, High: Write
-        LSU_I_memR = Input(UInt(64.W))
-        LSU_O_memW = Output(UInt(64.W))
-        LSU_O_error = Output(Bool())
-        LSU_O_len = Output(UInt(2.W)) // 00: Bit 01: Half 10: Word 11: Double Word
+        val LSU_O_memAddr = Output(UInt(64.W))
+        val LSU_O_memRW = Output(Bool()) // Low: Read, High: Write
+        val LSU_I_memR = Input(UInt(64.W))
+        val LSU_O_memW = Output(UInt(64.W))
+        val LSU_O_error = Output(Bool())
+        val LSU_O_len = Output(UInt(2.W)) // 00: Bit 01: Half 10: Word 11: Double Word
     })
     io.LSU_O_error := false.B
 
@@ -461,7 +462,7 @@ class LSU extends Module{
 
     var LSU_output = ListLookup(
         /*Compare Item: */ io.LSU_I_opcode,
-        /*Default: */               List(0.U(64.W)                                        , 0.U(64.W)     , 0.U, 0.U(64.W)     , 1.U , "b00".U),
+        /*Default: */               List(0.U(64.W)                                        , 0.U(64.W)     , 0.U, 0.U(64.W)     , 1.U , "b00".U), Array(
         LSU_opcode.LSU_DoNothing -> List(0.U(64.W)                                        , 0.U(64.W)     , 0.U, 0.U(64.W)     , 0.U , "b00".U),
         LSU_opcode.LSU_LB        -> List(Cat(Fill(56, io.LSU_I_memR(7)) , io.LSU_I_memR)  , io.LSU_I_src1 , 0.U, 0.U(64.W)     , 0.U , "b00".U),
         LSU_opcode.LSU_LBU       -> List(Cat(Fill(56, 0) , io.LSU_I_memR)                 , io.LSU_I_src1 , 0.U, 0.U(64.W)     , 0.U , "b00".U),
@@ -473,7 +474,7 @@ class LSU extends Module{
         LSU_opcode.LSU_SB        -> List(0.U(64.W)                                        , io.LSU_I_src1 , 1.U, io.LSU_I_src2 , 0.U , "b00".U),
         LSU_opcode.LSU_SH        -> List(0.U(64.W)                                        , io.LSU_I_src1 , 1.U, io.LSU_I_src2 , 0.U , "b01".U),
         LSU_opcode.LSU_SW        -> List(0.U(64.W)                                        , io.LSU_I_src1 , 1.U, io.LSU_I_src2 , 0.U , "b10".U),
-        LSU_opcode.LSU_SD        -> List(0.U(64.W)                                        , io.LSU_I_src1 , 1.U, io.LSU_I_src2 , 0.U , "b11".U)
+        LSU_opcode.LSU_SD        -> List(0.U(64.W)                                        , io.LSU_I_src1 , 1.U, io.LSU_I_src2 , 0.U , "b11".U))
     )
 
     io.LSU_O_result := LSU_output(0)
@@ -486,13 +487,13 @@ class LSU extends Module{
 
 class WBU extends Module{
     val io = IO(new Bundle{
-        WBU_I_EXUresult = Input(UInt(64.W))
-        WBU_I_LSUresult = Input(UInt(64.W))
-        WBU_I_LSUenable = Input(Bool())
-        WBU_I_rd = Input(UInt(5.W))
-        WBU_O_GPRidx = Output(UInt(5.W))
-        WBU_O_GPRWriteBack = Output(UInt(64.W))
-        WBU_O_error = Output(Bool())
+        val WBU_I_EXUresult = Input(UInt(64.W))
+        val WBU_I_LSUresult = Input(UInt(64.W))
+        val WBU_I_LSUenable = Input(Bool())
+        val WBU_I_rd = Input(UInt(5.W))
+        val WBU_O_GPRidx = Output(UInt(5.W))
+        val WBU_O_GPRWriteBack = Output(UInt(64.W))
+        val WBU_O_error = Output(Bool())
     })
     io.WBU_O_GPRidx := io.WBU_I_rd
     Mux(io.WBU_I_LSUenable, io.WBU_O_GPRWriteBack := io.WBU_I_LSUresult, io.WBU_O_GPRWriteBack := io.WBU_I_EXUresult)
@@ -502,17 +503,17 @@ class WBU extends Module{
 
 class NPCB extends Module{
     val io = IO(new Bundle{
-        NPC_sendCurrentPC = Output(UInt(64.W))
-        NPC_getInst = Input(UInt(32.W))
-        NPC_LSU_O_memAddr = Output(UInt(64.W))
-        NPC_LSU_O_memRW = Output(Bool()) // Low: Read, High: Write
-        NPC_LSU_I_memR = Input(UInt(64.W))
-        NPC_LSU_O_memW = Output(UInt(64.W))
-        NPC_LSU_O_lem = Output(UInt(2.W))
+        val NPC_sendCurrentPC = Output(UInt(64.W))
+        val NPC_getInst = Input(UInt(32.W))
+        val NPC_LSU_O_memAddr = Output(UInt(64.W))
+        val NPC_LSU_O_memRW = Output(Bool()) // Low: Read, High: Write
+        val NPC_LSU_I_memR = Input(UInt(64.W))
+        val NPC_LSU_O_memW = Output(UInt(64.W))
+        val NPC_LSU_O_lem = Output(UInt(2.W))
 
-        NPC_GPRchanged = Output(Bool())
-        NPC_halt = Output(Bool())
-        NPC_error = Output(Bool())
+        val NPC_GPRchanged = Output(Bool())
+        val NPC_halt = Output(Bool())
+        val NPC_error = Output(Bool())
     })
 
     val PC = RegInit(0.U(64.W))
