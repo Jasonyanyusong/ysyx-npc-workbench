@@ -317,16 +317,20 @@ class IDU extends Module{
     io.IDU_O_error            := IDU_opcodes(6)
     io.IDU_O_halt             := IDU_opcodes(7)
 
-    io.IDU_O_imm := MuxCase(SignExtend_immR, Seq(
-        (IDU_inst_type === inst_types.inst_error) -> SignExtend_immR,
-        (IDU_inst_type === inst_types.inst_N)     -> SignExtend_immR,
-        (IDU_inst_type === inst_types.inst_R)     -> SignExtend_immR,
-        (IDU_inst_type === inst_types.inst_I)     -> SignExtend_immI,
-        (IDU_inst_type === inst_types.inst_S)     -> SignExtend_immS,
-        (IDU_inst_type === inst_types.inst_B)     -> SignExtend_immB,
-        (IDU_inst_type === inst_types.inst_U)     -> SignExtend_immU,
-        (IDU_inst_type === inst_types.inst_J)     -> SignExtend_immJ
-    ))
+    val IDU_imm = ListLookup(IDU_inst_type, 
+        List(SignExtend_immR),
+        Array(
+            inst_types.inst_error -> List(SignExtend_immR),
+            inst_types.inst_N     -> List(SignExtend_immR),
+            inst_types.inst_R     -> List(SignExtend_immR),
+            inst_types.inst_I     -> List(SignExtend_immI),
+            inst_types.inst_S     -> List(SignExtend_immS),
+            inst_types.inst_B     -> List(SignExtend_immB),
+            inst_types.inst_U     -> List(SignExtend_immU),
+            inst_types.inst_J     -> List(SignExtend_immJ),
+        ))
+
+    io.IDU_O_imm := IDU_imm(0)
 }
 
 class EXU extends Module{
