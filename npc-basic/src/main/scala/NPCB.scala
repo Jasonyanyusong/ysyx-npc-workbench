@@ -496,7 +496,7 @@ class WBU extends Module{
         val WBU_O_error = Output(Bool())
     })
     io.WBU_O_GPRidx := io.WBU_I_rd
-    Mux(io.WBU_I_LSUenable, io.WBU_O_GPRWriteBack := io.WBU_I_LSUresult, io.WBU_O_GPRWriteBack := io.WBU_I_EXUresult)
+    io.WBU_O_GPRWriteBack := Mux(io.WBU_I_LSUenable, io.WBU_I_LSUresult, io.WBU_I_EXUresult)
     // Mux(io.WBU_I_IDUsnpcISdnpc, io.WBU_O_nextPC := io.WBU_I_currentPC + 4.U, Mux(io.WBU_I_EXUsnpcNEQdnpc, io.WBU_O_nextPC := io.WBU_I_nextPC))
     io.WBU_O_error := false.B
 }
@@ -557,7 +557,7 @@ class NPCB extends Module{
     npcb_PCU.io.PCU_I_willJump := (! npcb_IDU.io.IDU_O_snpcISdnpc) && npcb_EXU.io.EXU_O_snpcNEQdnpc
     npcb_PCU.io.PCU_I_imm := npcb_IDU.io.IDU_O_imm
     npcb_WBU.io.WBU_I_rd := npcb_IDU.io.IDU_O_rd
-    io.NPC_GPRchanged := true.B
-    Mux(npcb_IDU.io.IDU_O_GPRneedWriteBack, GPR(npcb_WBU.io.WBU_O_GPRidx) := npcb_WBU.io.WBU_O_GPRWriteBack, io.NPC_GPRchanged := false.B)
+    io.NPC_GPRchanged := npcb_IDU.io.IDU_O_GPRneedWriteBack
+    GPR(npcb_WBU.io.WBU_O_GPRidx) := Mux(npcb_IDU.io.IDU_O_GPRneedWriteBack, npcb_WBU.io.WBU_O_GPRWriteBack, GPR_read(npcb_WBU.io.WBU_O_GPRidx))
     PC := npcb_PCU.io.PCU_O_DynamicNextPC
 }
