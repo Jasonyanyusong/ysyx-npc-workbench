@@ -490,9 +490,9 @@ class EXU extends Module{
         (io.EXU_I_opcode === EXU_opcode.EXU_BGEU)      -> (!(EXU_src1_unsigned >= EXU_src2_unsigned))
     ))
 
-    io.EXU_O_error := MuxCase(true.B,
+    io.EXU_O_error := MuxCase(false.B,
     Array(
-        (io.EXU_I_opcode === EXU_opcode.EXU_DoNothing) -> (false.B)
+        (io.EXU_I_opcode === EXU_opcode.EXU_DoNothing) -> (true.B)
     ))
 }
 
