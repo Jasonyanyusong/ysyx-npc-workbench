@@ -195,11 +195,11 @@ class IDU extends Module{
         val IDU_I_inst = Input(UInt(32.W))
         val IDU_O_ModifyMem = Output(Bool())
         val IDU_O_rs1 = Output(UInt(5.W)) // Same for all
-        val IDU_I_src1 = Input(UInt(64.W))
-        val IDU_O_src1 = Input(UInt(64.W)) // Same for all
+        //val IDU_I_src1 = Input(UInt(64.W))
+        //val IDU_O_src1 = Input(UInt(64.W)) // Same for all
         val IDU_O_rs2 = Output(UInt(5.W)) // Same for all
-        val IDU_I_src2 = Input(UInt(64.W))
-        val IDU_O_src2 = Input(UInt(64.W)) // Same for all
+        //val IDU_I_src2 = Input(UInt(64.W))
+        //val IDU_O_src2 = Input(UInt(64.W)) // Same for all
         val IDU_O_rd = Output(UInt(5.W)) // Same for all
         val IDU_O_EXUopcode = Output(UInt(6.W))
         val IDU_O_LSUopcode = Output(UInt(6.W))
@@ -213,8 +213,8 @@ class IDU extends Module{
     io.IDU_O_rs1 := io.IDU_I_inst(19, 15) // Cut rs1 from BITS(i, 19, 15)
     io.IDU_O_rs2 := io.IDU_I_inst(24, 20) // Cut rs2 from BITS(i, 24, 20)
     io.IDU_O_rd := io.IDU_I_inst(11, 7) // Cut rd from BITS(i, 11, 7)
-    io.IDU_O_src1 := io.IDU_I_src1
-    io.IDU_O_src2 := io.IDU_I_src2
+    //io.IDU_O_src1 := io.IDU_I_src1
+    //io.IDU_O_src2 := io.IDU_I_src2
 
     io.IDU_O_halt := false.B
     io.IDU_O_error := false.B
@@ -413,69 +413,69 @@ class EXU extends Module{
 
     io.EXU_O_result := MuxCase(0.U(64.W),
     Array(
-        (io.EXU_I_opcode === EXU_opcode.EXU_DoNothing) -> (0.U(64.W)),
-        (io.EXU_I_opcode === EXU_opcode.EXU_LUI)       -> (EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_AUIPC)     -> (io.EXU_I_currentPC + EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_JAL)       -> (io.EXU_I_currentPC + EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_JALR)      -> ((EXU_src1_unsigned + EXU_src2_unsigned) & ~1.U),
-        (io.EXU_I_opcode === EXU_opcode.EXU_BEQ)       -> (io.EXU_I_currentPC + EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_BNE)       -> (io.EXU_I_currentPC + EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_BLT)       -> (io.EXU_I_currentPC + EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_BGE)       -> (io.EXU_I_currentPC + EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_BLTU)      -> (io.EXU_I_currentPC + EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_BGEU)      -> (io.EXU_I_currentPC + EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_LB)        -> (EXU_src1_unsigned + EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_LH)        -> (EXU_src1_unsigned + EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_LW)        -> (EXU_src1_unsigned + EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_LBU)       -> (EXU_src1_unsigned + EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_LHU)       -> (EXU_src1_unsigned + EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SB)        -> (EXU_src1_unsigned + EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SH)        -> (EXU_src1_unsigned + EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SW)        -> (EXU_src1_unsigned + EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_ADDI)      -> (EXU_src1_unsigned + EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SLTI)      -> (Mux(EXU_src1_signed < EXU_imm_signed, 1.U(64.W), 0.U(64.W))),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SLTIU)     -> (Mux(EXU_src1_unsigned < EXU_imm_unsigned, 1.U(64.W), 0.U(64.W))),
-        (io.EXU_I_opcode === EXU_opcode.EXU_XORI)      -> (EXU_src1_unsigned ^ EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_ORI)       -> (EXU_src1_unsigned | EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_ANDI)      -> (EXU_src1_unsigned & EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SLLI)      -> (EXU_src1_unsigned << EXU_imm_unsigned(5, 0)),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SRLI)      -> (EXU_src1_unsigned >> EXU_imm_unsigned(5, 0)),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SRAI)      -> (EXU_src1_unsigned >> EXU_imm_unsigned(5, 0)),
-        (io.EXU_I_opcode === EXU_opcode.EXU_ADD)       -> (EXU_src1_unsigned + EXU_src2_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SUB)       -> (EXU_src1_unsigned - EXU_src2_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SLL)       -> (EXU_src1_unsigned << EXU_src2_unsigned(5, 0)),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SLT)       -> (Mux(EXU_src1_signed < EXU_src2_signed, 1.U(64.W), 0.U(64.W))),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SLTU)      -> (Mux(EXU_src1_unsigned < EXU_src2_unsigned, 1.U(64.W), 0.U(64.W))),
-        (io.EXU_I_opcode === EXU_opcode.EXU_XOR)       -> (EXU_src1_unsigned ^ EXU_src2_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SRL)       -> (EXU_src1_unsigned >> EXU_src2_unsigned(5, 0)),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SRA)       -> (EXU_src1_signed >> EXU_src2_signed(5, 0)),
-        (io.EXU_I_opcode === EXU_opcode.EXU_OR)        -> (EXU_src1_unsigned | EXU_src2_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_AND)       -> (EXU_src1_unsigned & EXU_src2_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_LWU)       -> (EXU_src1_unsigned + EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_LD)        -> (EXU_src1_unsigned + EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SD)        -> (EXU_src1_unsigned + EXU_imm_unsigned),
-        (io.EXU_I_opcode === EXU_opcode.EXU_ADDIW)     -> (Cat(Fill(32, (EXU_src1_unsigned + EXU_imm_unsigned)(31)), (EXU_src1_unsigned + EXU_imm_unsigned)(31, 0))),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SLLIW)     -> (Cat(Fill(32, (EXU_src1_unsigned << EXU_imm_unsigned(4, 0))(31)), (EXU_src1_unsigned << EXU_imm_unsigned(4, 0))(31, 0))),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SRLIW)     -> (Cat(Fill(32, (EXU_src1_unsigned >> EXU_imm_unsigned(4, 0))(31)), (EXU_src1_unsigned >> EXU_imm_unsigned(4, 0))(31, 0))),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SRAIW)     -> (Cat(Fill(32, (EXU_src1_signed >> EXU_imm_unsigned(4, 0))(31)), (EXU_src1_signed >> EXU_imm_signed(4, 0))(31, 0))),
-        (io.EXU_I_opcode === EXU_opcode.EXU_ADDW)      -> (Cat(Fill(32, (EXU_src1_unsigned + EXU_src2_unsigned)(31)), (EXU_src1_unsigned + EXU_src2_unsigned)(31, 0))),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SUBW)      -> (Cat(Fill(32, (EXU_src1_unsigned - EXU_src2_unsigned)(31)), (EXU_src1_unsigned - EXU_src2_unsigned)(31, 0))),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SLLW)      -> (Cat(Fill(32, (EXU_src1_unsigned << EXU_src2_unsigned(4, 0))(31)), (EXU_src1_unsigned << EXU_imm_unsigned(4, 0))(31, 0))),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SRLW)      -> (Cat(Fill(32, (EXU_src1_unsigned >> EXU_src2_unsigned(4, 0))(31)), (EXU_src1_unsigned >> EXU_imm_unsigned(4, 0))(31, 0))),
-        (io.EXU_I_opcode === EXU_opcode.EXU_SRAW)      -> (Cat(Fill(32, (EXU_src1_signed >> EXU_src2_unsigned(4, 0))(31)), (EXU_src1_signed >> EXU_imm_signed(4, 0))(31, 0))),
-        (io.EXU_I_opcode === EXU_opcode.EXU_MUL)       -> ((EXU_src1_unsigned * EXU_src2_unsigned)(63, 0)),
-        (io.EXU_I_opcode === EXU_opcode.EXU_MULH)      -> ((EXU_src1_signed * EXU_src2_signed)(127, 64)),
-        (io.EXU_I_opcode === EXU_opcode.EXU_MULHSU)    -> ((EXU_src1_signed * EXU_src2_unsigned)(127, 64)),
-        (io.EXU_I_opcode === EXU_opcode.EXU_MULHU)     -> ((EXU_src1_unsigned * EXU_src2_unsigned)(127, 64)),
-        (io.EXU_I_opcode === EXU_opcode.EXU_DIV)       -> ((EXU_src1_signed / EXU_src2_signed)),
-        (io.EXU_I_opcode === EXU_opcode.EXU_DIVU)      -> ((EXU_src1_unsigned / EXU_src2_unsigned)),
-        (io.EXU_I_opcode === EXU_opcode.EXU_REM)       -> ((EXU_src1_signed % EXU_src2_signed)),
-        (io.EXU_I_opcode === EXU_opcode.EXU_REMU)      -> ((EXU_src1_unsigned % EXU_src2_unsigned)),
-        (io.EXU_I_opcode === EXU_opcode.EXU_MULW)      -> (Cat(Fill(32, (EXU_src1_unsigned * EXU_src2_unsigned)(31)), (EXU_src1_unsigned * EXU_src2_unsigned)(31, 0))),
-        (io.EXU_I_opcode === EXU_opcode.EXU_DIVW)      -> (Cat(Fill(32, (EXU_src1_signed / EXU_src2_signed)(31)), (EXU_src1_signed / EXU_src2_signed)(31, 0))),
-        (io.EXU_I_opcode === EXU_opcode.EXU_DIVUW)     -> (Cat(Fill(32, (EXU_src1_unsigned / EXU_src2_unsigned)(31)), (EXU_src1_unsigned / EXU_src2_unsigned)(31, 0))),
-        (io.EXU_I_opcode === EXU_opcode.EXU_REMW)      -> (Cat(Fill(32, (EXU_src1_signed % EXU_src2_signed)(31)), (EXU_src1_signed % EXU_src2_signed)(31, 0))),
-        (io.EXU_I_opcode === EXU_opcode.EXU_REMUW)     -> (Cat(Fill(32, (EXU_src1_unsigned % EXU_src2_unsigned)(31)), (EXU_src1_unsigned % EXU_src2_unsigned)(31, 0))),
+        (io.EXU_I_opcode === EXU_opcode.EXU_DoNothing) -> (0.U(64.W)).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_LUI)       -> (EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_AUIPC)     -> (io.EXU_I_currentPC + EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_JAL)       -> (io.EXU_I_currentPC + EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_JALR)      -> ((EXU_src1_unsigned + EXU_src2_unsigned) & ~1.U).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_BEQ)       -> (io.EXU_I_currentPC + EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_BNE)       -> (io.EXU_I_currentPC + EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_BLT)       -> (io.EXU_I_currentPC + EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_BGE)       -> (io.EXU_I_currentPC + EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_BLTU)      -> (io.EXU_I_currentPC + EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_BGEU)      -> (io.EXU_I_currentPC + EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_LB)        -> (EXU_src1_unsigned + EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_LH)        -> (EXU_src1_unsigned + EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_LW)        -> (EXU_src1_unsigned + EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_LBU)       -> (EXU_src1_unsigned + EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_LHU)       -> (EXU_src1_unsigned + EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SB)        -> (EXU_src1_unsigned + EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SH)        -> (EXU_src1_unsigned + EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SW)        -> (EXU_src1_unsigned + EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_ADDI)      -> (EXU_src1_unsigned + EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SLTI)      -> (Mux(EXU_src1_signed < EXU_imm_signed, 1.U(64.W), 0.U(64.W))).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SLTIU)     -> (Mux(EXU_src1_unsigned < EXU_imm_unsigned, 1.U(64.W), 0.U(64.W))).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_XORI)      -> (EXU_src1_unsigned ^ EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_ORI)       -> (EXU_src1_unsigned | EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_ANDI)      -> (EXU_src1_unsigned & EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SLLI)      -> (EXU_src1_unsigned << EXU_imm_unsigned(5, 0)).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SRLI)      -> (EXU_src1_unsigned >> EXU_imm_unsigned(5, 0)).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SRAI)      -> (EXU_src1_unsigned >> EXU_imm_unsigned(5, 0)).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_ADD)       -> (EXU_src1_unsigned + EXU_src2_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SUB)       -> (EXU_src1_unsigned - EXU_src2_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SLL)       -> (EXU_src1_unsigned << EXU_src2_unsigned(5, 0)).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SLT)       -> (Mux(EXU_src1_signed < EXU_src2_signed, 1.U(64.W), 0.U(64.W))).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SLTU)      -> (Mux(EXU_src1_unsigned < EXU_src2_unsigned, 1.U(64.W), 0.U(64.W))).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_XOR)       -> (EXU_src1_unsigned ^ EXU_src2_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SRL)       -> (EXU_src1_unsigned >> EXU_src2_unsigned(5, 0)).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SRA)       -> (EXU_src1_signed >> EXU_src2_signed(5, 0)).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_OR)        -> (EXU_src1_unsigned | EXU_src2_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_AND)       -> (EXU_src1_unsigned & EXU_src2_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_LWU)       -> (EXU_src1_unsigned + EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_LD)        -> (EXU_src1_unsigned + EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SD)        -> (EXU_src1_unsigned + EXU_imm_unsigned).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_ADDIW)     -> (Cat(Fill(32, (EXU_src1_unsigned + EXU_imm_unsigned)(31)), (EXU_src1_unsigned + EXU_imm_unsigned)(31, 0))).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SLLIW)     -> (Cat(Fill(32, (EXU_src1_unsigned << EXU_imm_unsigned(4, 0))(31)), (EXU_src1_unsigned << EXU_imm_unsigned(4, 0))(31, 0))).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SRLIW)     -> (Cat(Fill(32, (EXU_src1_unsigned >> EXU_imm_unsigned(4, 0))(31)), (EXU_src1_unsigned >> EXU_imm_unsigned(4, 0))(31, 0))).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SRAIW)     -> (Cat(Fill(32, (EXU_src1_signed >> EXU_imm_unsigned(4, 0))(31)), (EXU_src1_signed >> EXU_imm_signed(4, 0))(31, 0))).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_ADDW)      -> (Cat(Fill(32, (EXU_src1_unsigned + EXU_src2_unsigned)(31)), (EXU_src1_unsigned + EXU_src2_unsigned)(31, 0))).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SUBW)      -> (Cat(Fill(32, (EXU_src1_unsigned - EXU_src2_unsigned)(31)), (EXU_src1_unsigned - EXU_src2_unsigned)(31, 0))).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SLLW)      -> (Cat(Fill(32, (EXU_src1_unsigned << EXU_src2_unsigned(4, 0))(31)), (EXU_src1_unsigned << EXU_imm_unsigned(4, 0))(31, 0))).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SRLW)      -> (Cat(Fill(32, (EXU_src1_unsigned >> EXU_src2_unsigned(4, 0))(31)), (EXU_src1_unsigned >> EXU_imm_unsigned(4, 0))(31, 0))).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SRAW)      -> (Cat(Fill(32, (EXU_src1_signed >> EXU_src2_unsigned(4, 0))(31)), (EXU_src1_signed >> EXU_imm_signed(4, 0))(31, 0))).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_MUL)       -> ((EXU_src1_unsigned * EXU_src2_unsigned)(63, 0)).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_MULH)      -> ((EXU_src1_signed * EXU_src2_signed)(127, 64)).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_MULHSU)    -> ((EXU_src1_signed * EXU_src2_unsigned)(127, 64)).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_MULHU)     -> ((EXU_src1_unsigned * EXU_src2_unsigned)(127, 64)).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_DIV)       -> ((EXU_src1_signed / EXU_src2_signed)).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_DIVU)      -> ((EXU_src1_unsigned / EXU_src2_unsigned)).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_REM)       -> ((EXU_src1_signed % EXU_src2_signed)).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_REMU)      -> ((EXU_src1_unsigned % EXU_src2_unsigned)).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_MULW)      -> (Cat(Fill(32, (EXU_src1_unsigned * EXU_src2_unsigned)(31)), (EXU_src1_unsigned * EXU_src2_unsigned)(31, 0))).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_DIVW)      -> (Cat(Fill(32, (EXU_src1_signed / EXU_src2_signed)(31)), (EXU_src1_signed / EXU_src2_signed)(31, 0))).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_DIVUW)     -> (Cat(Fill(32, (EXU_src1_unsigned / EXU_src2_unsigned)(31)), (EXU_src1_unsigned / EXU_src2_unsigned)(31, 0))).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_REMW)      -> (Cat(Fill(32, (EXU_src1_signed % EXU_src2_signed)(31)), (EXU_src1_signed % EXU_src2_signed)(31, 0))).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_REMUW)     -> (Cat(Fill(32, (EXU_src1_unsigned % EXU_src2_unsigned)(31)), (EXU_src1_unsigned % EXU_src2_unsigned)(31, 0))).asUInt,
     ))
 
     io.EXU_O_snpcNEQdnpc := MuxCase(false.B,
@@ -642,12 +642,13 @@ class WBU extends Module{
 class NPCB extends Module{
     val io = IO(new Bundle{
         val NPC_sendCurrentPC = Output(UInt(64.W))
+        val NPC_sendNextPC = Output(UInt(64.W))
         val NPC_getInst = Input(UInt(32.W))
         val NPC_LSU_O_memAddr = Output(UInt(64.W))
         val NPC_LSU_O_memRW = Output(Bool()) // Low: Read, High: Write
         val NPC_LSU_I_memR = Input(UInt(64.W))
         val NPC_LSU_O_memW = Output(UInt(64.W))
-        val NPC_LSU_O_lem = Output(UInt(2.W))
+        val NPC_LSU_O_len = Output(UInt(2.W))
 
         val NPC_GPRchanged = Output(Bool())
         val NPC_halt = Output(Bool())
@@ -662,18 +663,21 @@ class NPCB extends Module{
     val npcb_IFU = Module(new IFU)
     npcb_IFU.io.IFU_I_inst := io.NPC_getInst
     npcb_IFU.io.IFU_I_PC := PC
+    io.NPC_sendCurrentPC := PC
 
     // Step II: Decode the instruction: 1) generate OPCODE for LSU and EXU 2) cut RS1, RS2 and RD 3) get SRC1 and SRC2 from GPR 4) Decide if this instruction may cause PC jump
     val npcb_IDU = Module(new IDU)
     npcb_IDU.io.IDU_I_inst := npcb_IFU.io.IFU_I_inst
-    npcb_IDU.io.IDU_I_src1 := GPR_read(npcb_IDU.io.IDU_O_rs1)
-    npcb_IDU.io.IDU_I_src2 := GPR_read(npcb_IDU.io.IDU_O_rs2)
+    //npcb_IDU.io.IDU_I_src1 := GPR_read(npcb_IDU.io.IDU_O_rs1)
+    //npcb_IDU.io.IDU_I_src2 := GPR_read(npcb_IDU.io.IDU_O_rs2)
+    val npcb_src1 = GPR_read(npcb_IDU.io.IDU_O_rs1)
+    val npcb_src2 = GPR_read(npcb_IDU.io.IDU_O_rs2)
     io.NPC_halt := npcb_IDU.io.IDU_O_halt
 
     // Step III: ALU execution
     val npcb_EXU = Module(new EXU)
-    npcb_EXU.io.EXU_I_src1 := npcb_IDU.io.IDU_O_src1
-    npcb_EXU.io.EXU_I_src2 := npcb_IDU.io.IDU_O_src2
+    npcb_EXU.io.EXU_I_src1 := npcb_src1
+    npcb_EXU.io.EXU_I_src2 := npcb_src2
     npcb_EXU.io.EXU_I_imm := npcb_IDU.io.IDU_O_imm
     npcb_EXU.io.EXU_I_opcode := npcb_IDU.io.IDU_O_EXUopcode
     npcb_EXU.io.EXU_I_currentPC := PC
@@ -681,13 +685,19 @@ class NPCB extends Module{
     // Step IV: LSU execution (we access memory using Verilator, NEMU and AM's debug interfaces)
     val npcb_LSU = Module(new LSU)
     npcb_LSU.io.LSU_I_src1 := npcb_EXU.io.EXU_O_result // LSU will get src1 + imm from EXU's result
-    npcb_LSU.io.LSU_I_src2 := npcb_IDU.io.IDU_O_src2
+    npcb_LSU.io.LSU_I_src2 := npcb_src2
     npcb_LSU.io.LSU_I_ModifyMem := npcb_IDU.io.IDU_O_ModifyMem
     npcb_LSU.io.LSU_I_opcode := npcb_IDU.io.IDU_O_LSUopcode
+    io.NPC_LSU_O_len := npcb_LSU.io.LSU_O_len
+    io.NPC_LSU_O_memRW := npcb_LSU.io.LSU_O_memRW
+    io.NPC_LSU_O_memAddr := npcb_LSU.io.LSU_O_memAddr
+    io.NPC_LSU_O_memW := npcb_LSU.io.LSU_O_memW
+    npcb_LSU.io.LSU_I_memR := io.NPC_LSU_I_memR
 
     // Step V: Write back data to a GPR and PC
     val npcb_WBU = Module(new WBU)
     val npcb_PCU = Module(new PCU)
+    npcb_WBU.io.WBU_I_LSUenable := !(npcb_IDU.io.IDU_O_LSUopcode === "b000000".U)
     npcb_WBU.io.WBU_I_EXUresult := npcb_EXU.io.EXU_O_result
     npcb_WBU.io.WBU_I_LSUresult := npcb_LSU.io.LSU_O_result
     npcb_PCU.io.PCU_I_CurrentPC := PC
@@ -697,4 +707,7 @@ class NPCB extends Module{
     io.NPC_GPRchanged := npcb_IDU.io.IDU_O_GPRneedWriteBack
     GPR(npcb_WBU.io.WBU_O_GPRidx) := Mux(npcb_IDU.io.IDU_O_GPRneedWriteBack, npcb_WBU.io.WBU_O_GPRWriteBack, GPR_read(npcb_WBU.io.WBU_O_GPRidx))
     PC := npcb_PCU.io.PCU_O_DynamicNextPC
+    io.NPC_sendNextPC := PC
+
+    io.NPC_error := npcb_IFU.io.IFU_O_error || npcb_IDU.io.IDU_O_error || npcb_EXU.io.EXU_O_error || npcb_LSU.io.LSU_O_error || npcb_WBU.io.WBU_O_error || npcb_PCU.io.PCU_O_error
 }
