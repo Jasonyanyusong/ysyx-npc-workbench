@@ -92,8 +92,8 @@ static int decode_exec(Decode *s) {
   decode_operand(s, &rd, &src1, &src2, &imm, concat(TYPE_, type)); \
   __VA_ARGS__ ; \
 }
-  int rs1 = BITS(s->isa.inst.val, 19, 15);
-  int rs2 = BITS(s->isa.inst.val, 24, 20);
+  //int rs1 = BITS(s->isa.inst.val, 19, 15);
+  //int rs2 = BITS(s->isa.inst.val, 24, 20);
 
   /*printf("Inst: %s (0x%8x)\n", instruction_bin_string, s->isa.inst.val);
   printf("rs1 = 0x%x (%d), rs2 = 0x%x (%d), rd = 0x%x (%d)\n", rs1, rs1, rs2, rs2, rd, rd);

@@ -68,22 +68,6 @@ static int cmd_si(char *args){
   return 0;
 }
 
-static int cmd_reglog(char *args){
-  if (args == NULL){
-    reglog_print_all();
-  }
-  else{
-    int cmd_reglog_n;
-    cmd_reglog_n = atoi(args);
-    if(cmd_reglog_n < 0 || cmd_reglog_n > 31){
-      printf("Invalid input\n");
-      return 0;
-    }
-    reglog_print(cmd_reglog_n);
-  }
-  return 0;
-}
-
 static int cmd_info(char *args){
   if (args == NULL){
     printf("No Subcommand\n");
@@ -91,7 +75,7 @@ static int cmd_info(char *args){
   }
   else{
     if (strcmp(args, "r") == 0){
-      isa_reg_display();
+      isa_gpr_display();
     }
   else if (strcmp(args, "w") == 0){
       print_WP();
@@ -103,14 +87,31 @@ static int cmd_info(char *args){
   return 0;
 }
 
-void print_memory_allisa(int allisa_start_memory_address, int steps){
-  printf("******************************************************************************************************************\n");
-  printf("|  Address   | 1b Phys | 2b Phys | 4b Phys  |     8b Phys      | 1b Virt | 2b Virt | 4b Virt  |     8b Virt      |\n");
+void print_memory_1(int allisa_start_memory_address, int steps){
+  printf("******************************************************************************\n");
+  printf("|  Address   | 1b Phys (Hex) | 1b Virt (Hex) | 1b Phys (Dec) | 1b Virt (Dec) |\n");
   for (int i = allisa_start_memory_address; i < allisa_start_memory_address + steps; i = i + 1){
-    IFDEF(CONFIG_ISA64, printf("| 0x%x | %7lx | %7lx | %8lx | %16lx | %7lx | %7lx | %8lx | %16lx |\n", i, paddr_read(i, 1), paddr_read(i, 2),paddr_read(i, 4), paddr_read(i, 8), vaddr_read(i, 1), vaddr_read(i, 2),vaddr_read(i, 4), vaddr_read(i, 8)););
-    IFNDEF(CONFIG_ISA64, printf("| 0x%x | %7x | %7x | %8x |        NA        | %7x | %7x | %8x |        NA        |\n", i, paddr_read(i, 1), paddr_read(i, 2),paddr_read(i, 4), vaddr_read(i, 1), vaddr_read(i, 2),vaddr_read(i, 4)););
+    printf("| 0x%x | 0x   %8lx | 0x   %8lx | 0x %10ld | 0x %10ld |\n", i, paddr_read(i, 1), vaddr_read(i, 1), paddr_read(i, 1), vaddr_read(i, 1));
   }
-  printf("******************************************************************************************************************\n");
+  printf("******************************************************************************\n\n");
+}
+
+void print_memory_2(int allisa_start_memory_address, int steps){
+  printf("******************************************************************************\n");
+  printf("|  Address   | 2b Phys (Hex) | 2b Virt (Hex) | 2b Phys (Dec) | 2b Virt (Dec) |\n");
+  for (int i = allisa_start_memory_address; i < allisa_start_memory_address + steps; i = i + 2){
+    printf("| 0x%x | 0x   %8lx | 0x   %8lx | 0x %10ld | 0x %10ld |\n", i, paddr_read(i, 2), vaddr_read(i, 2), paddr_read(i, 2), vaddr_read(i, 2));
+  }
+  printf("******************************************************************************\n\n");
+}
+
+void print_memory_4(int allisa_start_memory_address, int steps){
+  printf("******************************************************************************\n");
+  printf("|  Address   | 4b Phys (Hex) | 4b Virt (Hex) | 4b Phys (Dec) | 4b Virt (Dec) |\n");
+  for (int i = allisa_start_memory_address; i < allisa_start_memory_address + steps; i = i + 4){
+    printf("| 0x%x | 0x   %8lx | 0x   %8lx | 0x %10ld | 0x %10ld |\n", i, paddr_read(i, 4), vaddr_read(i, 4), paddr_read(i, 4), vaddr_read(i, 4));
+  }
+  printf("******************************************************************************\n\n");
 }
 
 static int cmd_x(char *args){
@@ -120,7 +121,9 @@ static int cmd_x(char *args){
   char *string_token_first = strtok_r(args, " ", &last_part_of_args);
   print_length = atoi(string_token_first);
   sscanf(last_part_of_args, "%x", &start_memory_address);
-  print_memory_allisa(start_memory_address, print_length);
+  print_memory_1(start_memory_address, print_length);
+  print_memory_2(start_memory_address, print_length);
+  print_memory_4(start_memory_address, print_length);
   return 0;
 }
 
