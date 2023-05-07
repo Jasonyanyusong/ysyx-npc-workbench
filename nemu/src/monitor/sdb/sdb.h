@@ -19,6 +19,7 @@
 #include <common.h>
 
 word_t expr(char *e, bool *success);
+void isa_gpr_display();
 
 // Functions in expr.c
 void set_expr_print_instruction(bool target_expr_print_instruction);

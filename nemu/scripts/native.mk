@@ -41,6 +41,10 @@ gdb: run-env
 	$(call git_commit, "gdb NEMU")
 	gdb -s $(BINARY) --args $(NEMU_EXEC)
 
+lldb: run-env # For Apple ARM-Processors macOS, we can use lldb as gdb is not currently available.
+	$(call git_commit, "lldb NEMU")
+	lldb -s $(BINARY) --  $(NEMU_EXEC)
+
 clean-tools = $(dir $(shell find ./tools -maxdepth 2 -mindepth 2 -name "Makefile"))
 $(clean-tools):
 	-@$(MAKE) -s -C $@ clean
@@ -48,3 +52,4 @@ clean-tools: $(clean-tools)
 clean-all: clean distclean clean-tools
 
 .PHONY: run gdb run-env clean-tools clean-all $(clean-tools)
+.PHONY: run lldb run-env clean-tools clean-all $(clean-tools)
