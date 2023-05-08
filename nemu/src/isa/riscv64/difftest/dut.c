@@ -44,7 +44,7 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
       return false;
     }
   }
-  isa_print_reg(pc);
+  //isa_print_reg(pc);
   return true;
 }
 
