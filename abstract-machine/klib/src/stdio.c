@@ -27,8 +27,13 @@ int sprintf(char *out, const char *fmt, ...) {
           charout += strlen(processChar);
           break;
         case 'd':
-          // TODO
+          char processDecimal[8] = {};
+          int processVal = va_arg(args, int);
+          itoa(processVal, processDecimal, 10);
+          memcpy(charout, processDecimal, strlen(processDecimal));
+          charout += strlen(processDecimal);
           break;
+        default: break;
       }
     }
     else{

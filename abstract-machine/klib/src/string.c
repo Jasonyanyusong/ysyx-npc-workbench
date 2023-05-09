@@ -8,7 +8,6 @@ size_t strlen(const char *s) {
   size_t ans = 0;
   while (*s++ != '\0'){
     ans ++;
-    s ++;
   }
   return ans;
 }
