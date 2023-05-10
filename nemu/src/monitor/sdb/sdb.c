@@ -259,5 +259,5 @@ void init_sdb() {
   init_wp_pool();
 
   /* Initialize tracers*/
-  trace_init(true, true, true, true);
+  trace_init();
 }

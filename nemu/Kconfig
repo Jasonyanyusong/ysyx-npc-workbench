@@ -127,6 +127,21 @@ config REGLOG
   bool "Enable reglog module"
   default y
 
+config InstructionTrace
+  bool "Enable itrace (pa2, implementing)"
+  default n
+
+config InstructionRingBuffer
+  bool "Enable iringbuf (pa2, not implemented)"
+  default n
+
+config MemoryTrace
+  bool "Enable mtrace (pa2, not implemented)"
+  default n
+
+config FunctionTrace
+  bool "Enable ftrace (pa2, not implemented)"
+  default n
 
 config TRACE
   bool "Enable tracer"
