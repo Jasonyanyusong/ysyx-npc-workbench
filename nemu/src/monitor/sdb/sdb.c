@@ -23,6 +23,7 @@
 #include <memory/vaddr.h>
 #include <memory/host.h>
 #include "sdb.h"
+#include "trace/trace.h"
 
 static int is_batch_mode = false;
 
@@ -256,4 +257,7 @@ void init_sdb() {
 
   /* Initialize the watchpoint pool. */
   init_wp_pool();
+
+  /* Initialize tracers*/
+  trace_init(true, true, true, true);
 }

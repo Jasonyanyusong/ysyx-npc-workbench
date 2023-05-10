@@ -1,8 +1,0 @@
-*
-!.gitignore
-!ftrace.c
-!iringbuf.c
-!itrace.c
-!mtrace.c
-!trace.c
-!trace.h
