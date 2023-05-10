@@ -128,11 +128,11 @@ config REGLOG
   default y
 
 config InstructionTrace
-  bool "Enable itrace (pa2, implementing)"
+  bool "Enable itrace (pa2, tested)"
   default n
 
 config InstructionRingBuffer
-  bool "Enable iringbuf (pa2, not implemented)"
+  bool "Enable iringbuf (pa2, implementing)"
   default n
 
 config MemoryTrace
