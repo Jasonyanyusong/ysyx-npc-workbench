@@ -3,7 +3,7 @@
 
 void itrace_init(){
     printf("trace: itrace enabled\n");
-    if(remove("$NEMU_HOME/itrace.txt")==0){
+    if(remove("itrace.txt")==0){
         printf("NEMU removed previous itrace records.\n");
     } // So previous traces will not be recorded
     return;
@@ -11,7 +11,7 @@ void itrace_init(){
 
 void iringbuf_init(){
     printf("trace: iringbuf enabled\n");
-    if(remove("$NEMU_HOME/iringbuf.txt")==0){
+    if(remove("iringbuf.txt")==0){
         printf("NEMU removed previous iringbuf records.\n");
     } // So previous traces will not be recorded
     return;
@@ -19,7 +19,7 @@ void iringbuf_init(){
 
 void mtrace_init(){
     printf("trace: mtrace enabled\n");
-    if(remove("$NEMU_HOME/mtrace.txt")==0){
+    if(remove("$mtrace.txt")==0){
         printf("NEMU removed previous mtrace records.\n");
     } // So previous traces will not be recorded
     return;
@@ -27,7 +27,7 @@ void mtrace_init(){
 
 void ftrace_init(){
     printf("trace: ftrace enabled\n");
-    if(remove("$NEMU_HOME/ftrace.txt")==0){
+    if(remove("ftrace.txt")==0){
         printf("NEMU removed previous ftrace records.\n");
     } // So previous traces will not be recorded
     return;
