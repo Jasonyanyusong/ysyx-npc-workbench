@@ -1,7 +1,7 @@
 #include<stdbool.h>
 #include<stdio.h>
 
-int iringbuf_size = 0;
+int iringbuf_size = 64;
 
 void itrace_init(){
     printf("trace: itrace enabled\n");
@@ -19,9 +19,18 @@ void itrace_write(char* messageWrite){
     return;
 }
 
-void iringbuf_init(int size){
-    iringbuf_size = size;
+struct ringbuf_element{
+    char message[128];
+    bool used;
+    int index;
+}iringbuf_store[64];
+
+void iringbuf_init(){
     printf("trace: iringbuf enabled, ring size is %d\n", iringbuf_size);
+    for(int i = 0; i < 64; i = i + 1){
+        iringbuf_store[i].index = -1;
+        iringbuf_store[i].used = false;
+    }
     if(remove("iringbuf.txt")==0){
         printf("NEMU removed previous iringbuf records.\n");
     } // So previous traces will not be recorded
@@ -46,7 +55,7 @@ void ftrace_init(){
 
 void trace_init(){
     IFDEF(CONFIG_InstructionTrace, itrace_init());
-    IFDEF(CONFIG_InstructionRingBuffer, iringbuf_init(64));
+    IFDEF(CONFIG_InstructionRingBuffer, iringbuf_init());
     IFDEF(CONFIG_MemoryTrace, mtrace_init());
     IFDEF(CONFIG_FunctionTrace, ftrace_init());
     return;
