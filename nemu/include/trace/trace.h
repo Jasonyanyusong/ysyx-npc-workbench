@@ -11,6 +11,14 @@ void itrace_init(){
     return;
 }
 
+void itrace_write(char* messageWrite){
+    FILE *itrace_file = fopen("itrace.txt", "a+");
+    assert(itrace_file != NULL);
+    fputs(messageWrite, itrace_file);
+    fclose(itrace_file);
+    return;
+}
+
 void iringbuf_init(int size){
     iringbuf_size = size;
     printf("trace: iringbuf enabled, ring size is %d\n", iringbuf_size);
