@@ -15,6 +15,7 @@ void itrace_init(){
 void itrace_write(char* messageWrite){
     FILE *itrace_file = fopen("itrace.txt", "a+");
     assert(itrace_file != NULL);
+    printf("trace-itrace: %s", messageWrite);
     fputs(messageWrite, itrace_file);
     fclose(itrace_file);
     return;
@@ -38,7 +39,7 @@ void iringbuf_write(word_t pc, word_t snpc, word_t dnpc, word_t inst, char* dias
     FILE *iringbuf_file = fopen("iringbuf.txt", "w+");
     assert(iringbuf_file != NULL);
     for(int i = 0; i < iringbuf_size; i = i + 1){
-        printf("%s", iringbuf_records[i]);
+        printf("trace-iringbuf: %s", iringbuf_records[i]);
         fputs(iringbuf_records[i], iringbuf_file);
     }
     fclose(iringbuf_file);
