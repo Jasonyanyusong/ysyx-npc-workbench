@@ -34,7 +34,7 @@ void iringbuf_init(){
 
 void iringbuf_write(word_t pc, word_t snpc, word_t dnpc, word_t inst, char* diasm){
     int iringbuf_opindex = iringbuf_count % iringbuf_size;
-    sprintf(iringbuf_records[iringbuf_opindex], "pc: 0x%lx  snpc: 0x%lx  inst: 0x%8x  dnpc: 0x%lx  %s\n", pc, snpc, inst, dnpc, diasm);
+    sprintf(iringbuf_records[iringbuf_opindex], "pc: 0x%lx  snpc: 0x%lx  inst: 0x%8lx  dnpc: 0x%lx  %s\n", pc, snpc, inst, dnpc, diasm);
     iringbuf_count = iringbuf_count + 1;
     FILE *iringbuf_file = fopen("iringbuf.txt", "w+");
     assert(iringbuf_file != NULL);
@@ -44,6 +44,33 @@ void iringbuf_write(word_t pc, word_t snpc, word_t dnpc, word_t inst, char* dias
     }
     fclose(iringbuf_file);
     return;
+}
+
+word_t mtrace_pc = 0;
+void mtrace_updatePC(word_t new_pc){
+    mtrace_pc = new_pc;
+    printf("trace-mtrace: current pc is 0x%lx\n", mtrace_pc);
+    return;
+}
+
+void mtrace_write(bool mem_RW, word_t addr, int mem_len, word_t mem_data){
+    char written_to_mtrace[128];
+    if(mem_RW){
+        sprintf(written_to_mtrace, "pc: 0x%lx  mem_w  addr: 0x%lx  len: %d  data: 0x%lx\n", mtrace_pc, addr, mem_len, mem_data);
+        printf("trace-mtrace: %s", written_to_mtrace);
+        FILE *mtrace_file = fopen("mtrace.txt", "a+");
+        assert(mtrace_file != NULL);
+        fputs(written_to_mtrace, mtrace_file);
+        fclose(mtrace_file);
+    }
+    else{
+        sprintf(written_to_mtrace, "pc: 0x%lx  mem_r  addr: 0x%lx  len: %d  data: 0x%lx\n", mtrace_pc, addr, mem_len, mem_data);
+        printf("trace-mtrace: %s", written_to_mtrace);
+        FILE *mtrace_file = fopen("mtrace.txt", "a+");
+        assert(mtrace_file != NULL);
+        fputs(written_to_mtrace, mtrace_file);
+        fclose(mtrace_file);
+    }
 }
 
 void mtrace_init(){

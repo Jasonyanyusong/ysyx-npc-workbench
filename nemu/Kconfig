@@ -132,15 +132,15 @@ config InstructionTrace
   default n
 
 config InstructionRingBuffer
-  bool "Enable iringbuf (pa2, tested, very slow)"
+  bool "Enable iringbuf (pa2, tested)"
   default n
 
 config MemoryTrace
-  bool "Enable mtrace (pa2, implementing)"
+  bool "Enable mtrace (pa2, tested)"
   default n
 
 config FunctionTrace
-  bool "Enable ftrace (pa2, not implemented)"
+  bool "Enable ftrace (pa2, implementing)"
   default n
 
 config TRACE
