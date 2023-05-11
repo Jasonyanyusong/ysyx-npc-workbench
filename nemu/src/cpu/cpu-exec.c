@@ -72,27 +72,14 @@ static void exec_once(Decode *s, vaddr_t pc) {
 #endif
 
 #ifdef CONFIG_InstructionTrace
-  //printf("pc: 0x%lx  snpc: 0x%lx  inst: 0x%8x  dnpc: 0x%lx  %s\n", s->pc, s->snpc, s->isa.inst.val, s->dnpc, p);
   char written_to_itrace[128];
   sprintf(written_to_itrace, "pc: 0x%lx  snpc: 0x%lx  inst: 0x%8x  dnpc: 0x%lx  %s\n", s->pc, s->snpc, s->isa.inst.val, s->dnpc, p);
   printf("%s", written_to_itrace);
-  /*FILE *itrace_file = fopen("itrace.txt", "a+");
-  assert(itrace_file != NULL);
-  fputs(written_to_itrace, itrace_file);
-  fclose(itrace_file);*/
   itrace_write(written_to_itrace);
 #endif
 
 #ifdef CONFIG_InstructionRingBuffer
-  //printf("pc: 0x%lx  snpc: 0x%lx  inst: 0x%8x  dnpc: 0x%lx  %s\n", s->pc, s->snpc, s->isa.inst.val, s->dnpc, p);
-  char written_to_iringbuf[128];
-  sprintf(written_to_iringbuf, "pc: 0x%lx  snpc: 0x%lx  inst: 0x%8x  dnpc: 0x%lx  %s\n", s->pc, s->snpc, s->isa.inst.val, s->dnpc, p);
-  //printf("%s", written_to_iringbuf);
-  /*FILE *itrace_file = fopen("itrace.txt", "a+");
-  assert(itrace_file != NULL);
-  fputs(written_to_itrace, itrace_file);
-  fclose(itrace_file);*/
-  iringbuf_write(written_to_iringbuf, s->pc, s->snpc, s->dnpc, s->isa.inst.val, p);
+  iringbuf_write(s->pc, s->snpc, s->dnpc, s->isa.inst.val, p);
 #endif
 }
 
