@@ -26,16 +26,10 @@
 #define Mr vaddr_read
 #define Mw vaddr_write
 
-u_int32_t instruction_value = 0;
-
 enum {
   TYPE_R, TYPE_I, TYPE_S, TYPE_B, TYPE_U, TYPE_J, TYPE_R4, 
   TYPE_N, // none
 };
-
-bool riscv64_instC_Print_Debug = true;
-bool riscv64_instC_Print_ChecKPoinT = true;
-bool riscv64_instC_Print_Instruction = true;
 
 #define src1R() do { *src1 = R(rs1); } while (0) // Skeleton Code
 #define src2R() do { *src2 = R(rs2); } while (0) // Skeleton Code
@@ -43,7 +37,6 @@ bool riscv64_instC_Print_Instruction = true;
 #define immI() do { *imm = SEXT(BITS(i, 31, 20), 12); } while(0) // Skeleton Code
 #define immU() do { *imm = SEXT(BITS(i, 31, 12), 20) << 12; } while(0) // Skeleton Code
 #define immS() do { *imm = (SEXT(BITS(i, 31, 25), 7) << 5) | BITS(i, 11, 7); } while(0) // Skeleton Code
-// My codes (Have confusions about SEXT and BITS)
 #define immB() do { *imm = (SEXT(BITS(i, 31, 31), 1) << 12) | BITS(i, 7, 7) << 11 | BITS(i, 30, 25) << 5 | BITS(i, 11, 8) << 1;} while(0)
 #define immJ() do { *imm = (SEXT(BITS(i, 31, 31), 1) << 20) | BITS(i, 19, 12) << 12 | BITS(i, 20, 20) << 11 | BITS(i, 30, 21) << 1;} while(0)
 
@@ -51,8 +44,6 @@ static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_
   uint32_t i = s->isa.inst.val;
   int rs1 = BITS(i, 19, 15);
   int rs2 = BITS(i, 24, 20);
-  // Below is rs3's implementation, rs3 appears in RV32(64)F, RV32(64)D, RV32(64)Q and RV32(64)Zfh 
-  //int rs3 = BITS(i, 31, 27);
   *rd     = BITS(i, 11, 7);
   switch (type) {
     case TYPE_R : src1R(); src2R();         break;
@@ -63,7 +54,6 @@ static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_
     case TYPE_U :                   immU(); break;
     case TYPE_J :                   immJ(); break;
   }
-  //printf("rs1 = 0x%x, rs2 = 0x%x\n", rs1, rs2);
 }
 
 static int decode_exec(Decode *s) {
@@ -101,11 +91,6 @@ static int decode_exec(Decode *s) {
 #ifdef CONFIG_ShowInstInfo
   int rs1 = BITS(s->isa.inst.val, 19, 15);
   int rs2 = BITS(s->isa.inst.val, 24, 20);
-
-  printf("Inst: %s (0x%8x)\n", instruction_bin_string, s->isa.inst.val);
-  printf("rs1 = 0x%x (%d), rs2 = 0x%x (%d), rd = 0x%x (%d)\n", rs1, rs1, rs2, rs2, rd, rd);
-  printf("src1 = 0x%8lx (%ld), src2 = 0x%8lx (%ld), R(rd) = 0x%8lx (%ld), imm = 0x%8lx (%ld)\n", src1, src1, src2, src2, R(rd), R(rd), imm, imm);
-  printf("pc = 0x%lx, dnpc = 0x%lx, snpc = 0x%lx\n", s -> pc, s -> dnpc, s -> snpc);
 #endif
   // R(10) is $a0
 
