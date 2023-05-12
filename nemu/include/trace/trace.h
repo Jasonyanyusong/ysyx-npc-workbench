@@ -75,7 +75,7 @@ void mtrace_write(bool mem_RW, word_t addr, int mem_len, word_t mem_data){
 
 void mtrace_init(){
     printf("trace: mtrace enabled\n");
-    if(remove("$mtrace.txt")==0){
+    if(remove("mtrace.txt")==0){
         printf("NEMU removed previous mtrace records.\n");
     } // So previous traces will not be recorded
     return;
