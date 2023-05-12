@@ -207,6 +207,11 @@ config DIFFTEST_NOABORT_MODE
   bool "Enable Non-abort mode of difftest (suggest use only in rand_img test mode)"
   default n
 
+config DIFFTEST_OBSERVE_MODE
+  depends on DIFFTEST
+  bool "Enable Observe mode of difftest (significantly reduce speed)"
+  default n
+
 config DIFFTEST_REF_PATH
   string
   default "tools/qemu-diff" if DIFFTEST_REF_QEMU

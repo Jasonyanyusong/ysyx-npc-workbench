@@ -47,8 +47,8 @@ void init_isa() {
 #ifdef CONFIG_RandomInstructionImage
 #include <stdio.h>
 #include <stdlib.h>
-for(int i = 1; i < 32; i = i + 1){
-  cpu.gpr[i] = rand();
+for(int i = 0; i < 32; i = i + 1){
+  cpu.gpr[i] = reg[i];
   printf("Random Instruction Image: set cpu.gpr[%d] to 0x%lx\n", i, cpu.gpr[i]);
 }
 #endif
