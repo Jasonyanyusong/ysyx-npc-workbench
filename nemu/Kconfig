@@ -123,6 +123,14 @@ config CC_ASAN
 endmenu
 
 menu "Testing and Debugging"
+config ShowInstInfo
+  bool "Show informations for every instruction executed (will significantly reduce executing speed)"
+  default n
+
+config RandomInstructionImage
+  bool "Enable Random Instruction Image mode (NEMU only)"
+  default n
+
 config REGLOG
   bool "Enable reglog module"
   default y
@@ -193,6 +201,11 @@ config DIFFTEST_REF_KVM
   bool "KVM"
 endif
 endchoice
+
+config DIFFTEST_NOABORT_MODE
+  depends on DIFFTEST
+  bool "Enable Non-abort mode of difftest (suggest use only in rand_img test mode)"
+  default n
 
 config DIFFTEST_REF_PATH
   string

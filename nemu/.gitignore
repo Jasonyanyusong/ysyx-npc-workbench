@@ -5,6 +5,7 @@
 !*.mk
 !*.[cSh]
 !*.cc
+!*.py
 !*.ctemp
 !*.htemp
 !.gitignore

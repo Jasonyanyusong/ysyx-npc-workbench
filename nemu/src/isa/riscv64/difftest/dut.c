@@ -18,6 +18,12 @@
 #include "../local-include/reg.h"
 #include<math.h>
 
+#ifdef CONFIG_DIFFTEST_NOABORT_MODE
+uint64_t exec_count = 0;
+uint64_t success_count = 0;
+uint64_t fail_count = 0;
+#endif
+
 const char *rvint_regs[] = {
   "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
   "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
@@ -41,10 +47,28 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
     if((unsigned)cpu.gpr[integer_register_index] != (unsigned)ref_r -> gpr[integer_register_index])
     {
       isa_print_regcompare(*ref_r, pc, integer_register_index);
+#ifndef CONFIG_DIFFTEST_NOABORT_MODE
       return false;
+#endif
+#ifdef CONFIG_DIFFTEST_NOABORT_MODE
+      fail_count = fail_count + 1;
+      return true;
+#endif
     }
+#ifdef CONFIG_DIFFTEST_NOABORT_MODE
+    else{
+      success_count = success_count + 1;
+    }
+#endif
   }
-  //isa_print_reg(pc);
+#ifdef CONFIG_ShowInstInfo
+  isa_print_reg(pc);
+#endif
+
+#ifdef CONFIG_DIFFTEST_NOABORT_MODE
+    printf("Up to now, we have executed %ld steps,\033[1;44;32m with %ld steps success\033[0m,\033[1;44;31m and %ld steps fail\033[0m\n", exec_count, success_count / 32, fail_count);
+#endif
+
   return true;
 }
 

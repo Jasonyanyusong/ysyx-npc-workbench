@@ -97,18 +97,17 @@ rvnemu_dut.append(IUT("0000001 ????? ????? 101 ????? 01110 11", "DIVUW"))
 rvnemu_dut.append(IUT("0000001 ????? ????? 110 ????? 01110 11", "REMW"))
 rvnemu_dut.append(IUT("0000001 ????? ????? 111 ????? 01110 11", "REMUW"))
 
-os.remove("inst_img.h")
-
-inst_img = open("inst_img.h","a", encoding="utf-8")
+inst_img = open("inst_img.h","w+", encoding="utf-8")
 inst_img.write("static const uint32_t img [] = {")
 
-for test_number in range(0, 1048576, 1):
+for test_number in range(0, 1048575, 1):
     rand_inst = rvnemu_dut[random.randint(0, len(rvnemu_dut) - 1)].gentest()
     print('%#x'%rand_inst)
     to_be_written = '%#x'%rand_inst + ","
     inst_img.write(to_be_written)
     rvnemu_randinst.append(rand_inst)
 
+inst_img.write("0x00100073,")
 inst_img.write("};")
 inst_img.close()
 
