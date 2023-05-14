@@ -147,6 +147,10 @@ config MemoryTrace
   bool "Enable mtrace (pa2, tested)"
   default n
 
+config RegisterTrace
+  bool "Enable rtrace (pa2, implementing)"
+  default n
+
 config FunctionTrace
   bool "Enable ftrace (pa2, implementing)"
   default n

@@ -81,6 +81,40 @@ void mtrace_init(){
     return;
 }
 
+word_t rtrace_pc = 0;
+void rtrace_updatePC(word_t new_pc){
+    rtrace_pc = new_pc;
+    printf("trace-rtrace: current pc is 0x%lx\n", rtrace_pc);
+    return;
+}
+
+void rtrace_init(){
+    printf("trace: rtrace enabled\n");
+    if(remove("rtrace.txt")==0){
+        printf("NEMU removed previous mtrace records.\n");
+    } // So previous traces will not be recorded
+    return;
+}
+
+void rtrace_write(){
+    char written_to_rtrace[1024] = {0};
+    char rtrace_pc_msg[64];
+    sprintf(rtrace_pc_msg, "At pc = 0x%lx, \0", rtrace_pc);
+    strcat(written_to_rtrace, rtrace_pc_msg);
+    for(int i = 0; i < 32; i = i + 1){
+        char rtrace_gpr_msg[64];
+        sprintf(rtrace_gpr_msg, "x%d = 0x%16lx ", i, cpu.gpr[i]);
+        strcat(written_to_rtrace, rtrace_gpr_msg);
+    }
+    strcat(written_to_rtrace, "\n\0");
+    printf("\n\n%s\n\n", written_to_rtrace);
+    FILE *rtrace_file = fopen("rtrace.txt", "a+");
+    assert(rtrace_file != NULL);
+    fputs(written_to_rtrace, rtrace_file);
+    fclose(rtrace_file);
+    return;
+}
+
 void ftrace_init(){
     printf("trace: ftrace enabled\n");
     if(remove("ftrace.txt")==0){
@@ -94,5 +128,6 @@ void trace_init(){
     IFDEF(CONFIG_InstructionRingBuffer, iringbuf_init());
     IFDEF(CONFIG_MemoryTrace, mtrace_init());
     IFDEF(CONFIG_FunctionTrace, ftrace_init());
+    IFDEF(CONFIG_RegisterTrace, rtrace_init());
     return;
 }
