@@ -53,7 +53,7 @@ static long load_img() {
     return 4096; // built-in image size
 #endif
 #ifdef CONFIG_RandomInstructionImage
-    return 4194304;
+    return 10485760;
 #endif
   }
 
