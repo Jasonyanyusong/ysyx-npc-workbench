@@ -115,19 +115,34 @@ void rtrace_write(){
     return;
 }
 
-void ftrace_init(){
+struct ftrace_function{
+    char * ftrace_name;
+    word_t ftrace_start_addr;
+    word_t ftrace_end_addr;
+}ftrace_functions[1024];
+
+word_t ftrace_exec_depth = 0;
+int ftrace_nr_function = 0;
+
+void ftrace_init(char* ftrace_elf, char* ftrace_das){
     printf("trace: ftrace enabled\n");
+    printf("trace: ftrace ELF file is \"%s\"\n", ftrace_elf);
+    printf("trace: ftrace TXT file is \"%s\"\n", ftrace_das);
     if(remove("ftrace.txt")==0){
         printf("NEMU removed previous ftrace records.\n");
     } // So previous traces will not be recorded
     return;
 }
 
-void trace_init(){
+void ftrace_write(){
+    return;
+}
+
+void trace_init(char* elf, char* diasm){
     IFDEF(CONFIG_InstructionTrace, itrace_init());
     IFDEF(CONFIG_InstructionRingBuffer, iringbuf_init());
     IFDEF(CONFIG_MemoryTrace, mtrace_init());
-    IFDEF(CONFIG_FunctionTrace, ftrace_init());
+    IFDEF(CONFIG_FunctionTrace, ftrace_init(elf, diasm));
     IFDEF(CONFIG_RegisterTrace, rtrace_init());
     return;
 }
