@@ -5,6 +5,7 @@
 #include<stdlib.h>
 
 #define iringbuf_size 64
+#define ftrace_elf_nr_Phdr 1024
 
 void itrace_init(){
     printf("trace: itrace enabled\n");
@@ -127,7 +128,7 @@ word_t ftrace_exec_depth = 0;
 word_t ftrace_exec_count = 0;
 int ftrace_nr_function = 0;
 
-void ftrace_process_efl(char* elf_addr){
+void ftrace_process_elf(char* elf_addr){
     FILE * elf_file;
 
     Elf64_Ehdr ftrace_efl_header;
@@ -213,7 +214,57 @@ void ftrace_process_efl(char* elf_addr){
     printf("trace: ftrace ELF header: e_shnum (Section header table entry count) is 0x%x\n", ftrace_efl_header.e_shnum);
     printf("trace: ftrace ELF header: e_shstrndx (Section header string table index) is 0x%x\n", ftrace_efl_header.e_shstrndx);
 
-    //Elf64_
+    // Default set number of Program Header's number at the begining of the file
+    Elf64_Phdr ftrace_elf_program_header[ftrace_elf_nr_Phdr];
+    fseek(elf_file, ftrace_efl_header.e_phoff, SEEK_SET);
+    fread(ftrace_elf_program_header, sizeof(Elf64_Phdr), ftrace_efl_header.e_phnum, elf_file);
+    printf("trace: ftrace ELF Program header: number of header(s) is %d, starting at offset 0x%4lx\n", ftrace_efl_header.e_phnum, ftrace_efl_header.e_phoff);
+    for(int i = 0; i < ftrace_efl_header.e_phnum; i = i + 1){
+        printf("trace: ftrace ELF Program header: program header %d\n\t\t\t\t\tp_type (Segment type) is %d:", i, ftrace_elf_program_header[i].p_type);
+        switch(ftrace_elf_program_header[i].p_type){
+            default:         printf("Unknown type\n");                                     break;
+            case 0:          printf("PT_NULL (Program header table entry unused)\n");      break;
+            case 1:          printf("PT_LOAD (Loadable program segment)\n");               break;
+            case 2:          printf("PT_DYNAMIC (Dynamic linking information)\n");         break;
+            case 3:          printf("PT_INTERP (Program interpreter)\n");                  break;
+            case 4:          printf("PT_NOTE (Auxiliary information)\n");                  break;
+            case 5:          printf("PT_SHLIB (Reserved)\n");                              break;
+            case 6:          printf("PT_PHDR (Entry for header table itself)\n");          break;
+            case 7:          printf("PT_TLS (Thread-local storage segment)\n");            break;
+            case 8:          printf("PT_NUM (Number of defined types)\n");                 break;
+            case 0x60000000: printf("PT_LOOS (Start of OS-specific)\n");                   break;
+            case 0x6474e550: printf("PT_GNU_EH_FRAME (GCC .eh_frame_hdr segment)\n");      break;
+            case 0x6474e551: printf("PT_GNU_STACK (Indicates stack executability)\n");     break;
+            case 0x6474e552: printf("PT_GNU_RELRO (Read-only after relocation)\n");        break;
+            case 0x6474e553: printf("PT_GNU_PROPERTY (GNU property)\n");                   break;
+            case 0x6ffffffa: printf("PT_LOSUNW or PT_SUNWBSS (Sun Specific segment)\n");   break;
+            case 0x6ffffffb: printf("PT_SUNWSTACK (Stack segment)\n");                     break;
+            case 0x6fffffff: printf("PT_HISUNW or PT_HIOS (End of OS-specific)\n");        break;
+            case 0x70000000: printf("PT_LOPROC (Start of processor-specific)\n");          break;
+            case 0x7fffffff: printf("PT_HIPROC (End of processor-specific)\n");            break;
+        }
+        printf("\t\t\t\t\tp_flags (segment flags) is ");
+        switch(ftrace_elf_program_header[i].p_flags){
+            default:         printf("Unknown flag\n");                                     break;
+            case (1 << 0):   printf("PF_X (Segment is executable)\n");                     break;
+            case (1 << 1):   printf("PF_W (Segment is writable)\n");                       break;
+            case (1 << 2):   printf("PF_R (Segment is readable)\n");                       break;
+            case 0x0ff00000: printf("PF_MASKOS (OS-specific)\n");                          break;
+            case 0xf0000000: printf("PF_MASKPROC (Processor-specific)\n");                 break;
+        }
+        printf("\t\t\t\t\tp_offset (Segment file offset) is 0x%lx\n", ftrace_elf_program_header[i].p_offset);
+        printf("\t\t\t\t\tp_vaddr (Segment virtual address) is 0x%lx\n", ftrace_elf_program_header[i].p_vaddr);
+        printf("\t\t\t\t\tp_paddr (Segment physical address) is 0x%lx\n", ftrace_elf_program_header[i].p_paddr);
+        printf("\t\t\t\t\tp_filesz (Segment size in file) is 0x%lx\n", ftrace_elf_program_header[i].p_filesz);
+        printf("\t\t\t\t\tp_memsz (Segment size in memory) is 0x%lx\n", ftrace_elf_program_header[i].p_memsz);
+        printf("\t\t\t\t\tp_align (Segment alignment) is 0x%lx\n", ftrace_elf_program_header[i].p_align);
+    }
+
+    Elf64_Shdr * ftrace_elf_section_header = (Elf64_Shdr*)malloc(sizeof(Elf64_Shdr) * ftrace_efl_header.e_shnum);
+    assert(ftrace_elf_section_header != NULL);
+    //ftrace_check_elf = 
+
+    
 
     return;
 }
@@ -226,7 +277,7 @@ void ftrace_init(char* ftrace_elf, char* ftrace_das){
         printf("NEMU removed previous ftrace records.\n");
     } // So previous traces will not be recorded
     // TODO: elf and disassembly file location is parsed here, read ELF and diasm to get location of each function
-    ftrace_process_efl(ftrace_elf);
+    ftrace_process_elf(ftrace_elf);
     return;
 }
 
