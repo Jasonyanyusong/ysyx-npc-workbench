@@ -262,9 +262,11 @@ void ftrace_process_elf(char* elf_addr){
 
     Elf64_Shdr * ftrace_elf_section_header = (Elf64_Shdr*)malloc(sizeof(Elf64_Shdr) * ftrace_efl_header.e_shnum);
     assert(ftrace_elf_section_header != NULL);
-    //ftrace_check_elf = 
-
-    
+    ftrace_check_elf = fseek(elf_file, ftrace_efl_header.e_shoff, SEEK_SET);
+    assert(ftrace_check_elf == 0);
+    ftrace_check_elf = fread(ftrace_elf_section_header, sizeof(Elf64_Shdr) * ftrace_efl_header.e_shnum, 1, elf_file);
+    assert(ftrace_check_elf != 0);
+    rewind(elf_file);
 
     return;
 }
