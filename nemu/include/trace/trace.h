@@ -6,6 +6,8 @@
 
 #define iringbuf_size 64
 #define ftrace_elf_nr_Phdr 1024
+#define ftrace_elf_nr_Shdr 1024
+#define ftrace_nr_stirng_table 1024
 
 void itrace_init(){
     printf("trace: itrace enabled\n");
@@ -127,6 +129,7 @@ struct ftrace_function{
 word_t ftrace_exec_depth = 0;
 word_t ftrace_exec_count = 0;
 int ftrace_nr_function = 0;
+char ftrace_stringtable[ftrace_nr_stirng_table];
 
 void ftrace_process_elf(char* elf_addr){
     FILE * elf_file;
@@ -260,13 +263,82 @@ void ftrace_process_elf(char* elf_addr){
         printf("\t\t\t\t\tp_align (Segment alignment) is 0x%lx\n", ftrace_elf_program_header[i].p_align);
     }
 
-    Elf64_Shdr * ftrace_elf_section_header = (Elf64_Shdr*)malloc(sizeof(Elf64_Shdr) * ftrace_efl_header.e_shnum);
-    assert(ftrace_elf_section_header != NULL);
-    ftrace_check_elf = fseek(elf_file, ftrace_efl_header.e_shoff, SEEK_SET);
-    assert(ftrace_check_elf == 0);
-    ftrace_check_elf = fread(ftrace_elf_section_header, sizeof(Elf64_Shdr) * ftrace_efl_header.e_shnum, 1, elf_file);
-    assert(ftrace_check_elf != 0);
-    rewind(elf_file);
+    Elf64_Shdr ftrace_elf_section_header[ftrace_elf_nr_Shdr];
+    fseek(elf_file, ftrace_efl_header.e_shoff, SEEK_SET);
+    fread(ftrace_elf_section_header, sizeof(Elf64_Shdr), ftrace_efl_header.e_shnum, elf_file);
+    fseek(elf_file, ftrace_elf_section_header[ftrace_efl_header.e_shstrndx].sh_size, SEEK_SET);
+    fread(ftrace_stringtable, 1, ftrace_elf_section_header[ftrace_efl_header.e_shstrndx].sh_size, elf_file);
+    printf("trace: ftrace ELF String Table is \"%s\"\n", ftrace_stringtable);
+
+    printf("trace: ftrace ELF Section header: number of header(s) is %d, starting at offset 0x%4lx\n", ftrace_efl_header.e_shnum, ftrace_efl_header.e_shoff);
+    for(int i = 0; i < ftrace_efl_header.e_shnum; i = i + 1){
+        printf("trace: ftrace ELF Section header: section header %d\n", i);
+        printf("\t\t\t\t\tsh_name (Section name, already process with index) is \"%s\"\n", ftrace_stringtable[ftrace_elf_section_header[i].sh_name]);
+        printf("\t\t\t\t\tsh_type (Section type) is ");
+        switch(ftrace_elf_section_header[i].sh_type){
+            default: printf("Unknown type\n");                                                                                                             break;
+            case 0: printf("SHT_NULL (Section header table entry unused)\n");                                                                              break;
+            case 1: printf("SHT_PROGBITS (Program data)\n");                                                                                               break;
+            case 2: printf("SHT_SYMTAB (Symbol table)\n");                                                                                                 break;
+            case 3: printf("SHT_STRTAB (String table)\n");                                                                                                 break;
+            case 4: printf("SHT_RELA (Relocation entries with addends)\n");                                                                                break;
+            case 5: printf("SHT_HASH (Symbol hash table)\n");                                                                                              break;
+            case 6: printf("SHT_DYNAMIC (Dynamic linking information)\n");                                                                                 break;
+            case 7: printf("SHT_NOTE (Notes)\n");                                                                                                          break;
+            case 8: printf("SHT_NOBITS (Program space with no data (bss))\n");                                                                             break;
+            case 9: printf("SHT_REL (Relocation entries, no addends)\n");                                                                                  break;
+            case 10: printf("SHT_SHLIB (Reserved)\n");                                                                                                     break;
+            case 11: printf("SHT_DYNSYM (Dynamic linker symbol table)\n");                                                                                 break;
+            case 14: printf("SHT_INIT_ARRAY (Array of constructors)\n");                                                                                   break;
+            case 15: printf("SHT_FINI_ARRAY (Array of destructors)\n");                                                                                    break;
+            case 16: printf("SHT_PREINIT_ARRAY (Array of pre-constructors)\n");                                                                            break;
+            case 17: printf("SHT_GROUP (Section group)\n");                                                                                                break;
+            case 18: printf("SHT_SYMTAB_SHNDX (Extended section indices)\n");                                                                              break;
+            case 19: printf("SHT_NUM (Number of defined types)\n");                                                                                        break;
+            case 0x60000000: printf("SHT_LOOS (Start OS-specific)\n");                                                                                     break;
+            case 0x6ffffff5: printf("SHT_GNU_ATTRIBUTES (Object attributes)\n");                                                                           break;
+            case 0x6ffffff6: printf("SHT_GNU_HASH (GNU-style hash table)\n");                                                                              break;
+            case 0x6ffffff7: printf("SHT_GNU_LIBLIST (Prelink library list)\n");                                                                           break;
+            case 0x6ffffff8: printf("SHT_CHECKSUM (Checksum for DSO content)\n");                                                                          break;
+            case 0x6ffffffa: printf("SHT_LOSUNW (Sun-specific low bound) or SHT_SUNW_move\n");                                                             break;
+            case 0x6ffffffb: printf("SHT_SUNW_COMDAT\n");                                                                                                  break;
+            case 0x6ffffffc: printf("SHT_SUNW_syminfo\n");                                                                                                 break;
+            case 0x6ffffffd: printf("SHT_GNU_verdef (Version definition section)\n");                                                                      break;
+            case 0x6ffffffe: printf("SHT_GNU_verneed (Version needs section)\n");                                                                          break;
+            case 0x6fffffff: printf("SHT_GNU_versym (Version symbol table) or SHT_HISUNW (Sun-specific high bound) or SHT_HIOS (End OS-specific type)\n"); break;
+            case 0x70000000: printf("SHT_LOPROC (Start of processor-specific)\n");                                                                         break;
+            case 0x7fffffff: printf("SHT_HIPROC (End of processor-specific)\n");                                                                           break;
+            case 0x80000000: printf("SHT_LOUSER (Start of application-specific)\n");                                                                       break;
+            case 0x8fffffff: printf("SHT_HIUSER (End of application-specific)\n");                                                                         break;
+        }
+        printf("\t\t\t\t\tsh_flag (Section flags) is ");
+        switch(ftrace_elf_section_header[i].sh_flags){
+            default: printf("Unknown flag\n");                                                                         break;
+            case (1 << 0):    printf("SHF_WRITE (Writable)\n");                                                        break;
+            case (1 << 1):    printf("SHF_ALLOC (Occupies memory during execution)\n");                                break;
+            case (1 << 2):    printf("SHF_EXECINSTR (Executable)\n");                                                  break;
+            case (1 << 4):    printf("SHF_MERGE (Might be merged)\n");                                                 break;
+            case (1 << 5):    printf("SHF_STRINGS (Contains nul-terminated strings)\n");                               break;
+            case (1 << 6):    printf("SHF_INFO_LINK (`sh_info' contains SHT index)\n");                                break;
+            case (1 << 7):    printf("SHF_LINK_ORDER (Preserve order after combining)\n");                             break;
+            case (1 << 8):    printf("SHF_OS_NONCONFORMING (Non-standard OS specific handling required)\n");           break;
+            case (1 << 9):    printf("SHF_GROUP (Section is member of a group)\n");                                    break;
+            case (1 << 10):   printf("SHF_TLS (Section hold thread-local data)\n");                                    break;
+            case (1 << 11):   printf("SHF_COMPRESSED (Section with compressed data)\n");                               break;
+            case 0x0ff00000:  printf("SHF_MASKOS (OS-specific)\n");                                                    break;
+            case 0xf0000000:  printf("SHF_MASKPROC (Processor-specific)\n");                                           break;
+            case (1 << 21):   printf("SHF_GNU_RETAIN (Not to be GCed by linker)\n");                                   break;
+            case (1 << 30):   printf("SHF_ORDERED (Special ordering requirement (Solaris))\n");                        break;
+            case (1U << 31):  printf("SHF_EXCLUDE (Section is excluded unless referenced or allocated (Solaris))\n");  break;
+        }
+        printf("\t\t\t\t\tsh_addr (Section virtual addr at execution) is 0x%lx\n", ftrace_elf_section_header[i].sh_addr);
+        printf("\t\t\t\t\tsh_offset (Section file offset) is 0x%lx\n", ftrace_elf_section_header[i].sh_offset);
+        printf("\t\t\t\t\tsh_size (Section size in bytes) is 0x%lx\n", ftrace_elf_section_header[i].sh_size);
+        printf("\t\t\t\t\tsh_link (Link to another section) is 0x%lx\n", ftrace_elf_section_header[i].sh_link);
+        printf("\t\t\t\t\tsh_info (Additional section information) is 0x%lx\n", ftrace_elf_section_header[i].sh_info);
+        printf("\t\t\t\t\tsh_addralign (Section alignment) is 0x%lx\n", ftrace_elf_section_header[i].sh_addralign);
+        printf("\t\t\t\t\tsh_entsize (Entry size if section holds table) is 0x%lx\n", ftrace_elf_section_header[i].sh_entsize);
+    }
 
     return;
 }
