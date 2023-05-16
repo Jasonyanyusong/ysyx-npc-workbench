@@ -131,28 +131,29 @@ config RandomInstructionImage
   bool "Enable Random Instruction Image mode (NEMU only)"
   default n
 
-config REGLOG
-  bool "Enable reglog module"
-  default y
-
 config InstructionTrace
   bool "Enable itrace (pa2, tested)"
+  depends on TRACE
   default n
 
 config InstructionRingBuffer
   bool "Enable iringbuf (pa2, tested)"
+  depends on TRACE
   default n
 
 config MemoryTrace
   bool "Enable mtrace (pa2, tested)"
+  depends on TRACE
   default n
 
 config RegisterTrace
-  bool "Enable rtrace (pa2, implementing)"
+  bool "Enable rtrace (pa2, tested)"
+  depends on TRACE
   default n
 
 config FunctionTrace
   bool "Enable ftrace (pa2, implementing)"
+  depends on TRACE
   default n
 
 config TRACE
