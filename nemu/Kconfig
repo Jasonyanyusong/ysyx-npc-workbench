@@ -62,6 +62,8 @@ config TARGET_NATIVE_ELF
   bool "Executable on Linux Native"
 config TARGET_SHARE
   bool "Shared object (used as REF for differential testing)"
+config NPC_DIFFTEST_SIMULATION
+  bool "NPC DiffTest Simulation (NEMU -> DiffTest -> NPC)"
 config TARGET_AM
   bool "Application on Abstract-Machine (DON'T CHOOSE)"
 endchoice
@@ -126,6 +128,9 @@ menu "Testing and Debugging"
 config ShowInstInfo
   bool "Show informations for every instruction executed (will significantly reduce executing speed)"
   default n
+
+config NPCDiffTest
+  bool "DiffTest NPC by comparing with NEMU's result"
 
 config RandomInstructionImage
   bool "Enable Random Instruction Image mode (NEMU only)"
