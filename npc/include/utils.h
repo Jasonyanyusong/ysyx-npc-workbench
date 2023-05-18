@@ -20,15 +20,15 @@
 
 // ----------- state -----------
 
-enum { NEMU_RUNNING, NEMU_STOP, NEMU_END, NEMU_ABORT, NEMU_QUIT };
+enum { NPC_RUNNING, NPC_STOP, NPC_END, NPC_ABORT, NPC_QUIT };
 
 typedef struct {
   int state;
   vaddr_t halt_pc;
   uint32_t halt_ret;
-} NEMUState;
+} NPCState;
 
-extern NEMUState nemu_state;
+extern NPCState npc_state;
 
 // ----------- timer -----------
 

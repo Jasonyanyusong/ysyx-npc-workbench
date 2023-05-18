@@ -12,7 +12,7 @@
 void itrace_init(){
     printf("trace: itrace enabled\n");
     if(remove("itrace.txt")==0){
-        printf("NEMU removed previous itrace records.\n");
+        printf("NPC removed previous itrace records.\n");
     } // So previous traces will not be recorded
     return;
 }
@@ -32,7 +32,7 @@ int iringbuf_count = 0;
 void iringbuf_init(){
     printf("trace: iringbuf enabled, ring size is %d\n", iringbuf_size);
     if(remove("iringbuf.txt")==0){
-        printf("NEMU removed previous iringbuf records.\n");
+        printf("NPC removed previous iringbuf records.\n");
     } // So previous traces will not be recorded
     return;
 }
@@ -81,7 +81,7 @@ void mtrace_write(bool mem_RW, word_t addr, int mem_len, word_t mem_data){
 void mtrace_init(){
     printf("trace: mtrace enabled\n");
     if(remove("mtrace.txt")==0){
-        printf("NEMU removed previous mtrace records.\n");
+        printf("NPC removed previous mtrace records.\n");
     } // So previous traces will not be recorded
     return;
 }
@@ -96,7 +96,7 @@ void rtrace_updatePC(word_t new_pc){
 void rtrace_init(){
     printf("trace: rtrace enabled\n");
     if(remove("rtrace.txt")==0){
-        printf("NEMU removed previous mtrace records.\n");
+        printf("NPC removed previous mtrace records.\n");
     } // So previous traces will not be recorded
     return;
 }
@@ -348,7 +348,7 @@ void ftrace_init(char* ftrace_elf, char* ftrace_das){
     printf("trace: ftrace ELF file is \"%s\"\n", ftrace_elf);
     printf("trace: ftrace TXT file is \"%s\"\n", ftrace_das);
     if(remove("ftrace.txt")==0){
-        printf("NEMU removed previous ftrace records.\n");
+        printf("NPC removed previous ftrace records.\n");
     } // So previous traces will not be recorded
     // TODO: elf and disassembly file location is parsed here, read ELF and diasm to get location of each function
     ftrace_process_elf(ftrace_elf);

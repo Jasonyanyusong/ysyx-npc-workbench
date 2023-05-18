@@ -24,7 +24,6 @@
 #include <memory/host.h>
 #include "sdb.h"
 #include "trace/trace.h"
-#include "npc.h"
 
 static int is_batch_mode = false;
 
@@ -40,7 +39,7 @@ static char* rl_gets() {
     line_read = NULL;
   }
 
-  line_read = readline("(nemu) ");
+  line_read = readline("(npc) ");
 
   if (line_read && *line_read) {
     add_history(line_read);
@@ -160,38 +159,11 @@ static int cmd_d(char *args){
 }
 
 static int cmd_q(char *args) {
-  nemu_state.state = NEMU_QUIT;
-  // Refined the function for quiting NEMU, so the system will not report bug.
-  // Principle: this is the function that calls the quit of NEMU, bu defalt, the function will not change the NEMU state when quiting.
-  // If we add "nemu_state.state = NEMU_QUIT;" the system will know that NEMU quit with status "NEMU_QUIT", there will no bug generated.
+  npc_state.state = NPC_QUIT;
+  // Refined the function for quiting nemu, so the system will not report bug.
+  // Principle: this is the function that calls the quit of nemu, bu defalt, the function will not change the nemu state when quiting.
+  // If we add "npc_state.state = nemu_QUIT;" the system will know that nemu quit with status "nemu_QUIT", there will no bug generated.
   return -1;
-}
-
-static int cmd_npc(char* args){
-  // TODO: add "npc" commands, which will looks like NEMU, will have reg, mem, si, c commands
-  npc_welcome();
-  if (args == NULL){
-    printf("No Subcommand\n");
-    return 0;
-  }
-  else{
-    if (strcmp(args, "reg") == 0){
-      npc_reg_display();
-    }
-  else if (strcmp(args, "mem") == 0){
-      npc_mem_display();
-    }
-  else if (strcmp(args, "si") == 0){
-      npc_si(1);
-    }
-  else if (strcmp(args, "c") == 0){
-      npc_c();
-    }
-  else{
-      printf("Subcommand Not Defined\n");
-    }
-  }
-  return 0;
 }
 
 static int cmd_help(char *args);
@@ -203,14 +175,13 @@ static struct {
 } cmd_table [] = {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
-  { "q", "Exit NEMU", cmd_q },
+  { "q", "Exit nemu", cmd_q },
   { "si", "Run the program for N steps and then suspend, if N is not given, defalt is 1", cmd_si},
   { "info", "info r: Print the state of register, info w: Print the information of watch point(s)", cmd_info},
   { "x", "Solve the value of EXPR, set the result of the start of memory address, using hexadecimal as output, print N continue memory", cmd_x},
   { "p", "Solve the expression EXPR", cmd_p},
   { "w", "When the value of EXPR changes, suspend the program", cmd_w},
-  { "d", "Delete the watch point with number N", cmd_d},
-  { "npc", "Execute in NPC (need to get verilator outputs)", cmd_npc}
+  { "d", "Delete the watch point with number N", cmd_d}
 };
 
 #define NR_CMD ARRLEN(cmd_table)

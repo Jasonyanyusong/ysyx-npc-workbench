@@ -1,34 +1,24 @@
-mainmenu "NEMU Configuration Menu"
+mainmenu "NPC Configuration Menu"
 
 choice
   prompt "Base ISA"
   default ISA_riscv32
-config ISA_x86
-  bool "x86"
-config ISA_mips32
-  bool "mips32"
 config ISA_riscv32
   bool "riscv32"
 config ISA_riscv64
   bool "riscv64"
-config ISA_loongarch32r
-  bool "loongarch32r"
 endchoice
 
 config ISA
   string
-  default "x86" if ISA_x86
-  default "mips32" if ISA_mips32
   default "riscv32" if ISA_riscv32
   default "riscv64" if ISA_riscv64
-  default "loongarch32r" if ISA_loongarch32r
   default "none"
 
 config ISA64
   depends on ISA_riscv64
   bool
   default y
-
 
 choice
   prompt "NEMU execution engine"
@@ -133,7 +123,7 @@ config NPCDiffTest
   bool "DiffTest NPC by comparing with NEMU's result"
 
 config RandomInstructionImage
-  bool "Enable Random Instruction Image mode (NEMU only)"
+  bool "Enable Random Instruction Image mode (NPC only)"
   default n
 
 config InstructionTrace
