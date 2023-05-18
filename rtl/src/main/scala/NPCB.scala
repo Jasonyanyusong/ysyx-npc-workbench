@@ -639,7 +639,7 @@ class WBU extends Module{
     io.WBU_O_error := false.B
 }
 
-class NPCB extends Module{
+class npc extends Module{
     val io = IO(new Bundle{
         val NPC_sendCurrentPC = Output(UInt(64.W))
         val NPC_sendNextPC = Output(UInt(64.W))
