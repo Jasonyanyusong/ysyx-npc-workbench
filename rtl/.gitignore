@@ -1,6 +1,4 @@
-*
-!.gitignore
-!build.sbt
-!build.sc
-!src/
-!project/
+.bsp/
+generated/
+target/
+project/
