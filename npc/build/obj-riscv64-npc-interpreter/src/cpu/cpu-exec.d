@@ -7,7 +7,6 @@ deps_/home/parallels/ysyx-npc-workbench/npc/build/obj-riscv64-npc-interpreter/sr
     $(wildcard include/config/itrace.h) \
     $(wildcard include/config/difftest.h) \
     $(wildcard include/config/isa/x86.h) \
-    $(wildcard include/config/isa/loongarch32r.h) \
     $(wildcard include/config/instructiontrace.h) \
     $(wildcard include/config/instructionringbuffer.h) \
     $(wildcard include/config/memorytrace.h) \
@@ -31,6 +30,7 @@ deps_/home/parallels/ysyx-npc-workbench/npc/build/obj-riscv64-npc-interpreter/sr
     $(wildcard include/config/isa/mips32.h) \
     $(wildcard include/config/isa/riscv32.h) \
     $(wildcard include/config/isa/riscv64.h) \
+    $(wildcard include/config/isa/loongarch32r.h) \
 
 /home/parallels/ysyx-npc-workbench/npc/build/obj-riscv64-npc-interpreter/src/cpu/cpu-exec.o: $(deps_/home/parallels/ysyx-npc-workbench/npc/build/obj-riscv64-npc-interpreter/src/cpu/cpu-exec.o)
 
