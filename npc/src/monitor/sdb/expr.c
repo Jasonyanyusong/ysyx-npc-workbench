@@ -31,16 +31,6 @@ void give_priority_no_parentheses();
 void give_sub_priority();
 int bool_to_int(bool bool_value);
 bool valid_call;
-
-bool expr_print_instruction = false;
-bool expr_print_debug = false;
-bool expr_print_checkpoint = false;
-bool expr_print_assertpoint = false;
-void set_expr_print_instruction(bool target_expr_print_instruction);
-void set_expr_print_debug(bool target_expr_print_debug);
-void set_expr_print_checkpoint(bool target_expr_print_checkpoint);
-void set_expr_print_assertpoint(bool target_expr_print_assertpoint);
-
 int process_add(int add_operator_index);
 int process_minus(int minus_operator_index);
 int process_multiply(int multiply_operator_index);
@@ -55,51 +45,22 @@ int process_mod(int mod_operator_index);
 int process_negative_sign(int negative_sign_operator_index);
 int process_positive_sign(int positive_sign_operator_index);
 int process_pointer_dereference(int pointer_dereference_index);
-
 void expr_init();
 void init_tokens();
 void init_operator_tokens();
 void init_operator_tokens_no_parentheses();
 void init_execute_history();
-
 char* calculate_one_round(bool success_calculate_one_round_call);
-
 char* expr_main_loop(char* token_input, bool *success_main_loop, bool *finished);
 
-struct OperatorToken
-{
-  const char *regex;
-  int token_type;
-  int priority;
-  int position;
-} operator_tokens[32];
-
-struct OperatorTokenNoParentheses
-{
-  const char *regex;
-  int token_type;
-  int priority_level;
-  int position;
-  int sub_priority_level;
-} operator_tokens_no_parentheses[32];
-
-struct ExecuteHistory
-{
-  const char *result_token_history;
-  bool success_history;
-  bool finished_history;
-  int that_round_operator_token_no_narentheses_index;
-  int that_round_token_index;
-} execution_histories[32];
-
+struct OperatorToken{const char *regex; int token_type; int priority; int position;} operator_tokens[32];
+struct OperatorTokenNoParentheses{const char *regex; int token_type; int priority_level; int position; int sub_priority_level;} operator_tokens_no_parentheses[32];
+struct ExecuteHistory{const char *result_token_history; bool success_history; bool finished_history; int that_round_operator_token_no_narentheses_index; int that_round_token_index;} execution_histories[32];
 int nr_operator_tokens_no_parentheses = 0;
 int nr_operator_token = 0;
 int nr_execution_histories = 0;
 
-static struct rule {
-  const char *regex;
-  int token_type;
-} rules[] = {
+static struct rule {const char *regex; int token_type;} rules[] = {
   {" +", TK_NOTYPE}, {"0x[0-9,a-f]+", TK_HEXNUMBER}, {"[0-9]+", TK_NUMBER}, {"\\$[a-z0-9]{1,31}", TK_REGISTER}, {"\\(", TK_LEFT_PARENTHESES}, {"\\)", TK_RIGHT_PARENTHESES}, {"\\*", TK_MULTIPLY}, {"\\/", TK_DIVIDE}, {"\\+", TK_PLUS}, {"\\-", TK_MINUS}, {"\\//", TK_MOD}, {"==", TK_EQ}, {"!=", TK_NEQ}, {"&&", TK_AND}, {"\\|\\|", TK_OR}, {"!", TK_NOT}, {"\\^", TK_EXOR},
 };
 
@@ -111,7 +72,6 @@ void init_regex() {
   int i;
   char error_msg[128];
   int ret;
-
   for (i = 0; i < NR_REGEX; i ++) {
     ret = regcomp(&re[i], rules[i].regex, REG_EXTENDED);
     if (ret != 0) {
@@ -129,30 +89,25 @@ typedef struct token {
 static Token tokens[32] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 
-void expr_init()
-{
+void expr_init(){
   init_tokens();
   init_operator_tokens();
   init_operator_tokens_no_parentheses();
   return;
 }
 
-void init_tokens()
-{
+void init_tokens(){
   nr_token = 0;
-  for(int init_tokens_index = 0; init_tokens_index < 32; init_tokens_index = init_tokens_index + 1)
-  {
+  for(int init_tokens_index = 0; init_tokens_index < 32; init_tokens_index = init_tokens_index + 1){
     memset(tokens[init_tokens_index].str,0,sizeof(tokens[init_tokens_index].str));
     tokens[init_tokens_index].type = -1;
   }
   return;
 }
 
-void init_operator_tokens()
-{
+void init_operator_tokens(){
   nr_operator_token = 0;
-  for(int init_operator_tokens_index = 0; init_operator_tokens_index < 32; init_operator_tokens_index = init_operator_tokens_index + 1)
-  {
+  for(int init_operator_tokens_index = 0; init_operator_tokens_index < 32; init_operator_tokens_index = init_operator_tokens_index + 1){
     operator_tokens[init_operator_tokens_index].regex = NULL;
     operator_tokens[init_operator_tokens_index].position = -1;
     operator_tokens[init_operator_tokens_index].priority = -1;
@@ -161,11 +116,9 @@ void init_operator_tokens()
   return;
 }
 
-void init_operator_tokens_no_parentheses()
-{
+void init_operator_tokens_no_parentheses(){
   nr_operator_tokens_no_parentheses = 0;
-  for(int init_operator_tokens_no_parentheses_index = 0; init_operator_tokens_no_parentheses_index < 32; init_operator_tokens_no_parentheses_index = init_operator_tokens_no_parentheses_index + 1)
-  {
+  for(int init_operator_tokens_no_parentheses_index = 0; init_operator_tokens_no_parentheses_index < 32; init_operator_tokens_no_parentheses_index = init_operator_tokens_no_parentheses_index + 1){
     operator_tokens_no_parentheses[init_operator_tokens_no_parentheses_index].regex = NULL;
     operator_tokens_no_parentheses[init_operator_tokens_no_parentheses_index].position = -1;
     operator_tokens_no_parentheses[init_operator_tokens_no_parentheses_index].priority_level = -1;
@@ -175,11 +128,9 @@ void init_operator_tokens_no_parentheses()
   return;
 }
 
-void init_execute_history()
-{
+void init_execute_history(){
   nr_execution_histories = 0;
-  for(int init_execute_history_index = 0; init_execute_history_index < 32; init_execute_history_index = init_execute_history_index + 1)
-  {
+  for(int init_execute_history_index = 0; init_execute_history_index < 32; init_execute_history_index = init_execute_history_index + 1){
     execution_histories[init_execute_history_index].result_token_history = NULL;
     execution_histories[init_execute_history_index].success_history = false;
     execution_histories[init_execute_history_index].finished_history = false;
@@ -372,82 +323,23 @@ static bool make_token(char *e) {
   return true;
 }
 
-void give_priority()
-{
-  for(int give_priority_index = 0; give_priority_index < nr_operator_token; give_priority_index = give_priority_index + 1)
-  {
-    switch(operator_tokens[give_priority_index].token_type)
-    {
-      case TK_OR:
-      {
-        operator_tokens[give_priority_index].priority = 1;
-        break;
-      }
-      case TK_EXOR:
-      {
-        operator_tokens[give_priority_index].priority = 2;
-        break;
-      }
-      case TK_AND:
-      {
-        operator_tokens[give_priority_index].priority = 3;
-        break;
-      }
-      case TK_EQ:
-      {
-        operator_tokens[give_priority_index].priority = 4;
-        break;
-      }
-      case TK_NEQ:
-      {
-        operator_tokens[give_priority_index].priority = 4;
-        break;
-      }
-      case TK_PLUS:
-      {
-        operator_tokens[give_priority_index].priority = 5;
-        break;
-      }
-      case TK_MINUS:
-      {
-        operator_tokens[give_priority_index].priority = 5;
-        break;
-      }
-      case TK_MULTIPLY:
-      {
-        operator_tokens[give_priority_index].priority = 6;
-        break;
-      }
-      case TK_DIVIDE:
-      {
-        operator_tokens[give_priority_index].priority = 6;
-        break;
-      }
-      case TK_MOD:
-      {
-        operator_tokens[give_priority_index].priority = 6;
-        break;
-      }
-      case TK_NOT:
-      {
-        operator_tokens[give_priority_index].priority = 7;
-        break;
-      }
-      case TK_POSITIVESIGN:
-      {
-        operator_tokens[give_priority_index].priority = 7;
-        break;
-      }
-      case TK_NEGATIVESIGN:
-      {
-        operator_tokens[give_priority_index].priority = 7;
-        break;
-      }
-      case TK_POINTER:
-      {
-        operator_tokens[give_priority_index].priority = 8;
-        break;
-      }
+void give_priority(){
+  for(int give_priority_index = 0; give_priority_index < nr_operator_token; give_priority_index = give_priority_index + 1){
+    switch(operator_tokens[give_priority_index].token_type){
+      case TK_OR:           operator_tokens[give_priority_index].priority = 1; break;
+      case TK_EXOR:         operator_tokens[give_priority_index].priority = 2; break;
+      case TK_AND:          operator_tokens[give_priority_index].priority = 3; break;
+      case TK_EQ:           operator_tokens[give_priority_index].priority = 4; break;
+      case TK_NEQ:          operator_tokens[give_priority_index].priority = 4; break;
+      case TK_PLUS:         operator_tokens[give_priority_index].priority = 5; break;
+      case TK_MINUS:        operator_tokens[give_priority_index].priority = 5; break;
+      case TK_MULTIPLY:     operator_tokens[give_priority_index].priority = 6; break;
+      case TK_DIVIDE:       operator_tokens[give_priority_index].priority = 6; break;
+      case TK_MOD:          operator_tokens[give_priority_index].priority = 6; break;
+      case TK_NOT:          operator_tokens[give_priority_index].priority = 7; break;
+      case TK_POSITIVESIGN: operator_tokens[give_priority_index].priority = 7; break;
+      case TK_NEGATIVESIGN: operator_tokens[give_priority_index].priority = 7; break;
+      case TK_POINTER:      operator_tokens[give_priority_index].priority = 8; break;
     }
   }
   return;
@@ -864,42 +756,26 @@ bool check_parentheses_balance(){
 
 bool check_parentheses_valid()
 {
-  if(!check_parentheses_balance())
-  {
+  if(!check_parentheses_balance()){
     return false;
   }
   int check_parentheses_valid_left_parentheses_count = 0;
   int check_parentheses_valid_right_parentheses_count = 0;
-  for(int check_inside_parentheses_valid_index = 0; check_inside_parentheses_valid_index < nr_token; check_inside_parentheses_valid_index = check_inside_parentheses_valid_index + 1)
-  {
-    if(tokens[check_inside_parentheses_valid_index].type == TK_LEFT_PARENTHESES)
-    {
-      check_parentheses_valid_left_parentheses_count = check_parentheses_valid_left_parentheses_count + 1;
-    }
-    if(tokens[check_inside_parentheses_valid_index].type == TK_RIGHT_PARENTHESES)
-    {
-      check_parentheses_valid_right_parentheses_count = check_parentheses_valid_right_parentheses_count + 1;
-    }
-    if(check_parentheses_valid_left_parentheses_count - check_parentheses_valid_right_parentheses_count < 0)
-    {
-      return false;
-    }
-    else
-    {
-      return true;
-    }
+  for(int check_inside_parentheses_valid_index = 0; check_inside_parentheses_valid_index < nr_token; check_inside_parentheses_valid_index = check_inside_parentheses_valid_index + 1){
+    if(tokens[check_inside_parentheses_valid_index].type == TK_LEFT_PARENTHESES){
+      check_parentheses_valid_left_parentheses_count = check_parentheses_valid_left_parentheses_count + 1;}
+    if(tokens[check_inside_parentheses_valid_index].type == TK_RIGHT_PARENTHESES){
+      check_parentheses_valid_right_parentheses_count = check_parentheses_valid_right_parentheses_count + 1;}
+    return ! check_parentheses_valid_left_parentheses_count - check_parentheses_valid_right_parentheses_count < 0;
   }
   return true;
 }
 
-void process_operator_token()
-{
+void process_operator_token(){
   int current_index_of_operator_tokens = 0;
   nr_operator_token = 0;
-  for(int current_scanning_index = 0; current_scanning_index < nr_token; current_scanning_index = current_scanning_index + 1)
-  {
-    if(tokens[current_scanning_index].type != TK_NUMBER && tokens[current_scanning_index].type != TK_HEXNUMBER)
-    {
+  for(int current_scanning_index = 0; current_scanning_index < nr_token; current_scanning_index = current_scanning_index + 1){
+    if(tokens[current_scanning_index].type != TK_NUMBER && tokens[current_scanning_index].type != TK_HEXNUMBER){
       operator_tokens[current_index_of_operator_tokens].position = current_scanning_index;
       operator_tokens[current_index_of_operator_tokens].token_type = tokens[current_scanning_index].type;
       operator_tokens[current_index_of_operator_tokens].regex = tokens[current_scanning_index].str;
