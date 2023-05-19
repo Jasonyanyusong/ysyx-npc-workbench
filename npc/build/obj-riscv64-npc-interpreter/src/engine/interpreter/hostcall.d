@@ -15,7 +15,7 @@ deps_/home/parallels/ysyx-npc-workbench/npc/build/obj-riscv64-npc-interpreter/sr
   /home/parallels/ysyx-npc-workbench/npc/include/cpu/ifetch.h \
   /home/parallels/ysyx-npc-workbench/npc/include/memory/vaddr.h \
   /home/parallels/ysyx-npc-workbench/npc/include/isa.h \
-  /home/parallels/ysyx-npc-workbench/nemu/src/isa/riscv64/include/isa-def.h \
+  /home/parallels/ysyx-npc-workbench/npc/src/isa/riscv64/include/isa-def.h \
   /home/parallels/ysyx-npc-workbench/npc/include/cpu/difftest.h \
     $(wildcard include/config/difftest.h) \
   /home/parallels/ysyx-npc-workbench/npc/include/difftest-def.h \

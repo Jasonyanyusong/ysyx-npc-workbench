@@ -14,7 +14,7 @@ deps_/home/parallels/ysyx-npc-workbench/npc/build/obj-riscv64-npc-interpreter/sr
     $(wildcard include/config/isa/riscv32.h) \
     $(wildcard include/config/isa/riscv64.h) \
   /home/parallels/ysyx-npc-workbench/npc/include/isa.h \
-  /home/parallels/ysyx-npc-workbench/nemu/src/isa/riscv64/include/isa-def.h \
+  /home/parallels/ysyx-npc-workbench/npc/src/isa/riscv64/include/isa-def.h \
   /home/parallels/ysyx-npc-workbench/npc/include/common.h \
     $(wildcard include/config/mbase.h) \
     $(wildcard include/config/msize.h) \

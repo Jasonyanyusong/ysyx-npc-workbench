@@ -25,7 +25,7 @@ deps_/home/parallels/ysyx-npc-workbench/npc/build/obj-riscv64-npc-interpreter/sr
     $(wildcard include/config/target/native/elf.h) \
   /home/parallels/ysyx-npc-workbench/npc/include/cpu/decode.h \
   /home/parallels/ysyx-npc-workbench/npc/include/isa.h \
-  /home/parallels/ysyx-npc-workbench/nemu/src/isa/riscv64/include/isa-def.h \
+  /home/parallels/ysyx-npc-workbench/npc/src/isa/riscv64/include/isa-def.h \
   /home/parallels/ysyx-npc-workbench/npc/include/cpu/difftest.h \
   /home/parallels/ysyx-npc-workbench/npc/include/difftest-def.h \
     $(wildcard include/config/isa/mips32.h) \

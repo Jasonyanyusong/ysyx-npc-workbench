@@ -22,7 +22,7 @@ deps_/home/parallels/ysyx-npc-workbench/npc/build/obj-riscv64-npc-interpreter/sr
   /home/parallels/ysyx-npc-workbench/npc/include/cpu/decode.h \
     $(wildcard include/config/itrace.h) \
   /home/parallels/ysyx-npc-workbench/npc/include/isa.h \
-  /home/parallels/ysyx-npc-workbench/nemu/src/isa/riscv64/include/isa-def.h \
+  /home/parallels/ysyx-npc-workbench/npc/src/isa/riscv64/include/isa-def.h \
 
 /home/parallels/ysyx-npc-workbench/npc/build/obj-riscv64-npc-interpreter/src/isa/riscv64/inst.o: $(deps_/home/parallels/ysyx-npc-workbench/npc/build/obj-riscv64-npc-interpreter/src/isa/riscv64/inst.o)
 
