@@ -45,14 +45,7 @@ void isa_gpr_display() {
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
-  *success = true;
-  for(int current_string_compare_index = 0; current_string_compare_index < 32; current_string_compare_index = current_string_compare_index + 1)
-  {
-    if(strcmp(regs[current_string_compare_index], s) == 0)
-    {
-      return cpu.gpr[current_string_compare_index];
-    }
-  }
-  *success = false;
+  // TODO: in NPC simulation environment, we can not use cpu.gpr to get register's information
+  printf("Not implemented!\n");
   return 0;
 }
