@@ -33,25 +33,14 @@ static const uint32_t img [] = {
 #endif
 
 static void restart() {
-  /* Set the initial program counter. */
-  cpu.pc = RESET_VECTOR;
-
-  /* The zero register is always 0. */
-  cpu.gpr[0] = 0;
+  // TODO: do like in dlco, init new waveform
+  printf("Not implemented!\n");
+  return;
 }
 
 void init_isa() {
   /* Load built-in image. */
   memcpy(guest_to_host(RESET_VECTOR), img, sizeof(img));
-
-#ifdef CONFIG_RandomInstructionImage
-#include <stdio.h>
-#include <stdlib.h>
-for(int i = 0; i < 32; i = i + 1){
-  cpu.gpr[i] = reg[i];
-  printf("Random Instruction Image: set cpu.gpr[%d] to 0x%lx\n", i, cpu.gpr[i]);
-}
-#endif
 
   /* Initialize this virtual computer system. */
   restart();

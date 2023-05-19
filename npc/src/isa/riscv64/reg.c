@@ -14,7 +14,6 @@
 ***************************************************************************************/
 
 #include <isa.h>
-#include "local-include/reg.h"
 #include <string.h>
 #include <math.h>
 
@@ -31,8 +30,6 @@ const char *regs_alias[] = {
   "x16", "x17", "x18", "x19", "x20", "x21", "x22", "x23",
   "x24", "x25", "x26", "x27", "x28", "x29", "x30", "x31"
 };
-
-word_t ans[32] = {0};
 
 void isa_reg_display() {
   return;

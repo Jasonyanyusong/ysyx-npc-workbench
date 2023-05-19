@@ -14,8 +14,6 @@ deps_/home/parallels/ysyx-npc-workbench/npc/build/obj-riscv64-npc-interpreter/sr
   /home/parallels/ysyx-npc-workbench/npc/include/debug.h \
   /home/parallels/ysyx-npc-workbench/npc/include/utils.h \
     $(wildcard include/config/target/native/elf.h) \
-  src/isa/riscv64/local-include/reg.h \
-    $(wildcard include/config/rt/check.h) \
 
 /home/parallels/ysyx-npc-workbench/npc/build/obj-riscv64-npc-interpreter/src/isa/riscv64/reg.o: $(deps_/home/parallels/ysyx-npc-workbench/npc/build/obj-riscv64-npc-interpreter/src/isa/riscv64/reg.o)
 

@@ -44,10 +44,7 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 
 static void exec_once(Decode *s, vaddr_t pc) {
   // In NPC simulation, we can only send instructions to NPC
-  s->pc = pc;
-  s->snpc = pc;
-  isa_exec_once(s);
-  cpu.pc = s->dnpc;
+  printf("Not implemented\n");
 
 #ifdef CONFIG_ITRACE
   char *p = s->logbuf;
