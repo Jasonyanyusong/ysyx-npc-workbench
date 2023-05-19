@@ -688,7 +688,7 @@ class npc extends Module{
         val NPC_GPR31 = Output(UInt(64.W))
     })
 
-    val PC = RegInit(0.U(64.W))
+    val PC = RegInit(0x80000000.U(64.W))
     val GPR = Mem(32, UInt(64.W))
     def GPR_read (index: UInt) = Mux(index === 0.U, 0.U(64.W), GPR(index)) // So that we make sure R(0) is always 0
 
