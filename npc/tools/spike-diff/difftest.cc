@@ -13,11 +13,10 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include "sim.h"
 #include "mmu.h"
+#include "sim.h"
 #include "../../include/common.h"
 #include <difftest-def.h>
-#include <optional>
 
 #ifdef CONFIG_ISA_riscv32
 #undef DEFAULT_ISA
@@ -84,7 +83,7 @@ void sim_t::diff_memcpy(reg_t dest, void* src, size_t n) {
 
 extern "C" {
 
-void difftest_memcpy(paddr_t addr, void *buf, size_t n, bool direction) {
+__EXPORT void difftest_memcpy(paddr_t addr, void *buf, size_t n, bool direction) {
   if (direction == DIFFTEST_TO_REF) {
     s->diff_memcpy(addr, buf, n);
   } else {
@@ -92,7 +91,7 @@ void difftest_memcpy(paddr_t addr, void *buf, size_t n, bool direction) {
   }
 }
 
-void difftest_regcpy(void* dut, bool direction) {
+__EXPORT void difftest_regcpy(void* dut, bool direction) {
   if (direction == DIFFTEST_TO_REF) {
     s->diff_set_regs(dut);
   } else {
@@ -100,11 +99,11 @@ void difftest_regcpy(void* dut, bool direction) {
   }
 }
 
-void difftest_exec(uint64_t n) {
+__EXPORT void difftest_exec(uint64_t n) {
   s->diff_step(n);
 }
 
-void difftest_init(int port) {
+__EXPORT void difftest_init(int port) {
   difftest_htif_args.push_back("");
   cfg_t cfg(/*default_initrd_bounds=*/std::make_pair((reg_t)0, (reg_t)0),
             /*default_bootargs=*/nullptr,
@@ -127,7 +126,7 @@ void difftest_init(int port) {
   s->diff_init(port);
 }
 
-void difftest_raise_intr(uint64_t NO) {
+__EXPORT void difftest_raise_intr(uint64_t NO) {
   trap_t t(NO);
   p->take_trap_public(t, state->pc);
 }

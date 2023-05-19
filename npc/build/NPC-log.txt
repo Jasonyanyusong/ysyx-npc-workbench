@@ -1,6 +1,0 @@
-[1;34m[src/utils/log.c:28 init_log] Log is written to /home/parallels/ysyx-npc-workbench/npc/build/NPC-log.txt[0m
-[1;34m[src/memory/paddr.c:62 init_mem] physical memory area [0x80000000, 0x87ffffff][0m
-[1;34m[src/monitor/monitor.c:51 load_img] No image is given. Use the default build-in image.[0m
-[1;34m[src/monitor/monitor.c:28 welcome] Trace: [1;32mON[0m[0m
-[1;34m[src/monitor/monitor.c:29 welcome] If trace is enabled, a log file will be generated to record the trace. This may lead to a large log file. If it is not necessary, you can disable it in menuconfig[0m
-[1;34m[src/monitor/monitor.c:32 welcome] Build time: 10:21:05, May 19 2023[0m

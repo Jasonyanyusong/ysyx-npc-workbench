@@ -19,11 +19,5 @@
 #include <common.h>
 
 word_t expr(char *e, bool *success);
-void isa_gpr_display();
 
-// Functions in watchpoint.c
-void record_WP(char* expression);
-void delete_WP(int WP_number);
-void print_WP();
-void check_WP();
 #endif

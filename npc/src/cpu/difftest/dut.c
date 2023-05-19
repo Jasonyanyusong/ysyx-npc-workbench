@@ -32,14 +32,14 @@ static bool is_skip_ref = false;
 static int skip_dut_nr_inst = 0;
 
 // this is used to let ref skip instructions which
-// can not produce consistent behavior with NPC
+// can not produce consistent behavior with NEMU
 void difftest_skip_ref() {
   is_skip_ref = true;
   // If such an instruction is one of the instruction packing in QEMU
   // (see below), we end the process of catching up with QEMU's pc to
   // keep the consistent behavior in our best.
   // Note that this is still not perfect: if the packed instructions
-  // already write some memory, and the incoming instruction in NPC
+  // already write some memory, and the incoming instruction in NEMU
   // will load that memory, we will encounter false negative. But such
   // situation is infrequent.
   skip_dut_nr_inst = 0;
@@ -47,7 +47,7 @@ void difftest_skip_ref() {
 
 // this is used to deal with instruction packing in QEMU.
 // Sometimes letting QEMU step once will execute multiple instructions.
-// We should skip checking until NPC's pc catches up with QEMU's pc.
+// We should skip checking until NEMU's pc catches up with QEMU's pc.
 // The semantic is
 //   Let REF run `nr_ref` instructions first.
 //   We expect that DUT will catch up with REF within `nr_dut` instructions.
@@ -93,7 +93,7 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
 
 static void checkregs(CPU_state *ref, vaddr_t pc) {
   if (!isa_difftest_checkregs(ref, pc)) {
-    nemu_state.state = NPC_ABORT;
+    nemu_state.state = NEMU_ABORT;
     nemu_state.halt_pc = pc;
     isa_reg_display();
   }

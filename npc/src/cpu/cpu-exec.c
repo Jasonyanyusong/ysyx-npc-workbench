@@ -13,12 +13,10 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include <stdio.h>
 #include <cpu/cpu.h>
 #include <cpu/decode.h>
 #include <cpu/difftest.h>
 #include <locale.h>
-#include <unistd.h>
 
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
@@ -43,9 +41,10 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 }
 
 static void exec_once(Decode *s, vaddr_t pc) {
-  // In NPC simulation, we can only send instructions to NPC
-  printf("Not implemented\n");
-
+  s->pc = pc;
+  s->snpc = pc;
+  isa_exec_once(s);
+  cpu.pc = s->dnpc;
 #ifdef CONFIG_ITRACE
   char *p = s->logbuf;
   p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);
@@ -61,29 +60,14 @@ static void exec_once(Decode *s, vaddr_t pc) {
   space_len = space_len * 3 + 1;
   memset(p, ' ', space_len);
   p += space_len;
+
+#ifndef CONFIG_ISA_loongarch32r
   void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
   disassemble(p, s->logbuf + sizeof(s->logbuf) - p,
       MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst.val, ilen);
+#else
+  p[0] = '\0'; // the upstream llvm does not support loongarch32r
 #endif
-
-#ifdef CONFIG_InstructionTrace
-  char written_to_itrace[128];
-  sprintf(written_to_itrace, "pc: 0x%lx  snpc: 0x%lx  inst: 0x%8x  dnpc: 0x%lx  %s\n", s->pc, s->snpc, s->isa.inst.val, s->dnpc, p);
-  printf("%s", written_to_itrace);
-  itrace_write(written_to_itrace);
-#endif
-
-#ifdef CONFIG_InstructionRingBuffer
-  iringbuf_write(s->pc, s->snpc, s->dnpc, s->isa.inst.val, p);
-#endif
-
-#ifdef CONFIG_MemoryTrace
-  mtrace_updatePC(s->pc);
-#endif
-
-#ifdef CONFIG_RegisterTrace
-  rtrace_updatePC(s->pc);
-  rtrace_write();
 #endif
 }
 
@@ -93,10 +77,9 @@ static void execute(uint64_t n) {
     exec_once(&s, cpu.pc);
     g_nr_guest_inst ++;
     trace_and_difftest(&s, cpu.pc);
-    if (npc_state.state != NPC_RUNNING) break;
+    if (nemu_state.state != NEMU_RUNNING) break;
     IFDEF(CONFIG_DEVICE, device_update());
   }
-  // reglog_record(isa_reg2val_all(), s.pc);
 }
 
 static void statistic() {
@@ -116,11 +99,11 @@ void assert_fail_msg() {
 /* Simulate how the CPU works. */
 void cpu_exec(uint64_t n) {
   g_print_step = (n < MAX_INST_TO_PRINT);
-  switch (npc_state.state) {
-    case NPC_END: case NPC_ABORT:
-      printf("Program execution has ended. To restart the program, exit NPC and run again.\n");
+  switch (nemu_state.state) {
+    case NEMU_END: case NEMU_ABORT:
+      printf("Program execution has ended. To restart the program, exit NEMU and run again.\n");
       return;
-    default: npc_state.state = NPC_RUNNING;
+    default: nemu_state.state = NEMU_RUNNING;
   }
 
   uint64_t timer_start = get_time();
@@ -130,16 +113,16 @@ void cpu_exec(uint64_t n) {
   uint64_t timer_end = get_time();
   g_timer += timer_end - timer_start;
 
-  switch (npc_state.state) {
-    case NPC_RUNNING: npc_state.state = NPC_STOP; break;
+  switch (nemu_state.state) {
+    case NEMU_RUNNING: nemu_state.state = NEMU_STOP; break;
 
-    case NPC_END: case NPC_ABORT:
-      Log("npc: %s at pc = " FMT_WORD,
-          (npc_state.state == NPC_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
-           (npc_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
+    case NEMU_END: case NEMU_ABORT:
+      Log("nemu: %s at pc = " FMT_WORD,
+          (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
+           (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
             ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
-          npc_state.halt_pc);
+          nemu_state.halt_pc);
       // fall through
-    case NPC_QUIT: statistic();
+    case NEMU_QUIT: statistic();
   }
 }

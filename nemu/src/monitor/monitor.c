@@ -21,7 +21,7 @@ void init_log(const char *log_file);
 void init_mem();
 void init_difftest(char *ref_so_file, long img_size, int port);
 void init_device();
-void init_sdb();
+void init_sdb(char* trace_ftrace_elf, char* trace_ftrace_diasm);
 void init_disasm(const char *triple);
 
 static void welcome() {

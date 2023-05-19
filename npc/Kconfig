@@ -1,24 +1,34 @@
-mainmenu "NPC Configuration Menu"
+mainmenu "NEMU Configuration Menu"
 
 choice
   prompt "Base ISA"
   default ISA_riscv32
+config ISA_x86
+  bool "x86"
+config ISA_mips32
+  bool "mips32"
 config ISA_riscv32
   bool "riscv32"
 config ISA_riscv64
   bool "riscv64"
+config ISA_loongarch32r
+  bool "loongarch32r"
 endchoice
 
 config ISA
   string
+  default "x86" if ISA_x86
+  default "mips32" if ISA_mips32
   default "riscv32" if ISA_riscv32
   default "riscv64" if ISA_riscv64
+  default "loongarch32r" if ISA_loongarch32r
   default "none"
 
 config ISA64
   depends on ISA_riscv64
   bool
   default y
+
 
 choice
   prompt "NEMU execution engine"
@@ -52,8 +62,6 @@ config TARGET_NATIVE_ELF
   bool "Executable on Linux Native"
 config TARGET_SHARE
   bool "Shared object (used as REF for differential testing)"
-config NPC_DIFFTEST_SIMULATION
-  bool "NPC DiffTest Simulation (NEMU -> DiffTest -> NPC)"
 config TARGET_AM
   bool "Application on Abstract-Machine (DON'T CHOOSE)"
 endchoice
@@ -115,41 +123,7 @@ config CC_ASAN
 endmenu
 
 menu "Testing and Debugging"
-config ShowInstInfo
-  bool "Show informations for every instruction executed (will significantly reduce executing speed)"
-  default n
 
-config NPCDiffTest
-  bool "DiffTest NPC by comparing with NEMU's result"
-
-config RandomInstructionImage
-  bool "Enable Random Instruction Image mode (NPC only)"
-  default n
-
-config InstructionTrace
-  bool "Enable itrace (pa2, tested)"
-  depends on TRACE
-  default n
-
-config InstructionRingBuffer
-  bool "Enable iringbuf (pa2, tested)"
-  depends on TRACE
-  default n
-
-config MemoryTrace
-  bool "Enable mtrace (pa2, tested)"
-  depends on TRACE
-  default n
-
-config RegisterTrace
-  bool "Enable rtrace (pa2, tested)"
-  depends on TRACE
-  default n
-
-config FunctionTrace
-  bool "Enable ftrace (pa2, implementing)"
-  depends on TRACE
-  default n
 
 config TRACE
   bool "Enable tracer"
@@ -201,16 +175,6 @@ config DIFFTEST_REF_KVM
   bool "KVM"
 endif
 endchoice
-
-config DIFFTEST_NOABORT_MODE
-  depends on DIFFTEST
-  bool "Enable Non-abort mode of difftest (suggest use only in rand_img test mode)"
-  default n
-
-config DIFFTEST_OBSERVE_MODE
-  depends on DIFFTEST
-  bool "Enable Observe mode of difftest (significantly reduce speed)"
-  default n
 
 config DIFFTEST_REF_PATH
   string

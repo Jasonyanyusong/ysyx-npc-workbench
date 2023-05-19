@@ -1,3 +1,2 @@
 repo/
-build/
 !difftest.cc

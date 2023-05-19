@@ -13,16 +13,11 @@
 # See the Mulan PSL v2 for more details.
 #**************************************************************************************/
 
-SRCS-y += src/nemu-main.c
-DIRS-y += src/cpu src/monitor src/utils
-DIRS-$(CONFIG_MODE_SYSTEM) += src/memory
-DIRS-BLACKLIST-$(CONFIG_TARGET_AM) += src/monitor/sdb
+NAME  = x86-kvm
+SRCS  = $(shell find src/ -name "*.c")
 
-SHARE = $(if $(CONFIG_TARGET_SHARE),1,0)
-LIBS += $(if $(CONFIG_TARGET_NATIVE_ELF),-lreadline -ldl -pie,)
+SHARE = 1
+INC_PATH += $(NEMU_HOME)/include $(NEMU_HOME)/src/isa/x86/include
+GUEST_ISA = x86
 
-ifdef mainargs
-ASFLAGS += -DBIN_PATH=\"$(mainargs)\"
-endif
-SRCS-$(CONFIG_TARGET_AM) += src/am-bin.S
-.PHONY: src/am-bin.S
+include $(NEMU_HOME)/scripts/build.mk
