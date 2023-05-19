@@ -34,7 +34,7 @@ $(shell mkdir -p $(BUILD_DIR))
 
 inc_dependencies = fesvr riscv disasm customext fdt softfloat spike_main spike_dasm build
 INC_PATH  = -I$(REPO_PATH) $(addprefix -I$(REPO_PATH)/, $(inc_dependencies))
-INC_PATH += -I$(NEMU_HOME)/include
+INC_PATH += -I$(RDB_HOME)/include
 lib_dependencies = libspike_main.a libriscv.a libdisasm.a libsoftfloat.a libfesvr.a libfdt.a
 INC_LIBS  = $(addprefix $(REPO_PATH)/build/, $(lib_dependencies))
 
