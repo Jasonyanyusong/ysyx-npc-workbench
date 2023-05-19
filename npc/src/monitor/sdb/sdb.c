@@ -160,9 +160,6 @@ static int cmd_d(char *args){
 
 static int cmd_q(char *args) {
   npc_state.state = NPC_QUIT;
-  // Refined the function for quiting nemu, so the system will not report bug.
-  // Principle: this is the function that calls the quit of nemu, bu defalt, the function will not change the nemu state when quiting.
-  // If we add "npc_state.state = nemu_QUIT;" the system will know that nemu quit with status "nemu_QUIT", there will no bug generated.
   return -1;
 }
 
