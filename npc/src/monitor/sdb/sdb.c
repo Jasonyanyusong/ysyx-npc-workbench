@@ -172,7 +172,7 @@ static struct {
 } cmd_table [] = {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
-  { "q", "Exit nemu", cmd_q },
+  { "q", "Exit npc", cmd_q },
   { "si", "Run the program for N steps and then suspend, if N is not given, defalt is 1", cmd_si},
   { "info", "info r: Print the state of register, info w: Print the information of watch point(s)", cmd_info},
   { "x", "Solve the value of EXPR, set the result of the start of memory address, using hexadecimal as output, print N continue memory", cmd_x},
