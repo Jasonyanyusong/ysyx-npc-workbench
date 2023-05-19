@@ -32,6 +32,3 @@ static inline const char* reg_name(int idx, int width) {
 }
 
 #endif
-
-// Declare functions in reg.c, so that other .c files can execute this function
-word_t* isa_reg2val_all();

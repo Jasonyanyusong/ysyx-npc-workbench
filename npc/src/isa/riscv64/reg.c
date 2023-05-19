@@ -38,45 +38,10 @@ void isa_reg_display() {
   return;
 }
 
-void isa_gpr_display() {  
-  printf("**************************************************************************NEMU-RV64 Integer Registers***************************************************************************\n");
-  printf("|    Name     |         Hex         |           Dec           |            Oct            |                                        Bin                                         |\n");
-  for (int i = 0; i < 32; i = i + 1)
-  {
-    char reg_value_bin_string[65] = {0};
-    u_int64_t get_reg_value = cpu.gpr[i];
-    for(int i = 0; i <= 63; i = i + 1)
-    {
-      if(get_reg_value >= pow(2, 63 - i))
-      {
-        reg_value_bin_string[i] = '1';
-        get_reg_value = get_reg_value - pow(2, 63 - i);
-      }
-      else
-      {
-        reg_value_bin_string[i] = '0';
-      }
-    }
-    reg_value_bin_string[64] = '\0';
-    char display_reg_string[79] = {0};
-    for(int parts_number = 0; parts_number < 16; parts_number = parts_number + 1)
-    {
-      for(int secter_number = 0; secter_number <= 4; secter_number = secter_number + 1)
-      {
-        if(secter_number != 4)
-        {
-          display_reg_string[5 * parts_number + secter_number] = reg_value_bin_string[4 * parts_number + secter_number];
-        }
-        else
-        {
-          display_reg_string[5 * parts_number + secter_number] = ' ';
-        }
-      }
-    }
-    display_reg_string[79] = '\0';
-    printf("| %4s (%4s) | 0x %16lx | 0d %20ld | 0o %22lo | 0b %s |\n", regs[i], regs_alias[i], cpu.gpr[i], cpu.gpr[i], cpu.gpr[i], display_reg_string);
-  }
-  printf("**************************************************************************NEMU-RV64 Integer Registers***************************************************************************\n");
+void isa_gpr_display() {
+  // TODO: in NPC simulation environment, we can not use cpu.gpr to get register's information
+  printf("Not implemented!\n");
+  return;
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
@@ -90,18 +55,4 @@ word_t isa_reg_str2val(const char *s, bool *success) {
   }
   *success = false;
   return 0;
-}
-
-word_t isa_reg2val(int regNo)
-{
-  return cpu.gpr[regNo];
-}
-
-word_t* isa_reg2val_all()
-{
-  for(int i = 0; i < 32; i = i + 1)
-  {
-    ans[i] = isa_reg2val(i);
-  }
-  return ans;
 }

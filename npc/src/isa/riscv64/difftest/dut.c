@@ -39,7 +39,6 @@ const char *rvint_regs_alias[] = {
 };
 
 void isa_print_regcompare(CPU_state ref_r, vaddr_t pc, int error_integer_register_number);
-void isa_print_reg();
 
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
   for(int integer_register_index = 0; integer_register_index < 32; integer_register_index = integer_register_index + 1)
@@ -62,7 +61,7 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
 #endif
   }
 #ifdef CONFIG_ShowInstInfo
-  isa_print_reg(pc);
+  //isa_print_reg(pc);
 #endif
 
 #ifdef CONFIG_DIFFTEST_NOABORT_MODE
@@ -144,52 +143,6 @@ void isa_print_regcompare(CPU_state ref_r, vaddr_t pc, int error_integer_registe
   }
   printf("*****************************************************************************RV64 Integer Registers*****************************************************************************\n");
 }
-
-void isa_print_reg(vaddr_t pc)
-{
-  printf("\n\033[1;32;43mAt pc = 0x%lx, all registers PASSED DiffTest!\033[0m\n", pc);
-  // Preserved function, if we need to print the value of all register even if DiffTest is CORRECT, we can implement this function.
-  printf("*****************************************************************************RV64 Integer Registers*****************************************************************************\n");
-  printf("|    Name     |         Hex         |           Dec           |            Oct            |                                        Bin                                         |\n");
-
-  for(int print_integer_register = 0; print_integer_register < 32; print_integer_register = print_integer_register + 1)
-  {
-    char nemu_register[79] = {0};
-    for(int group_index = 0; group_index < 16; group_index = group_index + 1)
-    {
-      for(int bit_index = 0; bit_index <= 4; bit_index = bit_index + 1)
-      {
-        if(bit_index != 4)
-        {
-          if(BITS(cpu.gpr[print_integer_register], 4 * group_index + bit_index, 4 * group_index + bit_index) == 1)
-          {
-            nemu_register[5 * group_index + bit_index] = '1';
-          }
-          else
-          {
-            nemu_register[5 * group_index + bit_index] = '0';
-          }
-        }
-        else
-        {
-          nemu_register[5 * group_index + bit_index] = ' ';;
-        }
-      }
-    }
-    nemu_register[79] = '\0';
-
-    // We find that codes above will print register inversely, now we find ways to print it in the correct order.
-    char inverse_nemu_register[79] = {0};
-    for(int i = 0; i < 79; i = i + 1)
-    {
-      inverse_nemu_register[i] = nemu_register[78 - i];
-    }
-    inverse_nemu_register[79] = '\0';
-    printf("| %4s (%4s) | 0x %16lx | 0d %20ld | 0o %22lo | 0b %s |\n", rvint_regs[print_integer_register], rvint_regs_alias[print_integer_register], cpu.gpr[print_integer_register], cpu.gpr[print_integer_register], cpu.gpr[print_integer_register], inverse_nemu_register);
-  }
-  printf("*****************************************************************************RV64 Integer Registers*****************************************************************************\n");
-}
-
 
 void isa_difftest_attach() {
 }
