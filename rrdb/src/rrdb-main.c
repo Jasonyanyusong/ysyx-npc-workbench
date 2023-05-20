@@ -28,6 +28,8 @@ int main(int argc, char *argv[]) {
   init_monitor(argc, argv);
 #endif
 
+  rtl_sim_init();
+
   /* Start engine. */
   engine_start();
 
