@@ -1,0 +1,1 @@
+CXXSRC	+=	obj_dir/Vnpc.cpp,

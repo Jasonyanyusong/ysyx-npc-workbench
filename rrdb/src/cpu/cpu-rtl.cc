@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../../obj_dir/Vnpc.h"
+#include "./obj_dir/Vnpc.h"
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 using namespace std;
