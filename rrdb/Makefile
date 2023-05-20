@@ -14,7 +14,7 @@
 #**************************************************************************************/
 
 # Sanity check
-ifeq ($(wildcard $(RRDB_HOME)/src/nemu-main.c),)
+ifeq ($(wildcard $(RRDB_HOME)/src/rrdb-main.c),)
   $(error RRDB_HOME=$(RRDB_HOME) is not a RRDB repo)
 endif
 
