@@ -12,7 +12,7 @@ void wp_add();
 void wp_delete();
 
 // functions in init.c
-void init_img();
+void init_img(char* img_addr);
 void init_trace();
 
 #include "mem.h"
