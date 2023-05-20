@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <malloc.h>
+#include <getopt.h>
 
 #include "verilated.h"
 #include "verilated_vcd_c.h"
@@ -100,6 +101,13 @@ uint64_t mem_write(uint64_t addr, int len, uint64_t val)    {paddr_write(addr, l
 
 //========== Parse args ==========
 
+char* log_file = NULL;
+char* diff_so_file = NULL;
+char* elf_file = NULL;
+char* das_file = NULL;
+char* img_file = NULL;
+int difftest_port = 1234;
+
 static int parse_args(int argc, char *argv[]) {
     const struct option table[] = {
         {"batch"    , no_argument      , NULL, 'b'},
@@ -114,7 +122,7 @@ static int parse_args(int argc, char *argv[]) {
   int o;
     while ( (o = getopt_long(argc, argv, "-bhl:d:p:r:a:", table, NULL)) != -1) {
         switch (o) {
-            case 'b': sdb_set_batch_mode(); break;
+            case 'b': /*sdb_set_batch_mode();*/ break;
             case 'p': sscanf(optarg, "%d", &difftest_port); break;
             case 'l': log_file = optarg; printf("log_file = \"%s\"\n", log_file); break;
             case 'd': diff_so_file = optarg; printf("diff_so_file = \"%s\"\n", diff_so_file); break;
@@ -138,7 +146,9 @@ static int parse_args(int argc, char *argv[]) {
 
 //========== Initialize monitor ==========
 void init_monitor(int argc, char *argv[]){
-    // TODO
+    printf("Welcome to YSYX-Basic-NPC simulation/verifacation environment\n");
+    printf("For help, type \"help\"\n");
+    parse_args(argc, argv);
 }
 
 //========== Debugger User Interface functions ==========
@@ -161,6 +171,6 @@ void sdb_showmem(){
 
 //========== main function ==========
 int main(int argc, char *argv[]){
-    printf("Welcome to NPC-Basic Simulation Environment\n");
+    init_monitor(argc, argv);
     return 0;
 }
