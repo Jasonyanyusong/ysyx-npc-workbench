@@ -1,8 +1,12 @@
 menu "Memory Configuration"
 
 config MBASE
-  hex "Memory base address"
+  hex "NEMU (EMU) Memory base address"
   default 0x80000000
+
+config RTL_MBASE
+  hex "RRDB (RTL) Memory base address"
+  default 0x90000000
 
 config MSIZE
   hex "Memory size"
