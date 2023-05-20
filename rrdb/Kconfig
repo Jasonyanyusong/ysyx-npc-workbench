@@ -1,4 +1,4 @@
-mainmenu "NEMU Configuration Menu"
+mainmenu "RRDB Configuration Menu"
 
 choice
   prompt "Base ISA"
@@ -19,7 +19,7 @@ config ISA64
 
 
 choice
-  prompt "NEMU execution engine"
+  prompt "RRDB execution engine"
   default ENGINE_INTERPRETER
 
 config ENGINE_INTERPRETER

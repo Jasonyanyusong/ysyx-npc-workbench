@@ -13,13 +13,13 @@
 # See the Mulan PSL v2 for more details.
 #**************************************************************************************/
 
--include $(NEMU_HOME)/../Makefile
-include $(NEMU_HOME)/scripts/build.mk
+-include $(RRDB_HOME)/../Makefile
+include $(RRDB_HOME)/scripts/build.mk
 
-include $(NEMU_HOME)/tools/difftest.mk
+include $(RRDB_HOME)/tools/difftest.mk
 
 compile_git:
-	$(call git_commit, "compile NEMU")
+	$(call git_commit, "compile RRDB")
 $(BINARY): compile_git
 
 # Some convenient rules
@@ -27,19 +27,19 @@ $(BINARY): compile_git
 override ARGS ?= --log=$(BUILD_DIR)/nemu-log.txt
 override ARGS += $(ARGS_DIFF)
 
-# Command to execute NEMU
+# Command to execute RRDB
 IMG ?=
-NEMU_EXEC := $(BINARY) $(ARGS) $(IMG)
+RRDB_EXEC := $(BINARY) $(ARGS) $(IMG)
 
 run-env: $(BINARY) $(DIFF_REF_SO)
 
 run: run-env
-	$(call git_commit, "run NEMU")
-	$(NEMU_EXEC)
+	$(call git_commit, "run RRDB")
+	$(RRDB_EXEC)
 
 gdb: run-env
-	$(call git_commit, "gdb NEMU")
-	gdb -s $(BINARY) --args $(NEMU_EXEC)
+	$(call git_commit, "gdb RRDB")
+	gdb -s $(BINARY) --args $(RRDB_EXEC)
 
 clean-tools = $(dir $(shell find ./tools -maxdepth 2 -mindepth 2 -name "Makefile"))
 $(clean-tools):
