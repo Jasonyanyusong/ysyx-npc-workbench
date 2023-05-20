@@ -10,3 +10,4 @@
 !Kconfig
 include/config
 include/generated
+obj_dir/
