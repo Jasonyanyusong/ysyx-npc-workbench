@@ -1,4 +1,4 @@
-/* verilator lint_off WIDTHEXPAND */
+/* verilator lint_off WIDTH */
 module IFU(
   input  [31:0] io_IFU_I_inst
 );
@@ -1298,4 +1298,4 @@ end // initial
 `endif
 `endif // SYNTHESIS
 endmodule
-/* verilator lint_on WIDTHEXPAND */
+/* verilator lint_on WIDTH */
