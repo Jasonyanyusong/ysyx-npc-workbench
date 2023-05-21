@@ -14,6 +14,10 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
+/*Usage:
+    Linux: "verilator --cc --exe --build --trace nsim.cpp npc.v -LDFLAGS -lreadline"
+*/
+
 //========== Macro Configurations ==========
 #define mem_start_addr  0x90000000
 #define mem_end_addr    0x9fffffff
@@ -26,6 +30,7 @@
 #include "obj_dir/Vnpc.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <malloc.h>
 #include <assert.h>
 #include <stdint.h>
@@ -201,47 +206,106 @@ void monitor_init_monitor(){
 //========== Simple Debugger (SDB) User Interface ==========
 
 char* sdb_rl_gets(){
-    // TODO
-    return NULL;
+    char* sdb_line_read = NULL;
+
+    if(sdb_line_read){
+        free(sdb_line_read);
+        sdb_line_read = NULL;
+    }
+
+    sdb_line_read = readline("(nsim) ");
+
+    if (sdb_line_read && *sdb_line_read){
+        add_history(sdb_line_read);
+    }
+
+    return sdb_line_read;
 }
 
 int sdb_cmd_c(char* args){
-    // TODO
-    return -1;
+    printf("[sdb] continue NPC execution\n");
+    //cpu_exec(-1);
+    return 0;
 } // continue execution
 
 int sdb_cmd_s(char* args){
-    // TODO
-    return -1;
+    if (args == NULL){
+        printf("[sdb] 1 setp NPC execution\n");
+        //cpu_exec(1);
+    }
+    else{
+        int sdb_cmd_si_n = atoi(args);
+        if(sdb_cmd_si_n < -1){
+        printf("Invalid input\n");
+        return 0;
+    }
+    printf("[sdb] %d setp NPC execution\n", sdb_cmd_si_n);
+    //cpu_exec(cmd_si_n);
+    }
+    return 0;
 } // single-step execution
 
 int sdb_cmd_i(char* args){
-    // TODO
-    return -1;
+    if (args == NULL){
+        printf("No Subcommand\n");
+        return 0;
+    }
+    else{
+        if (strcmp(args, "r") == 0){
+        printf("[sdb] list registers\n");
+        //isa_gpr_display();
+    }
+    else if (strcmp(args, "w") == 0){
+        printf("[sdb] list watchpoints\n");
+        //print_WP();
+    }
+    else{
+        printf("Subcommand Not Defined\n");
+    }
+  }
+    return 0;
 } // informations (register and watchpoint)
 
 int sdb_cmd_x(char* args){
-    // TODO
-    return -1;
+    printf("[sdb] scan and print memory");
+    int print_length;
+    int start_memory_address;
+    char *last_part_of_args;
+    char *string_token_first = strtok_r(args, " ", &last_part_of_args);
+    print_length = atoi(string_token_first);
+    sscanf(last_part_of_args, "%x", &start_memory_address);
+    printf("******************************************************************************\n");
+    printf("|  Address   | 4b Phys (Hex) | 4b Virt (Hex) | 4b Phys (Dec) | 4b Virt (Dec) |\n");
+    for (int i = start_memory_address; i < start_memory_address + print_length; i = i + 4){
+        printf("| 0x%x | 0x   %8lx | 0x   %8lx | 0x %10ld | 0x %10ld |\n", i, mem_paddr_read(i, 4), mem_vaddr_read(i, 4), mem_paddr_read(i, 4), mem_vaddr_read(i, 4));
+    }
+    printf("******************************************************************************\n\n");
+    return 0;
 } // scan and print memory
 
 int sdb_cmd_p(char* args){
-    // TODO
-    return -1;
+    printf("[sdb] expression evaluation\n");
+    bool expression_success;
+    expression_success = false;
+    u_int64_t cmd_p_result = 0;
+    //cmd_p_result = expr(args, &expression_success);
+    printf("%ld\t", cmd_p_result);
+    printf("0x%lx\n", cmd_p_result);
+    return 0;
 } // expression evaluation
 
 int sdb_cmd_w(char* args){
-    // TODO
-    return -1;
+    printf("[sdb] add watchpoint\n");
+    return 0;
 } // add watchpoint
 
 int sdb_cmd_d(char* args){
-    // TODO
-    return -1;
+    printf("[sdb] delete watchpoint\n");
+    return 0;
 } // delete watchpoint
 
 int sdb_cmd_q(char* args){
-    // TODO
+    printf("[sdb] quit NSIM\n");
     return -1;
 } // quit NSIM
 
@@ -258,7 +322,29 @@ void sdb_set_batch_mode(){
 }
 
 void sdb_main_loop(){
-    // TODO
+    if(sdb_is_batch_mode){
+        sdb_cmd_c(NULL);
+        return;
+    }
+
+    for(char* str; (str = sdb_rl_gets()) != NULL; ){
+        char* str_end = str + strlen(str);
+        char* cmd = strtok(str, " ");
+        if (cmd == NULL) {continue;}
+        
+        char* args = cmd + strlen(cmd) + 1;
+        if(args >= str_end) {args = NULL;}
+
+        int i;
+        for(i = 0; i < SDB_NR_CMD; i = i + 1){
+            if(strcmp(cmd, sdb_cmd_table[i].name) == 0){
+                if(sdb_cmd_table[i].handler(args) < 0) {return;}
+                break;
+            }
+        }
+
+        if(i == SDB_NR_CMD) {printf("[sdb] unknown command '%s'\n", cmd);}
+    }
     return;
 }
 
@@ -272,5 +358,6 @@ int main(int argc, char *argv[]){
     mem_init_mem();
     sdb_cmd_h(NULL);
     printf("Welcome to riscv64-nsim\n");
+    sdb_main_loop();
     return 0;
 }
