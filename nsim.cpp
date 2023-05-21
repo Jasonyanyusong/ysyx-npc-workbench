@@ -71,7 +71,7 @@ int   monitor_difftest_port = 1234;
 
 long monitor_load_img();
 int monitor_parse_args(int argc, char*argv[]);
-void monitor_init_monitor();
+void monitor_init_monitor(int argc, char*argv[]);
 
 //---------- Simple Debugger (SDB) User Interface ----------
 
@@ -243,8 +243,8 @@ int monitor_parse_args(int argc, char*argv[]){
     return 0;
 }
 
-void monitor_init_monitor(){
-    // TODO
+void monitor_init_monitor(int argc, char*argv[]){
+    monitor_parse_args(argc, argv);
     return;
 }
 
