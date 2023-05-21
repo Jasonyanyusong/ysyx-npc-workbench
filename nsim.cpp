@@ -253,7 +253,7 @@ int sdb_cmd_h(char* args){
 } // help
 
 void sdb_set_batch_mode(){
-    // TODO
+    sdb_is_batch_mode = true;
     return;
 }
 
