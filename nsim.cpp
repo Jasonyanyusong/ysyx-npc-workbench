@@ -249,7 +249,7 @@ int sdb_cmd_h(char* args){
     for(int i = 0; i < SDB_NR_CMD; i = i + 1){
         printf("%s - %s\n", sdb_cmd_table[i].name, sdb_cmd_table[i].description);
     }
-    return -1;
+    return 0;
 } // help
 
 void sdb_set_batch_mode(){
