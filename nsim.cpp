@@ -29,10 +29,13 @@
 #include <malloc.h>
 #include <assert.h>
 #include <stdint.h>
+#include <readline/readline.h>
+#include <readline/history.h>
+#include <getopt.h>
 
 //========== List functions that will be used later ==========
 
-//---------- Memory ----------
+//---------- Memory manipulations ----------
 uint64_t mem_host_read(void *mem_addr, int mem_length);
 void mem_host_write(void *mem_addr, int mem_length, uint64_t mem_data);
 bool mem_addr_in_bound(uint64_t mem_addr);
@@ -51,6 +54,57 @@ uint64_t mem_paddr_read(uint64_t mem_addr, int mem_length);
 void mem_paddr_write(uint64_t mem_addr, int mem_length, uint64_t mem_data);
 
 void mem_init_mem();
+
+//---------- Simple Debugger (SDB) Monitor ----------
+
+char* monitor_log_file = NULL;
+char* monitor_diff_so_file = NULL;
+char* monitor_img_file = NULL;
+char* monitor_elf_file = NULL;
+char* monitor_das_file = NULL;
+int   monitor_difftest_port = 1234;
+
+long monitor_load_img();
+int monitor_parse_args(int argc, char*argv[]);
+void monitor_init_monitor();
+
+//---------- Simple Debugger (SDB) User Interface ----------
+
+int sdb_is_batch_mode = false;
+
+char* sdb_rl_gets();
+
+int sdb_cmd_c(char* args); // continue execution
+int sdb_cmd_s(char* args); // single-step execution
+int sdb_cmd_i(char* args); // informations (register and watchpoint)
+int sdb_cmd_x(char* args); // scan and print memory
+int sdb_cmd_p(char* args); // expression evaluation
+int sdb_cmd_w(char* args); // add watchpoint
+int sdb_cmd_d(char* args); // delete watchpoint
+int sdb_cmd_q(char* args); // quit NSIM
+int sdb_cmd_h(char* args); // help
+
+static struct {
+    const char *name;
+    const char *description;
+    int (*handler) (char *);
+} sdb_cmd_table [] = {
+    { "h", "help",                                     sdb_cmd_h},
+    { "c", "continue execution",                       sdb_cmd_c},
+    { "q", "quit NSIM",                                sdb_cmd_q},
+    { "s", "single-step execution",                    sdb_cmd_s},
+    { "i", "informations (register and watchpoint)",   sdb_cmd_i},
+    { "x", "scan and print memory",                    sdb_cmd_x},
+    { "p", "expression evaluation",                    sdb_cmd_p},
+    { "w", "add watchpoint",                           sdb_cmd_w},
+    { "d", "delete watchpoint",                        sdb_cmd_d},
+};
+
+#define SDB_NR_CMD 9
+
+void sdb_set_batch_mode();
+void sdb_main_loop();
+void sdb_init_sdb();
 
 //========== Memory manipulations ==========
 
@@ -127,10 +181,96 @@ void mem_vaddr_write(uint64_t mem_addr, int mem_length, uint64_t mem_data){
     mem_paddr_write(mem_addr, mem_length, mem_data);
 }
 
+//========== Simple Debugger (SDB) Monitor ==========
+
+long monitor_load_img(){
+    // TODO
+    return 0;
+}
+
+int monitor_parse_args(int argc, char*argv[]){
+    // TODO
+    return 0;
+}
+
+void monitor_init_monitor(){
+    // TODO
+    return;
+}
+
+//========== Simple Debugger (SDB) User Interface ==========
+
+char* sdb_rl_gets(){
+    // TODO
+    return NULL;
+}
+
+int sdb_cmd_c(char* args){
+    // TODO
+    return -1;
+} // continue execution
+
+int sdb_cmd_s(char* args){
+    // TODO
+    return -1;
+} // single-step execution
+
+int sdb_cmd_i(char* args){
+    // TODO
+    return -1;
+} // informations (register and watchpoint)
+
+int sdb_cmd_x(char* args){
+    // TODO
+    return -1;
+} // scan and print memory
+
+int sdb_cmd_p(char* args){
+    // TODO
+    return -1;
+} // expression evaluation
+
+int sdb_cmd_w(char* args){
+    // TODO
+    return -1;
+} // add watchpoint
+
+int sdb_cmd_d(char* args){
+    // TODO
+    return -1;
+} // delete watchpoint
+
+int sdb_cmd_q(char* args){
+    // TODO
+    return -1;
+} // quit NSIM
+
+int sdb_cmd_h(char* args){
+    for(int i = 0; i < SDB_NR_CMD; i = i + 1){
+        printf("%s - %s\n", sdb_cmd_table[i].name, sdb_cmd_table[i].description);
+    }
+    return -1;
+} // help
+
+void sdb_set_batch_mode(){
+    // TODO
+    return;
+}
+
+void sdb_main_loop(){
+    // TODO
+    return;
+}
+
+void sdb_init_sdb(){
+    // TODO
+    return;
+}
 
 //========== Main function ==========
-int main(){
+int main(int argc, char *argv[]){
     mem_init_mem();
+    sdb_cmd_h(NULL);
     printf("Welcome to riscv64-nsim\n");
     return 0;
 }
