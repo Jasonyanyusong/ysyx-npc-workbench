@@ -19,8 +19,8 @@
 */
 
 //========== Macro Configurations ==========
-#define mem_start_addr  0x90000000
-#define mem_end_addr    0x9fffffff
+#define mem_start_addr  0x0900000
+#define mem_end_addr    0x09000ff
 #define mem_size        mem_end_addr - mem_start_addr + 1
 
 //========== Include Headers ==========
@@ -41,8 +41,8 @@
 //========== List functions and variables that will be used later ==========
 
 //---------- Memory manipulations ----------
-uint64_t mem_host_read(void *mem_addr, int mem_length);
-void mem_host_write(void *mem_addr, int mem_length, uint64_t mem_data);
+static inline uint64_t mem_host_read(uint8_t *mem_addr, int mem_length);
+static void mem_host_write(void *mem_addr, int mem_length, uint64_t mem_data);
 bool mem_addr_in_bound(uint64_t mem_addr);
 
 uint64_t mem_vaddr_ifetch(uint64_t mem_addr, int mem_length);
@@ -115,7 +115,10 @@ void sdb_init_sdb();
 
 static uint8_t *mem_pmem = NULL;
 
-uint64_t mem_host_read(void *mem_addr, int mem_length){
+// static uint8_t mem_pmem[mem_size] __attribute((aligned(4096))) = {};
+
+static inline uint64_t mem_host_read(uint8_t *mem_addr, int mem_length){
+    printf("[memory] in host read, address is %p, length is %d\n", mem_addr, mem_length);
     switch (mem_length){
         case 1: return *(uint8_t  *)mem_addr;
         case 2: return *(uint16_t *)mem_addr;
@@ -125,7 +128,7 @@ uint64_t mem_host_read(void *mem_addr, int mem_length){
     }
 }
 
-void mem_host_write(void *mem_addr, int mem_length, uint64_t mem_data){
+static void mem_host_write(void *mem_addr, int mem_length, uint64_t mem_data){
     switch (mem_length){
         case 1: *(uint8_t  *)mem_addr = mem_data; return;
         case 2: *(uint16_t *)mem_addr = mem_data; return;
@@ -136,21 +139,23 @@ void mem_host_write(void *mem_addr, int mem_length, uint64_t mem_data){
 }
 
 bool mem_addr_in_bound(uint64_t mem_addr){
-    if(!mem_addr - mem_start_addr < mem_size)
-        printf("[memory] address 0x%x out of bound [0x%x,0x%x]\n", mem_addr, mem_start_addr, mem_end_addr);
-    return mem_addr - mem_start_addr < mem_size;
+    if(mem_addr - mem_start_addr > mem_size || mem_addr < mem_start_addr)
+        {printf("[memory] address 0x%x out of bound [0x%x,0x%x]\n", mem_addr, mem_start_addr, mem_end_addr); assert(0); return false; }
+    return true;
 }
 
 void mem_init_mem(){
     mem_pmem = (uint8_t *)malloc(mem_size);
+    printf("[memory] host memory starts at %p\n", mem_pmem);
     assert(mem_pmem);
     printf("[memory] physical memory area [0x%x,0x%x] size 0x%x\n", mem_start_addr, mem_end_addr, mem_size);
 }
 
-uint8_t* mem_guest_to_host(uint64_t paddr) { return mem_pmem + paddr - mem_start_addr; }
+uint8_t* mem_guest_to_host(uint64_t paddr) { uint64_t temp = paddr - mem_start_addr; printf("[memory] temp is 0x%0x mem_pmem is %p, guest to host addr %p, paddr 0x%x, memstart addr 0x%x\n", temp, mem_pmem, mem_pmem + paddr, paddr, mem_start_addr); return mem_pmem + (paddr - mem_start_addr); }
 uint64_t mem_host_to_guest(uint8_t *haddr) { return haddr - mem_pmem + mem_start_addr; }
 
 uint64_t mem_pmem_read(uint64_t mem_addr, int mem_length){
+    printf("[memory] mem_pmem_read: mem_guest_to_host(mem_addr) = %p\n", mem_guest_to_host(mem_addr));
     uint64_t ret = mem_host_read(mem_guest_to_host(mem_addr), mem_length);
     return ret;
 }
@@ -159,6 +164,7 @@ void mem_pmem_write(uint64_t mem_addr, int mem_length, uint64_t mem_data){
 }
 
 uint64_t mem_paddr_read(uint64_t mem_addr, int mem_length){
+    printf("[memory] mem_paddr_read: mem_addr = 0x%x\n", mem_addr);
     if(mem_addr_in_bound(mem_addr))
         return mem_pmem_read(mem_addr, mem_length);
     // should not reach here!
@@ -312,16 +318,18 @@ int sdb_cmd_i(char* args){
 } // informations (register and watchpoint)
 
 int sdb_cmd_x(char* args){
-    printf("[sdb] scan and print memory");
+    printf("[sdb] scan and print memory\n");
     int print_length;
     int start_memory_address;
     char *last_part_of_args;
     char *string_token_first = strtok_r(args, " ", &last_part_of_args);
     print_length = atoi(string_token_first);
     sscanf(last_part_of_args, "%x", &start_memory_address);
+    printf("start mem addr is 0x%x\n", start_memory_address);
     printf("******************************************************************************\n");
     printf("|  Address   | 4b Phys (Hex) | 4b Virt (Hex) | 4b Phys (Dec) | 4b Virt (Dec) |\n");
     for (int i = start_memory_address; i < start_memory_address + print_length; i = i + 4){
+        printf("[sdb] reading memory at address 0x%x\n", i);
         printf("| 0x%x | 0x   %8lx | 0x   %8lx | 0x %10ld | 0x %10ld |\n", i, mem_paddr_read(i, 4), mem_vaddr_read(i, 4), mem_paddr_read(i, 4), mem_vaddr_read(i, 4));
     }
     printf("******************************************************************************\n\n");
