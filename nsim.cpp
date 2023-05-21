@@ -194,7 +194,36 @@ long monitor_load_img(){
 }
 
 int monitor_parse_args(int argc, char*argv[]){
-    // TODO
+    const struct option table[] = {
+        {"batch"    , no_argument      , NULL, 'b'},
+        {"log"      , required_argument, NULL, 'l'},
+        {"diff"     , required_argument, NULL, 'd'},
+        {"port"     , required_argument, NULL, 'p'},
+        {"help"     , no_argument      , NULL, 'h'},
+        {"readelf"  , required_argument, NULL, 'r'},
+        {"readdiasm", required_argument, NULL, 'a'},
+        {0          , 0                , NULL,  0 },
+    };
+    int o;
+    while ( (o = getopt_long(argc, argv, "-bhl:d:p:r:a:", table, NULL)) != -1) {
+        switch (o) {
+            case 'b': sdb_set_batch_mode(); break;
+            case 'p': sscanf(optarg, "%d", &monitor_difftest_port); break;
+            case 'l': monitor_log_file = optarg; printf("log_file = \"%s\"\n", monitor_log_file); break;
+            case 'd': monitor_diff_so_file = optarg; printf("diff_so_file = \"%s\"\n", monitor_diff_so_file); break;
+            case 'r': monitor_elf_file = optarg; printf("elf_file = \"%s\"\n", monitor_elf_file); break;
+            case 'a': monitor_das_file = optarg; printf("das_file = \"%s\"\n", monitor_das_file); break;
+            case 1:   monitor_img_file = optarg; printf("img_file = \"%s\"\n", monitor_img_file); return 0;
+            default:
+                printf("Usage: %s [OPTION...] IMAGE [args]\n\n", argv[0]);
+                printf("\t-b,--batch              run with batch mode\n");
+                printf("\t-l,--log=FILE           output log to FILE\n");
+                printf("\t-d,--diff=REF_SO        run DiffTest with reference REF_SO\n");
+                printf("\t-p,--port=PORT          run DiffTest with port PORT\n");
+                printf("\n");
+                exit(0);
+        }
+    }
     return 0;
 }
 
