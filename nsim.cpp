@@ -189,7 +189,23 @@ void mem_vaddr_write(uint64_t mem_addr, int mem_length, uint64_t mem_data){
 //========== Simple Debugger (SDB) Monitor ==========
 
 long monitor_load_img(){
-    // TODO
+    if(monitor_img_file == NULL){
+        printf("[monitor] no image file is given, using built-in RISCV image\n");
+    }
+
+    FILE *fp = fopen(monitor_img_file, "rb");
+    assert(fp);
+
+    fseek(fp, 0, SEEK_END);
+    long size = ftell(fp);
+
+    printf("[monitor] image is %s size is %d\n", monitor_img_file, size);
+
+    fseek(fp, 0, SEEK_SET);
+    int ret = fread(mem_guest_to_host(mem_start_addr), size, 1, fp);
+    assert(ret == 1);
+
+    fclose(fp);
     return 0;
 }
 
