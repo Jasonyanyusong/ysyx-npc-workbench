@@ -38,7 +38,7 @@
 #include <readline/history.h>
 #include <getopt.h>
 
-//========== List functions that will be used later ==========
+//========== List functions and variables that will be used later ==========
 
 //---------- Memory manipulations ----------
 uint64_t mem_host_read(void *mem_addr, int mem_length);
