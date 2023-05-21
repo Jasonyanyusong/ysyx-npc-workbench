@@ -394,7 +394,8 @@ void sdb_main_loop(){
 }
 
 void sdb_init_sdb(){
-    // TODO
+    // No expr and wp currently, so no function implementations
+    printf("[sdb] initialized\n");
     return;
 }
 
