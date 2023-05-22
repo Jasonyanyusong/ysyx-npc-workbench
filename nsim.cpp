@@ -210,25 +210,28 @@ void sim_one_exec(){
 
     // Step IV: Load and store
     printf("[sim] Phase IV: load and store\n");
-    if(top -> io_NPC_LSU_O_memRW == 0b1){
-        // memory write
-        uint64_t sim_mem_write_addr = top -> io_NPC_LSU_O_memAddr;
-        switch(top -> io_NPC_LSU_O_len){
-            case 0b00: mem_pmem_write(sim_mem_write_addr, 1, top -> io_NPC_LSU_O_memW);    break;
-            case 0b01: mem_pmem_write(sim_mem_write_addr, 2, top -> io_NPC_LSU_O_memW);    break;
-            case 0b10: mem_pmem_write(sim_mem_write_addr, 4, top -> io_NPC_LSU_O_memW);    break;
-            case 0b11: mem_pmem_write(sim_mem_write_addr, 8, top -> io_NPC_LSU_O_memW);    break;
-            default:   printf("[sim] NPC returned an unknown memory length\n"); assert(0); break;
-        }
-    }else{
-        // memory read
-        u_int64_t sim_mem_read_addr = top -> io_NPC_LSU_O_memAddr;
-        switch(top -> io_NPC_LSU_O_len){
-            case 0b00: top -> io_NPC_LSU_I_memR = mem_pmem_read(sim_mem_read_addr, 1);     break;
-            case 0b01: top -> io_NPC_LSU_I_memR = mem_pmem_read(sim_mem_read_addr, 2);     break;
-            case 0b10: top -> io_NPC_LSU_I_memR = mem_pmem_read(sim_mem_read_addr, 4);     break;
-            case 0b11: top -> io_NPC_LSU_I_memR = mem_pmem_read(sim_mem_read_addr, 8);     break;
-            default:   printf("[sim] NPC returned an unknown memory length\n"); assert(0); break;
+    if(top -> io_NPC_LSU_O_accessMem == 0b1)
+    {
+        if(top -> io_NPC_LSU_O_memRW == 0b1){
+            // memory write
+            uint64_t sim_mem_write_addr = top -> io_NPC_LSU_O_memAddr;
+            switch(top -> io_NPC_LSU_O_len){
+                case 0b00: mem_pmem_write(sim_mem_write_addr, 1, top -> io_NPC_LSU_O_memW);    break;
+                case 0b01: mem_pmem_write(sim_mem_write_addr, 2, top -> io_NPC_LSU_O_memW);    break;
+                case 0b10: mem_pmem_write(sim_mem_write_addr, 4, top -> io_NPC_LSU_O_memW);    break;
+                case 0b11: mem_pmem_write(sim_mem_write_addr, 8, top -> io_NPC_LSU_O_memW);    break;
+                default:   printf("[sim] NPC returned an unknown memory length\n"); assert(0); break;
+            }
+        }else{
+            // memory read
+            u_int64_t sim_mem_read_addr = top -> io_NPC_LSU_O_memAddr;
+            switch(top -> io_NPC_LSU_O_len){
+                case 0b00: top -> io_NPC_LSU_I_memR = mem_pmem_read(sim_mem_read_addr, 1);     break;
+                case 0b01: top -> io_NPC_LSU_I_memR = mem_pmem_read(sim_mem_read_addr, 2);     break;
+                case 0b10: top -> io_NPC_LSU_I_memR = mem_pmem_read(sim_mem_read_addr, 4);     break;
+                case 0b11: top -> io_NPC_LSU_I_memR = mem_pmem_read(sim_mem_read_addr, 8);     break;
+                default:   printf("[sim] NPC returned an unknown memory length\n"); assert(0); break;
+            }
         }
     }
     top -> eval();
