@@ -815,6 +815,7 @@ endmodule
 module npc(
   input         clock,
   input         reset,
+  input  [63:0] io_NPC_startPC,
   output [63:0] io_NPC_sendCurrentPC,
   output [63:0] io_NPC_sendNextPC,
   input  [31:0] io_NPC_getInst,
@@ -865,162 +866,162 @@ module npc(
 `ifdef RANDOMIZE_REG_INIT
   reg [63:0] _RAND_1;
 `endif // RANDOMIZE_REG_INIT
-  reg [63:0] GPR [0:31]; // @[npc.scala 692:18]
-  wire  GPR_npcb_src1_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_npcb_src1_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_npcb_src1_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_npcb_src2_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_npcb_src2_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_npcb_src2_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_MPORT_1_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_MPORT_1_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_MPORT_1_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR00_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR00_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR00_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR01_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR01_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR01_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR02_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR02_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR02_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR03_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR03_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR03_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR04_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR04_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR04_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR05_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR05_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR05_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR06_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR06_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR06_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR07_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR07_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR07_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR08_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR08_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR08_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR09_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR09_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR09_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR10_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR10_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR10_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR11_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR11_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR11_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR12_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR12_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR12_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR13_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR13_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR13_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR14_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR14_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR14_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR15_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR15_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR15_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR16_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR16_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR16_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR17_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR17_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR17_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR18_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR18_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR18_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR19_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR19_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR19_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR20_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR20_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR20_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR21_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR21_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR21_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR22_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR22_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR22_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR23_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR23_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR23_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR24_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR24_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR24_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR25_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR25_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR25_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR26_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR26_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR26_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR27_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR27_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR27_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR28_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR28_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR28_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR29_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR29_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR29_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR30_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR30_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR30_MPORT_data; // @[npc.scala 692:18]
-  wire  GPR_io_NPC_GPR31_MPORT_en; // @[npc.scala 692:18]
-  wire [4:0] GPR_io_NPC_GPR31_MPORT_addr; // @[npc.scala 692:18]
-  wire [63:0] GPR_io_NPC_GPR31_MPORT_data; // @[npc.scala 692:18]
-  wire [63:0] GPR_MPORT_data; // @[npc.scala 692:18]
-  wire [4:0] GPR_MPORT_addr; // @[npc.scala 692:18]
-  wire  GPR_MPORT_mask; // @[npc.scala 692:18]
-  wire  GPR_MPORT_en; // @[npc.scala 692:18]
-  wire [31:0] npcb_IFU_io_IFU_I_inst; // @[npc.scala 696:26]
-  wire [31:0] npcb_IDU_io_IDU_I_inst; // @[npc.scala 702:26]
-  wire [4:0] npcb_IDU_io_IDU_O_rs1; // @[npc.scala 702:26]
-  wire [4:0] npcb_IDU_io_IDU_O_rs2; // @[npc.scala 702:26]
-  wire [4:0] npcb_IDU_io_IDU_O_rd; // @[npc.scala 702:26]
-  wire [5:0] npcb_IDU_io_IDU_O_EXUopcode; // @[npc.scala 702:26]
-  wire [5:0] npcb_IDU_io_IDU_O_LSUopcode; // @[npc.scala 702:26]
-  wire  npcb_IDU_io_IDU_O_snpcISdnpc; // @[npc.scala 702:26]
-  wire  npcb_IDU_io_IDU_O_GPRneedWriteBack; // @[npc.scala 702:26]
-  wire [63:0] npcb_IDU_io_IDU_O_imm; // @[npc.scala 702:26]
-  wire  npcb_IDU_io_IDU_O_halt; // @[npc.scala 702:26]
-  wire  npcb_IDU_io_IDU_O_error; // @[npc.scala 702:26]
-  wire [63:0] npcb_EXU_io_EXU_I_src1; // @[npc.scala 711:26]
-  wire [63:0] npcb_EXU_io_EXU_I_src2; // @[npc.scala 711:26]
-  wire [63:0] npcb_EXU_io_EXU_I_imm; // @[npc.scala 711:26]
-  wire [5:0] npcb_EXU_io_EXU_I_opcode; // @[npc.scala 711:26]
-  wire [63:0] npcb_EXU_io_EXU_I_currentPC; // @[npc.scala 711:26]
-  wire [63:0] npcb_EXU_io_EXU_O_result; // @[npc.scala 711:26]
-  wire  npcb_EXU_io_EXU_O_snpcNEQdnpc; // @[npc.scala 711:26]
-  wire  npcb_EXU_io_EXU_O_error; // @[npc.scala 711:26]
-  wire [63:0] npcb_LSU_io_LSU_I_src1; // @[npc.scala 719:26]
-  wire [63:0] npcb_LSU_io_LSU_I_src2; // @[npc.scala 719:26]
-  wire [5:0] npcb_LSU_io_LSU_I_opcode; // @[npc.scala 719:26]
-  wire [63:0] npcb_LSU_io_LSU_O_result; // @[npc.scala 719:26]
-  wire [63:0] npcb_LSU_io_LSU_O_memAddr; // @[npc.scala 719:26]
-  wire  npcb_LSU_io_LSU_O_memRW; // @[npc.scala 719:26]
-  wire [63:0] npcb_LSU_io_LSU_I_memR; // @[npc.scala 719:26]
-  wire [63:0] npcb_LSU_io_LSU_O_memW; // @[npc.scala 719:26]
-  wire  npcb_LSU_io_LSU_O_error; // @[npc.scala 719:26]
-  wire [1:0] npcb_LSU_io_LSU_O_len; // @[npc.scala 719:26]
-  wire [63:0] npcb_WBU_io_WBU_I_EXUresult; // @[npc.scala 731:26]
-  wire [63:0] npcb_WBU_io_WBU_I_LSUresult; // @[npc.scala 731:26]
-  wire  npcb_WBU_io_WBU_I_LSUenable; // @[npc.scala 731:26]
-  wire [4:0] npcb_WBU_io_WBU_I_rd; // @[npc.scala 731:26]
-  wire [4:0] npcb_WBU_io_WBU_O_GPRidx; // @[npc.scala 731:26]
-  wire [63:0] npcb_WBU_io_WBU_O_GPRWriteBack; // @[npc.scala 731:26]
-  wire [63:0] npcb_PCU_io_PCU_I_CurrentPC; // @[npc.scala 732:26]
-  wire [63:0] npcb_PCU_io_PCU_I_imm; // @[npc.scala 732:26]
-  wire  npcb_PCU_io_PCU_I_willJump; // @[npc.scala 732:26]
-  wire [63:0] npcb_PCU_io_PCU_O_DynamicNextPC; // @[npc.scala 732:26]
-  reg [63:0] PC; // @[npc.scala 691:21]
-  wire [63:0] _T_1 = npcb_WBU_io_WBU_O_GPRidx == 5'h0 ? 64'h0 : GPR_MPORT_1_data; // @[npc.scala 693:37]
-  IFU npcb_IFU ( // @[npc.scala 696:26]
+  reg [63:0] GPR [0:31]; // @[npc.scala 694:18]
+  wire  GPR_npcb_src1_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_npcb_src1_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_npcb_src1_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_npcb_src2_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_npcb_src2_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_npcb_src2_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_MPORT_1_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_MPORT_1_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_MPORT_1_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR00_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR00_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR00_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR01_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR01_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR01_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR02_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR02_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR02_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR03_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR03_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR03_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR04_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR04_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR04_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR05_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR05_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR05_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR06_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR06_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR06_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR07_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR07_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR07_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR08_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR08_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR08_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR09_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR09_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR09_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR10_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR10_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR10_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR11_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR11_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR11_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR12_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR12_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR12_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR13_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR13_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR13_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR14_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR14_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR14_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR15_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR15_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR15_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR16_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR16_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR16_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR17_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR17_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR17_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR18_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR18_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR18_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR19_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR19_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR19_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR20_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR20_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR20_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR21_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR21_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR21_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR22_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR22_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR22_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR23_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR23_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR23_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR24_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR24_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR24_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR25_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR25_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR25_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR26_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR26_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR26_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR27_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR27_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR27_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR28_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR28_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR28_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR29_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR29_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR29_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR30_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR30_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR30_MPORT_data; // @[npc.scala 694:18]
+  wire  GPR_io_NPC_GPR31_MPORT_en; // @[npc.scala 694:18]
+  wire [4:0] GPR_io_NPC_GPR31_MPORT_addr; // @[npc.scala 694:18]
+  wire [63:0] GPR_io_NPC_GPR31_MPORT_data; // @[npc.scala 694:18]
+  wire [63:0] GPR_MPORT_data; // @[npc.scala 694:18]
+  wire [4:0] GPR_MPORT_addr; // @[npc.scala 694:18]
+  wire  GPR_MPORT_mask; // @[npc.scala 694:18]
+  wire  GPR_MPORT_en; // @[npc.scala 694:18]
+  wire [31:0] npcb_IFU_io_IFU_I_inst; // @[npc.scala 698:26]
+  wire [31:0] npcb_IDU_io_IDU_I_inst; // @[npc.scala 704:26]
+  wire [4:0] npcb_IDU_io_IDU_O_rs1; // @[npc.scala 704:26]
+  wire [4:0] npcb_IDU_io_IDU_O_rs2; // @[npc.scala 704:26]
+  wire [4:0] npcb_IDU_io_IDU_O_rd; // @[npc.scala 704:26]
+  wire [5:0] npcb_IDU_io_IDU_O_EXUopcode; // @[npc.scala 704:26]
+  wire [5:0] npcb_IDU_io_IDU_O_LSUopcode; // @[npc.scala 704:26]
+  wire  npcb_IDU_io_IDU_O_snpcISdnpc; // @[npc.scala 704:26]
+  wire  npcb_IDU_io_IDU_O_GPRneedWriteBack; // @[npc.scala 704:26]
+  wire [63:0] npcb_IDU_io_IDU_O_imm; // @[npc.scala 704:26]
+  wire  npcb_IDU_io_IDU_O_halt; // @[npc.scala 704:26]
+  wire  npcb_IDU_io_IDU_O_error; // @[npc.scala 704:26]
+  wire [63:0] npcb_EXU_io_EXU_I_src1; // @[npc.scala 713:26]
+  wire [63:0] npcb_EXU_io_EXU_I_src2; // @[npc.scala 713:26]
+  wire [63:0] npcb_EXU_io_EXU_I_imm; // @[npc.scala 713:26]
+  wire [5:0] npcb_EXU_io_EXU_I_opcode; // @[npc.scala 713:26]
+  wire [63:0] npcb_EXU_io_EXU_I_currentPC; // @[npc.scala 713:26]
+  wire [63:0] npcb_EXU_io_EXU_O_result; // @[npc.scala 713:26]
+  wire  npcb_EXU_io_EXU_O_snpcNEQdnpc; // @[npc.scala 713:26]
+  wire  npcb_EXU_io_EXU_O_error; // @[npc.scala 713:26]
+  wire [63:0] npcb_LSU_io_LSU_I_src1; // @[npc.scala 721:26]
+  wire [63:0] npcb_LSU_io_LSU_I_src2; // @[npc.scala 721:26]
+  wire [5:0] npcb_LSU_io_LSU_I_opcode; // @[npc.scala 721:26]
+  wire [63:0] npcb_LSU_io_LSU_O_result; // @[npc.scala 721:26]
+  wire [63:0] npcb_LSU_io_LSU_O_memAddr; // @[npc.scala 721:26]
+  wire  npcb_LSU_io_LSU_O_memRW; // @[npc.scala 721:26]
+  wire [63:0] npcb_LSU_io_LSU_I_memR; // @[npc.scala 721:26]
+  wire [63:0] npcb_LSU_io_LSU_O_memW; // @[npc.scala 721:26]
+  wire  npcb_LSU_io_LSU_O_error; // @[npc.scala 721:26]
+  wire [1:0] npcb_LSU_io_LSU_O_len; // @[npc.scala 721:26]
+  wire [63:0] npcb_WBU_io_WBU_I_EXUresult; // @[npc.scala 733:26]
+  wire [63:0] npcb_WBU_io_WBU_I_LSUresult; // @[npc.scala 733:26]
+  wire  npcb_WBU_io_WBU_I_LSUenable; // @[npc.scala 733:26]
+  wire [4:0] npcb_WBU_io_WBU_I_rd; // @[npc.scala 733:26]
+  wire [4:0] npcb_WBU_io_WBU_O_GPRidx; // @[npc.scala 733:26]
+  wire [63:0] npcb_WBU_io_WBU_O_GPRWriteBack; // @[npc.scala 733:26]
+  wire [63:0] npcb_PCU_io_PCU_I_CurrentPC; // @[npc.scala 734:26]
+  wire [63:0] npcb_PCU_io_PCU_I_imm; // @[npc.scala 734:26]
+  wire  npcb_PCU_io_PCU_I_willJump; // @[npc.scala 734:26]
+  wire [63:0] npcb_PCU_io_PCU_O_DynamicNextPC; // @[npc.scala 734:26]
+  reg [63:0] PC; // @[npc.scala 693:21]
+  wire [63:0] _T_1 = npcb_WBU_io_WBU_O_GPRidx == 5'h0 ? 64'h0 : GPR_MPORT_1_data; // @[npc.scala 695:37]
+  IFU npcb_IFU ( // @[npc.scala 698:26]
     .io_IFU_I_inst(npcb_IFU_io_IFU_I_inst)
   );
-  IDU npcb_IDU ( // @[npc.scala 702:26]
+  IDU npcb_IDU ( // @[npc.scala 704:26]
     .io_IDU_I_inst(npcb_IDU_io_IDU_I_inst),
     .io_IDU_O_rs1(npcb_IDU_io_IDU_O_rs1),
     .io_IDU_O_rs2(npcb_IDU_io_IDU_O_rs2),
@@ -1033,7 +1034,7 @@ module npc(
     .io_IDU_O_halt(npcb_IDU_io_IDU_O_halt),
     .io_IDU_O_error(npcb_IDU_io_IDU_O_error)
   );
-  EXU npcb_EXU ( // @[npc.scala 711:26]
+  EXU npcb_EXU ( // @[npc.scala 713:26]
     .io_EXU_I_src1(npcb_EXU_io_EXU_I_src1),
     .io_EXU_I_src2(npcb_EXU_io_EXU_I_src2),
     .io_EXU_I_imm(npcb_EXU_io_EXU_I_imm),
@@ -1043,7 +1044,7 @@ module npc(
     .io_EXU_O_snpcNEQdnpc(npcb_EXU_io_EXU_O_snpcNEQdnpc),
     .io_EXU_O_error(npcb_EXU_io_EXU_O_error)
   );
-  LSU npcb_LSU ( // @[npc.scala 719:26]
+  LSU npcb_LSU ( // @[npc.scala 721:26]
     .io_LSU_I_src1(npcb_LSU_io_LSU_I_src1),
     .io_LSU_I_src2(npcb_LSU_io_LSU_I_src2),
     .io_LSU_I_opcode(npcb_LSU_io_LSU_I_opcode),
@@ -1055,7 +1056,7 @@ module npc(
     .io_LSU_O_error(npcb_LSU_io_LSU_O_error),
     .io_LSU_O_len(npcb_LSU_io_LSU_O_len)
   );
-  WBU npcb_WBU ( // @[npc.scala 731:26]
+  WBU npcb_WBU ( // @[npc.scala 733:26]
     .io_WBU_I_EXUresult(npcb_WBU_io_WBU_I_EXUresult),
     .io_WBU_I_LSUresult(npcb_WBU_io_WBU_I_LSUresult),
     .io_WBU_I_LSUenable(npcb_WBU_io_WBU_I_LSUenable),
@@ -1063,7 +1064,7 @@ module npc(
     .io_WBU_O_GPRidx(npcb_WBU_io_WBU_O_GPRidx),
     .io_WBU_O_GPRWriteBack(npcb_WBU_io_WBU_O_GPRWriteBack)
   );
-  PCU npcb_PCU ( // @[npc.scala 732:26]
+  PCU npcb_PCU ( // @[npc.scala 734:26]
     .io_PCU_I_CurrentPC(npcb_PCU_io_PCU_I_CurrentPC),
     .io_PCU_I_imm(npcb_PCU_io_PCU_I_imm),
     .io_PCU_I_willJump(npcb_PCU_io_PCU_I_willJump),
@@ -1071,180 +1072,180 @@ module npc(
   );
   assign GPR_npcb_src1_MPORT_en = 1'h1;
   assign GPR_npcb_src1_MPORT_addr = npcb_IDU_io_IDU_O_rs1;
-  assign GPR_npcb_src1_MPORT_data = GPR[GPR_npcb_src1_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_npcb_src1_MPORT_data = GPR[GPR_npcb_src1_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_npcb_src2_MPORT_en = 1'h1;
   assign GPR_npcb_src2_MPORT_addr = npcb_IDU_io_IDU_O_rs2;
-  assign GPR_npcb_src2_MPORT_data = GPR[GPR_npcb_src2_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_npcb_src2_MPORT_data = GPR[GPR_npcb_src2_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_MPORT_1_en = 1'h1;
   assign GPR_MPORT_1_addr = npcb_WBU_io_WBU_O_GPRidx;
-  assign GPR_MPORT_1_data = GPR[GPR_MPORT_1_addr]; // @[npc.scala 692:18]
+  assign GPR_MPORT_1_data = GPR[GPR_MPORT_1_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR00_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR00_MPORT_addr = 5'h0;
-  assign GPR_io_NPC_GPR00_MPORT_data = GPR[GPR_io_NPC_GPR00_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR00_MPORT_data = GPR[GPR_io_NPC_GPR00_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR01_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR01_MPORT_addr = 5'h1;
-  assign GPR_io_NPC_GPR01_MPORT_data = GPR[GPR_io_NPC_GPR01_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR01_MPORT_data = GPR[GPR_io_NPC_GPR01_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR02_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR02_MPORT_addr = 5'h2;
-  assign GPR_io_NPC_GPR02_MPORT_data = GPR[GPR_io_NPC_GPR02_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR02_MPORT_data = GPR[GPR_io_NPC_GPR02_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR03_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR03_MPORT_addr = 5'h3;
-  assign GPR_io_NPC_GPR03_MPORT_data = GPR[GPR_io_NPC_GPR03_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR03_MPORT_data = GPR[GPR_io_NPC_GPR03_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR04_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR04_MPORT_addr = 5'h4;
-  assign GPR_io_NPC_GPR04_MPORT_data = GPR[GPR_io_NPC_GPR04_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR04_MPORT_data = GPR[GPR_io_NPC_GPR04_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR05_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR05_MPORT_addr = 5'h5;
-  assign GPR_io_NPC_GPR05_MPORT_data = GPR[GPR_io_NPC_GPR05_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR05_MPORT_data = GPR[GPR_io_NPC_GPR05_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR06_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR06_MPORT_addr = 5'h6;
-  assign GPR_io_NPC_GPR06_MPORT_data = GPR[GPR_io_NPC_GPR06_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR06_MPORT_data = GPR[GPR_io_NPC_GPR06_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR07_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR07_MPORT_addr = 5'h7;
-  assign GPR_io_NPC_GPR07_MPORT_data = GPR[GPR_io_NPC_GPR07_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR07_MPORT_data = GPR[GPR_io_NPC_GPR07_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR08_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR08_MPORT_addr = 5'h8;
-  assign GPR_io_NPC_GPR08_MPORT_data = GPR[GPR_io_NPC_GPR08_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR08_MPORT_data = GPR[GPR_io_NPC_GPR08_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR09_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR09_MPORT_addr = 5'h9;
-  assign GPR_io_NPC_GPR09_MPORT_data = GPR[GPR_io_NPC_GPR09_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR09_MPORT_data = GPR[GPR_io_NPC_GPR09_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR10_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR10_MPORT_addr = 5'ha;
-  assign GPR_io_NPC_GPR10_MPORT_data = GPR[GPR_io_NPC_GPR10_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR10_MPORT_data = GPR[GPR_io_NPC_GPR10_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR11_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR11_MPORT_addr = 5'hb;
-  assign GPR_io_NPC_GPR11_MPORT_data = GPR[GPR_io_NPC_GPR11_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR11_MPORT_data = GPR[GPR_io_NPC_GPR11_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR12_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR12_MPORT_addr = 5'hc;
-  assign GPR_io_NPC_GPR12_MPORT_data = GPR[GPR_io_NPC_GPR12_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR12_MPORT_data = GPR[GPR_io_NPC_GPR12_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR13_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR13_MPORT_addr = 5'hd;
-  assign GPR_io_NPC_GPR13_MPORT_data = GPR[GPR_io_NPC_GPR13_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR13_MPORT_data = GPR[GPR_io_NPC_GPR13_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR14_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR14_MPORT_addr = 5'he;
-  assign GPR_io_NPC_GPR14_MPORT_data = GPR[GPR_io_NPC_GPR14_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR14_MPORT_data = GPR[GPR_io_NPC_GPR14_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR15_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR15_MPORT_addr = 5'hf;
-  assign GPR_io_NPC_GPR15_MPORT_data = GPR[GPR_io_NPC_GPR15_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR15_MPORT_data = GPR[GPR_io_NPC_GPR15_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR16_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR16_MPORT_addr = 5'h10;
-  assign GPR_io_NPC_GPR16_MPORT_data = GPR[GPR_io_NPC_GPR16_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR16_MPORT_data = GPR[GPR_io_NPC_GPR16_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR17_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR17_MPORT_addr = 5'h11;
-  assign GPR_io_NPC_GPR17_MPORT_data = GPR[GPR_io_NPC_GPR17_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR17_MPORT_data = GPR[GPR_io_NPC_GPR17_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR18_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR18_MPORT_addr = 5'h12;
-  assign GPR_io_NPC_GPR18_MPORT_data = GPR[GPR_io_NPC_GPR18_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR18_MPORT_data = GPR[GPR_io_NPC_GPR18_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR19_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR19_MPORT_addr = 5'h13;
-  assign GPR_io_NPC_GPR19_MPORT_data = GPR[GPR_io_NPC_GPR19_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR19_MPORT_data = GPR[GPR_io_NPC_GPR19_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR20_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR20_MPORT_addr = 5'h14;
-  assign GPR_io_NPC_GPR20_MPORT_data = GPR[GPR_io_NPC_GPR20_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR20_MPORT_data = GPR[GPR_io_NPC_GPR20_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR21_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR21_MPORT_addr = 5'h15;
-  assign GPR_io_NPC_GPR21_MPORT_data = GPR[GPR_io_NPC_GPR21_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR21_MPORT_data = GPR[GPR_io_NPC_GPR21_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR22_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR22_MPORT_addr = 5'h16;
-  assign GPR_io_NPC_GPR22_MPORT_data = GPR[GPR_io_NPC_GPR22_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR22_MPORT_data = GPR[GPR_io_NPC_GPR22_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR23_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR23_MPORT_addr = 5'h17;
-  assign GPR_io_NPC_GPR23_MPORT_data = GPR[GPR_io_NPC_GPR23_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR23_MPORT_data = GPR[GPR_io_NPC_GPR23_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR24_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR24_MPORT_addr = 5'h18;
-  assign GPR_io_NPC_GPR24_MPORT_data = GPR[GPR_io_NPC_GPR24_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR24_MPORT_data = GPR[GPR_io_NPC_GPR24_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR25_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR25_MPORT_addr = 5'h19;
-  assign GPR_io_NPC_GPR25_MPORT_data = GPR[GPR_io_NPC_GPR25_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR25_MPORT_data = GPR[GPR_io_NPC_GPR25_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR26_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR26_MPORT_addr = 5'h1a;
-  assign GPR_io_NPC_GPR26_MPORT_data = GPR[GPR_io_NPC_GPR26_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR26_MPORT_data = GPR[GPR_io_NPC_GPR26_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR27_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR27_MPORT_addr = 5'h1b;
-  assign GPR_io_NPC_GPR27_MPORT_data = GPR[GPR_io_NPC_GPR27_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR27_MPORT_data = GPR[GPR_io_NPC_GPR27_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR28_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR28_MPORT_addr = 5'h1c;
-  assign GPR_io_NPC_GPR28_MPORT_data = GPR[GPR_io_NPC_GPR28_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR28_MPORT_data = GPR[GPR_io_NPC_GPR28_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR29_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR29_MPORT_addr = 5'h1d;
-  assign GPR_io_NPC_GPR29_MPORT_data = GPR[GPR_io_NPC_GPR29_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR29_MPORT_data = GPR[GPR_io_NPC_GPR29_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR30_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR30_MPORT_addr = 5'h1e;
-  assign GPR_io_NPC_GPR30_MPORT_data = GPR[GPR_io_NPC_GPR30_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR30_MPORT_data = GPR[GPR_io_NPC_GPR30_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_io_NPC_GPR31_MPORT_en = 1'h1;
   assign GPR_io_NPC_GPR31_MPORT_addr = 5'h1f;
-  assign GPR_io_NPC_GPR31_MPORT_data = GPR[GPR_io_NPC_GPR31_MPORT_addr]; // @[npc.scala 692:18]
+  assign GPR_io_NPC_GPR31_MPORT_data = GPR[GPR_io_NPC_GPR31_MPORT_addr]; // @[npc.scala 694:18]
   assign GPR_MPORT_data = npcb_IDU_io_IDU_O_GPRneedWriteBack ? npcb_WBU_io_WBU_O_GPRWriteBack : _T_1;
   assign GPR_MPORT_addr = npcb_WBU_io_WBU_O_GPRidx;
   assign GPR_MPORT_mask = 1'h1;
   assign GPR_MPORT_en = 1'h1;
-  assign io_NPC_sendCurrentPC = PC; // @[npc.scala 699:26]
-  assign io_NPC_sendNextPC = PC; // @[npc.scala 743:23]
-  assign io_NPC_LSU_O_memAddr = npcb_LSU_io_LSU_O_memAddr; // @[npc.scala 726:26]
-  assign io_NPC_LSU_O_memRW = npcb_LSU_io_LSU_O_memRW; // @[npc.scala 725:24]
-  assign io_NPC_LSU_O_memW = npcb_LSU_io_LSU_O_memW; // @[npc.scala 727:23]
-  assign io_NPC_LSU_O_len = npcb_LSU_io_LSU_O_len; // @[npc.scala 724:22]
-  assign io_NPC_GPRchanged = npcb_IDU_io_IDU_O_GPRneedWriteBack; // @[npc.scala 740:23]
-  assign io_NPC_halt = npcb_IDU_io_IDU_O_halt; // @[npc.scala 708:17]
-  assign io_NPC_error = npcb_IDU_io_IDU_O_error | npcb_EXU_io_EXU_O_error | npcb_LSU_io_LSU_O_error; // @[npc.scala 745:99]
-  assign io_NPC_GPR00 = 64'h0; // @[npc.scala 693:37]
-  assign io_NPC_GPR01 = GPR_io_NPC_GPR01_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR02 = GPR_io_NPC_GPR02_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR03 = GPR_io_NPC_GPR03_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR04 = GPR_io_NPC_GPR04_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR05 = GPR_io_NPC_GPR05_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR06 = GPR_io_NPC_GPR06_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR07 = GPR_io_NPC_GPR07_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR08 = GPR_io_NPC_GPR08_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR09 = GPR_io_NPC_GPR09_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR10 = GPR_io_NPC_GPR10_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR11 = GPR_io_NPC_GPR11_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR12 = GPR_io_NPC_GPR12_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR13 = GPR_io_NPC_GPR13_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR14 = GPR_io_NPC_GPR14_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR15 = GPR_io_NPC_GPR15_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR16 = GPR_io_NPC_GPR16_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR17 = GPR_io_NPC_GPR17_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR18 = GPR_io_NPC_GPR18_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR19 = GPR_io_NPC_GPR19_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR20 = GPR_io_NPC_GPR20_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR21 = GPR_io_NPC_GPR21_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR22 = GPR_io_NPC_GPR22_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR23 = GPR_io_NPC_GPR23_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR24 = GPR_io_NPC_GPR24_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR25 = GPR_io_NPC_GPR25_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR26 = GPR_io_NPC_GPR26_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR27 = GPR_io_NPC_GPR27_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR28 = GPR_io_NPC_GPR28_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR29 = GPR_io_NPC_GPR29_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR30 = GPR_io_NPC_GPR30_MPORT_data; // @[npc.scala 693:37]
-  assign io_NPC_GPR31 = GPR_io_NPC_GPR31_MPORT_data; // @[npc.scala 693:37]
-  assign npcb_IFU_io_IFU_I_inst = io_NPC_getInst; // @[npc.scala 697:28]
-  assign npcb_IDU_io_IDU_I_inst = npcb_IFU_io_IFU_I_inst; // @[npc.scala 703:28]
-  assign npcb_EXU_io_EXU_I_src1 = npcb_IDU_io_IDU_O_rs1 == 5'h0 ? 64'h0 : GPR_npcb_src1_MPORT_data; // @[npc.scala 693:37]
-  assign npcb_EXU_io_EXU_I_src2 = npcb_IDU_io_IDU_O_rs2 == 5'h0 ? 64'h0 : GPR_npcb_src2_MPORT_data; // @[npc.scala 693:37]
-  assign npcb_EXU_io_EXU_I_imm = npcb_IDU_io_IDU_O_imm; // @[npc.scala 714:27]
-  assign npcb_EXU_io_EXU_I_opcode = npcb_IDU_io_IDU_O_EXUopcode; // @[npc.scala 715:30]
-  assign npcb_EXU_io_EXU_I_currentPC = PC; // @[npc.scala 716:33]
-  assign npcb_LSU_io_LSU_I_src1 = npcb_EXU_io_EXU_O_result; // @[npc.scala 720:28]
-  assign npcb_LSU_io_LSU_I_src2 = npcb_IDU_io_IDU_O_rs2 == 5'h0 ? 64'h0 : GPR_npcb_src2_MPORT_data; // @[npc.scala 693:37]
-  assign npcb_LSU_io_LSU_I_opcode = npcb_IDU_io_IDU_O_LSUopcode; // @[npc.scala 723:30]
-  assign npcb_LSU_io_LSU_I_memR = io_NPC_LSU_I_memR; // @[npc.scala 728:28]
-  assign npcb_WBU_io_WBU_I_EXUresult = npcb_EXU_io_EXU_O_result; // @[npc.scala 734:33]
-  assign npcb_WBU_io_WBU_I_LSUresult = npcb_LSU_io_LSU_O_result; // @[npc.scala 735:33]
-  assign npcb_WBU_io_WBU_I_LSUenable = ~(npcb_IDU_io_IDU_O_LSUopcode == 6'h0); // @[npc.scala 733:36]
-  assign npcb_WBU_io_WBU_I_rd = npcb_IDU_io_IDU_O_rd; // @[npc.scala 739:26]
-  assign npcb_PCU_io_PCU_I_CurrentPC = PC; // @[npc.scala 736:33]
-  assign npcb_PCU_io_PCU_I_imm = npcb_IDU_io_IDU_O_imm; // @[npc.scala 738:27]
-  assign npcb_PCU_io_PCU_I_willJump = ~npcb_IDU_io_IDU_O_snpcISdnpc & npcb_EXU_io_EXU_O_snpcNEQdnpc; // @[npc.scala 737:68]
+  assign io_NPC_sendCurrentPC = PC; // @[npc.scala 701:26]
+  assign io_NPC_sendNextPC = PC; // @[npc.scala 745:23]
+  assign io_NPC_LSU_O_memAddr = npcb_LSU_io_LSU_O_memAddr; // @[npc.scala 728:26]
+  assign io_NPC_LSU_O_memRW = npcb_LSU_io_LSU_O_memRW; // @[npc.scala 727:24]
+  assign io_NPC_LSU_O_memW = npcb_LSU_io_LSU_O_memW; // @[npc.scala 729:23]
+  assign io_NPC_LSU_O_len = npcb_LSU_io_LSU_O_len; // @[npc.scala 726:22]
+  assign io_NPC_GPRchanged = npcb_IDU_io_IDU_O_GPRneedWriteBack; // @[npc.scala 742:23]
+  assign io_NPC_halt = npcb_IDU_io_IDU_O_halt; // @[npc.scala 710:17]
+  assign io_NPC_error = npcb_IDU_io_IDU_O_error | npcb_EXU_io_EXU_O_error | npcb_LSU_io_LSU_O_error; // @[npc.scala 747:99]
+  assign io_NPC_GPR00 = 64'h0; // @[npc.scala 695:37]
+  assign io_NPC_GPR01 = GPR_io_NPC_GPR01_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR02 = GPR_io_NPC_GPR02_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR03 = GPR_io_NPC_GPR03_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR04 = GPR_io_NPC_GPR04_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR05 = GPR_io_NPC_GPR05_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR06 = GPR_io_NPC_GPR06_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR07 = GPR_io_NPC_GPR07_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR08 = GPR_io_NPC_GPR08_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR09 = GPR_io_NPC_GPR09_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR10 = GPR_io_NPC_GPR10_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR11 = GPR_io_NPC_GPR11_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR12 = GPR_io_NPC_GPR12_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR13 = GPR_io_NPC_GPR13_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR14 = GPR_io_NPC_GPR14_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR15 = GPR_io_NPC_GPR15_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR16 = GPR_io_NPC_GPR16_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR17 = GPR_io_NPC_GPR17_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR18 = GPR_io_NPC_GPR18_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR19 = GPR_io_NPC_GPR19_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR20 = GPR_io_NPC_GPR20_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR21 = GPR_io_NPC_GPR21_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR22 = GPR_io_NPC_GPR22_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR23 = GPR_io_NPC_GPR23_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR24 = GPR_io_NPC_GPR24_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR25 = GPR_io_NPC_GPR25_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR26 = GPR_io_NPC_GPR26_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR27 = GPR_io_NPC_GPR27_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR28 = GPR_io_NPC_GPR28_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR29 = GPR_io_NPC_GPR29_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR30 = GPR_io_NPC_GPR30_MPORT_data; // @[npc.scala 695:37]
+  assign io_NPC_GPR31 = GPR_io_NPC_GPR31_MPORT_data; // @[npc.scala 695:37]
+  assign npcb_IFU_io_IFU_I_inst = io_NPC_getInst; // @[npc.scala 699:28]
+  assign npcb_IDU_io_IDU_I_inst = npcb_IFU_io_IFU_I_inst; // @[npc.scala 705:28]
+  assign npcb_EXU_io_EXU_I_src1 = npcb_IDU_io_IDU_O_rs1 == 5'h0 ? 64'h0 : GPR_npcb_src1_MPORT_data; // @[npc.scala 695:37]
+  assign npcb_EXU_io_EXU_I_src2 = npcb_IDU_io_IDU_O_rs2 == 5'h0 ? 64'h0 : GPR_npcb_src2_MPORT_data; // @[npc.scala 695:37]
+  assign npcb_EXU_io_EXU_I_imm = npcb_IDU_io_IDU_O_imm; // @[npc.scala 716:27]
+  assign npcb_EXU_io_EXU_I_opcode = npcb_IDU_io_IDU_O_EXUopcode; // @[npc.scala 717:30]
+  assign npcb_EXU_io_EXU_I_currentPC = PC; // @[npc.scala 718:33]
+  assign npcb_LSU_io_LSU_I_src1 = npcb_EXU_io_EXU_O_result; // @[npc.scala 722:28]
+  assign npcb_LSU_io_LSU_I_src2 = npcb_IDU_io_IDU_O_rs2 == 5'h0 ? 64'h0 : GPR_npcb_src2_MPORT_data; // @[npc.scala 695:37]
+  assign npcb_LSU_io_LSU_I_opcode = npcb_IDU_io_IDU_O_LSUopcode; // @[npc.scala 725:30]
+  assign npcb_LSU_io_LSU_I_memR = io_NPC_LSU_I_memR; // @[npc.scala 730:28]
+  assign npcb_WBU_io_WBU_I_EXUresult = npcb_EXU_io_EXU_O_result; // @[npc.scala 736:33]
+  assign npcb_WBU_io_WBU_I_LSUresult = npcb_LSU_io_LSU_O_result; // @[npc.scala 737:33]
+  assign npcb_WBU_io_WBU_I_LSUenable = ~(npcb_IDU_io_IDU_O_LSUopcode == 6'h0); // @[npc.scala 735:36]
+  assign npcb_WBU_io_WBU_I_rd = npcb_IDU_io_IDU_O_rd; // @[npc.scala 741:26]
+  assign npcb_PCU_io_PCU_I_CurrentPC = PC; // @[npc.scala 738:33]
+  assign npcb_PCU_io_PCU_I_imm = npcb_IDU_io_IDU_O_imm; // @[npc.scala 740:27]
+  assign npcb_PCU_io_PCU_I_willJump = ~npcb_IDU_io_IDU_O_snpcISdnpc & npcb_EXU_io_EXU_O_snpcNEQdnpc; // @[npc.scala 739:68]
   always @(posedge clock) begin
     if (GPR_MPORT_en & GPR_MPORT_mask) begin
-      GPR[GPR_MPORT_addr] <= GPR_MPORT_data; // @[npc.scala 692:18]
+      GPR[GPR_MPORT_addr] <= GPR_MPORT_data; // @[npc.scala 694:18]
     end
-    if (reset) begin // @[npc.scala 691:21]
-      PC <= 64'h80000000; // @[npc.scala 691:21]
+    if (reset) begin // @[npc.scala 693:21]
+      PC <= io_NPC_startPC; // @[npc.scala 693:21]
     end else begin
-      PC <= npcb_PCU_io_PCU_O_DynamicNextPC; // @[npc.scala 742:8]
+      PC <= npcb_PCU_io_PCU_O_DynamicNextPC; // @[npc.scala 744:8]
     end
   end
 // Register and memory initialization
