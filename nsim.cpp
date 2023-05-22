@@ -240,6 +240,8 @@ void sim_one_exec(){
     printf("[sim] Phase V: write back\n");
     top -> eval();
 
+    top -> clock = 1; //simulate posedge
+
     sim_step_and_dump_wave();
 
     return;
