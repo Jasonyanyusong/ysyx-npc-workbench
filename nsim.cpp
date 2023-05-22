@@ -113,7 +113,17 @@ void sdb_init_sdb();
 
 //---------- NSIM states ----------
 
-enum {NSIM_CONTINUE = 11, NSIM_STOP = 12, NSIM_ABORT = 13, NSIM_END = 14, NSIM_QUIT = 15}
+enum {NSIM_CONTINUE = 11, NSIM_STOP = 12, NSIM_ABORT = 13, NSIM_END = 14, NSIM_HALT = 15, NSIM_QUIT = 16}
+
+/*
+Informations about NSIM sate:
+NSIM_CONTINUE indicates that NSIM will continue normally
+NSIM_STOP indicates that watchpoint(s)'s value changed, so the simulation will be paused, which can be manually continued
+NSIM_ABORT indicates that NPC failed DiffTest, so we stop the simualation, which can not be manually continued
+NSIM_END indicates that NPC's program execution have finished, so we stop the simulation, which can be restarted by quit NSIM and run again
+NSIM_HALT indicates that NPC have raised an error, so we stop the simulation, which can not be manually continued
+NSIM_QUIT indicates that user quit SIM using SDB Q command
+*/
 
 typedef struct{
     int state;
@@ -126,6 +136,35 @@ extern NSIMState nsim_state;
 bool state_check_can_continue();
 void state_set_state(int state_get_state);
 void state_show_state();
+
+//========== NSIM states ==========
+
+bool state_check_can_continue(){
+    swtich(nsim_state.state){
+        case NSIM_CONTINUE: printf("[state] state is NSIM_CONTINUE, can continue\n"); return true;  break;
+        case NSIM_STOP:     printf("[state] state is NSIM_STOP, can continue\n");     return true;  break;
+        case NSIM_ABORT:    printf("[state] state is NSIM_ABORT, can't continue\n");  return false; break;
+        case NSIM_END:      printf("[state] state is NSIM_END, can't continue\n");    return false; break;
+        case NSIM_HALT:     printf("[state] state is NSIM_HALT, can't continue\n");   return false; break;
+        case NSIM_QUIT:     printf("[state] state is NSIM_QUIT, can't continue\n");   return false; break;
+        default:            printf("[state] unknown state, error\n"); assert(0);      return false; break;
+    }
+}
+
+void state_get_state(){
+    state_check_can_continue();
+}
+
+void state_set_state(int state_get_state){
+    bool state_continue               = state_get_state == NSIM_CONTINUE || state_get_state == NSIM_STOP;
+    bool state_normal_cant_continue   = state_get_state == NSIM_END      || state_get_state == NSIM_QUIT;
+    bool state_abnormal_cant_continue = state_get_state == NSIM_ABORT    || state_get_state == NSIM_HALT;
+    assert(state_continue || (state_normal_cant_continue || state_abnormal_cant_continue));
+    if(state_continue)                {printf("[state] state update to a can continue state\n");}
+    if(state_normal_cant_continue)    {printf("[state] state update to a normal can't continue state\n");}
+    if(state_abnormal_cant_continue)  {printf("[state] state update to an abnormal can't continue state\n");}
+    nsim_state.state = state_get_state;
+}
 
 //========== Memory manipulations ==========
 
