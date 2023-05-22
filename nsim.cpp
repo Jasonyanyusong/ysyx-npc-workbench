@@ -546,6 +546,8 @@ int main(int argc, char *argv[]){
     //sdb_cmd_h(NULL);
     state_set_state(NSIM_CONTINUE);
     printf("Welcome to riscv64-nsim\n");
+    sim_sim_init();
     sdb_main_loop();
+    sim_sim_exit();
     return 0;
 }

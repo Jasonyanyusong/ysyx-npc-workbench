@@ -2,3 +2,4 @@
 /.metals
 /obj_dir
 .DS_Store
+dump.vcd
