@@ -137,6 +137,37 @@ bool state_check_can_continue();
 void state_set_state(int state_get_state);
 void state_show_state();
 
+//---------- Register manipulations ----------
+
+typedef struct{
+    int index;
+    uint64_t value;
+    char alias[4];
+} NSIMGetGPR;
+
+NSIMGetGPR nsim_gpr[32];
+
+uint64_t reg_pc, reg_snpc, reg_dnpc;
+
+void reg_get_reg_from_sim(int reg_idx);
+void reg_get_pcreg_from_sim();
+void reg_display();
+
+//========== Register manipulations ==========
+
+void reg_get_reg_from_sim(int reg_idx){
+    // TODO
+    return;
+}
+void reg_get_pcreg_from_sim(){
+    // TODO
+    return;
+}
+void reg_display(){
+    // TODO
+    return;
+}
+
 //========== NSIM states ==========
 
 bool state_check_can_continue(){
