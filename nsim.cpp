@@ -162,21 +162,40 @@ static Vnpc* top;
 void sim_sim_init();
 void sim_sim_exit();
 void sim_one_exec();
+void sim_step_and_dump_wave();
 
 //========== RTL simulation ==========
 
 void sim_sim_init(){
-    // TODO
+    printf("[sim] initializing\n");
+    contextp = new verilatedContext;
+    tfp = new VerilatedVcdC;
+    top = new Vnpc;
+    contextp -> traceEverOn(true);
+    top -> trace(tfp, 0);
+    tfp -> open("dump.vcd");
+    printf("[sim] initialize finished\n");
+
+    top -> io_NPC_startPC = mem_start_addr;
+    printf("[sim] module's start PC is 0x%x\n", mem_start_addr);
     return;
 }
 
 void sim_sim_exit(){
-    // TODO
+    sim_step_and_dump_wave();
+    tfp -> close();
     return;
 }
 
 void sim_one_exec(){
     // TODO
+    return;
+}
+
+void sim_step_and_dump_wave(){
+    top -> eval();
+    contextp -> timeInc(1);
+    tfp -> dump(contextp -> time());
     return;
 }
 
