@@ -153,6 +153,33 @@ void reg_get_reg_from_sim(int reg_idx);
 void reg_get_pcreg_from_sim();
 void reg_display();
 
+//---------- RTL simulation ----------
+
+VerilatedContext* contextp = NULL;
+VerilatedVcdC* tfp = NULL;
+static Vnpc* top;
+
+void sim_sim_init();
+void sim_sim_exit();
+void sim_one_exec();
+
+//========== RTL simulation ==========
+
+void sim_sim_init(){
+    // TODO
+    return;
+}
+
+void sim_sim_exit(){
+    // TODO
+    return;
+}
+
+void sim_one_exec(){
+    // TODO
+    return;
+}
+
 //========== Register manipulations ==========
 
 void reg_get_reg_from_sim(int reg_idx){
