@@ -167,7 +167,7 @@ void sim_step_and_dump_wave();
 //========== RTL simulation ==========
 
 void sim_sim_init(){
-    printf("[sim] initializing\n");
+    printf("[sim] initializing simulation\n");
     contextp = new VerilatedContext;
     tfp = new VerilatedVcdC;
     top = new Vnpc;
@@ -182,13 +182,63 @@ void sim_sim_init(){
 }
 
 void sim_sim_exit(){
+    printf("[sim] exit simulation\n");
     sim_step_and_dump_wave();
     tfp -> close();
     return;
 }
 
 void sim_one_exec(){
-    // TODO
+    printf("[sim] execution one round\n");
+    top -> clock = 0;// simulate posedge
+
+    // Step I: fetch instruction and send back
+    printf("[sim] Phase I: Instruction fetch\n");
+    uint64_t sim_getCurrentPC = top -> io_NPC_sendCurrentPC;
+    printf("[sim] current pc is 0x%lx\n", sim_getCurrentPC);
+    uint32_t sim_currentInst = mem_paddr_read(sim_currentInst, 4);
+    printf("[sim] current instruction is 0x%x\n", sim_currentInst);
+    top -> eval();
+
+    // Step II: decode instruction
+    printf("[sim] Phase II: Instruction decode\n");
+    top -> eval();
+
+    // Step III: EXU execution
+    printf("[sim] Phase III: EXU execution\n");
+    top -> eval();
+
+    // Step IV: Load and store
+    printf("[sim] Phase IV: load and store\n");
+    if(top -> io_NPC_LSU_O_memRW == 0b1){
+        // memory write
+        uint64_t sim_mem_write_addr = top -> io_NPC_LSU_O_memAddr;
+        switch(top -> io_NPC_LSU_O_len){
+            case 0b00: mem_pmem_write(sim_mem_write_addr, 1, top -> io_NPC_LSU_O_memW);    break;
+            case 0b01: mem_pmem_write(sim_mem_write_addr, 2, top -> io_NPC_LSU_O_memW);    break;
+            case 0b10: mem_pmem_write(sim_mem_write_addr, 4, top -> io_NPC_LSU_O_memW);    break;
+            case 0b11: mem_pmem_write(sim_mem_write_addr, 8, top -> io_NPC_LSU_O_memW);    break;
+            default:   printf("[sim] NPC returned an unknown memory length\n"); assert(0); break;
+        }
+    }else{
+        // memory read
+        u_int64_t sim_mem_read_addr = top -> io_NPC_LSU_O_memAddr;
+        switch(top -> io_NPC_LSU_O_len){
+            case 0b00: top -> io_NPC_LSU_I_memR = mem_pmem_read(sim_mem_read_addr, 1);     break;
+            case 0b01: top -> io_NPC_LSU_I_memR = mem_pmem_read(sim_mem_read_addr, 2);     break;
+            case 0b10: top -> io_NPC_LSU_I_memR = mem_pmem_read(sim_mem_read_addr, 4);     break;
+            case 0b11: top -> io_NPC_LSU_I_memR = mem_pmem_read(sim_mem_read_addr, 8);     break;
+            default:   printf("[sim] NPC returned an unknown memory length\n"); assert(0); break;
+        }
+    }
+    top -> eval();
+
+    // Step V: Write back
+    printf("[sim] Phase V: write back\n");
+    top -> eval();
+
+    sim_step_and_dump_wave();
+
     return;
 }
 
