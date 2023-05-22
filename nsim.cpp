@@ -168,7 +168,7 @@ void sim_step_and_dump_wave();
 
 void sim_sim_init(){
     printf("[sim] initializing\n");
-    contextp = new verilatedContext;
+    contextp = new VerilatedContext;
     tfp = new VerilatedVcdC;
     top = new Vnpc;
     contextp -> traceEverOn(true);
