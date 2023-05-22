@@ -111,6 +111,22 @@ void sdb_set_batch_mode();
 void sdb_main_loop();
 void sdb_init_sdb();
 
+//---------- NSIM states ----------
+
+enum {NSIM_CONTINUE = 11, NSIM_STOP = 12, NSIM_ABORT = 13, NSIM_END = 14, NSIM_QUIT = 15}
+
+typedef struct{
+    int state;
+    uint64_t halt_pc;
+    uint32_t halt_ret;
+} NSIMState;
+
+extern NSIMState nsim_state;
+
+bool state_check_can_continue();
+void state_set_state(int state_get_state);
+void state_show_state();
+
 //========== Memory manipulations ==========
 
 static uint8_t *mem_pmem = NULL;
