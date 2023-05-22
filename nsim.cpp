@@ -113,7 +113,7 @@ void sdb_init_sdb();
 
 //---------- NSIM states ----------
 
-enum {NSIM_CONTINUE = 11, NSIM_STOP = 12, NSIM_ABORT = 13, NSIM_END = 14, NSIM_HALT = 15, NSIM_QUIT = 16}
+enum {NSIM_CONTINUE = 11, NSIM_STOP = 12, NSIM_ABORT = 13, NSIM_END = 14, NSIM_HALT = 15, NSIM_QUIT = 16};
 
 /*
 Informations about NSIM sate:
@@ -131,7 +131,7 @@ typedef struct{
     uint32_t halt_ret;
 } NSIMState;
 
-extern NSIMState nsim_state;
+NSIMState nsim_state;
 
 bool state_check_can_continue();
 void state_set_state(int state_get_state);
@@ -140,7 +140,7 @@ void state_show_state();
 //========== NSIM states ==========
 
 bool state_check_can_continue(){
-    swtich(nsim_state.state){
+    switch(nsim_state.state){
         case NSIM_CONTINUE: printf("[state] state is NSIM_CONTINUE, can continue\n"); return true;  break;
         case NSIM_STOP:     printf("[state] state is NSIM_STOP, can continue\n");     return true;  break;
         case NSIM_ABORT:    printf("[state] state is NSIM_ABORT, can't continue\n");  return false; break;
@@ -149,6 +149,7 @@ bool state_check_can_continue(){
         case NSIM_QUIT:     printf("[state] state is NSIM_QUIT, can't continue\n");   return false; break;
         default:            printf("[state] unknown state, error\n"); assert(0);      return false; break;
     }
+    return false;
 }
 
 void state_get_state(){
@@ -466,6 +467,7 @@ void sdb_init_sdb(){
 int main(int argc, char *argv[]){
     mem_init_mem();
     //sdb_cmd_h(NULL);
+    state_set_state(NSIM_CONTINUE);
     printf("Welcome to riscv64-nsim\n");
     sdb_main_loop();
     return 0;
