@@ -641,6 +641,8 @@ class WBU extends Module{
 
 class npc extends Module{
     val io = IO(new Bundle{
+        val NPC_startPC = Input(UInt(64.W))
+
         val NPC_sendCurrentPC = Output(UInt(64.W))
         val NPC_sendNextPC = Output(UInt(64.W))
         val NPC_getInst = Input(UInt(32.W))
@@ -688,7 +690,7 @@ class npc extends Module{
         val NPC_GPR31 = Output(UInt(64.W))
     })
 
-    val PC = RegInit("h80000000".asUInt(64.W))
+    val PC = RegInit(io.NPC_startPC)
     val GPR = Mem(32, UInt(64.W))
     def GPR_read (index: UInt) = Mux(index === 0.U, 0.U(64.W), GPR(index)) // So that we make sure R(0) is always 0
 
