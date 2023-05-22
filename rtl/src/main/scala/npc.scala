@@ -519,6 +519,7 @@ class LSU extends Module{
         val LSU_O_result = Output(UInt(64.W))
         // Following signals are pulled to top
         val LSU_O_memAddr = Output(UInt(64.W))
+        val LSU_O_accessMem = Output(Bool())
         val LSU_O_memRW = Output(Bool()) // Low: Read, High: Write
         val LSU_I_memR = Input(UInt(64.W))
         val LSU_O_memW = Output(UInt(64.W))
@@ -557,6 +558,22 @@ class LSU extends Module{
         (io.LSU_I_opcode === LSU_opcode.LSU_SH)        -> io.LSU_I_src1,
         (io.LSU_I_opcode === LSU_opcode.LSU_SW)        -> io.LSU_I_src1,
         (io.LSU_I_opcode === LSU_opcode.LSU_SD)        -> io.LSU_I_src1
+    ))
+
+    io.LSU_O_accessMem := MuxCase(false.B,
+    Array(
+        (io.LSU_I_opcode === LSU_opcode.LSU_DoNothing) -> false.B,
+        (io.LSU_I_opcode === LSU_opcode.LSU_LB)        -> true.B,
+        (io.LSU_I_opcode === LSU_opcode.LSU_LBU)       -> true.B,
+        (io.LSU_I_opcode === LSU_opcode.LSU_LH)        -> true.B,
+        (io.LSU_I_opcode === LSU_opcode.LSU_LHU)       -> true.B,
+        (io.LSU_I_opcode === LSU_opcode.LSU_LW)        -> true.B,
+        (io.LSU_I_opcode === LSU_opcode.LSU_LWU)       -> true.B,
+        (io.LSU_I_opcode === LSU_opcode.LSU_LD)        -> true.B,
+        (io.LSU_I_opcode === LSU_opcode.LSU_SB)        -> true.B,
+        (io.LSU_I_opcode === LSU_opcode.LSU_SH)        -> true.B,
+        (io.LSU_I_opcode === LSU_opcode.LSU_SW)        -> true.B,
+        (io.LSU_I_opcode === LSU_opcode.LSU_SD)        -> true.B
     ))
 
     io.LSU_O_memRW := MuxCase(false.B,
@@ -647,6 +664,7 @@ class npc extends Module{
         val NPC_sendNextPC = Output(UInt(64.W))
         val NPC_getInst = Input(UInt(32.W))
         val NPC_LSU_O_memAddr = Output(UInt(64.W))
+        val NPC_LSU_O_accessMem = Output(Bool())
         val NPC_LSU_O_memRW = Output(Bool()) // Low: Read, High: Write
         val NPC_LSU_I_memR = Input(UInt(64.W))
         val NPC_LSU_O_memW = Output(UInt(64.W))
@@ -724,6 +742,7 @@ class npc extends Module{
     npcb_LSU.io.LSU_I_ModifyMem := npcb_IDU.io.IDU_O_ModifyMem
     npcb_LSU.io.LSU_I_opcode := npcb_IDU.io.IDU_O_LSUopcode
     io.NPC_LSU_O_len := npcb_LSU.io.LSU_O_len
+    io.NPC_LSU_O_accessMem := npcb_LSU.io.LSU_O_accessMem
     io.NPC_LSU_O_memRW := npcb_LSU.io.LSU_O_memRW
     io.NPC_LSU_O_memAddr := npcb_LSU.io.LSU_O_memAddr
     io.NPC_LSU_O_memW := npcb_LSU.io.LSU_O_memW
