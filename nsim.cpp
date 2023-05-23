@@ -142,7 +142,7 @@ void state_show_state();
 typedef struct{
     int index;
     uint64_t value;
-    char alias[4];
+    //char alias[4];
 } NSIMGetGPR;
 
 NSIMGetGPR nsim_gpr[32];
@@ -242,6 +242,10 @@ void sim_one_exec(){
 
     top -> clock = 1; //simulate posedge
 
+    for(int i = 0; i < 32; i = i + 1){
+        reg_get_reg_from_sim(i);
+    }
+
     sim_step_and_dump_wave();
 
     return;
@@ -257,11 +261,49 @@ void sim_step_and_dump_wave(){
 //========== Register manipulations ==========
 
 void reg_get_reg_from_sim(int reg_idx){
-    // TODO
+    printf("[reg] getting GPR from simulation environment\n");
+    switch(reg_idx){
+        case 0:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR00; break;
+        case 1:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR01; break;
+        case 2:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR02; break;
+        case 3:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR03; break;
+        case 4:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR04; break;
+        case 5:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR05; break;
+        case 6:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR06; break;
+        case 7:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR07; break;
+        case 8:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR08; break;
+        case 9:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR09; break;
+        case 10:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR10; break;
+        case 11:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR11; break;
+        case 12:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR12; break;
+        case 13:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR13; break;
+        case 14:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR14; break;
+        case 15:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR15; break;
+        case 16:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR16; break;
+        case 17:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR17; break;
+        case 18:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR18; break;
+        case 19:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR19; break;
+        case 20:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR20; break;
+        case 21:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR21; break;
+        case 22:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR22; break;
+        case 23:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR23; break;
+        case 24:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR24; break;
+        case 25:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR25; break;
+        case 26:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR26; break;
+        case 27:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR27; break;
+        case 28:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR28; break;
+        case 29:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR29; break;
+        case 30:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR30; break;
+        case 31:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR31; break;
+        default:  printf("[reg] unknown register index\n"); assert(0);                                break;
+    }
     return;
 }
 void reg_get_pcreg_from_sim(){
-    // TODO
+    printf("[reg] getting PC registers from simulation environment\n");
+    reg_pc = top -> io_NPC_sendCurrentPC;
+    reg_snpc = top -> io_NPC_sendCurrentPC + 4;
+    reg_dnpc = top -> io_NPC_sendNextPC;
     return;
 }
 void reg_display(){
