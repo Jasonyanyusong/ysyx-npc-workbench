@@ -646,6 +646,7 @@ void sdb_init_sdb(){
 
 //========== Main function ==========
 int main(int argc, char *argv[]){
+    monitor_init_monitor(argc, argv);
     mem_init_mem();
     //sdb_cmd_h(NULL);
     state_set_state(NSIM_CONTINUE);
