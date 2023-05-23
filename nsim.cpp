@@ -187,7 +187,7 @@ void sim_sim_init(){
     sim_step_and_dump_wave();
     top -> reset = 0;
     top -> eval();
-    sim_step_and_dump_wave();
+    //sim_step_and_dump_wave();
 
     //tfp -> close();
     printf("[sim] module's start PC is 0x%x\n", mem_start_addr);
@@ -278,11 +278,13 @@ void sim_one_exec(){
 
     if(top -> io_NPC_error == 0b1){
         // NPC raised error, stop simulation
-        nsim_state.state = NSIM_ABORT;
+        state_set_state(NSIM_ABORT);
+        //nsim_state.state = NSIM_ABORT;
     }else{
         if(top -> io_NPC_halt == 0b1){
             // NPC halt (EBREAK)
-            nsim_state.state = NSIM_END;
+            state_set_state(NSIM_END);
+            //nsim_state.state = NSIM_END;
         }
     }
 
