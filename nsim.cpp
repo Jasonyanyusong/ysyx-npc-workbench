@@ -253,6 +253,18 @@ void sim_one_exec(){
     reg_get_pcreg_from_sim();
     reg_display();
 
+    nsim_state.state = NSIM_CONTINUE;
+
+    if(top -> io_NPC_error == 0b1){
+        // NPC raised error, stop simulation
+        nsim_state.state = NSIM_ABORT;
+    }else{
+        if(top -> io_NPC_halt == 0b1){
+            // NPC halt (EBREAK)
+            nsim_state.state = NSIM_END;
+        }
+    }
+
     sim_step_and_dump_wave();
 
     return;
