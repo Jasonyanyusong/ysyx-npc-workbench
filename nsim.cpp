@@ -317,8 +317,8 @@ void reg_display(){
     printf("[reg] print registers\n");
     printf("pc = 0x%lx, snpc = 0x%lx, dnpc = 0x%lx\n", reg_pc, reg_snpc, reg_dnpc);
     for(int i = 0; i < 32; i = i + 1){
-        printf("x%2d = 0x%lx\t", nsim_gpr[i].index, nsim_gpr[i].value);
-        if(i % 3 == 0) {printf("\n");}
+        printf("x%2d = 0x%lx\t", i, nsim_gpr[i].value);
+        if((i + 1) % 4 == 0) {printf("\n");}
     }
     return;
 }
@@ -546,6 +546,7 @@ int sdb_cmd_i(char* args){
     else{
         if (strcmp(args, "r") == 0){
         printf("[sdb] list registers\n");
+        reg_display();
         //isa_gpr_display();
     }
     else if (strcmp(args, "w") == 0){
