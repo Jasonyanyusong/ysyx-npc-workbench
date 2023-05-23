@@ -309,7 +309,6 @@ void reg_get_pcreg_from_sim(){
     return;
 }
 void reg_display(){
-    // TODO
     printf("[reg] print registers\n");
     printf("pc = 0x%lx, snpc = 0x%lx, dnpc = 0x%lx\n", reg_pc, reg_snpc, reg_dnpc);
     for(int i = 0; i < 32; i = i + 1){
