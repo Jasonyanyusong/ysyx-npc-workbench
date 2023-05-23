@@ -277,6 +277,8 @@ void sim_one_exec(){
 
     top -> clock = 1; //simulate posedge
 
+    top -> eval();
+
     for(int i = 0; i < 32; i = i + 1){
         reg_get_reg_from_sim(i);
     }
