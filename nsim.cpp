@@ -245,6 +245,8 @@ void sim_one_exec(){
     for(int i = 0; i < 32; i = i + 1){
         reg_get_reg_from_sim(i);
     }
+    reg_get_pcreg_from_sim();
+    reg_display();
 
     sim_step_and_dump_wave();
 
@@ -308,6 +310,12 @@ void reg_get_pcreg_from_sim(){
 }
 void reg_display(){
     // TODO
+    printf("[reg] print registers\n");
+    printf("pc = 0x%lx, snpc = 0x%lx, dnpc = 0x%lx\n", reg_pc, reg_snpc, reg_dnpc);
+    for(int i = 0; i < 32; i = i + 1){
+        printf("x%2d = 0x%lx\t", nsim_gpr[i].index, nsim_gpr[i].value);
+        if(i % 3 == 0) {printf("\n");}
+    }
     return;
 }
 
