@@ -176,7 +176,20 @@ void sim_sim_init(){
     tfp -> open("dump.vcd");
     printf("[sim] initialize finished\n");
 
+    // tell NPC the correct start PC
+    top -> clock = 0;
     top -> io_NPC_startPC = mem_start_addr;
+    top -> reset = 1;
+    top -> eval();
+    sim_step_and_dump_wave();
+    top -> clock = 1;
+    top -> eval();
+    sim_step_and_dump_wave();
+    top -> reset = 0;
+    top -> eval();
+    sim_step_and_dump_wave();
+
+    tfp -> close();
     printf("[sim] module's start PC is 0x%x\n", mem_start_addr);
     return;
 }
@@ -542,6 +555,7 @@ int sdb_cmd_c(char* args){
 int sdb_cmd_s(char* args){
     if (args == NULL){
         printf("[sdb] 1 setp NPC execution\n");
+        sim_one_exec();
         //cpu_exec(1);
     }
     else{
@@ -551,6 +565,9 @@ int sdb_cmd_s(char* args){
         return 0;
     }
     printf("[sdb] %d setp NPC execution\n", sdb_cmd_si_n);
+    for(int i = 0; i < sdb_cmd_si_n; i = i + 1){
+        sim_one_exec();
+    }
     //cpu_exec(cmd_si_n);
     }
     return 0;

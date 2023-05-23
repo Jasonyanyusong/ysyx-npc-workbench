@@ -709,6 +709,7 @@ class npc extends Module{
     })
 
     val PC = RegInit(io.NPC_startPC)
+    //PC := io.NPC_startPC;
     val GPR = Mem(32, UInt(64.W))
     def GPR_read (index: UInt) = Mux(index === 0.U, 0.U(64.W), GPR(index)) // So that we make sure R(0) is always 0
 
