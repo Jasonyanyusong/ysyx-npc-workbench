@@ -189,6 +189,11 @@ void sim_sim_exit(){
 }
 
 void sim_one_exec(){
+    if(!(nsim_state.state == NSIM_CONTINUE || nsim_state.state == NSIM_STOP)){
+        printf("[sim] current state indicates simulation can not continue\n");
+        return;
+    }
+
     printf("[sim] execution one round\n");
     top -> clock = 0;// simulate posedge
 
@@ -254,6 +259,7 @@ void sim_one_exec(){
     reg_display();
 
     nsim_state.state = NSIM_CONTINUE;
+    nsim_state.halt_pc = reg_pc;
 
     if(top -> io_NPC_error == 0b1){
         // NPC raised error, stop simulation
