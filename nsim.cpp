@@ -197,6 +197,7 @@ void sim_one_exec(){
     uint64_t sim_getCurrentPC = top -> io_NPC_sendCurrentPC;
     printf("[sim] current pc is 0x%lx\n", sim_getCurrentPC);
     uint32_t sim_currentInst = mem_paddr_read(sim_currentInst, 4);
+    top -> io_NPC_getInst = sim_currentInst;
     printf("[sim] current instruction is 0x%x\n", sim_currentInst);
     top -> eval();
 
@@ -222,6 +223,7 @@ void sim_one_exec(){
                 case 0b11: mem_pmem_write(sim_mem_write_addr, 8, top -> io_NPC_LSU_O_memW);    break;
                 default:   printf("[sim] NPC returned an unknown memory length\n"); assert(0); break;
             }
+            top -> io_NPC_LSU_I_memR = 0;
         }else{
             // memory read
             u_int64_t sim_mem_read_addr = top -> io_NPC_LSU_O_memAddr;
@@ -233,6 +235,9 @@ void sim_one_exec(){
                 default:   printf("[sim] NPC returned an unknown memory length\n"); assert(0); break;
             }
         }
+    }
+    else{
+        top -> io_NPC_LSU_I_memR = 0;
     }
     top -> eval();
 
