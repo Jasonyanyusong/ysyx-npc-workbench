@@ -761,6 +761,7 @@ class npc extends Module{
     npcb_WBU.io.WBU_I_rd := npcb_IDU.io.IDU_O_rd
     io.NPC_GPRchanged := npcb_IDU.io.IDU_O_GPRneedWriteBack
     GPR(npcb_WBU.io.WBU_O_GPRidx) := Mux(npcb_IDU.io.IDU_O_GPRneedWriteBack, npcb_WBU.io.WBU_O_GPRWriteBack, GPR_read(npcb_WBU.io.WBU_O_GPRidx))
+    GPR(0) := 0.U(64.W)
     PC := npcb_PCU.io.PCU_O_DynamicNextPC
     io.NPC_sendNextPC := PC
 
