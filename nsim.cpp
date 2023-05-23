@@ -295,7 +295,7 @@ void reg_get_reg_from_sim(int reg_idx){
         case 29:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR29; break;
         case 30:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR30; break;
         case 31:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR31; break;
-        default:  printf("[reg] unknown register index\n"); assert(0);                                break;
+        default:  printf("[reg] unknown register index\n"); assert(0);                              break;
     }
     return;
 }
