@@ -189,7 +189,7 @@ void sim_sim_init(){
     top -> eval();
     sim_step_and_dump_wave();
 
-    tfp -> close();
+    //tfp -> close();
     printf("[sim] module's start PC is 0x%x\n", mem_start_addr);
     return;
 }
@@ -214,7 +214,7 @@ void sim_one_exec(){
     printf("[sim] Phase I: Instruction fetch\n");
     uint64_t sim_getCurrentPC = top -> io_NPC_sendCurrentPC;
     printf("[sim] current pc is 0x%lx\n", sim_getCurrentPC);
-    uint32_t sim_currentInst = mem_paddr_read(sim_currentInst, 4);
+    uint32_t sim_currentInst = mem_paddr_read(sim_getCurrentPC, 4);
     top -> io_NPC_getInst = sim_currentInst;
     printf("[sim] current instruction is 0x%x\n", sim_currentInst);
     top -> eval();
@@ -262,6 +262,8 @@ void sim_one_exec(){
     // Step V: Write back
     printf("[sim] Phase V: write back\n");
     top -> eval();
+
+    sim_step_and_dump_wave();
 
     top -> clock = 1; //simulate posedge
 
@@ -413,7 +415,7 @@ static void mem_host_write(void *mem_addr, int mem_length, uint64_t mem_data){
 
 bool mem_addr_in_bound(uint64_t mem_addr){
     if(mem_addr - mem_start_addr > mem_size || mem_addr < mem_start_addr)
-        {/*printf("[memory] address 0x%x out of bound [0x%x,0x%x]\n", mem_addr, mem_start_addr, mem_end_addr);*/ assert(0); return false; }
+        {printf("[memory] address 0x%x out of bound [0x%x,0x%x]\n", mem_addr, mem_start_addr, mem_end_addr); assert(0); return false; }
     return true;
 }
 
