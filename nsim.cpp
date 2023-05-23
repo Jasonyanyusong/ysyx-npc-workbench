@@ -224,7 +224,7 @@ void sim_one_exec(){
     top -> eval();
 
     // Step III: EXU execution
-    printf("[sim] Phase III: EXU execution\n");
+    printf("[sim] Phase III: execute\n");
     top -> eval();
 
     // Step IV: Load and store
@@ -303,7 +303,7 @@ void sim_step_and_dump_wave(){
 //========== Register manipulations ==========
 
 void reg_get_reg_from_sim(int reg_idx){
-    printf("[reg] getting GPR from simulation environment\n");
+    //printf("[reg] getting GPR No.%d from simulation environment\n", reg_idx);
     switch(reg_idx){
         case 0:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR00; break;
         case 1:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR01; break;
