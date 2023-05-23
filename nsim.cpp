@@ -417,7 +417,7 @@ static void mem_host_write(void *mem_addr, int mem_length, uint64_t mem_data){
 
 bool mem_addr_in_bound(uint64_t mem_addr){
     if(mem_addr - mem_start_addr > mem_size || mem_addr < mem_start_addr)
-        {printf("[memory] address 0x%x out of bound [0x%x,0x%x]\n", mem_addr, mem_start_addr, mem_end_addr); assert(0); return false; }
+        {printf("[memory] address 0x%lx out of bound [0x%x,0x%x]\n", mem_addr, mem_start_addr, mem_end_addr); assert(0); return false; }
     return true;
 }
 
@@ -482,7 +482,7 @@ long monitor_load_img(){
     fseek(fp, 0, SEEK_END);
     long size = ftell(fp);
 
-    printf("[monitor] image is %s size is %d\n", monitor_img_file, size);
+    printf("[monitor] image is %s size is %ld\n", monitor_img_file, size);
 
     fseek(fp, 0, SEEK_SET);
     int ret = fread(mem_guest_to_host(mem_start_addr), size, 1, fp);
