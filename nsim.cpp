@@ -564,7 +564,9 @@ char* sdb_rl_gets(){
 
 int sdb_cmd_c(char* args){
     printf("[sdb] continue NPC execution\n");
-    //cpu_exec(-1);
+    while((nsim_state.state == NSIM_CONTINUE || nsim_state.state == NSIM_STOP)){
+        sim_one_exec();
+    }
     return 0;
 } // continue execution
 
