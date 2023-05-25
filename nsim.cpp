@@ -288,16 +288,21 @@ void sim_one_exec(){
     nsim_state.state = NSIM_CONTINUE;
     nsim_state.halt_pc = reg_pc;
 
+    if(top -> io_NPC_halt == 0b1){
+        if(nsim_gpr[10].value == 0){
+            printf("[sim] HIT GOOD TRAP at pc 0x%lx\n", top -> io_NPC_sendCurrentPC);
+        }else{
+            printf("[sim] HIT BAD  TRAP at pc 0x%lx\n", top -> io_NPC_sendCurrentPC);
+        }
+        sim_step_and_dump_wave();
+        state_set_state(NSIM_END);
+        return;
+    }
+
     if(top -> io_NPC_error == 0b1){
         // NPC raised error, stop simulation
         state_set_state(NSIM_ABORT);
         //nsim_state.state = NSIM_ABORT;
-    }else{
-        if(top -> io_NPC_halt == 0b1){
-            // NPC halt (EBREAK)
-            state_set_state(NSIM_END);
-            //nsim_state.state = NSIM_END;
-        }
     }
 
     sim_step_and_dump_wave();
