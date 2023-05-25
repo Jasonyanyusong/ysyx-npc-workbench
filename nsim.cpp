@@ -299,11 +299,11 @@ void sim_one_exec(){
         return;
     }
 
-    if(top -> io_NPC_error == 0b1){
+    /*if(top -> io_NPC_error == 0b1){
         // NPC raised error, stop simulation
         state_set_state(NSIM_ABORT);
         //nsim_state.state = NSIM_ABORT;
-    }
+    }*/
 
     sim_step_and_dump_wave();
 
