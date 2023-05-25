@@ -183,11 +183,11 @@ class IFU extends Module{
         val IFU_O_PC = Output(UInt(64.W))
         val IFU_I_inst = Input(UInt(32.W))
         val IFU_O_inst = Output(UInt(32.W))
-        val IFU_O_error = Output(Bool())
+        //val IFU_O_error = Output(Bool())
     })
     io.IFU_O_inst := io.IFU_I_inst
     io.IFU_O_PC := io.IFU_I_PC
-    io.IFU_O_error := false.B
+    //io.IFU_O_error := false.B
 }
 
 class IDU extends Module{
@@ -203,11 +203,11 @@ class IDU extends Module{
         val IDU_O_rd = Output(UInt(5.W)) // Same for all
         val IDU_O_EXUopcode = Output(UInt(6.W))
         val IDU_O_LSUopcode = Output(UInt(6.W))
-        val IDU_O_snpcISdnpc = Output(Bool())
+        //val IDU_O_snpcISdnpc = Output(Bool())
         val IDU_O_GPRneedWriteBack = Output(Bool())
         val IDU_O_imm = Output(UInt(64.W))
         val IDU_O_halt = Output(Bool())
-        val IDU_O_error = Output(Bool())
+        //val IDU_O_error = Output(Bool())
     })
 
     io.IDU_O_rs1 := io.IDU_I_inst(19, 15) // Cut rs1 from BITS(i, 19, 15)
@@ -217,7 +217,7 @@ class IDU extends Module{
     //io.IDU_O_src2 := io.IDU_I_src2
 
     io.IDU_O_halt := false.B
-    io.IDU_O_error := false.B
+    //io.IDU_O_error := false.B
 
     val immI = io.IDU_I_inst(31, 20)
     val SignExtend_immI = Cat(Fill(52, immI(11)), immI)
@@ -374,9 +374,9 @@ class IDU extends Module{
         )
 
     io.IDU_O_ModifyMem        := IDU_switchs(0)
-    io.IDU_O_snpcISdnpc       := IDU_switchs(1)
+    //io.IDU_O_snpcISdnpc       := IDU_switchs(1)
     io.IDU_O_GPRneedWriteBack := IDU_switchs(2)
-    io.IDU_O_error            := IDU_switchs(3)
+    //io.IDU_O_error            := IDU_switchs(3)
     io.IDU_O_halt             := IDU_switchs(4)
 
     io.IDU_O_imm := MuxCase(SignExtend_immR,
@@ -400,10 +400,9 @@ class EXU extends Module{
         val EXU_I_opcode = Input(UInt(6.W))
         val EXU_I_currentPC = Input(UInt(64.W))
         val EXU_O_result = Output(UInt(64.W))
-        val EXU_O_snpcNEQdnpc = Output(Bool())
-        val EXU_O_error = Output(Bool())
+        val EXU_O_staticNPC = Output(UInt(64.W))
+        val EXU_O_dynamicNPC = Output(UInt(64.W))
     })
-    io.EXU_O_error := false.B
     val EXU_src1_signed = io.EXU_I_src1.asSInt
     val EXU_src1_unsigned = io.EXU_I_src1.asUInt
     val EXU_src2_signed = io.EXU_I_src2.asSInt
@@ -411,13 +410,15 @@ class EXU extends Module{
     val EXU_imm_signed = io.EXU_I_imm.asSInt
     val EXU_imm_unsigned = io.EXU_I_imm.asUInt
 
+    io.EXU_O_staticNPC := io.EXU_I_currentPC + 4.U
+
     io.EXU_O_result := MuxCase(0.U(64.W),
     Array(
         (io.EXU_I_opcode === EXU_opcode.EXU_DoNothing) -> (0.U(64.W)).asUInt,
         (io.EXU_I_opcode === EXU_opcode.EXU_LUI)       -> (EXU_imm_unsigned).asUInt,
         (io.EXU_I_opcode === EXU_opcode.EXU_AUIPC)     -> (io.EXU_I_currentPC + EXU_imm_unsigned).asUInt,
-        (io.EXU_I_opcode === EXU_opcode.EXU_JAL)       -> (io.EXU_I_currentPC + EXU_imm_unsigned).asUInt,
-        (io.EXU_I_opcode === EXU_opcode.EXU_JALR)      -> ((EXU_src1_unsigned + EXU_src2_unsigned) & ~1.U).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_JAL)       -> (io.EXU_I_currentPC + 4.U(64.W)).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_JALR)      -> (io.EXU_I_currentPC + 4.U(64.W)).asUInt,
         (io.EXU_I_opcode === EXU_opcode.EXU_BEQ)       -> (io.EXU_I_currentPC + EXU_imm_unsigned).asUInt,
         (io.EXU_I_opcode === EXU_opcode.EXU_BNE)       -> (io.EXU_I_currentPC + EXU_imm_unsigned).asUInt,
         (io.EXU_I_opcode === EXU_opcode.EXU_BLT)       -> (io.EXU_I_currentPC + EXU_imm_unsigned).asUInt,
@@ -478,36 +479,19 @@ class EXU extends Module{
         (io.EXU_I_opcode === EXU_opcode.EXU_REMUW)     -> (Cat(Fill(32, (EXU_src1_unsigned % EXU_src2_unsigned)(31)), (EXU_src1_unsigned % EXU_src2_unsigned)(31, 0))).asUInt,
     ))
 
-    io.EXU_O_snpcNEQdnpc := MuxCase(false.B,
-    Array(
-        (io.EXU_I_opcode === EXU_opcode.EXU_JAL)       -> (true.B),
-        (io.EXU_I_opcode === EXU_opcode.EXU_JALR)      -> (true.B),
-        (io.EXU_I_opcode === EXU_opcode.EXU_BEQ)       -> (!(EXU_src1_unsigned === EXU_src2_unsigned)),
-        (io.EXU_I_opcode === EXU_opcode.EXU_BNE)       -> (!(EXU_src1_unsigned =/= EXU_src2_unsigned)),
-        (io.EXU_I_opcode === EXU_opcode.EXU_BLT)       -> (!(EXU_src1_signed < EXU_src2_signed)),
-        (io.EXU_I_opcode === EXU_opcode.EXU_BGE)       -> (!(EXU_src1_signed >= EXU_src2_signed)),
-        (io.EXU_I_opcode === EXU_opcode.EXU_BLTU)      -> (!(EXU_src1_unsigned < EXU_src2_unsigned)),
-        (io.EXU_I_opcode === EXU_opcode.EXU_BGEU)      -> (!(EXU_src1_unsigned >= EXU_src2_unsigned))
-    ))
+    val JALR_zeroEnd = Cat(Fill(63, 1.U(1.W)), 0.U(1.W))
 
-    io.EXU_O_error := MuxCase(false.B,
+    io.EXU_O_dynamicNPC := MuxCase(io.EXU_O_staticNPC,
     Array(
-        (io.EXU_I_opcode === EXU_opcode.EXU_DoNothing) -> (true.B)
+        (io.EXU_I_opcode === EXU_opcode.EXU_JAL)       -> (io.EXU_I_currentPC + io.EXU_I_imm),
+        (io.EXU_I_opcode === EXU_opcode.EXU_JALR)      -> (((EXU_src1_unsigned + io.EXU_I_imm) & JALR_zeroEnd).asUInt),
+        (io.EXU_I_opcode === EXU_opcode.EXU_BEQ)       -> (Mux(EXU_src1_unsigned === EXU_src2_unsigned, (io.EXU_I_currentPC + io.EXU_I_imm), (io.EXU_I_currentPC + 4.U))),
+        (io.EXU_I_opcode === EXU_opcode.EXU_BNE)       -> (Mux(EXU_src1_unsigned =/= EXU_src2_unsigned, (io.EXU_I_currentPC + io.EXU_I_imm), (io.EXU_I_currentPC + 4.U))),
+        (io.EXU_I_opcode === EXU_opcode.EXU_BLT)       -> (Mux(EXU_src1_signed   <   EXU_src2_signed,   (io.EXU_I_currentPC + io.EXU_I_imm), (io.EXU_I_currentPC + 4.U))),
+        (io.EXU_I_opcode === EXU_opcode.EXU_BGE)       -> (Mux(EXU_src1_signed   >=  EXU_src2_signed,   (io.EXU_I_currentPC + io.EXU_I_imm), (io.EXU_I_currentPC + 4.U))),
+        (io.EXU_I_opcode === EXU_opcode.EXU_BLTU)      -> (Mux(EXU_src1_unsigned <   EXU_src2_unsigned, (io.EXU_I_currentPC + io.EXU_I_imm), (io.EXU_I_currentPC + 4.U))),
+        (io.EXU_I_opcode === EXU_opcode.EXU_BGEU)      -> (Mux(EXU_src1_unsigned >=  EXU_src2_unsigned, (io.EXU_I_currentPC + io.EXU_I_imm), (io.EXU_I_currentPC + 4.U))),
     ))
-}
-
-class PCU extends Module{
-    val io = IO(new Bundle{
-        val PCU_I_CurrentPC = Input(UInt(64.W))
-        val PCU_I_imm = Input(UInt(64.W))
-        val PCU_I_willJump = Input(Bool())
-        val PCU_O_DynamicNextPC = Output(UInt(64.W))
-        val PCU_O_StaticNextPC = Output(UInt(64.W))
-        val PCU_O_error = Output(Bool())
-    })
-    io.PCU_O_StaticNextPC := io.PCU_I_CurrentPC + 4.U
-    io.PCU_O_DynamicNextPC := Mux(io.PCU_I_willJump, io.PCU_I_CurrentPC + io.PCU_I_imm, io.PCU_I_CurrentPC + 4.U)
-    io.PCU_O_error := false.B
 }
 
 class LSU extends Module{
@@ -523,10 +507,10 @@ class LSU extends Module{
         val LSU_O_memRW = Output(Bool()) // Low: Read, High: Write
         val LSU_I_memR = Input(UInt(64.W))
         val LSU_O_memW = Output(UInt(64.W))
-        val LSU_O_error = Output(Bool())
+        //val LSU_O_error = Output(Bool())
         val LSU_O_len = Output(UInt(2.W)) // 00: Bit 01: Half 10: Word 11: Double Word
     })
-    io.LSU_O_error := false.B
+    //io.LSU_O_error := false.B
 
     io.LSU_O_result := MuxCase(0.U(64.W),
     Array(
@@ -608,22 +592,6 @@ class LSU extends Module{
         (io.LSU_I_opcode === LSU_opcode.LSU_SD)        -> io.LSU_I_src2
     ))
 
-    io.LSU_O_error := MuxCase(true.B,
-    Array(
-        (io.LSU_I_opcode === LSU_opcode.LSU_DoNothing) -> false.B,
-        (io.LSU_I_opcode === LSU_opcode.LSU_LB)        -> false.B,
-        (io.LSU_I_opcode === LSU_opcode.LSU_LBU)       -> false.B,
-        (io.LSU_I_opcode === LSU_opcode.LSU_LH )       -> false.B,
-        (io.LSU_I_opcode === LSU_opcode.LSU_LHU)       -> false.B,
-        (io.LSU_I_opcode === LSU_opcode.LSU_LW)        -> false.B,
-        (io.LSU_I_opcode === LSU_opcode.LSU_LWU)       -> false.B,
-        (io.LSU_I_opcode === LSU_opcode.LSU_LD)        -> false.B,
-        (io.LSU_I_opcode === LSU_opcode.LSU_SB)        -> false.B,
-        (io.LSU_I_opcode === LSU_opcode.LSU_SH)        -> false.B,
-        (io.LSU_I_opcode === LSU_opcode.LSU_SW)        -> false.B,
-        (io.LSU_I_opcode === LSU_opcode.LSU_SD)        -> false.B
-    ))
-
     io.LSU_O_len := MuxCase("b00".U,
     Array(
         (io.LSU_I_opcode === LSU_opcode.LSU_DoNothing) -> "b00".U,
@@ -649,11 +617,11 @@ class WBU extends Module{
         val WBU_I_rd = Input(UInt(5.W))
         val WBU_O_GPRidx = Output(UInt(5.W))
         val WBU_O_GPRWriteBack = Output(UInt(64.W))
-        val WBU_O_error = Output(Bool())
+        //val WBU_O_error = Output(Bool())
     })
     io.WBU_O_GPRidx := io.WBU_I_rd
     io.WBU_O_GPRWriteBack := Mux(io.WBU_I_LSUenable, io.WBU_I_LSUresult, io.WBU_I_EXUresult)
-    io.WBU_O_error := false.B
+    //io.WBU_O_error := false.B
 }
 
 class npc extends Module{
@@ -672,7 +640,7 @@ class npc extends Module{
 
         val NPC_GPRchanged = Output(Bool())
         val NPC_halt = Output(Bool())
-        val NPC_error = Output(Bool())
+        //val NPC_error = Output(Bool())
 
         val NPC_GPR00 = Output(UInt(64.W))
         val NPC_GPR01 = Output(UInt(64.W))
@@ -751,21 +719,15 @@ class npc extends Module{
 
     // Step V: Write back data to a GPR and PC
     val npcb_WBU = Module(new WBU)
-    val npcb_PCU = Module(new PCU)
     npcb_WBU.io.WBU_I_LSUenable := !(npcb_IDU.io.IDU_O_LSUopcode === "b000000".U)
     npcb_WBU.io.WBU_I_EXUresult := npcb_EXU.io.EXU_O_result
     npcb_WBU.io.WBU_I_LSUresult := npcb_LSU.io.LSU_O_result
-    npcb_PCU.io.PCU_I_CurrentPC := PC
-    npcb_PCU.io.PCU_I_willJump := (! npcb_IDU.io.IDU_O_snpcISdnpc) && npcb_EXU.io.EXU_O_snpcNEQdnpc
-    npcb_PCU.io.PCU_I_imm := npcb_IDU.io.IDU_O_imm
     npcb_WBU.io.WBU_I_rd := npcb_IDU.io.IDU_O_rd
     io.NPC_GPRchanged := npcb_IDU.io.IDU_O_GPRneedWriteBack
     GPR(npcb_WBU.io.WBU_O_GPRidx) := Mux(npcb_IDU.io.IDU_O_GPRneedWriteBack, npcb_WBU.io.WBU_O_GPRWriteBack, GPR_read(npcb_WBU.io.WBU_O_GPRidx))
     GPR(0) := 0.U(64.W)
-    PC := npcb_PCU.io.PCU_O_DynamicNextPC
+    PC := npcb_EXU.io.EXU_O_dynamicNPC
     io.NPC_sendNextPC := PC
-
-    io.NPC_error := npcb_IFU.io.IFU_O_error || npcb_IDU.io.IDU_O_error || npcb_EXU.io.EXU_O_error || npcb_LSU.io.LSU_O_error || npcb_WBU.io.WBU_O_error || npcb_PCU.io.PCU_O_error
 
     io.NPC_GPR00 := GPR_read(0.U)
     io.NPC_GPR01 := GPR_read(1.U)
