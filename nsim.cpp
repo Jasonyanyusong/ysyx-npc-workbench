@@ -492,6 +492,8 @@ void mem_vaddr_write(uint64_t mem_addr, int mem_length, uint64_t mem_data){
 long monitor_load_img(){
     if(monitor_img_file == NULL){
         printf("[monitor] no image file is given, using built-in RISCV image\n");
+        memcpy(mem_guest_to_host(mem_start_addr), img, sizeof(img));
+        return -1;
     }
 
     FILE *fp = fopen(monitor_img_file, "rb");
@@ -517,6 +519,7 @@ int monitor_parse_args(int argc, char*argv[]){
         {"diff"     , required_argument, NULL, 'd'},
         {"port"     , required_argument, NULL, 'p'},
         {"help"     , no_argument      , NULL, 'h'},
+        {"readbin"  , required_argument, NULL, 'i'},
         {"readelf"  , required_argument, NULL, 'r'},
         {"readdiasm", required_argument, NULL, 'a'},
         {0          , 0                , NULL,  0 },
@@ -530,6 +533,7 @@ int monitor_parse_args(int argc, char*argv[]){
             case 'd': monitor_diff_so_file = optarg; printf("diff_so_file = \"%s\"\n", monitor_diff_so_file); break;
             case 'r': monitor_elf_file = optarg; printf("elf_file = \"%s\"\n", monitor_elf_file); break;
             case 'a': monitor_das_file = optarg; printf("das_file = \"%s\"\n", monitor_das_file); break;
+            case 'i': monitor_img_file = optarg; printf("bin_file = \"%s\"\n", monitor_img_file); break;
             case 1:   monitor_img_file = optarg; printf("img_file = \"%s\"\n", monitor_img_file); return 0;
             default:
                 printf("Usage: %s [OPTION...] IMAGE [args]\n\n", argv[0]);
@@ -546,6 +550,7 @@ int monitor_parse_args(int argc, char*argv[]){
 
 void monitor_init_monitor(int argc, char*argv[]){
     monitor_parse_args(argc, argv);
+    monitor_load_img();
     return;
 }
 
@@ -711,10 +716,9 @@ void sdb_init_sdb(){
 
 //========== Main function ==========
 int main(int argc, char *argv[]){
-    monitor_init_monitor(argc, argv);
     mem_init_mem();
-    //sdb_cmd_h(NULL);
-    memcpy(mem_guest_to_host(mem_start_addr), img, sizeof(img));
+    monitor_init_monitor(argc, argv);
+    //memcpy(mem_guest_to_host(mem_start_addr), img, sizeof(img));
     state_set_state(NSIM_CONTINUE);
     printf("Welcome to riscv64-nsim\n");
     sim_sim_init();
