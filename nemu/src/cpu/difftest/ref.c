@@ -27,7 +27,18 @@ void difftest_memcpy(paddr_t addr, void *buf, size_t n, bool direction) {
 }
 
 void difftest_regcpy(void *dut, bool direction) {
-  assert(0);
+  CPU_state *_dut = (CPU_state*)dut;
+  if(direction == DIFFTEST_TO_REF){
+    for(int i = 0; i < 32; i = i + 1){
+      cpu.gpr[i] = _dut->gpr[i];
+    }
+    cpu.pc = _dut->pc;
+  }else{
+    for(int i = 0; i < 32; i = i + 1){
+      _dut->gpr[i] = cpu.gpr[i];
+    }
+    _dut->pc = cpu.pc;
+  }
 }
 
 void difftest_exec(uint64_t n) {
