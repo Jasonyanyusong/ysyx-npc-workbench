@@ -2,7 +2,7 @@
 #include <klib-macros.h>
 //#include "riscv.h"
 
-#define nemu_trap(code) asm volatile("mv a0, %0; ebreak" : :"r"(code))
+#define npc_trap(code) asm volatile("mv a0, %0; ebreak" : :"r"(code))
 
 extern char _heap_start;
 int main(const char *args);
@@ -22,7 +22,7 @@ void putch(char ch) {
 }
 
 void halt(int code) {
-  nemu_trap(code);
+  npc_trap(code);
 
   // should not reach here
   while (1);
