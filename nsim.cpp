@@ -177,14 +177,14 @@ static const uint32_t img [] = {
 //========== RTL simulation ==========
 
 void sim_sim_init(){
-    printf("[sim] initializing simulation\n");
+    printf("\33[1;33m[sim] initializing simulation\33[0m\n");
     contextp = new VerilatedContext;
     tfp = new VerilatedVcdC;
     top = new Vnpc;
     contextp -> traceEverOn(true);
     top -> trace(tfp, 0);
     tfp -> open("dump.vcd");
-    printf("[sim] initialize finished\n");
+    printf("\33[1;33m[sim] initialize finished\33[0m\n");
 
     // tell NPC the correct start PC
     top -> clock = 0;
@@ -200,12 +200,12 @@ void sim_sim_init(){
     //sim_step_and_dump_wave();
 
     //tfp -> close();
-    printf("[sim] module's start PC is 0x%x\n", mem_start_addr);
+    printf("\33[1;33m[sim] module's start PC is 0x%x\33[0m\n", mem_start_addr);
     return;
 }
 
 void sim_sim_exit(){
-    printf("[sim] exit simulation\n");
+    printf("\33[1;33m[sim] exit simulation\33[0m\n");
     sim_step_and_dump_wave();
     tfp -> close();
     return;
@@ -213,32 +213,32 @@ void sim_sim_exit(){
 
 void sim_one_exec(){
     if(!(nsim_state.state == NSIM_CONTINUE || nsim_state.state == NSIM_STOP)){
-        printf("[sim] current state indicates simulation can not continue\n");
+        printf("\33[1;33m[sim] current state indicates simulation can not continue\33[0m\n");
         return;
     }
 
-    printf("[sim] execution one round\n");
+    printf("\33[1;33m[sim] execution one round\33[0m\n");
     top -> clock = 0;// simulate posedge
 
     // Step I: fetch instruction and send back
-    printf("[sim] Phase I: Instruction fetch\n");
+    printf("\33[1;33m[sim] Phase I: Instruction fetch\33[0m\n");
     uint64_t sim_getCurrentPC = top -> io_NPC_sendCurrentPC;
-    printf("[sim] current pc is 0x%lx\n", sim_getCurrentPC);
+    printf("\33[1;33m[sim] current pc is 0x%lx\33[0m\n", sim_getCurrentPC);
     uint32_t sim_currentInst = mem_paddr_read(sim_getCurrentPC, 4);
     top -> io_NPC_getInst = sim_currentInst;
-    printf("[sim] current instruction is 0x%x\n", sim_currentInst);
+    printf("\33[1;33m[sim] current instruction is 0x%x\33[0m\n", sim_currentInst);
     top -> eval();
 
     // Step II: decode instruction
-    printf("[sim] Phase II: Instruction decode\n");
+    printf("\33[1;33m[sim] Phase II: Instruction decode\33[0m\n");
     top -> eval();
 
     // Step III: EXU execution
-    printf("[sim] Phase III: execute\n");
+    printf("\33[1;33m[sim] Phase III: execute\33[0m\n");
     top -> eval();
 
     // Step IV: Load and store
-    printf("[sim] Phase IV: load and store\n");
+    printf("\33[1;33m[sim] Phase IV: load and store\33[0m\n");
     if(top -> io_NPC_LSU_O_accessMem == 0b1)
     {
         if(top -> io_NPC_LSU_O_memRW == 0b1){
@@ -270,7 +270,7 @@ void sim_one_exec(){
     top -> eval();
 
     // Step V: Write back
-    printf("[sim] Phase V: write back\n");
+    printf("\33[1;33m[sim] Phase V: write back\33[0m\n");
     top -> eval();
 
     sim_step_and_dump_wave();
@@ -290,9 +290,9 @@ void sim_one_exec(){
 
     if(top -> io_NPC_halt == 0b1){
         if(nsim_gpr[10].value == 0){
-            printf("[sim] HIT GOOD TRAP at pc 0x%lx\n", top -> io_NPC_sendCurrentPC);
+            printf("\33[1;33m[sim] \33[1;32mHIT GOOD TRAP\33[1;33m at pc 0x%lx\33[0m\n", top -> io_NPC_sendCurrentPC);
         }else{
-            printf("[sim] HIT BAD  TRAP at pc 0x%lx\n", top -> io_NPC_sendCurrentPC);
+            printf("\33[1;33m[sim] \33[1;31mHIT BAD  TRAP\33[1;33m at pc 0x%lx\33[0m\n", top -> io_NPC_sendCurrentPC);
         }
         sim_step_and_dump_wave();
         state_set_state(NSIM_END);
@@ -354,24 +354,25 @@ void reg_get_reg_from_sim(int reg_idx){
         case 29:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR29; break;
         case 30:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR30; break;
         case 31:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR31; break;
-        default:  printf("[reg] unknown register index\n"); assert(0);                              break;
+        default:  printf("\33[1;34m[reg] unknown register index\33[0m\n"); assert(0);                              break;
     }
     return;
 }
 void reg_get_pcreg_from_sim(){
-    printf("[reg] getting PC registers from simulation environment\n");
+    printf("\33[1;34m[reg] getting PC registers from simulation environment\33[0m\n");
     reg_pc = top -> io_NPC_sendCurrentPC;
     reg_snpc = top -> io_NPC_sendCurrentPC + 4;
     reg_dnpc = top -> io_NPC_sendNextPC;
     return;
 }
 void reg_display(){
-    printf("[reg] print registers\n");
+    printf("\33[1;34m[reg] print registers\n");
     printf("pc = 0x%lx, snpc = 0x%lx, dnpc = 0x%lx\n", reg_pc, reg_snpc, reg_dnpc);
     for(int i = 0; i < 32; i = i + 1){
         printf("x%2d = 0x%lx\t", i, nsim_gpr[i].value);
         if((i + 1) % 4 == 0) {printf("\n");}
     }
+    printf("\33[0m");
     return;
 }
 
