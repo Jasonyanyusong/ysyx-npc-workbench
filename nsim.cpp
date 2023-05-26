@@ -243,7 +243,7 @@ bool diff_difftest_check_reg(){
     ref_difftest_regcpy(&ref, DIFFTEST_TO_DUT);
     for(int i = 0; i < 32; i = i + 1){
         if(cpu.gpr[i] != ref.gpr[i]){
-            printf("[difftest] gpr x%d different, difftest failed, NSIM's val: 0x%lx, NEMU's val: 0x%lx\n", i, cpu.gpr[i], ref.gpr[i]);
+            printf("[difftest] gpr x%d different, difftest failed, NSIM's val: 0x%16lx, NEMU's val: 0x%16lx\n", i, cpu.gpr[i], ref.gpr[i]);
             state_set_state(NSIM_ABORT);
             //assert(0);
             return false;
@@ -466,7 +466,7 @@ void reg_display(){
     printf("\33[1;34m[reg] print registers\n");
     printf("pc = 0x%lx, snpc = 0x%lx, dnpc = 0x%lx\n", reg_pc, reg_snpc, reg_dnpc);
     for(int i = 0; i < 32; i = i + 1){
-        printf("x%2d = 0x%lx\t", i, nsim_gpr[i].value);
+        printf("x%2d = 0x%16lx\t", i, nsim_gpr[i].value);
         if((i + 1) % 4 == 0) {printf("\n");}
     }
     printf("\33[0m");
