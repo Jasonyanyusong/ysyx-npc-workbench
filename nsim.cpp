@@ -165,7 +165,7 @@ static Vnpc* top;
 
 typedef struct{
     uint64_t gpr[32];
-    uint64_t pc;
+    uint64_t pc = mem_start_addr;
 } riscv64_CPU_State;
 
 riscv64_CPU_State cpu;
@@ -232,6 +232,30 @@ void diff_difftest_init(long img_size){
         return;
     }
     //difftest_memcpy();
+}
+
+void diff_difftest_one_exec(){
+    ref_difftest_exec(1);
+}
+
+bool diff_difftest_check_reg(){
+    riscv64_CPU_State ref;
+    ref_difftest_regcpy(&ref, DIFFTEST_TO_DUT);
+    for(int i = 0; i < 32; i = i + 1){
+        if(cpu.gpr[i] != ref.gpr[i]){
+            printf("[difftest] gpr x%d different, difftest failed, NSIM's val: 0x%lx, NEMU's val: 0x%lx\n", i, cpu.gpr[i], ref.gpr[i]);
+            state_set_state(NSIM_ABORT);
+            //assert(0);
+            return false;
+        }
+    }
+    if(cpu.pc != ref.pc)
+    {
+        printf("[difftest] pc different, difftest failed\n");
+        return false;
+    }
+    printf("[difftest] success at current pc\n");
+    return true;
 }
 
 //========== RTL simulation ==========
@@ -351,6 +375,15 @@ void sim_one_exec(){
 
     nsim_state.state = NSIM_CONTINUE;
     nsim_state.halt_pc = reg_pc;
+
+    if(difftest_enable)
+    {
+        diff_difftest_one_exec();
+        if(!diff_difftest_check_reg())
+        {
+            state_set_state(NSIM_ABORT);
+        }
+    }
 
     if(top -> io_NPC_halt == 0b1){
         if(nsim_gpr[10].value == 0){
