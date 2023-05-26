@@ -174,6 +174,12 @@ static const uint32_t img [] = {
   0xdeadbeef,  // some data
 };
 
+//---------- Differencial Testing ----------
+
+void difftest_init();
+void difftest_one_exec();
+bool difftest_check_reg();
+
 //========== RTL simulation ==========
 
 void sim_sim_init(){
