@@ -140,8 +140,8 @@ static int decode_exec(Decode *s) {
   INSTPAT("0000000 ????? ????? 001 ????? 00110 11", slliw  , R, printf("SLLIW\n"), R(rd) = SEXT((unsigned)BITS(src1, 31, 0) << BITS(s->isa.inst.val, 24, 20), 64));
   INSTPAT("0000000 ????? ????? 101 ????? 00110 11", srliw  , R, printf("SRLIW\n"), R(rd) = SEXT((unsigned)BITS(src1, 31, 0) >> BITS(s->isa.inst.val, 24, 20), 64));
   INSTPAT("0100000 ????? ????? 101 ????? 00110 11", sraiw  , R, printf("SRAIW\n"), R(rd) = SEXT((signed)BITS(src1, 31, 0) >> BITS(s->isa.inst.val, 24, 20), 64));
-  INSTPAT("0000000 ????? ????? 000 ????? 01110 11", addw   , R, printf("ADDW\n"), R(rd) = SEXT(BITS((signed)(src1 + src2), 31, 0), 64));
-  INSTPAT("0100000 ????? ????? 000 ????? 01110 11", subw   , R, printf("SUBW\n"), R(rd) = SEXT(BITS((signed)(src1 - src2), 31, 0), 64));
+  INSTPAT("0000000 ????? ????? 000 ????? 01110 11", addw   , R, printf("ADDW\n"), R(rd) = SEXT(BITS((signed)(src1 + src2), 31, 0), 32));
+  INSTPAT("0100000 ????? ????? 000 ????? 01110 11", subw   , R, printf("SUBW\n"), R(rd) = SEXT(BITS((signed)(src1 - src2), 31, 0), 32));
   INSTPAT("0000000 ????? ????? 001 ????? 01110 11", sllw   , R, printf("SLLW\n"), R(rd) = SEXT(BITS((unsigned)BITS(src1, 31, 0) << src2, 31, 0), 64));
   INSTPAT("0000000 ????? ????? 101 ????? 01110 11", srlw   , R, printf("SRLW\n"), R(rd) = SEXT((unsigned)BITS(src1, 31, 0) >> src2, 64));
   INSTPAT("0100000 ????? ????? 101 ????? 01110 11", sraw   , R, printf("SRAW\n"), R(rd) = SEXT((signed)BITS(src1, 31, 0) >> src2, 64));
