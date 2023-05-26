@@ -23,6 +23,8 @@
 #define mem_end_addr    0x01fffffff
 #define mem_size        mem_end_addr - mem_start_addr + 1
 
+#define difftest_enable true
+
 //========== Include Headers ==========
 
 #include "verilated.h"
@@ -37,6 +39,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <getopt.h>
+#include <dlfcn.h>
 
 //========== List functions and variables that will be used later ==========
 
@@ -68,6 +71,7 @@ char* monitor_img_file = NULL;
 char* monitor_elf_file = NULL;
 char* monitor_das_file = NULL;
 int   monitor_difftest_port = 1234;
+long  monitor_img_size = -1;
 
 long monitor_load_img();
 int monitor_parse_args(int argc, char*argv[]);
@@ -176,9 +180,52 @@ static const uint32_t img [] = {
 
 //---------- Differencial Testing ----------
 
-void difftest_init();
-void difftest_one_exec();
-bool difftest_check_reg();
+enum { DIFFTEST_TO_DUT, DIFFTEST_TO_REF };
+
+void diff_difftest_init();
+void diff_difftest_one_exec();
+bool diff_difftest_check_reg();
+
+void (*ref_difftest_memcpy)(uint64_t addr, void *buf, size_t n, bool direction) = NULL;
+void (*ref_difftest_regcpy)(void *dut, bool direction) = NULL;
+void (*ref_difftest_exec)(uint64_t n) = NULL;
+void (*ref_difftest_raise_intr)(uint64_t NO) = NULL;
+
+//========== Differencial Testing ==========
+
+void diff_difftest_init(long img_size){
+    if(difftest_enable){
+        printf("[difftest] enabled, initializing\n");
+        assert(monitor_diff_so_file != NULL);
+
+        void *handle;
+        handle = dlopen(monitor_diff_so_file, RTLD_LAZY);
+        assert(handle);
+
+        ref_difftest_memcpy = (void (*)(uint64_t, void*, size_t, bool)) dlsym(handle, "difftest_memcpy");
+        assert(ref_difftest_memcpy);
+
+        ref_difftest_regcpy = (void (*)(void*, bool)) dlsym(handle, "difftest_regcpy");
+        assert(ref_difftest_regcpy);
+
+        ref_difftest_exec = (void (*)(uint64_t)) dlsym(handle, "difftest_exec");
+        assert(ref_difftest_exec);
+
+        ref_difftest_raise_intr = (void (*)(uint64_t)) dlsym(handle, "difftest_raise_intr"); // Not implemented in NEMU
+        assert(ref_difftest_raise_intr);
+
+        void (*ref_difftest_init)(int) = (void (*)(int)) dlsym(handle, "difftest_init");
+        assert(ref_difftest_init);
+
+        ref_difftest_init(1234);
+        ref_difftest_memcpy(mem_start_addr, mem_guest_to_host(mem_start_addr), img_size, DIFFTEST_TO_REF);
+        ref_difftest_regcpy(NULL, DIFFTEST_TO_REF); // Need later changes
+    }else{
+        printf("[difftest] not enabled, skipping\n");
+        return;
+    }
+    //difftest_memcpy();
+}
 
 //========== RTL simulation ==========
 
@@ -360,7 +407,7 @@ void reg_get_reg_from_sim(int reg_idx){
         case 29:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR29; break;
         case 30:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR30; break;
         case 31:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR31; break;
-        default:  printf("\33[1;34m[reg] unknown register index\33[0m\n"); assert(0);                              break;
+        default:  printf("\33[1;34m[reg] unknown register index\33[0m\n"); assert(0);               break;
     }
     return;
 }
@@ -499,6 +546,7 @@ long monitor_load_img(){
     if(monitor_img_file == NULL){
         printf("[monitor] no image file is given, using built-in RISCV image\n");
         memcpy(mem_guest_to_host(mem_start_addr), img, sizeof(img));
+        monitor_img_size = sizeof(img);
         return -1;
     }
 
@@ -507,6 +555,7 @@ long monitor_load_img(){
 
     fseek(fp, 0, SEEK_END);
     long size = ftell(fp);
+    monitor_img_size = size;
 
     printf("[monitor] image is %s size is %ld\n", monitor_img_file, size);
 
@@ -726,6 +775,7 @@ int main(int argc, char *argv[]){
     monitor_init_monitor(argc, argv);
     //memcpy(mem_guest_to_host(mem_start_addr), img, sizeof(img));
     state_set_state(NSIM_CONTINUE);
+    diff_difftest_init(monitor_img_size);
     printf("Welcome to riscv64-nsim\n");
     sim_sim_init();
     sdb_main_loop();
