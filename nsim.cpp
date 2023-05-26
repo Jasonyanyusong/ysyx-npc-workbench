@@ -163,6 +163,13 @@ VerilatedContext* contextp = NULL;
 VerilatedVcdC* tfp = NULL;
 static Vnpc* top;
 
+typedef struct{
+    uint64_t gpr[32];
+    uint64_t pc;
+} riscv64_CPU_State;
+
+riscv64_CPU_State cpu;
+
 void sim_sim_init();
 void sim_sim_exit();
 void sim_one_exec();
@@ -219,7 +226,7 @@ void diff_difftest_init(long img_size){
 
         ref_difftest_init(1234);
         ref_difftest_memcpy(mem_start_addr, mem_guest_to_host(mem_start_addr), img_size, DIFFTEST_TO_REF);
-        ref_difftest_regcpy(NULL, DIFFTEST_TO_REF); // Need later changes
+        ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF); // Need later changes
     }else{
         printf("[difftest] not enabled, skipping\n");
         return;
@@ -336,6 +343,10 @@ void sim_one_exec(){
         reg_get_reg_from_sim(i);
     }
     reg_get_pcreg_from_sim();
+    for(int i = 0; i < 32; i = i + 1){
+        cpu.gpr[i] = nsim_gpr[i].value;
+    }
+    cpu.pc = top -> io_NPC_sendCurrentPC;
     reg_display();
 
     nsim_state.state = NSIM_CONTINUE;
