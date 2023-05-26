@@ -512,14 +512,18 @@ class LSU extends Module{
     })
     //io.LSU_O_error := false.B
 
+    val LSU_LB_Mask = Cat(Fill(56, io.LSU_I_memR(7)), Fill(8, 0.U))
+    val LSU_LH_Mask = Cat(Fill(48, io.LSU_I_memR(15)), Fill(16, 0.U))
     val LSU_LW_Mask = Cat(Fill(32, io.LSU_I_memR(31)), Fill(32, 0.U))
 
     io.LSU_O_result := MuxCase(0.U(64.W),
     Array(
         (io.LSU_I_opcode === LSU_opcode.LSU_DoNothing) -> 0.U(64.W),
-        (io.LSU_I_opcode === LSU_opcode.LSU_LB)        -> Cat(Fill(56, io.LSU_I_memR(7, 7  )) , io.LSU_I_memR),
+        //(io.LSU_I_opcode === LSU_opcode.LSU_LB)        -> Cat(Fill(56, io.LSU_I_memR(7, 7  )) , io.LSU_I_memR),
+        (io.LSU_I_opcode === LSU_opcode.LSU_LB)        -> (io.LSU_I_memR | LSU_LB_Mask),
         (io.LSU_I_opcode === LSU_opcode.LSU_LBU)       -> Cat(Fill(56, 0.U) , io.LSU_I_memR),
-        (io.LSU_I_opcode === LSU_opcode.LSU_LH)        -> Cat(Fill(48, io.LSU_I_memR(15, 15)) , io.LSU_I_memR),
+        //(io.LSU_I_opcode === LSU_opcode.LSU_LH)        -> Cat(Fill(48, io.LSU_I_memR(15, 15)) , io.LSU_I_memR),
+        (io.LSU_I_opcode === LSU_opcode.LSU_LH)        -> (io.LSU_I_memR | LSU_LH_Mask),
         (io.LSU_I_opcode === LSU_opcode.LSU_LHU)       -> Cat(Fill(48, 0.U) , io.LSU_I_memR),
         //(io.LSU_I_opcode === LSU_opcode.LSU_LW)        -> Cat(Fill(32, io.LSU_I_memR(31, 31)) , io.LSU_I_memR),
         (io.LSU_I_opcode === LSU_opcode.LSU_LW)        -> (io.LSU_I_memR | LSU_LW_Mask),
