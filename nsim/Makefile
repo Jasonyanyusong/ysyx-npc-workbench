@@ -14,7 +14,7 @@
 #**************************************************************************************/
 
 # Sanity check
-ifeq ($(wildcard $(NSIM_HOME)/src/nemu-main.c),)
+ifeq ($(wildcard $(NSIM_HOME)/src/nsim-main.c),)
   $(error NSIM_HOME=$(NSIM_HOME) is not a NSIM repo)
 endif
 
