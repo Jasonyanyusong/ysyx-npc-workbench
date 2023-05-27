@@ -24,7 +24,6 @@
 #include <memory/host.h>
 #include "sdb.h"
 #include "trace/trace.h"
-#include "npc.h"
 
 static int is_batch_mode = false;
 
@@ -162,37 +161,7 @@ static int cmd_d(char *args){
 
 static int cmd_q(char *args) {
   nemu_state.state = NEMU_QUIT;
-  // Refined the function for quiting NEMU, so the system will not report bug.
-  // Principle: this is the function that calls the quit of NEMU, bu defalt, the function will not change the NEMU state when quiting.
-  // If we add "nemu_state.state = NEMU_QUIT;" the system will know that NEMU quit with status "NEMU_QUIT", there will no bug generated.
   return -1;
-}
-
-static int cmd_npc(char* args){
-  // TODO: add "npc" commands, which will looks like NEMU, will have reg, mem, si, c commands
-  npc_welcome();
-  if (args == NULL){
-    printf("No Subcommand\n");
-    return 0;
-  }
-  else{
-    if (strcmp(args, "reg") == 0){
-      npc_reg_display();
-    }
-  else if (strcmp(args, "mem") == 0){
-      npc_mem_display();
-    }
-  else if (strcmp(args, "si") == 0){
-      npc_si(1);
-    }
-  else if (strcmp(args, "c") == 0){
-      npc_c();
-    }
-  else{
-      printf("Subcommand Not Defined\n");
-    }
-  }
-  return 0;
 }
 
 static int cmd_help(char *args);
@@ -211,7 +180,6 @@ static struct {
   { "p", "Solve the expression EXPR", cmd_p},
   { "w", "When the value of EXPR changes, suspend the program", cmd_w},
   { "d", "Delete the watch point with number N", cmd_d},
-  { "npc", "Execute in NPC (need to get verilator outputs)", cmd_npc}
 };
 
 #define NR_CMD ARRLEN(cmd_table)
