@@ -19,8 +19,8 @@
 */
 
 //========== Macro Configurations ==========
-#define mem_start_addr  0x010000000
-#define mem_end_addr    0x01fffffff
+#define mem_start_addr  0x080000000
+#define mem_end_addr    0x08fffffff
 #define mem_size        mem_end_addr - mem_start_addr + 1
 
 #define difftest_enable true
