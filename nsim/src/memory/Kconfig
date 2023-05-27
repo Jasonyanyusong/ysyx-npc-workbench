@@ -2,16 +2,14 @@ menu "Memory Configuration"
 
 config MBASE
   hex "Memory base address"
-  default 0x0        if ISA_x86
   default 0x80000000
 
 config MSIZE
   hex "Memory size"
-  default 0x8000000
+  default 0x10000000
 
 config PC_RESET_OFFSET
   hex "Offset of reset vector from the base of memory"
-  default 0x100000 if ISA_x86
   default 0
 
 choice

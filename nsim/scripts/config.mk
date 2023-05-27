@@ -22,9 +22,9 @@ $(warning $(COLOR_RED)To build the project, first run 'make menuconfig'.$(COLOR_
 endif
 
 Q            := @
-KCONFIG_PATH := $(NEMU_HOME)/tools/kconfig
-FIXDEP_PATH  := $(NEMU_HOME)/tools/fixdep
-Kconfig      := $(NEMU_HOME)/Kconfig
+KCONFIG_PATH := $(NSIM_HOME)/tools/kconfig
+FIXDEP_PATH  := $(NSIM_HOME)/tools/fixdep
+Kconfig      := $(NSIM_HOME)/Kconfig
 rm-distclean += include/generated include/config .config .config.old
 silent := -s
 

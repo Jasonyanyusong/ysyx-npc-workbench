@@ -13,38 +13,38 @@
 # See the Mulan PSL v2 for more details.
 #**************************************************************************************/
 
--include $(NEMU_HOME)/../Makefile
-include $(NEMU_HOME)/scripts/build.mk
+-include $(NSIM_HOME)/../Makefile
+include $(NSIM_HOME)/scripts/build.mk
 
-include $(NEMU_HOME)/tools/difftest.mk
+#include $(NSIM_HOME)/tools/difftest.mk
 
 compile_git:
-	$(call git_commit, "compile NEMU")
+	$(call git_commit, "compile NSIM")
 $(BINARY): compile_git
 
 # Some convenient rules
 
-override ARGS ?= --log=$(BUILD_DIR)/nemu-log.txt
+override ARGS ?= --log=$(BUILD_DIR)/nsim-log.txt
 override ARGS += $(ARGS_DIFF)
 
 # Command to execute NEMU
 # Enable "-b" in NEMU_EXEC to run in batch mode
 IMG ?=
-NEMU_EXEC := $(BINARY) $(ARGS) $(IMG) 
+NSIM_EXEC := $(BINARY) $(ARGS) $(IMG) 
 
 run-env: $(BINARY) $(DIFF_REF_SO)
 
 run: run-env
-	$(call git_commit, "run NEMU")
-	$(NEMU_EXEC)
+	$(call git_commit, "run NSIM")
+	$(NSIM_EXEC)
 
 gdb: run-env
-	$(call git_commit, "gdb NEMU")
-	gdb -s $(BINARY) --args $(NEMU_EXEC)
+	$(call git_commit, "gdb NSIM")
+	gdb -s $(BINARY) --args $(NSIM_EXEC)
 
 lldb: run-env # For Apple ARM-Processors macOS, we can use lldb as gdb is not currently available.
-	$(call git_commit, "lldb NEMU")
-	lldb -s $(BINARY) --  $(NEMU_EXEC)
+	$(call git_commit, "lldb NSIM")
+	lldb -s $(BINARY) --  $(NSIM_EXEC)
 
 clean-tools = $(dir $(shell find ./tools -maxdepth 2 -mindepth 2 -name "Makefile"))
 $(clean-tools):
