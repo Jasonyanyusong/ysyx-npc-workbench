@@ -13,5 +13,5 @@
 # See the Mulan PSL v2 for more details.
 #**************************************************************************************/
 
-INC_PATH += $(NSIM_HOME)/src/isa/$(GUEST_ISA)/include
-DIRS-y += src/isa/$(GUEST_ISA)
+INC_PATH += $(NSIM_HOME)/src/emu/$(GUEST_ISA)/include
+DIRS-y += src/emu/$(GUEST_ISA)
