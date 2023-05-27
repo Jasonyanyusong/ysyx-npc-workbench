@@ -46,7 +46,7 @@ static void execute(uint64_t n) {
   for (;n > 0; n --) {
     exec_once(&s, cpu.pc);
     g_nr_guest_inst ++;
-    if (nemu_state.state != NEMU_RUNNING) break;
+    if (nsim_state.state != NSIM_RUNNING) break;
     IFDEF(CONFIG_DEVICE, device_update());
   }
 }
@@ -68,11 +68,11 @@ void assert_fail_msg() {
 /* Simulate how the CPU works. */
 void cpu_exec(uint64_t n) {
   g_print_step = (n < MAX_INST_TO_PRINT);
-  switch (nemu_state.state) {
-    case NEMU_END: case NEMU_ABORT:
-      printf("Program execution has ended. To restart the program, exit NEMU and run again.\n");
+  switch (nsim_state.state) {
+    case NSIM_END: case NSIM_ABORT:
+      printf("Program execution has ended. To restart the program, exit NSIM and run again.\n");
       return;
-    default: nemu_state.state = NEMU_RUNNING;
+    default: nsim_state.state = NSIM_RUNNING;
   }
 
   uint64_t timer_start = get_time();
@@ -82,16 +82,16 @@ void cpu_exec(uint64_t n) {
   uint64_t timer_end = get_time();
   g_timer += timer_end - timer_start;
 
-  switch (nemu_state.state) {
-    case NEMU_RUNNING: nemu_state.state = NEMU_STOP; break;
+  switch (nsim_state.state) {
+    case NSIM_RUNNING: nsim_state.state = NSIM_STOP; break;
 
-    case NEMU_END: case NEMU_ABORT:
+    case NSIM_END: case NSIM_ABORT:
       Log("nsim: %s at pc = " FMT_WORD,
-          (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
-           (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
+          (nsim_state.state == NSIM_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
+           (nsim_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
             ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
-          nemu_state.halt_pc);
+          nsim_state.halt_pc);
       // fall through
-    case NEMU_QUIT: statistic();
+    case NSIM_QUIT: statistic();
   }
 }

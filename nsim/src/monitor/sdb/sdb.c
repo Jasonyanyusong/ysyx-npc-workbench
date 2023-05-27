@@ -122,7 +122,7 @@ static int cmd_d(char *args){
 }
 
 static int cmd_q(char *args) {
-  nemu_state.state = NEMU_QUIT;
+  nsim_state.state = NSIM_QUIT;
   return -1;
 }
 

@@ -15,10 +15,10 @@
 
 #include <utils.h>
 
-NEMUState nemu_state = { .state = NEMU_STOP };
+NSIMState nsim_state = { .state = NSIM_STOP };
 
 int is_exit_status_bad() {
-  int good = (nemu_state.state == NEMU_END && nemu_state.halt_ret == 0) ||
-    (nemu_state.state == NEMU_QUIT);
+  int good = (nsim_state.state == NSIM_END && nsim_state.halt_ret == 0) ||
+    (nsim_state.state == NSIM_QUIT);
   return !good;
 }

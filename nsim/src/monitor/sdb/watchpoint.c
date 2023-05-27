@@ -333,7 +333,7 @@ void check_WP()
         printf("[NEMU_WATCHPOINT_DEBUG: void check_WP()] previous(Hex) = %lx\n", current_checking_watchpoint -> watchpoint_last_value);
         printf("[NEMU_WATCHPOINT_DEBUG: void check_WP()] current (Hex) = %lx\n", current_checking_watchpoint -> watchpoint_current_value);
       }
-      nemu_state.state = NEMU_STOP;
+      nsim_state.state = NSIM_STOP;
     }
   }
   return;

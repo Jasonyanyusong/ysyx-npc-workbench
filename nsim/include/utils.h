@@ -20,15 +20,15 @@
 
 // ----------- state -----------
 
-enum { NEMU_RUNNING, NEMU_STOP, NEMU_END, NEMU_ABORT, NEMU_QUIT };
+enum { NSIM_RUNNING, NSIM_STOP, NSIM_END, NSIM_ABORT, NSIM_QUIT };
 
 typedef struct {
   int state;
   vaddr_t halt_pc;
   uint32_t halt_ret;
-} NEMUState;
+} NSIMState;
 
-extern NEMUState nemu_state;
+extern NSIMState nsim_state;
 
 // ----------- timer -----------
 
