@@ -6,7 +6,38 @@
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
 int printf(const char *fmt, ...) {
-  panic("Not implemented");
+  va_list args;
+  va_start(args, *fmt);
+  while(*fmt != '\0'){
+    if(*fmt == '%'){
+      fmt ++;
+      switch(*fmt){
+        case 's':
+          char* printCharPtr = va_arg(args, char*);
+          while(*printCharPtr != '\0'){
+            putch(*printCharPtr);
+            printCharPtr ++;
+          }
+          break;
+        case 'd':
+          int printIntVal = va_arg(args, int);
+          char printInt[12] = {};
+          itoa(printIntVal, printInt, 10);
+          int i = 0;
+          while(printInt[i] != '\0'){
+            putch(printInt[i]);
+            i ++;
+          }
+          break;
+      }
+      fmt ++;
+    }
+    putch(*fmt);
+    fmt ++;
+  }
+  va_end(args);
+  return 0;
+  //panic("Not implemented");
 }
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
