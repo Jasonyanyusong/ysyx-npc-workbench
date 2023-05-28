@@ -129,6 +129,10 @@ config ShowInstInfo
   bool "Show informations for every instruction executed (will significantly reduce executing speed)"
   default n
 
+config ShowInstName
+  bool "Show informations name every execution (will be bad for input/output cases)"
+  default y
+
 config NPCDiffTest
   bool "DiffTest NPC by comparing with NEMU's result"
 
