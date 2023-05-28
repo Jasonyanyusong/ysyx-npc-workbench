@@ -1,5 +1,6 @@
 /***************************************************************************************
 * Copyright (c) 2023 Yusong Yan, Beijing 101 High School
+* Copyright (c) 2023 Yusong Yan, University of Washington - Seattle
 *
 * YSYX-NPCB is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
