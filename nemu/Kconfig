@@ -1,6 +1,20 @@
 mainmenu "NEMU Configuration Menu"
 
 choice
+  prompt "Running System"
+  default RunOnLinux
+
+  config RunOnLinux
+  bool "Linux"
+
+  config RunOnMacOS
+  bool "macOS"
+
+  config RunOnWindows
+  bool "Windows"
+endchoice
+
+choice
   prompt "Base ISA"
   default ISA_riscv32
 config ISA_x86

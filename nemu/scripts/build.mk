@@ -11,6 +11,8 @@ WORK_DIR  = $(shell pwd)
 BUILD_DIR = $(WORK_DIR)/build
 
 INC_PATH := $(WORK_DIR)/include $(INC_PATH)
+INC_PATH += /opt/homebrew/Cellar/sdl2/2.26.5/include/
+INC_PATH += /opt/homebrew/Cellar/sdl2_image/2.6.3_1/include/
 OBJ_DIR  = $(BUILD_DIR)/obj-$(NAME)$(SO)
 BINARY   = $(BUILD_DIR)/$(NAME)$(SO)
 
