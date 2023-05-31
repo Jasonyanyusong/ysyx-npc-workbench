@@ -19,14 +19,24 @@ int printf(const char *fmt, ...) {
             printCharPtr ++;
           }
           break;
+        /*case 'c':
+          char printCharVal = va_arg(args, char);
+          char printChar[4] = {};
+          itoa((long long)printCharVal, printChar, 10);
+          int ci = 0;
+          while(printChar[ci] != '\0'){
+            putch(printChar[ci]);
+            ci ++;
+          }
+          break;*/
         case 'd':
           int printIntVal = va_arg(args, int);
           char printInt[12] = {};
           itoa(printIntVal, printInt, 10);
-          int i = 0;
-          while(printInt[i] != '\0'){
-            putch(printInt[i]);
-            i ++;
+          int di = 0;
+          while(printInt[di] != '\0'){
+            putch(printInt[di]);
+            di ++;
           }
           break;
       }
