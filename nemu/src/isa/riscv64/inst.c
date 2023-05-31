@@ -154,10 +154,16 @@ static int decode_exec(Decode *s) {
   INSTPAT("0000001 ????? ????? 110 ????? 01100 11", rem    , R, IFDEF(CONFIG_ShowInstName, printf("REM\n"));    R(rd) = (int64_t)src1 % (int64_t)src2);
   INSTPAT("0000001 ????? ????? 111 ????? 01100 11", remu   , R, IFDEF(CONFIG_ShowInstName, printf("REMU\n"));   R(rd) = (uint64_t)src1 % (uint64_t)src2);
   INSTPAT("0000001 ????? ????? 000 ????? 01110 11", mulw   , R, IFDEF(CONFIG_ShowInstName, printf("MULW\n"));   R(rd) = SEXT(BITS(BITS(src1, 31, 0) * BITS(src2, 31, 0), 31, 0), 32));
-  INSTPAT("0000001 ????? ????? 100 ????? 01110 11", divw   , R, IFDEF(CONFIG_ShowInstName, printf("DIVW\n"));   R(rd) = SEXT((signed)BITS(src1, 31, 0) / (signed)BITS(src2, 31, 0), 32));
-  INSTPAT("0000001 ????? ????? 101 ????? 01110 11", divuw  , R, IFDEF(CONFIG_ShowInstName, printf("DIVUW\n"));  R(rd) = SEXT((unsigned)BITS(src1, 31, 0) / (unsigned)BITS(src2, 31, 0), 32));
+
+  //INSTPAT("0000001 ????? ????? 100 ????? 01110 11", divw   , R, IFDEF(CONFIG_ShowInstName, printf("DIVW\n"));   R(rd) = SEXT((signed)BITS(src1, 31, 0) / (signed)BITS(src2, 31, 0), 32));
+  INSTPAT("0000001 ????? ????? 100 ????? 01110 11", divw   , R, IFDEF(CONFIG_ShowInstName, printf("DIVW\n"));   R(rd) = (signed)BITS(src2, 31, 0) != 0 ? SEXT((signed)BITS(src1, 31, 0) / (signed)BITS(src2, 31, 0), 32) : -1);
+  //INSTPAT("0000001 ????? ????? 101 ????? 01110 11", divuw  , R, IFDEF(CONFIG_ShowInstName, printf("DIVUW\n"));  R(rd) = SEXT((unsigned)BITS(src1, 31, 0) / (unsigned)BITS(src2, 31, 0), 32));
+  INSTPAT("0000001 ????? ????? 101 ????? 01110 11", divuw  , R, IFDEF(CONFIG_ShowInstName, printf("DIVUW\n"));  R(rd) = (unsigned)BITS(src2, 31, 0) != 0 ? SEXT((unsigned)BITS(src1, 31, 0) / (unsigned)BITS(src2, 31, 0), 32) : -1);
+
   INSTPAT("0000001 ????? ????? 110 ????? 01110 11", remw   , R, IFDEF(CONFIG_ShowInstName, printf("REMW\n"));   R(rd) = SEXT((signed)BITS(src1, 31, 0) % (signed)BITS(src2, 31, 0), 32));
   INSTPAT("0000001 ????? ????? 111 ????? 01110 11", remuw  , R, IFDEF(CONFIG_ShowInstName, printf("REMUW\n"));  R(rd) = SEXT((unsigned)BITS(src1, 31, 0) % (unsigned)BITS(src2, 31, 0), 32));
+  //INSTPAT("0000001 ????? ????? 110 ????? 01110 11", remw   , R, IFDEF(CONFIG_ShowInstName, printf("REMW\n"));   R(rd) = (signed)BITS(src2, 31, 0) != 0 ? SEXT((signed)BITS(src1, 31, 0) % (signed)BITS(src2, 31, 0), 32) : 0);
+  //INSTPAT("0000001 ????? ????? 111 ????? 01110 11", remuw  , R, IFDEF(CONFIG_ShowInstName, printf("REMUW\n"));  R(rd) = (unsigned)BITS(src2, 31, 0) != 0 ? SEXT((unsigned)BITS(src1, 31, 0) % (unsigned)BITS(src2, 31, 0), 32) : 0);
   INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    , N, INV(s->pc));
   INSTPAT_END();
 
