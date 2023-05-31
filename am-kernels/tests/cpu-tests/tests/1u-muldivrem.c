@@ -5,21 +5,21 @@ int main(){
     for(unsigned char a = 0; a < 255; a = a + 1){
         for(unsigned char b = 0; b < 255; b = b + 1){
             ans = a * b;
-            printf("%d, ", ans);
+            //printf("%d, ", ans);
         }
     }
     for(unsigned char a = 0; a < 255; a = a + 1){
         for(unsigned char b = 0; b < 255; b = b + 1){
             ans = a / b;
-            printf("%d, ", ans);
+            //printf("%d, ", ans);
         }
     }
     for(unsigned char a = 0; a < 255; a = a + 1){
         for(unsigned char b = 0; b < 255; b = b + 1){
             ans = a % b;
-            printf("%d, ", ans);
+            //printf("%d, ", ans);
         }
     }
-    printf("\n");
+    //printf("\n");
     return 0;
 }
