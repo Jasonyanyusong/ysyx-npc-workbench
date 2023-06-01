@@ -2,7 +2,6 @@
 #define __CONFIG_H__
 
 //#define HAS_GUI
-#define SIZE_OPT
 
 #define SOUND_NONE 0
 #define SOUND_LQ   1

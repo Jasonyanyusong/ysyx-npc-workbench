@@ -44,6 +44,7 @@ static uint8 gorko;
 
 static void NamcoSound(int Count);
 static void NamcoSoundHack(void);
+static void DoNamcoSound(int32 *Wave, int Count);
 static void DoNamcoSoundHQ(void);
 static void SyncHQ(int32 ts);
 
@@ -212,15 +213,9 @@ static DECLFW(Mapper19_write) {
 		}
 }
 
-#if SOUND_CONFIG != SOUND_NONE
 static int dwave = 0;
-static void DoNamcoSound(int32 *Wave, int Count) {
-  assert(0);
-}
-#endif
 
 static void NamcoSoundHack(void) {
-#if SOUND_CONFIG != SOUND_NONE
 	int32 z, a;
 	if (FSettings.soundq >= 1) {
 		DoNamcoSoundHQ();
@@ -230,17 +225,14 @@ static void NamcoSoundHack(void) {
 	a = z - dwave;
 	if (a) DoNamcoSound(&Wave[dwave], a);
 	dwave += a;
-#endif
 }
 
 static void NamcoSound(int Count) {
-#if SOUND_CONFIG != SOUND_NONE
 	int32 z, a;
 	z = ((SOUNDTS << 16) / soundtsinc) >> 4;
 	a = z - dwave;
 	if (a) DoNamcoSound(&Wave[dwave], a);
 	dwave = 0;
-#endif
 }
 
 static uint32 PlayIndex[8];
@@ -274,7 +266,6 @@ static INLINE uint32 FetchDuff(uint32 P, uint32 envelope) {
 }
 
 static void DoNamcoSoundHQ(void) {
-#if SOUND_CONFIG != SOUND_NONE
 	int32 P, V;
 	int32 cyclesuck = (((IRAM[0x7F] >> 4) & 7) + 1) * 15;
 
@@ -304,7 +295,11 @@ static void DoNamcoSoundHQ(void) {
 		}
 	}
 	CVBC = SOUNDTS;
-#endif
+}
+
+
+static void DoNamcoSound(int32 *Wave, int Count) {
+  assert(0);
 }
 
 static void Mapper19_StateRestore(int version) {

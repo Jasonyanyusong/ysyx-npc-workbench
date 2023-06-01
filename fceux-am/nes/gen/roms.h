@@ -1,5 +1,5 @@
-extern unsigned char rom_mario_nes[];
-extern unsigned int rom_mario_nes_len;
+extern unsigned char rom_mario1_nes[];
+extern unsigned int rom_mario1_nes_len;
 
 struct rom {
   const char *name;
@@ -8,6 +8,6 @@ struct rom {
 };
 
 struct rom roms[] = {
-  { .name = "mario", .body = rom_mario_nes, .size = &rom_mario_nes_len, },
+  { .name = "mario1", .body = rom_mario1_nes, .size = &rom_mario1_nes_len, },
 };
 int nroms = 1;

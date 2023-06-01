@@ -18,7 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "config.h"
 #include "types.h"
 #include "x6502.h"
 #include "fceu.h"
@@ -117,24 +116,11 @@ FCEUGI *GameInfo = NULL;
 void (*GameInterface)(GI h);
 void (*GameStateRestore)(int version);
 
-#ifdef SIZE_OPT
-#define FUNC_IDX_MAX16
-
-#ifdef FUNC_IDX_MAX16
-#define FUNC_IDX_MAX 16
-static uint8 AReadIdx[0x10000 / 2];
-static uint8 BWriteIdx[0x10000 / 2];
-#else
-#define FUNC_IDX_MAX 256
-static uint8 AReadIdx[0x10000];
-static uint8 BWriteIdx[0x10000];
-#endif
-static readfunc ARead[FUNC_IDX_MAX];
-static writefunc BWrite[FUNC_IDX_MAX];
-#else
-static readfunc ARead[0x10000];
-static writefunc BWrite[0x10000];
-#endif
+readfunc ARead[0x10000];
+writefunc BWrite[0x10000];
+static readfunc *AReadG;
+static writefunc *BWriteG;
+static int RWWrap = 0;
 
 //mbg merge 7/18/06 docs
 //bit0 indicates whether emulation is paused
@@ -157,71 +143,36 @@ static DECLFR(ANull) {
 	return(X.DB);
 }
 
-#ifdef SIZE_OPT
-static int RegisterARead(readfunc func) {
-  int i;
-  for (i = 0; i < FUNC_IDX_MAX; i ++) {
-    if (ARead[i] == NULL) ARead[i] = func;
-    if (ARead[i] == func) return i;
-  }
-  assert(i < FUNC_IDX_MAX);
-  return -1;
+int AllocGenieRW(void) {
+	if (!(AReadG = (readfunc*)FCEU_malloc(0x8000 * sizeof(readfunc))))
+		return 0;
+	if (!(BWriteG = (writefunc*)FCEU_malloc(0x8000 * sizeof(writefunc))))
+		return 0;
+	RWWrap = 1;
+	return 1;
 }
 
-static int RegisterBWrite(writefunc func) {
-  int i;
-  for (i = 0; i < FUNC_IDX_MAX; i ++) {
-    if (BWrite[i] == NULL) BWrite[i] = func;
-    if (BWrite[i] == func) return i;
-  }
-  assert(i < FUNC_IDX_MAX);
-  return -1;
-}
+void FlushGenieRW(void) {
+	int32 x;
 
-static uint8 GetIdx(uint8 *array, uint32 addr) {
-#ifdef FUNC_IDX_MAX16
-  uint8 i = array[addr >> 1];
-  if (addr & 1) i >>= 4;
-  else i &= 0xf;
-#else
-  uint8 i = array[addr];
-#endif
-  assert(i < FUNC_IDX_MAX);
-  return i;
+	if (RWWrap) {
+		for (x = 0; x < 0x8000; x++) {
+			ARead[x + 0x8000] = AReadG[x];
+			BWrite[x + 0x8000] = BWriteG[x];
+		}
+		free(AReadG);
+		free(BWriteG);
+		AReadG = NULL;
+		BWriteG = NULL;
+		RWWrap = 0;
+	}
 }
-
-static void SetIdx(uint8 *array, uint32 addr, uint8 i) {
-  assert(i < FUNC_IDX_MAX);
-#ifdef FUNC_IDX_MAX16
-  uint8 mask = 0xf;
-  if (addr & 1) {
-    mask <<= 4;
-    i <<= 4;
-  }
-  array[addr >> 1] &= ~mask;
-  array[addr >> 1] |= i;
-#else
-  array[addr] = i;
-#endif
-}
-#endif
 
 readfunc GetReadHandler(int32 a) {
-#ifdef SIZE_OPT
-  return ARead[GetIdx(AReadIdx, a)];
-#else
-  return ARead[a];
-#endif
-}
-
-void SetOneReadHandler(int32 addr, readfunc func) {
-  if (!func)
-    func = ANull;
-#ifdef SIZE_OPT
-  SetIdx(AReadIdx, addr, RegisterARead(func));
-#else
-  ARead[addr] = func;
-#endif
+	if (a >= 0x8000 && RWWrap)
+		return AReadG[a - 0x8000];
+	else
+		return ARead[a];
 }
 
 void SetReadHandler(int32 start, int32 end, readfunc func) {
@@ -230,32 +181,23 @@ void SetReadHandler(int32 start, int32 end, readfunc func) {
 	if (!func)
 		func = ANull;
 
-#ifdef SIZE_OPT
-  int idx = RegisterARead(func);
-  for (x = end; x >= start; x--)
-    SetIdx(AReadIdx, x, idx);
-#else
-  for (x = end; x >= start; x--)
-    ARead[x] = func;
-#endif
+	if (RWWrap)
+		for (x = end; x >= start; x--) {
+			if (x >= 0x8000)
+				AReadG[x - 0x8000] = func;
+			else
+				ARead[x] = func;
+		}
+	else
+		for (x = end; x >= start; x--)
+			ARead[x] = func;
 }
 
 writefunc GetWriteHandler(int32 a) {
-#ifdef SIZE_OPT
-  return BWrite[GetIdx(BWriteIdx, a)];
-#else
-  return BWrite[a];
-#endif
-}
-
-void SetOneWriteHandler(int32 addr, writefunc func) {
-  if (!func)
-    func = BNull;
-#ifdef SIZE_OPT
-  SetIdx(BWriteIdx, addr, RegisterBWrite(func));
-#else
-  BWrite[addr] = func;
-#endif
+	if (RWWrap && a >= 0x8000)
+		return BWriteG[a - 0x8000];
+	else
+		return BWrite[a];
 }
 
 void SetWriteHandler(int32 start, int32 end, writefunc func) {
@@ -264,22 +206,16 @@ void SetWriteHandler(int32 start, int32 end, writefunc func) {
 	if (!func)
 		func = BNull;
 
-#ifdef SIZE_OPT
-  int idx = RegisterBWrite(func);
-  for (x = end; x >= start; x--)
-    SetIdx(BWriteIdx, x, idx);
-#else
-  for (x = end; x >= start; x--)
-    BWrite[x] = func;
-#endif
-}
-
-uint8 readb(int32 a) {
-  return GetReadHandler(a)(a);
-}
-
-void writeb(int32 a, uint8 v) {
-  GetWriteHandler(a)(a, v);
+	if (RWWrap)
+		for (x = end; x >= start; x--) {
+			if (x >= 0x8000)
+				BWriteG[x - 0x8000] = func;
+			else
+				BWrite[x] = func;
+		}
+	else
+		for (x = end; x >= start; x--)
+			BWrite[x] = func;
 }
 
 uint8 RAM[0x800];
@@ -484,14 +420,9 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 		if (EmulationPaused & EMULATIONPAUSED_PAUSED)
 		{
 			// emulator is paused
-			//memcpy(XBuf, XBackBuf, 256*256);
-			memset(XBuf, 0, 256*256);
+			memcpy(XBuf, XBackBuf, 256*256);
 			*pXBuf = XBuf;
-#if SOUND_CONFIG != SOUND_NONE
       *SoundBuf = WaveFinal;
-#else
-      *SoundBuf = 0;
-#endif
       *SoundBufSize = 0;
 			return;
 		}
@@ -512,11 +443,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
     *SoundBuf = 0;
     *SoundBufSize = 0;
   } else {
-#if SOUND_CONFIG != SOUND_NONE
-      *SoundBuf = WaveFinal;
-#else
-      *SoundBuf = 0;
-#endif
+    *SoundBuf = WaveFinal;
     *SoundBufSize = ssize;
   }
 
@@ -540,8 +467,8 @@ void ResetNES(void) {
 	X6502_Reset();
 
 	// clear back baffer
-	//extern uint8 *XBackBuf;
-	//memset(XBackBuf, 0, 256 * 256);
+	extern uint8 *XBackBuf;
+	memset(XBackBuf, 0, 256 * 256);
 
 	FCEU_DispMessage("Reset");
 }
@@ -582,8 +509,8 @@ void PowerNES(void) {
 	timestampbase = 0;
 	X6502_Power();
 	// clear back buffer
-	//extern uint8 *XBackBuf;
-	//memset(XBackBuf, 0, 256 * 256);
+	extern uint8 *XBackBuf;
+	memset(XBackBuf, 0, 256 * 256);
 
 	FCEU_DispMessage("Power on");
 }

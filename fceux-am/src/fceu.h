@@ -23,15 +23,13 @@ extern char romNameWhenClosingEmulator[];
 #define DECLFW(x) void x (uint32 A, uint8 V)
 
 void FCEU_MemoryRand(uint8 *ptr, uint32 size, bool default_zero=false);
-void SetOneReadHandler(int32 addr, readfunc func);
 void SetReadHandler(int32 start, int32 end, readfunc func);
-void SetOneWriteHandler(int32 addr, writefunc func);
 void SetWriteHandler(int32 start, int32 end, writefunc func);
 writefunc GetWriteHandler(int32 a);
 readfunc GetReadHandler(int32 a);
 
-uint8 readb(int32 a);
-void writeb(int32 a, uint8 v);
+int AllocGenieRW(void);
+void FlushGenieRW(void);
 
 void FCEU_ResetVidSys(void);
 
@@ -74,6 +72,9 @@ extern int EmulationPaused;
 
 uint8 FCEU_ReadRomByte(uint32 i);
 void FCEU_WriteRomByte(uint32 i, uint8 value);
+
+extern readfunc ARead[0x10000];
+extern writefunc BWrite[0x10000];
 
 enum GI {
 	GI_RESETM2	=1,

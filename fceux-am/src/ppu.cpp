@@ -1361,7 +1361,7 @@ static void FetchSpriteData(void) {
 					}
 
 					/* Fix this geniestage hack */
-					if (MMC5Hack)
+					if (MMC5Hack && geniestage != 1)
 						C = MMC5SPRVRAMADR(vadr);
 					else
 						C = VRAMADR(vadr);
@@ -1634,24 +1634,24 @@ void FCEUPPU_Power(void) {
 	FCEUPPU_Reset();
 
 	for (x = 0x2000; x < 0x4000; x += 8) {
-		SetOneReadHandler (x, A200x);
-		SetOneWriteHandler(x, B2000);
-		SetOneReadHandler (x + 1, A200x);
-		SetOneWriteHandler(x + 1, B2001);
-		SetOneReadHandler (x + 2, A2002);
-		SetOneWriteHandler(x + 2, B2002);
-		SetOneReadHandler (x + 3, A200x);
-		SetOneWriteHandler(x + 3, B2003);
-		SetOneReadHandler (x + 4, A2004);
-		SetOneWriteHandler(x + 4, B2004);
-		SetOneReadHandler (x + 5, A200x);
-		SetOneWriteHandler(x + 5, B2005);
-		SetOneReadHandler (x + 6, A200x);
-		SetOneWriteHandler(x + 6, B2006);
-		SetOneReadHandler (x + 7, A2007);
-		SetOneWriteHandler(x + 7, B2007);
+		ARead[x] = A200x;
+		BWrite[x] = B2000;
+		ARead[x + 1] = A200x;
+		BWrite[x + 1] = B2001;
+		ARead[x + 2] = A2002;
+		BWrite[x + 2] = B2002;
+		ARead[x + 3] = A200x;
+		BWrite[x + 3] = B2003;
+		ARead[x + 4] = A2004;
+		BWrite[x + 4] = B2004;
+		ARead[x + 5] = A200x;
+		BWrite[x + 5] = B2005;
+		ARead[x + 6] = A200x;
+		BWrite[x + 6] = B2006;
+		ARead[x + 7] = A2007;
+		BWrite[x + 7] = B2007;
 	}
-	SetOneWriteHandler(0x4014, B4014);
+	BWrite[0x4014] = B4014;
 }
 
 int FCEUPPU_Loop(int skip) {
@@ -2081,9 +2081,9 @@ int FCEUX_PPU_Loop(int skip) {
 					int xstart = xt << 3;
 					oamcount = oamcounts[renderslot];
 					uint8 * const target = XBuf + (yp << 8) + xstart;
-					//uint8 * const dtarget = XDBuf + (yp << 8) + xstart;
+					uint8 * const dtarget = XDBuf + (yp << 8) + xstart;
 					uint8 *ptr = target;
-					//uint8 *dptr = dtarget;
+					uint8 *dptr = dtarget;
 					int rasterpos = xstart;
 
 					//check all the conditions that can cause things to render in these 8px
@@ -2167,7 +2167,7 @@ int FCEUX_PPU_Loop(int skip) {
 						}
 
 						*ptr++ = PaletteAdjustPixel(pixelcolor);
-						//*dptr++= PPU[1]>>5; //grab deemph
+						*dptr++= PPU[1]>>5; //grab deemph
 					}
 				}
 			}

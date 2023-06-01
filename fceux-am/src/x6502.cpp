@@ -42,13 +42,13 @@ void (*MapIRQHook)(int a);
 //normal memory read
 static INLINE uint8 RdMem(unsigned int A)
 {
- return(_DB=readb(A));
+ return(_DB=ARead[A](A));
 }
 
 //normal memory write
 static INLINE void WrMem(unsigned int A, uint8 V)
 {
-	writeb(A, V);
+	BWrite[A](A,V);
 }
 
 static INLINE uint8 RdRAM(unsigned int A)
@@ -66,13 +66,13 @@ static INLINE void WrRAM(unsigned int A, uint8 V)
 uint8 X6502_DMR(uint32 A)
 {
  ADDCYC(1);
- return(X.DB=readb(A));
+ return(X.DB=ARead[A](A));
 }
 
 void X6502_DMW(uint32 A, uint8 V)
 {
  ADDCYC(1);
- writeb(A, V);
+ BWrite[A](A,V);
 }
 
 #define PUSH(V) \
