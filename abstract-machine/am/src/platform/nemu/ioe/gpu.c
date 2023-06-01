@@ -3,7 +3,19 @@
 
 #define SYNC_ADDR (VGACTL_ADDR + 4)
 
+// let's treat hight equals to height
+// so the code appears more beautiful
+
+uint32_t am_gpu_width = 0;
+uint32_t am_gpu_hight = 0;
+
+#define  am_gpu_width_mask 0xFFFF0000
+#define  am_gpu_hight_mask 0x0000FFFF
+
 void __am_gpu_init() {
+  uint32_t am_gpu_config = inl(VGACTL_ADDR);
+  am_gpu_width = am_gpu_config & am_gpu_width_mask;
+  am_gpu_hight = am_gpu_config & am_gpu_hight_mask;
 }
 
 void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
