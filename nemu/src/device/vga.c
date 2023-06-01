@@ -15,6 +15,9 @@
 
 #include <common.h>
 #include <device/map.h>
+#include <memory/paddr.h>
+#include <memory/vaddr.h>
+#include <memory/host.h>
 
 #define SCREEN_W (MUXDEF(CONFIG_VGA_SIZE_800x600, 800, 400))
 #define SCREEN_H (MUXDEF(CONFIG_VGA_SIZE_800x600, 600, 300))
@@ -73,6 +76,11 @@ static inline void update_screen() {
 void vga_update_screen() {
   // TODO: call `update_screen()` when the sync register is non-zero,
   // then zero out the sync register
+  uint64_t gpu_sync_reg_addr = CONFIG_VGA_CTL_MMIO + 4;
+  if(paddr_read(gpu_sync_reg_addr, 4) != 0){
+    update_screen();
+    paddr_write(gpu_sync_reg_addr, 4, 0);
+  }
 }
 
 void init_vga() {

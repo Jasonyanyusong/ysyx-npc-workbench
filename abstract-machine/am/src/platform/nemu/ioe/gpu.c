@@ -14,14 +14,22 @@ uint32_t am_gpu_hight = 0;
 
 void __am_gpu_init() {
   uint32_t am_gpu_config = inl(VGACTL_ADDR);
-  am_gpu_width = am_gpu_config & am_gpu_width_mask;
+  am_gpu_width = (am_gpu_config & am_gpu_width_mask) >> 16;
   am_gpu_hight = am_gpu_config & am_gpu_hight_mask;
+  int i;
+  uint32_t *fb = (uint32_t *)(uintptr_t)FB_ADDR;
+  for(i = 0; i < am_gpu_width * am_gpu_hight; i = i + 1){
+    fb[i] = i;
+  }
+  outl(SYNC_ADDR, 1);
 }
 
 void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
   *cfg = (AM_GPU_CONFIG_T) {
-    .present = true, .has_accel = false,
-    .width = 0, .height = 0,
+    .present = true,
+    .has_accel = false,
+    .width  = am_gpu_width,
+    .height = am_gpu_hight,
     .vmemsz = 0
   };
 }
