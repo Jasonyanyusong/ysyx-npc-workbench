@@ -16,12 +16,12 @@ void __am_gpu_init() {
   uint32_t am_gpu_config = inl(VGACTL_ADDR);
   am_gpu_width = (am_gpu_config & am_gpu_width_mask) >> 16;
   am_gpu_hight = am_gpu_config & am_gpu_hight_mask;
-  int i;
+  /*int i;
   uint32_t *fb = (uint32_t *)(uintptr_t)FB_ADDR;
   for(i = 0; i < am_gpu_width * am_gpu_hight; i = i + 1){
     fb[i] = i;
   }
-  outl(SYNC_ADDR, 1);
+  outl(SYNC_ADDR, 1);*/
 }
 
 void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
@@ -36,6 +36,15 @@ void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
 }
 
 void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
+  uint32_t* fb = (uint32_t*)(uintptr_t)FB_ADDR;
+  uint32_t* pixels = (uint32_t*)(ctl->pixels);
+  int x = ctl -> x, y = ctl -> y;
+  int w = ctl -> w, h = ctl -> h;
+  for(int j = 0; j < h; j = j + 1){
+    for(int i = 0; i < w; i = i + 1){
+      fb[(y + j) * am_gpu_width + (x + i)] = *(pixels + j * w + i);
+    }
+  }
   if (ctl->sync) {
     outl(SYNC_ADDR, 1);
   }
