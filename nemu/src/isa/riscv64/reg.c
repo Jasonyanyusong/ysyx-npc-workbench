@@ -44,7 +44,7 @@ void isa_gpr_display() {
   for (int i = 0; i < 32; i = i + 1)
   {
     char reg_value_bin_string[65] = {0};
-    u_int64_t get_reg_value = cpu.gpr[i];
+    uint64_t get_reg_value = cpu.gpr[i];
     for(int i = 0; i <= 63; i = i + 1)
     {
       if(get_reg_value >= pow(2, 63 - i))
