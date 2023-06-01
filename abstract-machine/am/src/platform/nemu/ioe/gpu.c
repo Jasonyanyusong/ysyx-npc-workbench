@@ -25,6 +25,7 @@ void __am_gpu_init() {
 }
 
 void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
+  //printf("am_gpu_width = %d, am_gpu_hight = %d\n", am_gpu_width, am_gpu_hight);
   *cfg = (AM_GPU_CONFIG_T) {
     .present = true,
     .has_accel = false,
