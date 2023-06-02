@@ -82,6 +82,33 @@ config TARGET_AM
   bool "Application on Abstract-Machine (DON'T CHOOSE)"
 endchoice
 
+menu "RISCV64 Instruction Extensions"
+config RV64M
+  bool "M   Standard Extension for Integer Multiplication and Division"
+  default n
+config RV64A
+  bool "A   Standard Extension for Atomic Instructions"
+  default n
+config RV64F
+  bool "F   Standard Extension for Single-Precision Floating-Point"
+  default n
+config RV64D
+  bool "D   Standard Extension for Double-Precision Floating-Point"
+  default n
+config RV64Q
+  bool "Q   Standard Extension for Quad-Precision Floating-Point"
+  default n
+config RV64Zfh
+  bool "Zfh Standard Extension for Half-Precision Floating-Point"
+  default n
+config RV64C
+  bool "C   Standard Extension for Compressed Instructions"
+  default n
+config RV64V
+  bool "V   Standard Extension for Vector Operations"
+  default n
+endmenu
+
 menu "Build Options"
 choice
   prompt "Compiler"
