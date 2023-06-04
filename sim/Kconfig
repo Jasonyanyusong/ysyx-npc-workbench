@@ -1,0 +1,120 @@
+mainmenu "NSIM Configuration Menu"
+
+choice
+    prompt "Running System"
+    default RunOnLinux
+
+    config RunOnLinux
+    bool "Linux"
+
+    config RunOnMacOS
+    bool "macOS"
+
+    config RunOnWindows
+    bool "Windows"
+endchoice
+
+choice
+    prompt "CPU Bits"
+    default XLEN_64
+config XLEN_32
+    bool "32 Bit CPU Design"
+config XLEN_64
+    bool "64 Bit CPU Design"
+endchoice
+
+menu "Build Options"
+choice
+    prompt "Compiler"
+    default CC_GCC
+config CC_GCC
+    bool "gcc"
+config CC_GPP
+    bool "g++"
+config CC_CLANG
+    bool "clang"
+endchoice
+
+config CC
+    string
+    default "gcc" if CC_GCC
+    default "g++" if CC_GPP
+    default "clang" if CC_CLANG
+    default "none"
+
+choice
+    prompt "Optimization Level"
+    default CC_O2
+config CC_O0
+    bool "O0"
+config CC_O1
+    bool "O1"
+config CC_O2
+    bool "O2"
+config CC_O3
+    bool "O3"
+endchoice
+
+config CC_OPT
+    string
+    default "-O0" if CC_O0
+    default "-O1" if CC_O1
+    default "-O2" if CC_O2
+    default "-O3" if CC_O3
+    default "none"
+endmenu
+
+menu "Testing and Debugging"
+config DifftestWithNEMU
+    bool "Difftest NPC (as DUT) with NEMU (as REF)"
+
+config ShowInstName
+    bool "Show instruction name every NPC execution"
+
+config ShowNPCInfo
+    bool "Show NPC's info every NPC execution (Mem & Reg)"
+
+config ITRACE
+    bool "Enable Instruction Tracer"
+
+config MTRACE
+    bool "Enable Memory Tracer"
+
+config FTRACE
+    bool "Enable Function Tracer"
+
+config DTRACE
+    bool "Enable Device Tracer"
+
+config RTRACE
+    bool "Enable Register Tracer"
+
+config RTRACE_CSR
+    depends on RTRACE
+    bool "R-Trace Control State Registers"
+
+config RTRACE_GPR
+    depends on RTRACE
+    bool "R-Trace General Purpose Registers"
+
+config RTRACE_CSR
+    depends on RTRACE
+    bool "R-Trace Float Point Registers"
+
+config RTRACE_AIR
+    depends on RTRACE
+    bool "R-Trace Atomic Instruction Registers"
+
+endmenu
+
+menu "Miscellaneous"
+choice
+    prompt "Host timer"
+    default TIMER_GETTIMEOFDAY
+config TIMER_GETTIMEOFDAY
+    bool "gettimeofday"
+config TIMER_CLOCK_GETTIME
+    bool "clock_gettime"
+endchoice
+
+endnemu
