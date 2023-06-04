@@ -24,7 +24,7 @@
 #include <memory/host.h>
 #include "sdb.h"
 #include "trace/trace.h"
-#include "npc.h"
+//#include "npc.h"
 
 static int is_batch_mode = false;
 
