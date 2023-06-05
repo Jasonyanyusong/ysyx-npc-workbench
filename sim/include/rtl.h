@@ -2,6 +2,13 @@
 #define __ISA_RISCV64_H__
 
 #include <common.h>
+#include "verilated.h"
+#include "verilated_vcd_c.h"
+#include "obj_dir/Vnpc.h"
+
+VerilatedContext* contextp = NULL;
+VerilatedVcdC* tfp = NULL;
+static Vnpc* top;
 
 typedef struct {
   uint64_t gpr[32];
