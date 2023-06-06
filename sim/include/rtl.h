@@ -18,17 +18,36 @@ typedef struct {
 
 riscv64_CPU_state cpu;
 
-void rv64rtl_gpr_display(int index);
-void rv64rtl_fpr_display(int index);
-void rv64rtl_csr_display(int index);
+// ---------- difftest ----------
 
-void rtl_sim_init();
-void rtl_exec_once(bool printRegs);
-void rtl_sim_exit();
+void diff_difftest_init(long img_size);
+void diff_difftest_one_exec();
+bool diff_difftest_check_reg();
+
+void (*ref_difftest_memcpy)(uint64_t addr, void *buf, size_t n, bool direction) = NULL;
+void (*ref_difftest_regcpy)(void *dut, bool direction) = NULL;
+void (*ref_difftest_exec)(uint64_t n) = NULL;
+void (*ref_difftest_raise_intr)(uint64_t NO) = NULL;
 
 bool rtl_difftest_checkGPR();
 bool rtl_difftest_checkFPR();
 bool rtl_difftest_checkCSR();
+
+// ---------- registers ----------
+
+void rv64rtl_gpr_get(int index);
+void rv64rtl_fpr_get(int index);
+void rv64rtl_csr_get(int index);
+
+void rv64rtl_gpr_display(int index);
+void rv64rtl_fpr_display(int index);
+void rv64rtl_csr_display(int index);
+
+// ----------simulation ----------
+
+void rtl_sim_init();
+void rtl_exec_once(bool printRegs);
+void rtl_sim_exit();
 
 /*// decode
 typedef struct {

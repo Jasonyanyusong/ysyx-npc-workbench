@@ -3,15 +3,6 @@
 
 enum { DIFFTEST_TO_DUT, DIFFTEST_TO_REF };
 
-void diff_difftest_init();
-void diff_difftest_one_exec();
-bool diff_difftest_check_reg();
-
-void (*ref_difftest_memcpy)(uint64_t addr, void *buf, size_t n, bool direction) = NULL;
-void (*ref_difftest_regcpy)(void *dut, bool direction) = NULL;
-void (*ref_difftest_exec)(uint64_t n) = NULL;
-void (*ref_difftest_raise_intr)(uint64_t NO) = NULL;
-
 void diff_difftest_init(long img_size){
     if(difftest_enable){
         printf("[difftest] enabled, initializing\n");
@@ -68,4 +59,16 @@ bool diff_difftest_check_reg(){
     }
     printf("[difftest] success at current pc\n");
     return true;
+}
+
+bool rtl_difftest_checkGPR(){
+    return false;
+}
+
+bool rtl_difftest_checkFPR(){
+    return false;
+}
+
+bool rtl_difftest_checkCSR(){
+    return false;
 }

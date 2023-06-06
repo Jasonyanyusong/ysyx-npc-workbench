@@ -1,6 +1,6 @@
 #include "rtl.h"
 
-void sim_sim_init(){
+void rtl_sim_init(){
     printf("[sim] initializing simulation\n");
     contextp = new VerilatedContext;
     tfp = new VerilatedVcdC;
@@ -25,16 +25,19 @@ void sim_sim_init(){
     return;
 }
 
-void sim_sim_exit(){
+void rtl_sim_exit(){
     printf("[sim] exit simulation\n");
     sim_step_and_dump_wave();
     tfp -> close();
     return;
 }
 
-void sim_one_exec();
+void rtl_one_exec(bool printRegs){
+    // TODO
+    return;
+}
 
-void sim_step_and_dump_wave(){
+void rtl_step_and_dump_wave(){
     top -> eval();
     contextp -> timeInc(1);
     tfp -> dump(contextp -> time());
