@@ -15,7 +15,7 @@
 ***************************************************************************************/
 
 /*Usage:
-    Linux: "verilator --cc --exe --build --trace nsim.cpp npc.v -LDFLAGS -lreadline"
+    Linux: "verilator -Wno-lint -Wno-style --cc --exe --build --trace nsim.cpp npc.v -LDFLAGS -lreadline"
 */
 
 //========== Macro Configurations ==========
@@ -209,7 +209,7 @@ uint64_t host_timer_get_time();
 
 #define DEVICE_RTC_ADDR_LO 0xa0000048
 #define DEVICE_RTC_ADDR_HI 0xa000004c
-void device_timer_write_time_to_sim(bool low_high); // When is false, return low 4 bytes, else high 4 bytes
+uint32_t device_timer_write_time_to_sim(bool low_high); // When is false, return low 4 bytes, else high 4 bytes
 
 //========== Host timer ==========
 
@@ -228,7 +228,7 @@ uint64_t host_timer_get_time(){
 
 //========== Device-Timer (RTC) ==========
 
-void device_timer_write_time_to_sim(bool low_high){
+uint32_t device_timer_write_time_to_sim(bool low_high){
     uint64_t time_us = host_timer_get_time();
     uint32_t ret = 0;
     if(low_high = 0){ ret = (uint32_t)time_us;}
