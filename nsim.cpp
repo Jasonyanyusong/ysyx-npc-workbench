@@ -608,7 +608,7 @@ uint64_t mem_pmem_read(uint64_t mem_addr, int mem_length){
 }
 void mem_pmem_write(uint64_t mem_addr, int mem_length, uint64_t mem_data){
 
-    if(mem_addr == DEVICE_SERIAL_ADDR){device_serial_putchar(mem_data); break;}
+    if(mem_addr == DEVICE_SERIAL_ADDR){device_serial_putchar(mem_data); return;}
 
     mem_host_write(mem_guest_to_host(mem_addr), mem_length, mem_data);
 }
