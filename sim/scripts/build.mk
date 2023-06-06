@@ -7,32 +7,15 @@ INC_PATH := $(WORK_DIR)/include $(INC_PATH)
 OBJ_DIR  = $(BUILD_DIR)/obj-$(NAME)$(SO)
 BINARY   = $(BUILD_DIR)/$(NAME)$(SO)
 
-# Compilation flags
-ifeq ($(CC),clang)
-CXX := clang++
-else
-CXX := g++
-endif
-LD := $(CXX)
 INCLUDES = $(addprefix -I, $(INC_PATH))
-# CFLAGS  := -O2 -MMD -Wall -Werror $(INCLUDES) $(CFLAGS)
-CFLAGS  := -O2 -MMD -Wall $(INCLUDES) $(CFLAGS)
-LDFLAGS := -O2 $(LDFLAGS)
-
-OBJS = $(SRCS:%.c=$(OBJ_DIR)/%.o) $(CXXSRC:%.cc=$(OBJ_DIR)/%.o)
+VERILATOR = verilator
+CFLAGS  := $(INCLUDES)
+LDFLAGS := -lreadline -lSDL2 $(shell llvm-config --libs)
+VERILOG_FILE := $(NSIM_HOME)/../rtl/generated/npc/npc.v
 
 # Compilation patterns
-$(OBJ_DIR)/%.o: %.c
-	@echo + CC $<
-	@mkdir -p $(dir $@)
-	@$(CC) $(CFLAGS) -c -o $@ $<
-	$(call call_fixdep, $(@:.o=.d), $@)
-
-$(OBJ_DIR)/%.o: %.cc
-	@echo + CXX $<
-	@mkdir -p $(dir $@)
-	@$(CXX) $(CFLAGS) $(CXXFLAGS) -c -o $@ $<
-	$(call call_fixdep, $(@:.o=.d), $@)
+$(BINARY):
+	$(VERILATOR) --cc $(shell find ./src "*.c") $(shell find ./utils "*.c") $(shell find ./utils "*.cc") --exe --build --trace $(addprefix -CFLAGS , $(CFLAGS)) $(addprefix -LDFLAGS , $(LDFLAGS)) $(VERILOG_FILE) -Wno-WIDTHEXPAND
 
 # Depencies
 -include $(OBJS:.o=.d)
@@ -43,9 +26,6 @@ $(OBJ_DIR)/%.o: %.cc
 
 app: $(BINARY)
 
-$(BINARY): $(OBJS) $(ARCHIVES)
-	@echo + LD $@
-	@$(LD) -o $@ $(OBJS) $(LDFLAGS) $(ARCHIVES) $(LIBS)
-
 clean:
+	-rm -rf $(NSIM_HOME)/obj_dir
 	-rm -rf $(BUILD_DIR)
