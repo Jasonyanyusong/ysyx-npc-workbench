@@ -16,6 +16,8 @@ typedef struct {
   vaddr_t pc;
 } riscv64_CPU_state;
 
+riscv64_CPU_state cpu;
+
 void rv64rtl_gpr_display(int index);
 void rv64rtl_fpr_display(int index);
 void rv64rtl_csr_display(int index);
