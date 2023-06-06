@@ -13,18 +13,13 @@
 # See the Mulan PSL v2 for more details.
 #**************************************************************************************/
 
-DIRS-y += src/device/io
-SRCS-$(CONFIG_DEVICE) += src/device/device.c src/device/alarm.c src/device/intr.c
-SRCS-$(CONFIG_HAS_SERIAL) += src/device/serial.c
-SRCS-$(CONFIG_HAS_TIMER) += src/device/timer.c
-SRCS-$(CONFIG_HAS_KEYBOARD) += src/device/keyboard.c
-SRCS-$(CONFIG_HAS_VGA) += src/device/vga.c
-SRCS-$(CONFIG_HAS_AUDIO) += src/device/audio.c
-SRCS-$(CONFIG_HAS_DISK) += src/device/disk.c
-SRCS-$(CONFIG_HAS_SDCARD) += src/device/sdcard.c
+SRCS-y += src/nsim-main.c
+DIRS-y += src/rtl src/monitor src/utils src/memory src/trace
 
-SRCS-BLACKLIST-$(CONFIG_TARGET_AM) += src/device/alarm.c
+LIBS += -lreadline -ldl -pie
 
-ifdef CONFIG_DEVICE
-LIBS += -lSDL2
+ifdef mainargs
+ASFLAGS += -DBIN_PATH=\"$(mainargs)\"
 endif
+SRCS-$(CONFIG_TARGET_AM) += src/am-bin.S
+.PHONY: src/am-bin.S

@@ -117,4 +117,4 @@ config TIMER_CLOCK_GETTIME
     bool "clock_gettime"
 endchoice
 
-endnemu
+endmenu
