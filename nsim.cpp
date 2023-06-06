@@ -15,7 +15,7 @@
 ***************************************************************************************/
 
 /*Usage:
-    Linux: "verilator -Wno-lint -Wno-style --cc --exe --build --trace nsim.cpp npc.v -LDFLAGS -lreadline"
+    Linux: "verilator -Wno-lint -Wno-style --cc --exe --build --trace nsim.cpp npc.v -LDFLAGS -lreadline -lSDL2"
 */
 
 //========== Macro Configurations ==========
@@ -24,6 +24,11 @@
 #define mem_size        mem_end_addr - mem_start_addr + 1
 
 #define difftest_enable true
+
+#define device_have_serial   true
+#define device_have_rtc      true
+#define device_have_keyboard false
+#define device_have_vga      false
 
 //========== Include Headers ==========
 
@@ -600,15 +605,15 @@ uint64_t mem_host_to_guest(uint8_t *haddr) { return haddr - mem_pmem + mem_start
 uint64_t mem_pmem_read(uint64_t mem_addr, int mem_length){
     //printf("[memory] mem_pmem_read: mem_guest_to_host(mem_addr) = %p\n", mem_guest_to_host(mem_addr));
 
-    if(mem_addr == DEVICE_RTC_ADDR_LO){return device_timer_write_time_to_sim(false);}
-    if(mem_addr == DEVICE_RTC_ADDR_HI){return device_timer_write_time_to_sim(true);}
+    if(device_have_rtc && mem_addr == DEVICE_RTC_ADDR_LO){return device_timer_write_time_to_sim(false);}
+    if(device_have_rtc && mem_addr == DEVICE_RTC_ADDR_HI){return device_timer_write_time_to_sim(true);}
 
     uint64_t ret = mem_host_read(mem_guest_to_host(mem_addr), mem_length);
     return ret;
 }
 void mem_pmem_write(uint64_t mem_addr, int mem_length, uint64_t mem_data){
 
-    if(mem_addr == DEVICE_SERIAL_ADDR){device_serial_putchar(mem_data); return;}
+    if(device_have_serial && mem_addr == DEVICE_SERIAL_ADDR){device_serial_putchar(mem_data); return;}
 
     mem_host_write(mem_guest_to_host(mem_addr), mem_length, mem_data);
 }
