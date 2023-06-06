@@ -23,7 +23,9 @@
 #define mem_end_addr    0x08fffffff
 #define mem_size        mem_end_addr - mem_start_addr + 1
 
-#define difftest_enable true
+#define print_debug_informations false
+
+#define difftest_enable false
 
 #define device_have_serial   true
 #define device_have_rtc      true
@@ -258,7 +260,7 @@ uint32_t device_timer_write_time_to_sim(bool low_high){
 
 void diff_difftest_init(long img_size){
     if(difftest_enable){
-        printf("[difftest] enabled, initializing\n");
+        if(print_debug_informations) {printf("[difftest] enabled, initializing\n");}
         assert(monitor_diff_so_file != NULL);
 
         void *handle;
@@ -284,7 +286,7 @@ void diff_difftest_init(long img_size){
         ref_difftest_memcpy(mem_start_addr, mem_guest_to_host(mem_start_addr), img_size, DIFFTEST_TO_REF);
         ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF); // Need later changes
     }else{
-        printf("[difftest] not enabled, skipping\n");
+        if(print_debug_informations) {printf("[difftest] not enabled, skipping\n");}
         return;
     }
     //difftest_memcpy();
@@ -310,7 +312,7 @@ bool diff_difftest_check_reg(){
         printf("[difftest] pc different, difftest failed\n");
         return false;
     }
-    printf("[difftest] success at current pc\n");
+    if(print_debug_informations) {printf("[difftest] success at current pc\n");}
     return true;
 }
 
@@ -357,28 +359,28 @@ void sim_one_exec(){
         return;
     }
 
-    printf("\33[1;33m[sim] execution one round\33[0m\n");
+    if(print_debug_informations) {printf("\33[1;33m[sim] execution one round\33[0m\n");}
     top -> clock = 0;// simulate posedge
 
     // Step I: fetch instruction and send back
-    printf("\33[1;33m[sim] Phase I: Instruction fetch\33[0m\n");
+    if(print_debug_informations) {printf("\33[1;33m[sim] Phase I: Instruction fetch\33[0m\n");}
     uint64_t sim_getCurrentPC = top -> io_NPC_sendCurrentPC;
-    printf("\33[1;33m[sim] current pc is 0x%lx\33[0m\n", sim_getCurrentPC);
+    if(print_debug_informations) {printf("\33[1;33m[sim] current pc is 0x%lx\33[0m\n", sim_getCurrentPC);}
     uint32_t sim_currentInst = mem_paddr_read(sim_getCurrentPC, 4);
     top -> io_NPC_getInst = sim_currentInst;
-    printf("\33[1;33m[sim] current instruction is 0x%x\33[0m\n", sim_currentInst);
+    if(print_debug_informations) {printf("\33[1;33m[sim] current instruction is 0x%x\33[0m\n", sim_currentInst);}
     top -> eval();
 
     // Step II: decode instruction
-    printf("\33[1;33m[sim] Phase II: Instruction decode\33[0m\n");
+    if(print_debug_informations) {printf("\33[1;33m[sim] Phase II: Instruction decode\33[0m\n");}
     top -> eval();
 
     // Step III: EXU execution
-    printf("\33[1;33m[sim] Phase III: execute\33[0m\n");
+    if(print_debug_informations) {printf("\33[1;33m[sim] Phase III: execute\33[0m\n");}
     top -> eval();
 
     // Step IV: Load and store
-    printf("\33[1;33m[sim] Phase IV: load and store\33[0m\n");
+    if(print_debug_informations) {printf("\33[1;33m[sim] Phase IV: load and store\33[0m\n");}
     if(top -> io_NPC_LSU_O_accessMem == 0b1)
     {
         if(top -> io_NPC_LSU_O_memRW == 0b1){
@@ -410,7 +412,7 @@ void sim_one_exec(){
     top -> eval();
 
     // Step V: Write back
-    printf("\33[1;33m[sim] Phase V: write back\33[0m\n");
+    if(print_debug_informations) {printf("\33[1;33m[sim] Phase V: write back\33[0m\n");}
     top -> eval();
 
     sim_step_and_dump_wave();
@@ -512,20 +514,22 @@ void reg_get_reg_from_sim(int reg_idx){
     return;
 }
 void reg_get_pcreg_from_sim(){
-    printf("\33[1;34m[reg] getting PC registers from simulation environment\33[0m\n");
+    if(print_debug_informations) {printf("\33[1;34m[reg] getting PC registers from simulation environment\33[0m\n");}
     reg_pc = top -> io_NPC_sendCurrentPC;
     reg_snpc = top -> io_NPC_sendCurrentPC + 4;
     reg_dnpc = top -> io_NPC_sendNextPC;
     return;
 }
 void reg_display(){
-    printf("\33[1;34m[reg] print registers\n");
-    printf("pc = 0x%lx, snpc = 0x%lx, dnpc = 0x%lx\n", reg_pc, reg_snpc, reg_dnpc);
-    for(int i = 0; i < 32; i = i + 1){
-        printf("x%2d = 0x%16lx\t", i, nsim_gpr[i].value);
-        if((i + 1) % 4 == 0) {printf("\n");}
+    if(print_debug_informations){
+        printf("\33[1;34m[reg] print registers\n");
+        printf("pc = 0x%lx, snpc = 0x%lx, dnpc = 0x%lx\n", reg_pc, reg_snpc, reg_dnpc);
+        for(int i = 0; i < 32; i = i + 1){
+            printf("x%2d = 0x%16lx\t", i, nsim_gpr[i].value);
+            if((i + 1) % 4 == 0) {printf("\n");}
+        }
+        printf("\33[0m");
     }
-    printf("\33[0m");
     return;
 }
 
