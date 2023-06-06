@@ -40,6 +40,7 @@
 #include <readline/history.h>
 #include <getopt.h>
 #include <dlfcn.h>
+#include <sys/time.h> // Host timer
 
 //========== List functions and variables that will be used later ==========
 
@@ -197,6 +198,43 @@ void (*ref_difftest_memcpy)(uint64_t addr, void *buf, size_t n, bool direction) 
 void (*ref_difftest_regcpy)(void *dut, bool direction) = NULL;
 void (*ref_difftest_exec)(uint64_t n) = NULL;
 void (*ref_difftest_raise_intr)(uint64_t NO) = NULL;
+
+//---------- Host timer ----------
+
+uint64_t host_timer_boot_time = 0;
+uint64_t host_timer_get_time_internal();
+uint64_t host_timer_get_time();
+
+//---------- Device-Timer (RTC) ----------
+
+#define DEVICE_RTC_ADDR_LO 0xa0000048
+#define DEVICE_RTC_ADDR_HI 0xa000004c
+void device_timer_write_time_to_sim(bool low_high); // When is false, return low 4 bytes, else high 4 bytes
+
+//========== Host timer ==========
+
+uint64_t host_timer_get_time_internal(){
+    struct timeval host_timer_now;
+    gettimeofday(&host_timer_now, NULL);
+    uint64_t host_timer_us = host_timer_now.tv_sec * 1000000 + host_timer_now.tv_usec;
+    return host_timer_us;
+}
+
+uint64_t host_timer_get_time(){
+    if(host_timer_boot_time == 0) {host_timer_boot_time = host_timer_get_time_internal();}
+    uint64_t now = host_timer_get_time_internal();
+    return now - host_timer_boot_time;
+}
+
+//========== Device-Timer (RTC) ==========
+
+void device_timer_write_time_to_sim(bool low_high){
+    uint64_t time_us = host_timer_get_time();
+    uint32_t ret = 0;
+    if(low_high = 0){ ret = (uint32_t)time_us;}
+    if(low_high = 1){ ret = time_us >> 32;    }
+    return ret;
+}
 
 //========== Differencial Testing ==========
 
@@ -548,6 +586,10 @@ uint64_t mem_host_to_guest(uint8_t *haddr) { return haddr - mem_pmem + mem_start
 
 uint64_t mem_pmem_read(uint64_t mem_addr, int mem_length){
     //printf("[memory] mem_pmem_read: mem_guest_to_host(mem_addr) = %p\n", mem_guest_to_host(mem_addr));
+
+    if(mem_addr == DEVICE_RTC_ADDR_LO){return device_timer_write_time_to_sim(false);}
+    if(mem_addr == DEVICE_RTC_ADDR_HI){return device_timer_write_time_to_sim(true);}
+
     uint64_t ret = mem_host_read(mem_guest_to_host(mem_addr), mem_length);
     return ret;
 }
