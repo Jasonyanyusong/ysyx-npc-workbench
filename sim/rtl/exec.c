@@ -25,6 +25,13 @@ void sim_sim_init(){
     return;
 }
 
-void sim_sim_exit();
+void sim_sim_exit(){
+    printf("[sim] exit simulation\n");
+    sim_step_and_dump_wave();
+    tfp -> close();
+    return;
+}
+
 void sim_one_exec();
+
 void sim_step_and_dump_wave();
