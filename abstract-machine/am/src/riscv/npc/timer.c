@@ -1,4 +1,5 @@
 #include <am.h>
+#include "../riscv.h"
 
 #define RTC_ADDR 0xa0000048
 

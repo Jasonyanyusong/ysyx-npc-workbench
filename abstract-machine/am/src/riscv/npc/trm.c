@@ -1,6 +1,6 @@
 #include <am.h>
 #include <klib-macros.h>
-//#include "riscv.h"
+#include "../riscv.h"
 
 #define SERIAL_PORT 0xa00003f8
 
