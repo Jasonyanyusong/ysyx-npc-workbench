@@ -34,4 +34,9 @@ void sim_sim_exit(){
 
 void sim_one_exec();
 
-void sim_step_and_dump_wave();
+void sim_step_and_dump_wave(){
+    top -> eval();
+    contextp -> timeInc(1);
+    tfp -> dump(contextp -> time());
+    return;
+}
