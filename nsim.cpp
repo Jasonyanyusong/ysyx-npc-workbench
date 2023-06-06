@@ -211,6 +211,19 @@ uint64_t host_timer_get_time();
 #define DEVICE_RTC_ADDR_HI 0xa000004c
 uint32_t device_timer_write_time_to_sim(bool low_high); // When is false, return low 4 bytes, else high 4 bytes
 
+//---------- Device-Serial ----------
+
+#define DEVICE_SERIAL_ADDR 0xa00003f8
+void device_serial_putchar(uint64_t device_serial_mem_write_data);
+
+//========== Device-Serial ==========
+
+void device_serial_putchar(uint64_t device_serial_mem_write_data){
+    char device_serial_to_print = (char) device_serial_mem_write_data;
+    putc(device_serial_to_print, stderr);
+    return;
+}
+
 //========== Host timer ==========
 
 uint64_t host_timer_get_time_internal(){
@@ -594,6 +607,9 @@ uint64_t mem_pmem_read(uint64_t mem_addr, int mem_length){
     return ret;
 }
 void mem_pmem_write(uint64_t mem_addr, int mem_length, uint64_t mem_data){
+
+    if(mem_addr == DEVICE_SERIAL_ADDR){device_serial_putchar(mem_data); break;}
+
     mem_host_write(mem_guest_to_host(mem_addr), mem_length, mem_data);
 }
 
