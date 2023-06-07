@@ -55,7 +55,7 @@
 //---------- Memory manipulations ----------
 static inline uint64_t mem_host_read(uint8_t *mem_addr, int mem_length);
 static void mem_host_write(void *mem_addr, int mem_length, uint64_t mem_data);
-bool mem_addr_in_bound(uint64_t mem_addr);
+bool mem_addr_in_bound(uint32_t mem_addr);
 
 uint64_t mem_vaddr_ifetch(uint64_t mem_addr, int mem_length);
 uint64_t mem_vaddr_read(uint64_t mem_addr, int mem_length);
@@ -591,7 +591,7 @@ static void mem_host_write(void *mem_addr, int mem_length, uint64_t mem_data){
     }
 }
 
-bool mem_addr_in_bound(uint64_t mem_addr){
+bool mem_addr_in_bound(uint32_t mem_addr){
     if(mem_addr - mem_start_addr > mem_size || mem_addr < mem_start_addr)
         {printf("[memory] address 0x%lx out of bound [0x%x,0x%x]\n", mem_addr, mem_start_addr, mem_end_addr); assert(0); return false; }
     return true;
@@ -613,14 +613,14 @@ uint64_t mem_pmem_read(uint64_t mem_addr, int mem_length){
     if(device_have_rtc && mem_addr == DEVICE_RTC_ADDR_LO){return device_timer_write_time_to_sim(false);}
     if(device_have_rtc && mem_addr == DEVICE_RTC_ADDR_HI){return device_timer_write_time_to_sim(true);}
 
-    uint64_t ret = mem_host_read(mem_guest_to_host(mem_addr), mem_length);
+    uint64_t ret = mem_host_read(mem_guest_to_host((uint32_t)mem_addr), mem_length);
     return ret;
 }
 void mem_pmem_write(uint64_t mem_addr, int mem_length, uint64_t mem_data){
 
     if(device_have_serial && mem_addr == DEVICE_SERIAL_ADDR){device_serial_putchar(mem_data); return;}
 
-    mem_host_write(mem_guest_to_host(mem_addr), mem_length, mem_data);
+    mem_host_write(mem_guest_to_host((uint32_t)mem_addr), mem_length, mem_data);
 }
 
 uint64_t mem_paddr_read(uint64_t mem_addr, int mem_length){
