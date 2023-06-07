@@ -24,6 +24,7 @@
 #define mem_size        mem_end_addr - mem_start_addr + 1
 
 #define print_debug_informations false
+#define generate_dump_wave_file  false
 
 #define difftest_enable false
 
@@ -163,7 +164,7 @@ uint64_t reg_pc, reg_snpc, reg_dnpc;
 
 void reg_get_reg_from_sim(int reg_idx);
 void reg_get_pcreg_from_sim();
-void reg_display();
+void reg_display(bool sdb_print_regs);
 
 //---------- RTL simulation ----------
 
@@ -320,12 +321,12 @@ bool diff_difftest_check_reg(){
 
 void sim_sim_init(){
     printf("\33[1;33m[sim] initializing simulation\33[0m\n");
-    contextp = new VerilatedContext;
-    tfp = new VerilatedVcdC;
+    if(generate_dump_wave_file) {contextp = new VerilatedContext;}
+    if(generate_dump_wave_file) {tfp = new VerilatedVcdC;}
     top = new Vnpc;
-    contextp -> traceEverOn(true);
-    top -> trace(tfp, 0);
-    tfp -> open("dump.vcd");
+    if(generate_dump_wave_file) {contextp -> traceEverOn(true);}
+    if(generate_dump_wave_file) {top -> trace(tfp, 0);}
+    if(generate_dump_wave_file) {tfp -> open("dump.vcd");}
     printf("\33[1;33m[sim] initialize finished\33[0m\n");
 
     // tell NPC the correct start PC
@@ -349,7 +350,7 @@ void sim_sim_init(){
 void sim_sim_exit(){
     printf("\33[1;33m[sim] exit simulation\33[0m\n");
     sim_step_and_dump_wave();
-    tfp -> close();
+    if(generate_dump_wave_file) {tfp -> close();}
     return;
 }
 
@@ -429,7 +430,7 @@ void sim_one_exec(){
         cpu.gpr[i] = nsim_gpr[i].value;
     }
     cpu.pc = top -> io_NPC_sendCurrentPC;
-    reg_display();
+    reg_display(false);
 
     nsim_state.state = NSIM_CONTINUE;
     nsim_state.halt_pc = reg_pc;
@@ -467,8 +468,8 @@ void sim_one_exec(){
 
 void sim_step_and_dump_wave(){
     top -> eval();
-    contextp -> timeInc(1);
-    tfp -> dump(contextp -> time());
+    if(generate_dump_wave_file) {contextp -> timeInc(1);}
+    if(generate_dump_wave_file) {tfp -> dump(contextp -> time());}
     return;
 }
 
@@ -520,8 +521,8 @@ void reg_get_pcreg_from_sim(){
     reg_dnpc = top -> io_NPC_sendNextPC;
     return;
 }
-void reg_display(){
-    if(print_debug_informations){
+void reg_display(bool sdb_print_regs){
+    if(print_debug_informations || sdb_print_regs){
         printf("\33[1;34m[reg] print registers\n");
         printf("pc = 0x%lx, snpc = 0x%lx, dnpc = 0x%lx\n", reg_pc, reg_snpc, reg_dnpc);
         for(int i = 0; i < 32; i = i + 1){
@@ -776,7 +777,7 @@ int sdb_cmd_i(char* args){
     else{
         if (strcmp(args, "r") == 0){
         printf("[sdb] list registers\n");
-        reg_display();
+        reg_display(true);
         //isa_gpr_display();
     }
     else if (strcmp(args, "w") == 0){
