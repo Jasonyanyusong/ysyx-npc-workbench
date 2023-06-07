@@ -251,10 +251,14 @@ uint64_t host_timer_get_time(){
 
 uint32_t device_timer_write_time_to_sim(bool low_high){
     uint64_t time_us = host_timer_get_time();
-    uint32_t ret = 0;
-    if(low_high = 0){ ret = (uint32_t)time_us;}
-    if(low_high = 1){ ret = time_us >> 32;    }
-    return ret;
+    //printf("time_us = 0x%lx\n", time_us);
+    //uint32_t ret;
+    if(low_high == 0){return (uint32_t)time_us;}
+    if(low_high == 1){return time_us >> 32;    }
+
+    // should not reach here!
+    assert(0);
+    return -1;
 }
 
 //========== Differencial Testing ==========
@@ -610,8 +614,8 @@ uint64_t mem_host_to_guest(uint8_t *haddr) { return haddr - mem_pmem + mem_start
 uint64_t mem_pmem_read(uint64_t mem_addr, int mem_length){
     //printf("[memory] mem_pmem_read: mem_guest_to_host(mem_addr) = %p\n", mem_guest_to_host(mem_addr));
 
-    if(device_have_rtc && mem_addr == DEVICE_RTC_ADDR_LO){return device_timer_write_time_to_sim(false);}
-    if(device_have_rtc && mem_addr == DEVICE_RTC_ADDR_HI){return device_timer_write_time_to_sim(true);}
+    if(device_have_rtc && mem_addr == DEVICE_RTC_ADDR_LO){/*printf("[device] access rtc_lo\n");*/ return device_timer_write_time_to_sim(0);}
+    if(device_have_rtc && mem_addr == DEVICE_RTC_ADDR_HI){/*printf("[device] access rtc_hi\n");*/ return device_timer_write_time_to_sim(1);}
 
     uint64_t ret = mem_host_read(mem_guest_to_host((uint32_t)mem_addr), mem_length);
     return ret;
