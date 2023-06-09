@@ -59,8 +59,12 @@ void difftest_skip_dut(int nr_ref, int nr_dut) {
   }
 }
 
+long mem_img_size = -1;
+
 void init_difftest(char *ref_so_file, long img_size, int port) {
   assert(ref_so_file != NULL);
+
+  mem_img_size = img_size;
 
   void *handle;
   handle = dlopen(ref_so_file, RTLD_LAZY);
@@ -117,11 +121,14 @@ void difftest_step(vaddr_t pc, vaddr_t npc) {
 
   if (is_skip_ref) {
     // to skip the checking of an instruction, just copy the reg state to reference design
+    //printf("Difftest skipped ref at pc = 0x%16lx\n", pc);
     ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
+    //ref_difftest_memcpy(RESET_VECTOR, guest_to_host(RESET_VECTOR), CONFIG_MSIZE, DIFFTEST_TO_REF);
     is_skip_ref = false;
     return;
   }
 
+  //ref_difftest_memcpy(RESET_VECTOR, guest_to_host(RESET_VECTOR), mem_img_size, DIFFTEST_TO_REF);
   ref_difftest_exec(1);
   ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);
 

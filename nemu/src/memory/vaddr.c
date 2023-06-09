@@ -15,15 +15,20 @@
 
 #include <isa.h>
 #include <memory/paddr.h>
+#include "cpu/difftest.h"
 
 word_t vaddr_ifetch(vaddr_t addr, int len) {
   return paddr_read(addr, len);
 }
 
 word_t vaddr_read(vaddr_t addr, int len) {
+  word_t ret = paddr_read(addr, len);
+  //printf("In vaddr_read at pc = 0x%8lx, addr = 0x%16lx, len = %d, ret  = 0x%16lx\n", cpu.pc, addr, len, ret);
   return paddr_read(addr, len);
 }
 
 void vaddr_write(vaddr_t addr, int len, word_t data) {
+  //printf("In vaddr_writeat pc = 0x%8lx, addr = 0x%16lx, len = %d, data = 0x%16lx\n", cpu.pc, addr, len, data);
   paddr_write(addr, len, data);
+  //ref_difftest_memcpy(addr - 8, (void *)guest_to_host(addr), len + 16, DIFFTEST_TO_REF);
 }

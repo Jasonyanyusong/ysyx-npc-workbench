@@ -17,6 +17,7 @@
 #define __DEVICE_MAP_H__
 
 #include <cpu/difftest.h>
+#include "isa.h"
 
 typedef void(*io_callback_t)(uint32_t, int, bool);
 uint8_t* new_space(int size);
@@ -30,7 +31,8 @@ typedef struct {
   io_callback_t callback;
 } IOMap;
 
-static inline bool map_inside(IOMap *map, paddr_t addr) {
+static bool map_inside(IOMap *map, paddr_t addr) {
+  //printf("At pc = 0x%8lx, addr: 0x%8x, Map \"%s\" [0x%8x,0x%8x]\n", cpu.pc, addr, map -> name, map -> low, map -> high);
   return (addr >= map->low && addr <= map->high);
 }
 
