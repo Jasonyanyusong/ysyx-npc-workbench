@@ -82,7 +82,7 @@ config TARGET_AM
   bool "Application on Abstract-Machine (DON'T CHOOSE)"
 endchoice
 
-menu "RISCV64 Instruction Extensions"
+menu "RISCV Unprivileged Settings"
 config RV64M
   bool "M   Standard Extension for Integer Multiplication and Division"
   default n
@@ -107,6 +107,19 @@ config RV64C
 config RV64V
   bool "V   Standard Extension for Vector Operations"
   default n
+endmenu
+
+menu "RISCV Privileged Settings"
+choice 
+  prompt "Supported privilege modes"
+  default RPS_M
+config RPS_M
+  bool "M Mode (Simple embedded systems)"
+config RPS_MS
+  bool "M, S Mode (Secure embedded systems)"
+config RPS_MSU
+  bool "M, S, U Mode (Systems running Unix-like operating systems)"
+endchoice
 endmenu
 
 menu "Build Options"
