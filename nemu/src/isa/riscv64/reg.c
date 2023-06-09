@@ -25,59 +25,56 @@ const char *regs[] = {
   "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
 };
 
-const char *regs_alias[] = {
-  "x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7",
-  "x8", "x9", "x10", "x11", "x12", "x13", "x14", "x15",
-  "x16", "x17", "x18", "x19", "x20", "x21", "x22", "x23",
-  "x24", "x25", "x26", "x27", "x28", "x29", "x30", "x31"
-};
-
 word_t ans[32] = {0};
 
-void isa_reg_display() {
+void isa_display_gpr(){
+  printf("GPR:\n");
+  for(int i = 0; i < 32; i = i + 1){
+    printf("x%2d = %16lx ", i, cpu.gpr[i]);
+    if((i + 1) % 8 == 0){
+      printf("\n");
+    }
+  }
+  printf("\n");
   return;
 }
 
-void isa_gpr_display() {  
-  printf("**************************************************************************NEMU-RV64 Integer Registers***************************************************************************\n");
-  printf("|    Name     |         Hex         |           Dec           |            Oct            |                                        Bin                                         |\n");
-  for (int i = 0; i < 32; i = i + 1)
-  {
-    char reg_value_bin_string[65] = {0};
-    uint64_t get_reg_value = cpu.gpr[i];
-    for(int i = 0; i <= 63; i = i + 1)
-    {
-      if(get_reg_value >= pow(2, 63 - i))
-      {
-        reg_value_bin_string[i] = '1';
-        get_reg_value = get_reg_value - pow(2, 63 - i);
-      }
-      else
-      {
-        reg_value_bin_string[i] = '0';
-      }
+void isa_display_fpr(){
+  printf("FPR:\n");
+  for(int i = 0; i < 32; i = i + 1){
+    printf("f%2d = %16lx ", i, cpu.fpr[i]);
+    if((i + 1) % 8 == 0){
+      printf("\n");
     }
-    reg_value_bin_string[64] = '\0';
-    char display_reg_string[79] = {0};
-    for(int parts_number = 0; parts_number < 16; parts_number = parts_number + 1)
-    {
-      for(int secter_number = 0; secter_number <= 4; secter_number = secter_number + 1)
-      {
-        if(secter_number != 4)
-        {
-          display_reg_string[5 * parts_number + secter_number] = reg_value_bin_string[4 * parts_number + secter_number];
-        }
-        else
-        {
-          display_reg_string[5 * parts_number + secter_number] = ' ';
-        }
-      }
-    }
-    display_reg_string[79] = '\0';
-    printf("| %4s (%4s) | 0x %16lx | 0d %20ld | 0o %22lo | 0b %s |\n", regs[i], regs_alias[i], cpu.gpr[i], cpu.gpr[i], cpu.gpr[i], display_reg_string);
   }
-  printf("**************************************************************************NEMU-RV64 Integer Registers***************************************************************************\n");
+  printf("\n");
+  return;
 }
+
+void isa_display_csr(){
+  printf("CSR:\n");
+  for(int i = 0; i < 4096; i = i + 1){
+    printf("csr0x%3x = %16lx ", i, cpu.csr[i]);
+    if((i + 1) % 8 == 0){
+      printf("\n");
+    }
+  }
+  printf("\n");
+  return;
+}
+
+void isa_reg_display() {
+  isa_display_gpr();
+  isa_display_fpr();
+  isa_display_csr();
+  return;
+}
+
+/*void isa_gpr_display() {  
+  isa_display_gpr();
+  isa_display_fpr();
+  isa_display_csr();
+}*/
 
 word_t isa_reg_str2val(const char *s, bool *success) {
   *success = true;
@@ -90,18 +87,4 @@ word_t isa_reg_str2val(const char *s, bool *success) {
   }
   *success = false;
   return 0;
-}
-
-word_t isa_reg2val(int regNo)
-{
-  return cpu.gpr[regNo];
-}
-
-word_t* isa_reg2val_all()
-{
-  for(int i = 0; i < 32; i = i + 1)
-  {
-    ans[i] = isa_reg2val(i);
-  }
-  return ans;
 }
