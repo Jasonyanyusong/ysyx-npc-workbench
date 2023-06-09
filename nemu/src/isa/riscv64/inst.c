@@ -139,6 +139,8 @@ static int decode_exec(Decode *s) {
   INSTPAT("0000000 ????? ????? 110 ????? 01100 11", or     , R, IFDEF(CONFIG_ShowInstName, printf("OR\n"));     R(rd) = src1 | src2);
   INSTPAT("0000000 ????? ????? 111 ????? 01100 11", and    , R, IFDEF(CONFIG_ShowInstName, printf("AND\n"));    R(rd) = src1 & src2);
   INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak , N, IFDEF(CONFIG_ShowInstName, printf("EBREAK\n")); NEMUTRAP(s->pc, R(10)));
+  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, IFDEF(CONFIG_ShowInstName, printf("ECALL\n"));  s -> dnpc = isa_raise_intr(R(17), s -> pc));
+
   INSTPAT("??????? ????? ????? 110 ????? 00000 11", lwu    , I, IFDEF(CONFIG_ShowInstName, printf("LWU\n"));    R(rd) = Mr(src1 + imm, 4));
   INSTPAT("??????? ????? ????? 011 ????? 00000 11", ld     , I, IFDEF(CONFIG_ShowInstName, printf("LD\n"));     R(rd) = Mr(src1 + imm, 8));
   INSTPAT("??????? ????? ????? 011 ????? 01000 11", sd     , S, IFDEF(CONFIG_ShowInstName, printf("SD\n"));     Mw(src1 + imm, 8, src2));

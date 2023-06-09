@@ -15,12 +15,20 @@
 
 #include <isa.h>
 
+#define CSR_MSTATUS 0x300
+#define CSR_MTVEC   0x305
+#define CSR_MEPC    0x341
+#define CSR_MCAUSE  0x342
+
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   /* TODO: Trigger an interrupt/exception with ``NO''.
    * Then return the address of the interrupt/exception vector.
    */
+  printf("CPU raised interupt at pc 0x%lx with interrupt NO.%d, mevtc = 0x%lx\n", epc, NO, cpu.csr[CSR_MTVEC]);
+  cpu.csr[CSR_MEPC] = epc;
+  cpu.csr[CSR_MCAUSE] = NO;
 
-  return 0;
+  return cpu.csr[CSR_MTVEC];
 }
 
 word_t isa_query_intr() {
