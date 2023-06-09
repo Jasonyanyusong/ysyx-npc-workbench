@@ -57,7 +57,7 @@ static int cmd_c(char *args) {
 static int cmd_si(char *args){
   if (args == NULL){
     cpu_exec(1);
-    isa_gpr_display();
+    //isa_reg_display();
   }
   else{
     int cmd_si_n;
@@ -77,12 +77,11 @@ static int cmd_info(char *args){
     return 0;
   }
   else{
-    if (strcmp(args, "r") == 0){
-      isa_gpr_display();
-    }
-  else if (strcmp(args, "w") == 0){
-      print_WP();
-    }
+    if      (strcmp(args, "r") == 0)   {isa_reg_display();}
+    else if (strcmp(args, "w") == 0)   {print_WP();       }
+    else if (strcmp(args, "gpr") == 0) {isa_display_gpr();}
+    else if (strcmp(args, "fpr") == 0) {isa_display_fpr();}
+    else if (strcmp(args, "csr") == 0) {isa_display_csr();}
   else{
       printf("Subcommand Not Defined\n");
     }
@@ -91,30 +90,39 @@ static int cmd_info(char *args){
 }
 
 void print_memory_1(int allisa_start_memory_address, int steps){
-  printf("******************************************************************************\n");
-  printf("|  Address   | 1b Phys (Hex) | 1b Virt (Hex) | 1b Phys (Dec) | 1b Virt (Dec) |\n");
+  printf("******************************************************************************************************************\n");
+  printf("|  Address   |     1b Phys (Hex)     |     1b Virt (Hex)     |      1b Phys (Dec)      |      1b Virt (Dec)      |\n");
   for (int i = allisa_start_memory_address; i < allisa_start_memory_address + steps; i = i + 1){
-    printf("| 0x%x | 0x   %8lx | 0x   %8lx | 0x %10ld | 0x %10ld |\n", i, paddr_read(i, 1), vaddr_read(i, 1), paddr_read(i, 1), vaddr_read(i, 1));
+    printf("| 0x%x |     0x   %8lx     |     0x   %8lx     |      0x %10ld      |      0x %10ld      |\n", i, paddr_read(i, 1), vaddr_read(i, 1), paddr_read(i, 1), vaddr_read(i, 1));
   }
-  printf("******************************************************************************\n\n");
+  printf("******************************************************************************************************************\n\n");
 }
 
 void print_memory_2(int allisa_start_memory_address, int steps){
-  printf("******************************************************************************\n");
-  printf("|  Address   | 2b Phys (Hex) | 2b Virt (Hex) | 2b Phys (Dec) | 2b Virt (Dec) |\n");
+  printf("******************************************************************************************************************\n");
+  printf("|  Address   |     2b Phys (Hex)     |     2b Virt (Hex)     |      2b Phys (Dec)      |      2b Virt (Dec)      |\n");
   for (int i = allisa_start_memory_address; i < allisa_start_memory_address + steps; i = i + 2){
-    printf("| 0x%x | 0x   %8lx | 0x   %8lx | 0x %10ld | 0x %10ld |\n", i, paddr_read(i, 2), vaddr_read(i, 2), paddr_read(i, 2), vaddr_read(i, 2));
+    printf("| 0x%x |     0x   %8lx     |     0x   %8lx     |      0x %10ld      |      0x %10ld      |\n", i, paddr_read(i, 2), vaddr_read(i, 2), paddr_read(i, 2), vaddr_read(i, 2));
   }
-  printf("******************************************************************************\n\n");
+  printf("******************************************************************************************************************\n\n");
 }
 
 void print_memory_4(int allisa_start_memory_address, int steps){
-  printf("******************************************************************************\n");
-  printf("|  Address   | 4b Phys (Hex) | 4b Virt (Hex) | 4b Phys (Dec) | 4b Virt (Dec) |\n");
+  printf("******************************************************************************************************************\n");
+  printf("|  Address   |     4b Phys (Hex)     |     4b Virt (Hex)     |      4b Phys (Dec)      |      4b Virt (Dec)      |\n");
   for (int i = allisa_start_memory_address; i < allisa_start_memory_address + steps; i = i + 4){
-    printf("| 0x%x | 0x   %8lx | 0x   %8lx | 0x %10ld | 0x %10ld |\n", i, paddr_read(i, 4), vaddr_read(i, 4), paddr_read(i, 4), vaddr_read(i, 4));
+    printf("| 0x%x |     0x   %8lx     |     0x   %8lx     |      0x %10ld      |      0x %10ld      |\n", i, paddr_read(i, 4), vaddr_read(i, 4), paddr_read(i, 4), vaddr_read(i, 4));
   }
-  printf("******************************************************************************\n\n");
+  printf("******************************************************************************************************************\n\n");
+}
+
+void print_memory_8(int allisa_start_memory_address, int steps){
+  printf("******************************************************************************************************************\n");
+  printf("|  Address   |     8b Phys (Hex)     |     8b Virt (Hex)     |      8b Phys (Dec)      |      8b Virt (Dec)      |\n");
+  for (int i = allisa_start_memory_address; i < allisa_start_memory_address + steps; i = i + 8){
+    printf("| 0x%x | 0x   %16lx | 0x   %16lx | 0x %20ld | 0x %20ld |\n", i, paddr_read(i, 8), vaddr_read(i, 8), paddr_read(i, 8), vaddr_read(i, 8));
+  }
+  printf("******************************************************************************************************************\n\n");
 }
 
 static int cmd_x(char *args){
@@ -127,6 +135,7 @@ static int cmd_x(char *args){
   print_memory_1(start_memory_address, print_length);
   print_memory_2(start_memory_address, print_length);
   print_memory_4(start_memory_address, print_length);
+  print_memory_8(start_memory_address, print_length);
   return 0;
 }
 
