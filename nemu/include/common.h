@@ -31,6 +31,9 @@
 #include <stdlib.h>
 #endif
 
+typedef __int128_t int128_t;
+typedef __uint128_t uint128_t;
+
 #if CONFIG_MBASE + CONFIG_MSIZE > 0x100000000ul
 #define PMEM64 1
 #endif
