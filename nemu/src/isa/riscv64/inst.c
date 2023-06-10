@@ -23,7 +23,11 @@
 // #include <stdlib.h>
 
 #define R(i) gpr(i)
-#define CSR(i) csr(i)
+#define C(i) csr(i)
+#define F(i) fpr(i)
+//#define FH(i) BITS(F(i), 15, 0)
+//#define FS(i) BITS(F(i), 31, 0)
+//#define FD(i) BITS(F(i), 63, 0)
 #define Mr vaddr_read
 #define Mw vaddr_write
 
@@ -91,6 +95,30 @@ static int decode_exec(Decode *s) {
 
   int rs1 = BITS(s->isa.inst.val, 19, 15);
   int rs2 = BITS(s->isa.inst.val, 24, 20);
+  int rs3 = BITS(s->isa.inst.val, 31, 27);
+
+  uint32_t  FudianS_int1, FudianS_int2, FudianS_int3;
+  float     FudianS_src1, FudianS_src2, FudianS_src3;
+  uint64_t  FudianD_int1, FudianD_int2, FudianD_int3;
+  double    FudianD_src1, FudianD_src2, FudianD_src3;
+
+  FudianS_int1 = BITS(F(rs1), 31, 0);
+  FudianD_int1 = BITS(F(rs1), 63, 0);
+  memcpy(&FudianS_src1, &FudianS_int1, sizeof(float));
+  memcpy(&FudianD_src1, &FudianD_int1, sizeof(double));
+  //printf("rs1 = %d, float = %f, double = %e\n", rs1, FudianS_int1, FudianD_int1);
+
+  FudianS_int2 = BITS(F(rs2), 31, 0);
+  FudianD_int2 = BITS(F(rs2), 63, 0);
+  memcpy(&FudianS_src2, &FudianS_int2, sizeof(float));
+  memcpy(&FudianD_src2, &FudianD_int2, sizeof(double));
+  //printf("rs2 = %d, float = %f, double = %e\n", rs2, FudianS_int2, FudianD_int2);
+
+  FudianS_int3 = BITS(F(rs3), 31, 0);
+  FudianD_int3 = BITS(F(rs3), 63, 0);
+  memcpy(&FudianS_src3, &FudianS_int3, sizeof(float));
+  memcpy(&FudianD_src3, &FudianD_int3, sizeof(double));
+  //printf("rs3 = %d, float = %f, double = %e\n", rs3, FudianS_int3, FudianD_int3);
 
 #ifdef CONFIG_RV64A
   bool aq = BITS(s->isa.inst.val, 26, 26);
@@ -153,12 +181,12 @@ static int decode_exec(Decode *s) {
   INSTPAT("0000000 ????? ????? 101 ????? 01110 11", srlw   , R, IFDEF(CONFIG_ShowInstName, printf("SRLW\n"));   R(rd) = SEXT((unsigned)BITS(src1, 31, 0) >> src2, 32));
   INSTPAT("0100000 ????? ????? 101 ????? 01110 11", sraw   , R, IFDEF(CONFIG_ShowInstName, printf("SRAW\n"));   R(rd) = SEXT((signed)BITS(src1, 31, 0) >> src2, 32));
 
-  INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , I, IFDEF(CONFIG_ShowInstName, printf("CSRRW\n"));  uint64_t oldCSR = CSR(imm); CSR(imm) = src1; R(rd) = oldCSR);
-  INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  , I, IFDEF(CONFIG_ShowInstName, printf("CSRRS\n"));  uint64_t oldCSR = CSR(imm); CSR(imm) = src1 | oldCSR; R(rd) = oldCSR);
-  INSTPAT("??????? ????? ????? 011 ????? 11100 11", csrrc  , I, IFDEF(CONFIG_ShowInstName, printf("CSRRC\n"));  uint64_t oldCSR = CSR(imm); CSR(imm) = src1 & oldCSR; R(rd) = oldCSR);
-  INSTPAT("??????? ????? ????? 101 ????? 11100 11", csrrwi , I, IFDEF(CONFIG_ShowInstName, printf("CSRRWI\n")); uint64_t oldCSR = CSR(imm); CSR(imm) = rs1; R(rd) = oldCSR);
-  INSTPAT("??????? ????? ????? 110 ????? 11100 11", csrrsi , I, IFDEF(CONFIG_ShowInstName, printf("CSRRSI\n")); uint64_t oldCSR = CSR(imm); CSR(imm) = rs1 | oldCSR; R(rd) = oldCSR);
-  INSTPAT("??????? ????? ????? 111 ????? 11100 11", csrrci , I, IFDEF(CONFIG_ShowInstName, printf("CSRRCI\n")); uint64_t oldCSR = CSR(imm); CSR(imm) = rs1 & oldCSR; R(rd) = oldCSR);
+  INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , I, IFDEF(CONFIG_ShowInstName, printf("CSRRW\n"));  uint64_t oldCSR = C(imm); C(imm) = src1; R(rd) = oldCSR);
+  INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  , I, IFDEF(CONFIG_ShowInstName, printf("CSRRS\n"));  uint64_t oldCSR = C(imm); C(imm) = src1 | oldCSR; R(rd) = oldCSR);
+  INSTPAT("??????? ????? ????? 011 ????? 11100 11", csrrc  , I, IFDEF(CONFIG_ShowInstName, printf("CSRRC\n"));  uint64_t oldCSR = C(imm); C(imm) = src1 & oldCSR; R(rd) = oldCSR);
+  INSTPAT("??????? ????? ????? 101 ????? 11100 11", csrrwi , I, IFDEF(CONFIG_ShowInstName, printf("CSRRWI\n")); uint64_t oldCSR = C(imm); C(imm) = rs1; R(rd) = oldCSR);
+  INSTPAT("??????? ????? ????? 110 ????? 11100 11", csrrsi , I, IFDEF(CONFIG_ShowInstName, printf("CSRRSI\n")); uint64_t oldCSR = C(imm); C(imm) = rs1 | oldCSR; R(rd) = oldCSR);
+  INSTPAT("??????? ????? ????? 111 ????? 11100 11", csrrci , I, IFDEF(CONFIG_ShowInstName, printf("CSRRCI\n")); uint64_t oldCSR = C(imm); C(imm) = rs1 & oldCSR; R(rd) = oldCSR);
 
   // RV64M
   #ifdef CONFIG_RV64M
