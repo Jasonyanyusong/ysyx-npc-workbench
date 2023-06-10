@@ -76,10 +76,11 @@ static inline void update_screen() {
 void vga_update_screen() {
   // TODO: call `update_screen()` when the sync register is non-zero,
   // then zero out the sync register
-  uint64_t gpu_sync_reg_addr = CONFIG_VGA_CTL_MMIO + 4;
-  if(paddr_read(gpu_sync_reg_addr, 4) != 0){
+  //uint64_t gpu_sync_reg_addr = CONFIG_VGA_CTL_MMIO + 4;
+  //printf("Check and update screen\n");
+  if(vgactl_port_base[1] != 0){
     update_screen();
-    paddr_write(gpu_sync_reg_addr, 4, 0);
+    vgactl_port_base[1] = 0;
   }
 }
 
