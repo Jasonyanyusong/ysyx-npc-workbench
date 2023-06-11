@@ -97,7 +97,7 @@ static int decode_exec(Decode *s) {
   int rs2 = BITS(s->isa.inst.val, 24, 20);
   int rs3 = BITS(s->isa.inst.val, 31, 27);
 
-  uint16_t     FudianH_int1, FudianH_int2, FudianH_int3;
+  /*uint16_t     FudianH_int1, FudianH_int2, FudianH_int3;
   float        FudianH_src1, FudianH_src2, FudianH_src3;
   uint32_t     FudianS_int1, FudianS_int2, FudianS_int3;
   float        FudianS_src1, FudianS_src2, FudianS_src3;
@@ -131,7 +131,7 @@ static int decode_exec(Decode *s) {
   memcpy(&FudianS_src3, &FudianS_int3, sizeof(float));
   memcpy(&FudianD_src3, &FudianD_int3, sizeof(double));
   memcpy(&FudianQ_src3, &FudianQ_int3, sizeof(long double));
-  //printf("rs3 = %d, float = %f, double = %e\n", rs3, FudianS_int3, FudianD_int3);
+  //printf("rs3 = %d, float = %f, double = %e\n", rs3, FudianS_int3, FudianD_int3);*/
 
 #ifdef CONFIG_RV64A
   bool aq = BITS(s->isa.inst.val, 26, 26);
