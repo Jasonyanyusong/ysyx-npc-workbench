@@ -269,6 +269,8 @@ static IOMap* device_mmio_fetch_mmio_map(uint64_t addr);
 void device_report_mmio_overlap(const char* name1, uint64_t left1, uint64_t right1, const char* name2, uint64_t left2, uint64_t right2);
 void device_add_mmio_map(const char *name, uint64_t addr, void *space, uint32_t len, io_callback_t callback);
 
+void device_mmio_check_bound(IOMap *map, uint64_t addr);
+
 uint64_t device_map_read(uint64_t addr, int len, IOMap *map);
 void device_map_write(uint64_t addr, int len, uint64_t data, IOMap *map);
 
@@ -332,6 +334,23 @@ void device_add_mmio_map(const char *name, uint64_t addr, void *space, uint32_t 
     device_maps[device_nr_map] = (IOMap){ .name = name, .low = addr, .high = addr + len - 1, .space = space, .callback = callback};
     printf("[device] name \"%s\", left 0x%lx, right 0x%lx, added to mmio map\n", name, left, right);
     return;
+}
+
+void device_mmio_check_bound(IOMap *map, uint64_t addr){
+    if(map == NULL){
+        // should not reach here!
+        printf("[device] error: IOMap is NULL\n");
+        assert(0);
+        return;
+    }
+    else{
+        if(addr > map -> high || addr < map -> low){
+            // should not reach here!
+            printf("[device] error: address 0x%lx is out of bound @\"%s\"[0x%lx,0x%lx]\n", addr, map -> name, map -> low, map -> high);
+            assert(0);
+            return;
+        }
+    }
 }
 
 //========== Devices ==========
