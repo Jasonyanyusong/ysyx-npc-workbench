@@ -32,6 +32,9 @@
 #define device_have_rtc      true
 #define device_have_keyboard false
 #define device_have_vga      false
+#define device_have_audio    false
+#define device_have_disk     false
+#define device_have_sdcard   false
 
 //========== Include Headers ==========
 
@@ -218,6 +221,126 @@ uint64_t host_timer_get_time();
 #define DEVICE_RTC_ADDR_LO 0xa0000048
 #define DEVICE_RTC_ADDR_HI 0xa000004c
 uint32_t device_timer_write_time_to_sim(bool low_high); // When is false, return low 4 bytes, else high 4 bytes
+
+//---------- Devices ----------
+
+void device_init_map();
+void device_init_serial();
+void device_init_timer();
+void device_init_vga()
+void device_init_i8042();
+void device_init_audio();
+void device_init_disk();
+void device_init_sdcard();
+void device_init_alarm();
+void device_send_key(uint8_t, bool);
+void device_vga_update_screen();
+void device_update();
+void device_init_devices();
+
+//typedef uint16_t ioaddr_t;
+
+//---------- Device: Map & MMIO----------
+
+#define DEVICE_MAP_IO_SPACE_MAX (2 * 1024 * 1024)
+#define DEVICE_NR_MAP 16
+
+static uint8_t *device_map_io_space = NULL;
+static uint8_t *device_map_p_space  = NULL;
+
+typedef void(*io_callback_t)(uint32_t, int, bool);
+
+typedef struct {
+    const char *name;
+    uint64_t low;
+    uint64_t high;
+    void *space;
+    io_callback_t callback;
+} IOMap;
+
+static IOMap device_maps[DEVICE_NR_MAP] = {};
+static int device_nr_map = 0;
+
+static bool device_map_inside(IOMap *map, uint64_t addr);
+static int  device_find_mapID_by_addr(IOMap *maps, int size, uint64_t addr);
+
+static IOMap* device_mmio_fetch_mmio_map(uint64_t addr);
+
+void device_report_mmio_overlap(const char* name1, uint64_t left1, uint64_t right1, const char* name2, uint64_t left2, uint64_t right2);
+void device_add_mmio_map(const char *name, uint64_t addr, void *space, uint32_t len, io_callback_t callback);
+
+uint64_t device_map_read(uint64_t addr, int len, IOMap *map);
+void device_map_write(uint64_t addr, int len, uint64_t data, IOMap *map);
+
+uint8_t* device_map_new_space(int size);
+static void device_check_bound(IOMap *map, uint64_t addr);
+static void device_invoke_callback(io_callback_t c, uint64_t offset, int len, bool is_write);
+
+//========== Device: Map & MMIO ==========
+
+static bool device_map_inside(IOMap *map, uint64_t addr){
+    //printf("At pc = 0x%8lx, addr: 0x%8x, Map \"%s\" [0x%8x,0x%8x]\n", cpu.pc, addr, map -> name, map -> low, map -> high);
+    return (addr >= map->low && addr <= map->high);
+}
+
+int device_find_mapID_by_addr(IOMap *maps, int size, uint64_t addr){
+    int i;
+    //printf("[find_mapid_by_addr] paddr is 0x%8x\n", addr);
+    for(i = 0; i < size; i = i + 1){
+        if(device_map_inside(maps + i, addr)){
+            //difftest_skip_ref(); //As we use NEMU to difftest, the behavior of decices are same with NSIM
+            return i;
+        }
+    }
+    // should not reach here!
+    return -1;
+}
+
+static IOMap* device_mmio_fetch_mmio_map(uint64_t addr){
+    //printf("[fetch_mmio_map] paddr is 0x%8x\n", addr);
+    int mapid = device_find_mapID_by_addr(device_maps, device_nr_map, addr);
+    return (mapid == -1 ? NULL : &device_maps[mapid]);
+}
+
+static void device_report_mmio_overlap(const char* name1, uint64_t left1, uint64_t right1, const char* name2, uint64_t left2, uint64_t right2){
+    printf("[device] error: MMIO region \"%s\"@[0x%lx,0x%lx] is overlapped with \"%s\"@[0x%lx,0x%lx]\n", name1, left1, right1, name2, left2, right2);
+    // should not reach here!
+    assert(0);
+    return;
+}
+
+void device_add_mmio_map(const char *name, uint64_t addr, void *space, uint32_t len, io_callback_t callback){
+    assert(device_nr_map < DEVICE_NR_MAP); // so that we have space to add another device
+    uint64_t left = addr;
+    uint64_t right = addr + len - 1;
+    printf("[device] name \"%s\", left 0x%lx, right 0x%lx check before add to mmio map\n", name, left, right);
+    if(mem_addr_in_bound(left) || mem_addr_in_bound(right)){
+        // should not reach here!
+        device_report_mmio_overlap(name, left, right, "pmem", mem_start_addr, mem_end_addr);
+        assert(0);
+        return;
+    }
+    for(int i = 0; i < device_nr_map; i = i + 1){
+        if(left <= device_maps[i].high && right >= device_maps[i].low){
+            // should not reach here!
+            device_report_mmio_overlap(name, left, right, device_maps[i].name, device_maps[i].low, device_maps[i].high);
+            assert(0);
+            return;
+        }
+    }
+    printf("[device] name \"%s\", left 0x%lx, right 0x%lx check passed, adding to mmio map\n", name, left, right);
+    device_maps[device_nr_map] = (IOMap){ .name = name, .low = addr, .high = addr + len - 1, .space = space, .callback = callback};
+    printf("[device] name \"%s\", left 0x%lx, right 0x%lx, added to mmio map\n", name, left, right);
+    return;
+}
+
+//========== Devices ==========
+
+void device_init_map(){
+    // TODO
+    assert(0);
+    return;
+}
 
 //---------- Device-Serial ----------
 
