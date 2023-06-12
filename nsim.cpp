@@ -407,8 +407,9 @@ uint8_t* device_map_new_space(int size){
 //========== Devices ==========
 
 void device_init_map(){
-    // TODO
-    assert(0);
+    device_map_io_space = malloc(DEVICE_MAP_IO_SPACE_MAX);
+    assert(device_map_io_space);
+    device_map_p_space = device_map_io_space;
     return;
 }
 
