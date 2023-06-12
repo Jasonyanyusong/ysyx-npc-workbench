@@ -245,6 +245,10 @@ void device_init_devices();
 #define DEVICE_MAP_IO_SPACE_MAX (2 * 1024 * 1024)
 #define DEVICE_NR_MAP 16
 
+#define PAGE_SHIFT        12
+#define PAGE_SIZE         (1ul << PAGE_SHIFT)
+#define PAGE_MASK         (PAGE_SIZE - 1)
+
 static uint8_t *device_map_io_space = NULL;
 static uint8_t *device_map_p_space  = NULL;
 
@@ -274,9 +278,14 @@ void device_mmio_check_bound(IOMap *map, uint64_t addr);
 uint64_t device_map_read(uint64_t addr, int len, IOMap *map);
 void device_map_write(uint64_t addr, int len, uint64_t data, IOMap *map);
 
+void device_mmio_invoke_callback(io_callback_t c, paddr_t offset, int len, bool is_write);
+
+uint64_t device_mmio_read(uint64_t addr, int len);
+void device_mmio_write(uint64_t addr, int len, uint64_t data);
+
 uint8_t* device_map_new_space(int size);
-static void device_check_bound(IOMap *map, uint64_t addr);
-static void device_invoke_callback(io_callback_t c, uint64_t offset, int len, bool is_write);
+//static void device_check_bound(IOMap *map, uint64_t addr);
+//static void device_invoke_callback(io_callback_t c, uint64_t offset, int len, bool is_write);
 
 //========== Device: Map & MMIO ==========
 
@@ -351,6 +360,48 @@ void device_mmio_check_bound(IOMap *map, uint64_t addr){
             return;
         }
     }
+}
+
+void device_mmio_invoke_callback(io_callback_t c, paddr_t offset, int len, bool is_write){
+    if (c != NULL) { c(offset, len, is_write); }
+    return;
+}
+
+uint64_t device_map_read(uint64_t addr, int len, IOMap *map){
+    assert(len >= 1 && len <= 8);
+    device_mmio_check_bound(map, addr);
+    uint64_t offset = addr - map -> low;
+    device_mmio_invoke_callback(map -> callback, offset, len, false);
+    uint64_t ret = mem_host_read(map -> space + offset, len);
+    return ret;
+}
+
+void device_map_write(uint64_t addr, int len, uint64_t data, IOMap *map){
+    assert(len >= 1 && len <= 8);
+    device_mmio_check_bound(map, addr);
+    uint64_t offset = addr - map -> low;
+    mem_host_write(map -> space, len, data);
+    device_mmio_invoke_callback(map -> callback, offset, len, true);
+    return;
+}
+
+uint64_t device_mmio_read(uint64_t addr, int len){
+    //printf("[mmio_read] paddr is 0x%8x\n", addr);
+    return device_map_read(addr, len, device_mmio_fetch_mmio_map(addr));
+}
+
+void device_mmio_write(uint64_t addr, int len, uint64_t data){
+    //printf("[mmio_write] paddr is 0x%8x\n", addr);
+    device_map_write(addr, len, data, device_mmio_fetch_mmio_map(addr));
+    return;
+}
+
+uint8_t* device_map_new_space(int size){
+    uint8_t *p = device_map_p_space;
+    size = (size + (PAGE_SIZE - 1)) & ~PAGE_MASK;
+    device_map_p_space += size;
+    assert(device_map_p_space - device_map_io_space < DEVICE_MAP_IO_SPACE_MAX);
+    return p;
 }
 
 //========== Devices ==========
