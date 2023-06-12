@@ -238,6 +238,12 @@ void device_vga_update_screen();
 void device_update();
 void device_init_devices();
 
+void device_serial_io_handler(uint32_t offset, int len, bool is_write);
+
+#define DEVICE_SERIAL_BASE     0xa00003f8
+#define DEVICE_SERIO_CH_OFFSET 0
+static uint8_t *device_serial_base = NULL;
+
 //typedef uint16_t ioaddr_t;
 
 //---------- Device: Map & MMIO----------
@@ -410,6 +416,31 @@ void device_init_map(){
     device_map_io_space = malloc(DEVICE_MAP_IO_SPACE_MAX);
     assert(device_map_io_space);
     device_map_p_space = device_map_io_space;
+    return;
+}
+
+void device_init_devices(){
+    device_init_map();
+    if(device_have_serial){device_init_serial();}
+    return;
+}
+
+//========== Device: Serial ==========
+
+void device_serial_io_handler(uint32_t offset, int len, bool is_write){
+    assert(len == 1);
+    switch(offset){
+        case DEVICE_SERIO_CH_OFFSET:
+            if (is_write == true) {putc(ch, stderr);}
+            else {printf("[decive-serio] error: serio do not support read\n"); assert(0);}
+            break;
+        default: {printf("[device-serio] error: do not support offset = %d\n", offset); assert(0); break;}
+    }
+}
+
+void device_init_serial(){
+    device_serial_base = device_map_new_space(8);
+    device_add_mmio_map("serial", DEVICE_SERIAL_BASE, device_serial_base, 8, device_serial_io_handler);
     return;
 }
 
