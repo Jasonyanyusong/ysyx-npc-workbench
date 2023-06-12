@@ -15,7 +15,7 @@
 ***************************************************************************************/
 
 /*Usage:
-    Linux: "verilator -Wno-lint -Wno-style --cc --exe --build --trace nsim.cpp npc.v -LDFLAGS -lreadline -lSDL2"
+    Linux: "verilator -Wno-lint -Wno-style --cc --exe --build --trace nsim.cpp npc.v -LDFLAGS -lreadline -LDFLAGS -lSDL2"
 */
 
 //========== Macro Configurations ==========
@@ -227,7 +227,7 @@ uint32_t device_timer_write_time_to_sim(bool low_high); // When is false, return
 void device_init_map();
 void device_init_serial();
 void device_init_timer();
-void device_init_vga()
+void device_init_vga();
 void device_init_i8042();
 void device_init_audio();
 void device_init_disk();
@@ -291,7 +291,7 @@ void device_mmio_check_bound(IOMap *map, uint64_t addr);
 uint64_t device_map_read(uint64_t addr, int len, IOMap *map);
 void device_map_write(uint64_t addr, int len, uint64_t data, IOMap *map);
 
-void device_mmio_invoke_callback(io_callback_t c, paddr_t offset, int len, bool is_write);
+void device_mmio_invoke_callback(io_callback_t c, uint64_t offset, int len, bool is_write);
 
 uint64_t device_mmio_read(uint64_t addr, int len);
 void device_mmio_write(uint64_t addr, int len, uint64_t data);
@@ -331,7 +331,7 @@ static IOMap* device_mmio_fetch_mmio_map(uint64_t addr){
     return (mapid == -1 ? NULL : &device_maps[mapid]);
 }
 
-static void device_report_mmio_overlap(const char* name1, uint64_t left1, uint64_t right1, const char* name2, uint64_t left2, uint64_t right2){
+void device_report_mmio_overlap(const char* name1, uint64_t left1, uint64_t right1, const char* name2, uint64_t left2, uint64_t right2){
     printf("[device] error: MMIO region \"%s\"@[0x%lx,0x%lx] is overlapped with \"%s\"@[0x%lx,0x%lx]\n", name1, left1, right1, name2, left2, right2);
     // should not reach here!
     assert(0);
@@ -380,7 +380,7 @@ void device_mmio_check_bound(IOMap *map, uint64_t addr){
     }
 }
 
-void device_mmio_invoke_callback(io_callback_t c, paddr_t offset, int len, bool is_write){
+void device_mmio_invoke_callback(io_callback_t c, uint64_t offset, int len, bool is_write){
     if (c != NULL) { c(offset, len, is_write); }
     return;
 }
@@ -390,7 +390,7 @@ uint64_t device_map_read(uint64_t addr, int len, IOMap *map){
     device_mmio_check_bound(map, addr);
     uint64_t offset = addr - map -> low;
     device_mmio_invoke_callback(map -> callback, offset, len, false);
-    uint64_t ret = mem_host_read(map -> space + offset, len);
+    uint64_t ret = mem_host_read((uint8_t *)map -> space + offset, len);
     return ret;
 }
 
@@ -425,7 +425,7 @@ uint8_t* device_map_new_space(int size){
 //========== Devices ==========
 
 void device_init_map(){
-    device_map_io_space = malloc(DEVICE_MAP_IO_SPACE_MAX);
+    device_map_io_space = (uint8_t *)malloc(DEVICE_MAP_IO_SPACE_MAX);
     assert(device_map_io_space);
     device_map_p_space = device_map_io_space;
     return;
@@ -443,7 +443,7 @@ void device_serial_io_handler(uint32_t offset, int len, bool is_write){
     assert(len == 1);
     switch(offset){
         case DEVICE_SERIO_CH_OFFSET:
-            if (is_write == true) {putc(ch, stderr);}
+            if (is_write == true) {putc((char)device_serial_base[0], stderr);}
             else {printf("[decive-serio] error: serio do not support read\n"); assert(0);}
             break;
         default: {printf("[device-serio] error: do not support offset = %d\n", offset); assert(0); break;}
@@ -853,8 +853,10 @@ static void mem_host_write(void *mem_addr, int mem_length, uint64_t mem_data){
 }
 
 bool mem_addr_in_bound(uint32_t mem_addr){
+    // For a 64-bit system, the mem address space should be uint64_t, however, if we use uint64_t here, when we scan memory, there will be segmentation error, so we set to uint32_t first
+    // but need later refinements!
     if(mem_addr - mem_start_addr > mem_size || mem_addr < mem_start_addr)
-        {printf("[memory] address 0x%lx out of bound [0x%x,0x%x]\n", mem_addr, mem_start_addr, mem_end_addr); assert(0); return false; }
+        {printf("[memory] address 0x%x out of bound [0x%x,0x%x]\n", mem_addr, mem_start_addr, mem_end_addr); assert(0); return false; }
     return true;
 }
 
