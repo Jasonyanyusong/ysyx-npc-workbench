@@ -293,6 +293,11 @@ uint8_t* device_map_new_space(int size);
 //static void device_check_bound(IOMap *map, uint64_t addr);
 //static void device_invoke_callback(io_callback_t c, uint64_t offset, int len, bool is_write);
 
+//---------- Device-Serial ----------
+
+#define DEVICE_SERIAL_ADDR 0xa00003f8
+void device_serial_putchar(uint64_t device_serial_mem_write_data);
+
 //========== Device: Map & MMIO ==========
 
 static bool device_map_inside(IOMap *map, uint64_t addr){
@@ -443,11 +448,6 @@ void device_init_serial(){
     device_add_mmio_map("serial", DEVICE_SERIAL_BASE, device_serial_base, 8, device_serial_io_handler);
     return;
 }
-
-//---------- Device-Serial ----------
-
-#define DEVICE_SERIAL_ADDR 0xa00003f8
-void device_serial_putchar(uint64_t device_serial_mem_write_data);
 
 //========== Device-Serial ==========
 
