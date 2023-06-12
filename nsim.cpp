@@ -75,6 +75,13 @@ void mem_paddr_write(uint64_t mem_addr, int mem_length, uint64_t mem_data);
 
 void mem_init_mem();
 
+//---------- Statistics ----------
+
+uint64_t statistics_nr_exec = 0;
+uint64_t statistics_time_exec = 0;
+
+void statistics_show();
+
 //---------- Simple Debugger (SDB) Monitor ----------
 
 char* monitor_log_file = NULL;
@@ -304,6 +311,19 @@ uint8_t* device_map_new_space(int size);
 
 #define DEVICE_SERIAL_ADDR 0xa00003f8
 void device_serial_putchar(uint64_t device_serial_mem_write_data);
+
+//========== Statistics ==========
+
+void statistics_show(){
+    printf("[statistics] total insturction executed by NSIM: %ld\n", statistics_nr_exec);
+    printf("[statistics] total time cost for execution instructions: %ld\n", statistics_time_exec);
+    if(statistics_time_exec == 0){
+        printf("[statistics] time is so low, can not show statistics\n");
+    }else{
+        printf("[statistics] NSIM simulation frequency: %ld\n", (statistics_nr_exec / statistics_time_exec));
+    }
+    return;
+}
 
 //========== Device: Map & MMIO ==========
 
