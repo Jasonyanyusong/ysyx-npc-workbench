@@ -316,6 +316,30 @@ uint32_t *device_keyboard_i8042_data_port_base = NULL;
 void device_keyboard_i8042_data_io_handler(uint32_t offset, int len, bool is_write);
 void device_keyboard_init_i8042();
 
+//********** VGA Definitions **********
+
+#define DEVICE_VGA_SHOW_SCREEN true
+#define DEVICE_VGA_SCREEN_W 400
+#define DEVICE_VGA_SCREEN_H 300
+
+#define DEVICE_VGA_CTRL_BASE 0xa0000100
+#define DEVICE_VGA_FB_ADDR   0xa1000000
+
+uint32_t device_vga_screen_width();
+uint32_t device_vga_screen_height();
+uint32_t device_vga_screen_size();
+
+SDL_Renderer *device_vga_renderer = NULL;
+SDL_Texture  *device_vga_texture  = NULL;
+
+void device_vga_init_screen();
+void device_vga_update_screen();
+void device_vga_vga_update_screen();
+void device_vga_init_vga();
+
+void *device_vga_vmem = NULL;
+uint32_t *device_vga_ctl_port_base = NULL;
+
 //---------- Device: Map & MMIO----------
 
 #define DEVICE_MAP_IO_SPACE_MAX (2 * 1024 * 1024)
@@ -610,6 +634,56 @@ void device_keyboard_init_i8042(){
     device_add_mmio_map("keyboard", DEVICE_KEYBOARD_I8042_BASE, device_keyboard_i8042_data_port_base, 4, device_keyboard_i8042_data_io_handler);
 }
 
+//========== Device: VGA ==========
+
+uint32_t device_vga_screen_width(){
+    return DEVICE_VGA_SCREEN_W;
+}
+
+uint32_t device_vga_screen_height(){
+    return DEVICE_VGA_SCREEN_H;
+}
+
+uint32_t device_vga_screen_size(){
+    return device_vga_screen_width() * device_vga_screen_height() * sizeof(uint32_t);
+}
+
+void device_vga_init_screen(){
+    SDL_Window *device_vga_window = NULL;
+    SDL_Init(SDL_INIT_VIDEO);
+    SDL_CreateWindowAndRenderer(DEVICE_VGA_SCREEN_W * 2, DEVICE_VGA_SCREEN_H * 2, 0, &device_vga_window, &device_vga_renderer);
+    SDL_SetWindowTitle(device_vga_window, "YSYX NPC (Baisc Level) Simulator By Jasonyanyusong");
+    device_vga_texture = SDL_CreateTexture(device_vga_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, DEVICE_VGA_SCREEN_W, DEVICE_VGA_SCREEN_H);
+    return;
+}
+
+void device_vga_update_screen(){
+    SDL_UpdateTexture(device_vga_texture, NULL, device_vga_vmem, DEVICE_VGA_SCREEN_W * sizeof(uint32_t));
+    SDL_RenderClear(device_vga_renderer);
+    SDL_RenderCopy(device_vga_renderer, device_vga_texture, NULL, NULL);
+    SDL_RenderPresent(device_vga_renderer);
+}
+
+void device_vga_vga_update_screen(){
+    if(device_vga_ctl_port_base[1] != 0){
+        if(DEVICE_VGA_SHOW_SCREEN) {device_vga_update_screen();}
+        device_vga_ctl_port_base[1] = 0;
+        return;
+    }
+    return;
+}
+
+void device_vga_init_vga(){
+    device_vga_ctl_port_base = (uint32_t *)device_map_new_space(8);
+    device_vga_ctl_port_base[0] = (device_vga_screen_width() << 16) | device_vga_screen_height();
+    device_add_mmio_map("vgactl", DEVICE_VGA_CTRL_BASE, device_vga_ctl_port_base, 8, NULL);
+    device_vga_vmem = device_map_new_space(device_vga_screen_size());
+    device_add_mmio_map("vmem", DEVICE_VGA_FB_ADDR, device_vga_vmem, device_vga_screen_size(), NULL);
+    if(DEVICE_VGA_SHOW_SCREEN){
+        device_vga_init_screen();
+        memset(device_vga_vmem, 0, device_vga_screen_size());
+    }
+}
 
 //========== Device-Serial ==========
 
