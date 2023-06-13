@@ -36,6 +36,17 @@
 #define device_have_disk     false
 #define device_have_sdcard   false
 
+//========== Macros ==========
+
+#define concat_temp(x, y) x ## y
+#define concat(x, y) concat_temp(x, y)
+
+#define BITMASK(bits) ((1ull << (bits)) - 1)
+#define BITS(x, hi, lo) (((x) >> (lo)) & BITMASK((hi) - (lo) + 1)) // similar to x[hi:lo] in verilog
+#define SEXT(x, len) ({ struct { int64_t n : len; } __x = { .n = x }; (uint64_t)__x.n; })
+
+#define MAP(c, f) c(f)
+
 //========== Include Headers ==========
 
 #include "verilated.h"
@@ -52,6 +63,7 @@
 #include <getopt.h>
 #include <dlfcn.h>
 #include <sys/time.h> // Host timer
+#include <SDL2/SDL.h> // Used for IO devices
 
 //========== List functions and variables that will be used later ==========
 
@@ -245,12 +257,16 @@ void device_vga_update_screen();
 void device_update();
 void device_init_devices();
 
+//********** Serial Definitions **********
+
 void device_serial_io_handler(uint32_t offset, int len, bool is_write);
 
 #define DEVICE_SERIAL_BASE     0xa00003f8
 #define DEVICE_SERIO_CH_OFFSET 0
 static uint8_t *device_serial_base = NULL;
 
+
+//********** RTC Timer Definitions **********
 
 void device_rtc_io_handler(uint32_t offset, int len, bool is_write);
 void device_rtc_time_interrupt(); // Not implemented yet
@@ -259,6 +275,46 @@ void device_rtc_time_interrupt(); // Not implemented yet
 static uint32_t *device_rtc_port_base = NULL;
 
 //typedef uint16_t ioaddr_t;
+
+//********** Keyboard Definitions **********
+
+#define DEVICE_KEYBOARD_I8042_BASE 0xa0000060
+
+#define DEVICE_KEYBOARD_KEYDOWN_MASK 0x8000
+#define DEVICE_KEYBOARD_KEYCODE_MASK 0x7fff
+
+#define _KEYS(f) \
+    f(ESCAPE) f(F1) f(F2) f(F3) f(F4) f(F5) f(F6) f(F7) f(F8) f(F9) f(F10) f(F11) f(F12) \
+f(GRAVE) f(1) f(2) f(3) f(4) f(5) f(6) f(7) f(8) f(9) f(0) f(MINUS) f(EQUALS) f(BACKSPACE) \
+f(TAB) f(Q) f(W) f(E) f(R) f(T) f(Y) f(U) f(I) f(O) f(P) f(LEFTBRACKET) f(RIGHTBRACKET) f(BACKSLASH) \
+f(CAPSLOCK) f(A) f(S) f(D) f(F) f(G) f(H) f(J) f(K) f(L) f(SEMICOLON) f(APOSTROPHE) f(RETURN) \
+f(LSHIFT) f(Z) f(X) f(C) f(V) f(B) f(N) f(M) f(COMMA) f(PERIOD) f(SLASH) f(RSHIFT) \
+f(LCTRL) f(APPLICATION) f(LALT) f(SPACE) f(RALT) f(RCTRL) \
+f(UP) f(DOWN) f(LEFT) f(RIGHT) f(INSERT) f(DELETE) f(HOME) f(END) f(PAGEUP) f(PAGEDOWN)
+
+#define _KEY_NAME(k) _KEY_##k,
+
+enum{
+    _KEY_NONE = 0,
+    MAP(_KEYS, _KEY_NAME)
+};
+
+#define SDL_KEYMAP(k) device_keyboard_keymap[concat(SDL_SCANCODE_, k)] = concat(_KEY_, k);
+static uint32_t device_keyboard_keymap[256] = {};
+
+//void device_keyboard_init_keymap(); // seems only TARGET_AM in nemu will use this function
+
+#define DEVICE_KEYBOARD_KEY_QUEUE_LEN 1024
+static int device_keyboard_key_queue[DEVICE_KEYBOARD_KEY_QUEUE_LEN] = {};
+static int device_keyboard_key_f = 0, device_keyboard_key_r = 0;
+
+void device_keyboard_key_enqueue(uint32_t am_scancode);
+uint32_t device_keyboard_key_dequeue();
+void device_keyboard_send_key(uint8_t scancode, bool is_keydown);
+
+uint32_t *device_keyboard_i8042_data_port_base = NULL;
+void device_keyboard_i8042_data_io_handler(uint32_t offset, int len, bool is_write);
+void device_keyboard_init_i8042();
 
 //---------- Device: Map & MMIO----------
 
@@ -500,6 +556,60 @@ void device_rtc_time_interrupt(){
     assert(0);
     return;
 } // Not implemented yet
+
+//========== Device: Keyboard i8042 ==========
+
+void device_keyboard_key_enqueue(uint32_t am_scancode){
+    device_keyboard_key_queue[device_keyboard_key_r] = am_scancode;
+    device_keyboard_key_r = (device_keyboard_key_r + 1) % DEVICE_KEYBOARD_KEY_QUEUE_LEN;
+    if(device_keyboard_key_r != device_keyboard_key_f){
+        // should not reach here
+        printf("[device-keyboard] error: key queue overflow\n");
+        assert(0);
+        return;
+    }
+    return;
+} 
+
+uint32_t device_keyboard_key_dequeue(){
+    uint32_t key = _KEY_NONE;
+    if(device_keyboard_key_f != device_keyboard_key_r){
+        key = device_keyboard_key_queue[device_keyboard_key_f];
+        device_keyboard_key_f = (device_keyboard_key_f + 1) % DEVICE_KEYBOARD_KEY_QUEUE_LEN;
+    }
+    return key;
+}
+
+void device_keyboard_send_key(uint8_t scancode, bool is_keydown){
+    if(nsim_state.state == NSIM_CONTINUE && device_keyboard_keymap[scancode] != _KEY_NONE){
+        uint32_t am_scancode = device_keyboard_keymap[scancode] | (is_keydown ? DEVICE_KEYBOARD_KEYDOWN_MASK : 0);
+        device_keyboard_key_enqueue(am_scancode);
+    }
+    return;
+}
+
+void device_keyboard_i8042_data_io_handler(uint32_t offset, int len, bool is_write){
+    if(is_write){
+        // should not reach here
+        printf("[device-keyboard] error: can not handle write to keyboard MMIO\n");
+        assert(0);
+        return;
+    }
+    if(offset != 0){
+        // should not reach here
+        printf("[device-keyboard] error: can not process offset %d, only can process offset = 0\n", offset);
+        assert(0);
+        return;
+    }
+    device_keyboard_i8042_data_port_base[0] = device_keyboard_key_dequeue();
+}
+
+void device_keyboard_init_i8042(){
+    device_keyboard_i8042_data_port_base = (uint32_t *)device_map_new_space(4);
+    device_keyboard_i8042_data_port_base[0] = _KEY_NONE;
+    device_add_mmio_map("keyboard", DEVICE_KEYBOARD_I8042_BASE, device_keyboard_i8042_data_port_base, 4, device_keyboard_i8042_data_io_handler);
+}
+
 
 //========== Device-Serial ==========
 
