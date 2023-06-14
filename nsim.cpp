@@ -30,8 +30,8 @@
 
 #define device_have_serial   true
 #define device_have_rtc      true
-#define device_have_keyboard false
-#define device_have_vga      false
+#define device_have_keyboard true
+#define device_have_vga      true
 #define device_have_audio    false
 #define device_have_disk     false
 #define device_have_sdcard   false
@@ -442,7 +442,7 @@ void device_add_mmio_map(const char *name, uint64_t addr, void *space, uint32_t 
     assert(device_nr_map < DEVICE_NR_MAP); // so that we have space to add another device
     uint64_t left = addr;
     uint64_t right = addr + len - 1;
-    printf("[device] name \"%s\", left 0x%lx, right 0x%lx check before add to mmio map\n", name, left, right);
+    //printf("[device] name \"%s\", left 0x%lx, right 0x%lx check before add to mmio map\n", name, left, right);
     if(mem_addr_in_bound(left) || mem_addr_in_bound(right)){
         // should not reach here!
         device_report_mmio_overlap(name, left, right, "pmem", mem_start_addr, mem_end_addr);
@@ -457,7 +457,7 @@ void device_add_mmio_map(const char *name, uint64_t addr, void *space, uint32_t 
             return;
         }
     }
-    printf("[device] name \"%s\", left 0x%lx, right 0x%lx check passed, adding to mmio map\n", name, left, right);
+    //printf("[device] name \"%s\", left 0x%lx, right 0x%lx check passed, adding to mmio map\n", name, left, right);
     device_maps[device_nr_map] = (IOMap){ .name = name, .low = addr, .high = addr + len - 1, .space = space, .callback = callback};
     printf("[device] name \"%s\", left 0x%lx, right 0x%lx, added to mmio map\n", name, left, right);
     return;
@@ -533,7 +533,10 @@ void device_init_map(){
 
 void device_init_devices(){
     device_init_map();
-    if(device_have_serial){device_init_serial();}
+    if(device_have_serial)   {device_init_serial();}
+    if(device_have_rtc)      {device_init_timer();}
+    if(device_have_keyboard) {device_keyboard_init_i8042();}
+    if(device_have_vga)      {device_vga_init_vga();}
     return;
 }
 
@@ -1060,7 +1063,7 @@ bool mem_addr_in_bound(uint32_t mem_addr){
     // For a 64-bit system, the mem address space should be uint64_t, however, if we use uint64_t here, when we scan memory, there will be segmentation error, so we set to uint32_t first
     // but need later refinements!
     if(mem_addr - mem_start_addr > mem_size || mem_addr < mem_start_addr)
-        {printf("[memory] address 0x%x out of bound [0x%x,0x%x]\n", mem_addr, mem_start_addr, mem_end_addr); assert(0); return false; }
+        {/*printf("[memory] address 0x%x out of bound [0x%x,0x%x]\n", mem_addr, mem_start_addr, mem_end_addr);*/ /*assert(0);*/ return false; }
     return true;
 }
 
@@ -1351,6 +1354,7 @@ void sdb_init_sdb(){
 //========== Main function ==========
 int main(int argc, char *argv[]){
     mem_init_mem();
+    device_init_devices();
     monitor_init_monitor(argc, argv);
     //memcpy(mem_guest_to_host(mem_start_addr), img, sizeof(img));
     state_set_state(NSIM_CONTINUE);
