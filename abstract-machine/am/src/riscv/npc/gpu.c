@@ -1,4 +1,5 @@
 #include <am.h>
+#include "riscv/riscv.h"
 
 #define VGACTL_ADDR 0xa0000100
 #define FB_ADDR     0xa1000000
