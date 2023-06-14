@@ -1083,14 +1083,14 @@ uint64_t mem_pmem_read(uint64_t mem_addr, int mem_length){
     if(device_have_rtc && mem_addr == DEVICE_RTC_ADDR_LO){/*printf("[device] access rtc_lo\n");*/ return device_timer_write_time_to_sim(0);}
     if(device_have_rtc && mem_addr == DEVICE_RTC_ADDR_HI){/*printf("[device] access rtc_hi\n");*/ return device_timer_write_time_to_sim(1);}
 
-    uint64_t ret = mem_host_read(mem_guest_to_host((uint32_t)mem_addr), mem_length);
+    uint64_t ret = mem_host_read(mem_guest_to_host(mem_addr), mem_length);
     return ret;
 }
 void mem_pmem_write(uint64_t mem_addr, int mem_length, uint64_t mem_data){
 
     if(device_have_serial && mem_addr == DEVICE_SERIAL_ADDR){device_serial_putchar(mem_data); return;}
 
-    mem_host_write(mem_guest_to_host((uint32_t)mem_addr), mem_length, mem_data);
+    mem_host_write(mem_guest_to_host(mem_addr), mem_length, mem_data);
 }
 
 uint64_t mem_paddr_read(uint64_t mem_addr, int mem_length){
@@ -1264,17 +1264,17 @@ int sdb_cmd_i(char* args){
 int sdb_cmd_x(char* args){
     printf("[sdb] scan and print memory\n");
     int print_length;
-    int start_memory_address;
+    uint64_t start_memory_address;
     char *last_part_of_args;
     char *string_token_first = strtok_r(args, " ", &last_part_of_args);
     print_length = atoi(string_token_first);
-    sscanf(last_part_of_args, "%x", &start_memory_address);
-    printf("start mem addr is 0x%x\n", start_memory_address);
+    sscanf(last_part_of_args, "%lx", &start_memory_address);
+    printf("start mem addr is 0x%lx\n", start_memory_address);
     printf("******************************************************************************\n");
     printf("|  Address   | 4b Phys (Hex) | 4b Virt (Hex) | 4b Phys (Dec) | 4b Virt (Dec) |\n");
-    for (int i = start_memory_address; i < start_memory_address + print_length; i = i + 4){
+    for (uint64_t i = start_memory_address; i < start_memory_address + print_length; i = i + 4){
         //printf("[sdb] reading memory at address 0x%x\n", i);
-        printf("| 0x%x | 0x   %8lx | 0x   %8lx | 0x %10ld | 0x %10ld |\n", i, mem_paddr_read(i, 4), mem_vaddr_read(i, 4), mem_paddr_read(i, 4), mem_vaddr_read(i, 4));
+        printf("| 0x%lx | 0x   %8lx | 0x   %8lx | 0x %10ld | 0x %10ld |\n", i, mem_paddr_read(i, 4), mem_vaddr_read(i, 4), mem_paddr_read(i, 4), mem_vaddr_read(i, 4));
     }
     printf("******************************************************************************\n\n");
     return 0;
