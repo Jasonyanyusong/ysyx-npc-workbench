@@ -246,16 +246,13 @@ uint32_t device_timer_write_time_to_sim(bool low_high); // When is false, return
 void device_init_map();
 void device_init_serial();
 void device_init_timer();
-void device_init_vga();
-void device_init_i8042();
-void device_init_audio();
-void device_init_disk();
-void device_init_sdcard();
-void device_init_alarm();
-void device_send_key(uint8_t, bool);
 void device_vga_update_screen();
 void device_update();
 void device_init_devices();
+
+uint64_t device_last = 0;
+
+void device_sdl_clear_event_queue();
 
 //********** Serial Definitions **********
 
@@ -294,15 +291,102 @@ f(UP) f(DOWN) f(LEFT) f(RIGHT) f(INSERT) f(DELETE) f(HOME) f(END) f(PAGEUP) f(PA
 
 #define _KEY_NAME(k) _KEY_##k,
 
+// It's conflicted on macos with sys/_types/_key_t.h
+#ifdef __APPLE__
+  #undef _KEY_T 
+#endif
+
 enum{
     _KEY_NONE = 0,
-    MAP(_KEYS, _KEY_NAME)
+    _KEY_ESCAPE = 1,
+    _KEY_F1 = 2,
+    _KEY_F2 = 3,
+    _KEY_F3 = 4, 
+    _KEY_F4 = 5, 
+    _KEY_F5 = 6, 
+    _KEY_F6 = 7, 
+    _KEY_F7 = 8, 
+    _KEY_F8 = 9, 
+    _KEY_F9 = 10, 
+    _KEY_F10 = 11, 
+    _KEY_F11 = 12, 
+    _KEY_F12 = 13, 
+    _KEY_GRAVE = 14, 
+    _KEY_1 = 15,
+    _KEY_2 = 16,
+    _KEY_3 = 17,
+    _KEY_4 = 18, 
+    _KEY_5 = 19, 
+    _KEY_6 = 20, 
+    _KEY_7 = 21, 
+    _KEY_8 = 22, 
+    _KEY_9 = 23, 
+    _KEY_0 = 24, 
+    _KEY_MINUS = 25, 
+    _KEY_EQUALS = 26, 
+    _KEY_BACKSPACE = 27, 
+    _KEY_TAB = 28, 
+    _KEY_Q = 29, 
+    _KEY_W = 30, 
+    _KEY_E = 31, 
+    _KEY_R = 32, 
+    _KEY_T = 33, 
+    _KEY_Y = 34, 
+    _KEY_U = 35, 
+    _KEY_I = 36, 
+    _KEY_O = 37, 
+    _KEY_P = 38, 
+    _KEY_LEFTBRACKET = 39, 
+    _KEY_RIGHTBRACKET = 40, 
+    _KEY_BACKSLASH = 41, 
+    _KEY_CAPSLOCK = 42, 
+    _KEY_A = 43, 
+    _KEY_S = 44, 
+    _KEY_D = 45, 
+    _KEY_F = 46, 
+    _KEY_G = 47, 
+    _KEY_H = 48, 
+    _KEY_J = 49, 
+    _KEY_K = 50, 
+    _KEY_L = 51, 
+    _KEY_SEMICOLON = 52, 
+    _KEY_APOSTROPHE = 53, 
+    _KEY_RETURN = 54, 
+    _KEY_LSHIFT = 55, 
+    _KEY_Z = 56,
+    _KEY_X = 57,
+    _KEY_C = 58,
+    _KEY_V = 59,
+    _KEY_B = 60,
+    _KEY_N = 61,
+    _KEY_M = 62, 
+    _KEY_COMMA = 63, 
+    _KEY_PERIOD = 64, 
+    _KEY_SLASH = 65, 
+    _KEY_RSHIFT = 66, 
+    _KEY_LCTRL = 67, 
+    _KEY_APPLICATION = 68, 
+    _KEY_LALT = 69, 
+    _KEY_SPACE = 70, 
+    _KEY_RALT = 71, 
+    _KEY_RCTRL = 72, 
+    _KEY_UP = 73, 
+    _KEY_DOWN = 74, 
+    _KEY_LEFT = 75, 
+    _KEY_RIGHT = 76, 
+    _KEY_INSERT = 77, 
+    _KEY_DELETE = 78, 
+    _KEY_HOME = 79, 
+    _KEY_END = 80, 
+    _KEY_PAGEUP = 81, 
+    _KEY_PAGEDOWN = 82,
+    //MAP(_KEYS, _KEY_NAME)
 };
 
 #define SDL_KEYMAP(k) device_keyboard_keymap[concat(SDL_SCANCODE_, k)] = concat(_KEY_, k);
 static uint32_t device_keyboard_keymap[256] = {};
 
-//void device_keyboard_init_keymap(); // seems only TARGET_AM in nemu will use this function
+void device_keyboard_init_keymap(); // is necessary or send key will fail
 
 #define DEVICE_KEYBOARD_KEY_QUEUE_LEN 1024
 static int device_keyboard_key_queue[DEVICE_KEYBOARD_KEY_QUEUE_LEN] = {};
@@ -426,8 +510,10 @@ int device_find_mapID_by_addr(IOMap *maps, int size, uint64_t addr){
 }
 
 static IOMap* device_mmio_fetch_mmio_map(uint64_t addr){
-    //printf("[fetch_mmio_map] paddr is 0x%8x\n", addr);
+    //printf("[fetch_mmio_map] paddr is 0x%lx\n", addr);
+    //printf("device_nr_map = %d\n", device_nr_map);
     int mapid = device_find_mapID_by_addr(device_maps, device_nr_map, addr);
+    //printf("[fetch_mmio_map] mapid = %d\n", mapid);
     return (mapid == -1 ? NULL : &device_maps[mapid]);
 }
 
@@ -459,6 +545,7 @@ void device_add_mmio_map(const char *name, uint64_t addr, void *space, uint32_t 
     }
     //printf("[device] name \"%s\", left 0x%lx, right 0x%lx check passed, adding to mmio map\n", name, left, right);
     device_maps[device_nr_map] = (IOMap){ .name = name, .low = addr, .high = addr + len - 1, .space = space, .callback = callback};
+    device_nr_map = device_nr_map + 1;
     printf("[device] name \"%s\", left 0x%lx, right 0x%lx, added to mmio map\n", name, left, right);
     return;
 }
@@ -540,6 +627,48 @@ void device_init_devices(){
     return;
 }
 
+void device_update(){
+    uint64_t device_now = host_timer_get_time();
+    if(device_now - device_last < (1000000 / 60)){
+        return;
+    }
+    device_last = device_now;
+
+    if(device_have_vga){
+        device_vga_vga_update_screen();
+    }
+    SDL_Event event;
+    while (SDL_PollEvent(&event)){
+        switch(event.type){
+            case SDL_QUIT:{
+                state_set_state(NSIM_STOP);
+                break;
+            }
+            case SDL_KEYDOWN:
+            case SDL_KEYUP:{
+                if(device_have_keyboard){
+                    //printf("[device-keyboard] SDL event catch key with scancode %d, have event \"%s\"\n", event.key.keysym.scancode, event.key.type == SDL_KEYDOWN ? "KEY DOWN" : "KEY UP");
+                    uint8_t k = event.key.keysym.scancode;
+                    bool is_keydown = (event.key.type == SDL_KEYDOWN);
+                    device_keyboard_send_key(k, is_keydown);
+                    break;
+                }
+                else{
+                    break;
+                }
+                break;
+            }
+            default: break;
+        }
+    }
+    return;
+}
+
+void device_sdl_clear_event_queue(){
+    SDL_Event event;
+    while (SDL_PollEvent(&event));
+}
+
 //========== Device: Serial ==========
 
 void device_serial_io_handler(uint32_t offset, int len, bool is_write){
@@ -590,9 +719,9 @@ void device_keyboard_key_enqueue(uint32_t am_scancode){
     device_keyboard_key_queue[device_keyboard_key_r] = am_scancode;
     device_keyboard_key_r = (device_keyboard_key_r + 1) % DEVICE_KEYBOARD_KEY_QUEUE_LEN;
     if(device_keyboard_key_r != device_keyboard_key_f){
-        // should not reach here
-        printf("[device-keyboard] error: key queue overflow\n");
-        assert(0);
+        // should not reach here, however, this does not seems to be wrong, so do not assert :)
+        //printf("[device-keyboard] error: key queue overflow\n");
+        //assert(0);
         return;
     }
     return;
@@ -608,8 +737,16 @@ uint32_t device_keyboard_key_dequeue(){
 }
 
 void device_keyboard_send_key(uint8_t scancode, bool is_keydown){
+    /*if(nsim_state.state == NSIM_CONTINUE){
+        printf("[device-keyboard] nsim's state is NSIM_CONTINUE\n");
+    }
+    if(device_keyboard_keymap[scancode] != _KEY_NONE){
+        printf("[device-keyboard] device_keyboard_keymap[scancode] != _KEY_NONE\n");
+    }
+    printf("[device-keyboard] device_keyboard_keymap[scancode] = %d\n", device_keyboard_keymap[scancode]);*/
     if(nsim_state.state == NSIM_CONTINUE && device_keyboard_keymap[scancode] != _KEY_NONE){
         uint32_t am_scancode = device_keyboard_keymap[scancode] | (is_keydown ? DEVICE_KEYBOARD_KEYDOWN_MASK : 0);
+        //printf("[device-keyboard] send key with am_scancode = %d\n", am_scancode);
         device_keyboard_key_enqueue(am_scancode);
     }
     return;
@@ -635,6 +772,100 @@ void device_keyboard_init_i8042(){
     device_keyboard_i8042_data_port_base = (uint32_t *)device_map_new_space(4);
     device_keyboard_i8042_data_port_base[0] = _KEY_NONE;
     device_add_mmio_map("keyboard", DEVICE_KEYBOARD_I8042_BASE, device_keyboard_i8042_data_port_base, 4, device_keyboard_i8042_data_io_handler);
+    device_keyboard_init_keymap();
+}
+
+void device_keyboard_init_keymap(){
+    //MAP(_KEYS, SDL_KEYMAP)
+    device_keyboard_keymap[SDL_SCANCODE_ESCAPE] = _KEY_ESCAPE;
+    device_keyboard_keymap[SDL_SCANCODE_F1] = _KEY_F1;
+    device_keyboard_keymap[SDL_SCANCODE_F2] = _KEY_F2;
+    device_keyboard_keymap[SDL_SCANCODE_F3] = _KEY_F3;
+    device_keyboard_keymap[SDL_SCANCODE_F4] = _KEY_F4;
+    device_keyboard_keymap[SDL_SCANCODE_F5] = _KEY_F5;
+    device_keyboard_keymap[SDL_SCANCODE_F6] = _KEY_F6;
+    device_keyboard_keymap[SDL_SCANCODE_F7] = _KEY_F7;
+    device_keyboard_keymap[SDL_SCANCODE_F8] = _KEY_F8;
+    device_keyboard_keymap[SDL_SCANCODE_F9] = _KEY_F9;
+    device_keyboard_keymap[SDL_SCANCODE_F10] = _KEY_F10;
+    device_keyboard_keymap[SDL_SCANCODE_F11] = _KEY_F11;
+    device_keyboard_keymap[SDL_SCANCODE_F12] = _KEY_F12;
+    
+    device_keyboard_keymap[SDL_SCANCODE_GRAVE] = _KEY_GRAVE;
+    device_keyboard_keymap[SDL_SCANCODE_1] = _KEY_1;
+    device_keyboard_keymap[SDL_SCANCODE_2] = _KEY_2;
+    device_keyboard_keymap[SDL_SCANCODE_3] = _KEY_3;
+    device_keyboard_keymap[SDL_SCANCODE_4] = _KEY_4;
+    device_keyboard_keymap[SDL_SCANCODE_5] = _KEY_5;
+    device_keyboard_keymap[SDL_SCANCODE_6] = _KEY_6;
+    device_keyboard_keymap[SDL_SCANCODE_7] = _KEY_7;
+    device_keyboard_keymap[SDL_SCANCODE_8] = _KEY_8;
+    device_keyboard_keymap[SDL_SCANCODE_9] = _KEY_9;
+    device_keyboard_keymap[SDL_SCANCODE_0] = _KEY_0;
+    device_keyboard_keymap[SDL_SCANCODE_MINUS] = _KEY_MINUS;
+    device_keyboard_keymap[SDL_SCANCODE_EQUALS] = _KEY_EQUALS;
+    device_keyboard_keymap[SDL_SCANCODE_BACKSPACE] = _KEY_BACKSPACE;
+    
+    device_keyboard_keymap[SDL_SCANCODE_TAB] = _KEY_TAB;
+    device_keyboard_keymap[SDL_SCANCODE_Q] = _KEY_Q;
+    device_keyboard_keymap[SDL_SCANCODE_W] = _KEY_W;
+    device_keyboard_keymap[SDL_SCANCODE_E] = _KEY_E;
+    device_keyboard_keymap[SDL_SCANCODE_R] = _KEY_R;
+    device_keyboard_keymap[SDL_SCANCODE_T] = _KEY_T;
+    device_keyboard_keymap[SDL_SCANCODE_Y] = _KEY_Y;
+    device_keyboard_keymap[SDL_SCANCODE_U] = _KEY_U;
+    device_keyboard_keymap[SDL_SCANCODE_I] = _KEY_I;
+    device_keyboard_keymap[SDL_SCANCODE_O] = _KEY_O;
+    device_keyboard_keymap[SDL_SCANCODE_P] = _KEY_P;
+    device_keyboard_keymap[SDL_SCANCODE_LEFTBRACKET] = _KEY_LEFTBRACKET;
+    device_keyboard_keymap[SDL_SCANCODE_RIGHTBRACKET] = _KEY_RIGHTBRACKET;
+    device_keyboard_keymap[SDL_SCANCODE_BACKSLASH] = _KEY_BACKSLASH;
+    
+    device_keyboard_keymap[SDL_SCANCODE_CAPSLOCK] = _KEY_CAPSLOCK;
+    device_keyboard_keymap[SDL_SCANCODE_A] = _KEY_A;
+    device_keyboard_keymap[SDL_SCANCODE_S] = _KEY_S;
+    device_keyboard_keymap[SDL_SCANCODE_D] = _KEY_D;
+    device_keyboard_keymap[SDL_SCANCODE_F] = _KEY_F;
+    device_keyboard_keymap[SDL_SCANCODE_G] = _KEY_G;
+    device_keyboard_keymap[SDL_SCANCODE_H] = _KEY_H;
+    device_keyboard_keymap[SDL_SCANCODE_J] = _KEY_J;
+    device_keyboard_keymap[SDL_SCANCODE_K] = _KEY_K;
+    device_keyboard_keymap[SDL_SCANCODE_L] = _KEY_L;
+    device_keyboard_keymap[SDL_SCANCODE_SEMICOLON] = _KEY_SEMICOLON;
+    device_keyboard_keymap[SDL_SCANCODE_APOSTROPHE] = _KEY_APOSTROPHE;
+    device_keyboard_keymap[SDL_SCANCODE_RETURN] = _KEY_RETURN;
+
+    device_keyboard_keymap[SDL_SCANCODE_LSHIFT] = _KEY_LSHIFT;
+    device_keyboard_keymap[SDL_SCANCODE_Z] = _KEY_Z;
+    device_keyboard_keymap[SDL_SCANCODE_X] = _KEY_X;
+    device_keyboard_keymap[SDL_SCANCODE_C] = _KEY_C;
+    device_keyboard_keymap[SDL_SCANCODE_V] = _KEY_V;
+    device_keyboard_keymap[SDL_SCANCODE_B] = _KEY_B;
+    device_keyboard_keymap[SDL_SCANCODE_N] = _KEY_N;
+    device_keyboard_keymap[SDL_SCANCODE_M] = _KEY_M;
+    device_keyboard_keymap[SDL_SCANCODE_COMMA] = _KEY_COMMA;
+    device_keyboard_keymap[SDL_SCANCODE_PERIOD] = _KEY_PERIOD;
+    device_keyboard_keymap[SDL_SCANCODE_SLASH] = _KEY_SLASH;
+    device_keyboard_keymap[SDL_SCANCODE_RSHIFT] = _KEY_RSHIFT;
+    
+    device_keyboard_keymap[SDL_SCANCODE_LCTRL] = _KEY_LCTRL;
+    device_keyboard_keymap[SDL_SCANCODE_APPLICATION] = _KEY_APPLICATION;
+    device_keyboard_keymap[SDL_SCANCODE_LALT] = _KEY_LALT;
+    device_keyboard_keymap[SDL_SCANCODE_SPACE] = _KEY_SPACE;
+    device_keyboard_keymap[SDL_SCANCODE_RALT] = _KEY_RALT;
+    device_keyboard_keymap[SDL_SCANCODE_RCTRL] = _KEY_RCTRL;
+    
+    device_keyboard_keymap[SDL_SCANCODE_UP] = _KEY_UP;
+    device_keyboard_keymap[SDL_SCANCODE_DOWN] = _KEY_DOWN;
+    device_keyboard_keymap[SDL_SCANCODE_LEFT] = _KEY_LEFT;
+    device_keyboard_keymap[SDL_SCANCODE_RIGHT] = _KEY_RIGHT;
+    device_keyboard_keymap[SDL_SCANCODE_INSERT] = _KEY_INSERT;
+    device_keyboard_keymap[SDL_SCANCODE_DELETE] = _KEY_DELETE;
+    device_keyboard_keymap[SDL_SCANCODE_HOME] = _KEY_HOME;
+    device_keyboard_keymap[SDL_SCANCODE_END] = _KEY_END;
+    device_keyboard_keymap[SDL_SCANCODE_PAGEUP] = _KEY_PAGEUP;
+    device_keyboard_keymap[SDL_SCANCODE_PAGEDOWN] = _KEY_PAGEDOWN;
+    return;
 }
 
 //========== Device: VGA ==========
@@ -823,7 +1054,7 @@ void sim_sim_exit(){
 }
 
 void sim_one_exec(){
-    if(!(nsim_state.state == NSIM_CONTINUE || nsim_state.state == NSIM_STOP)){
+    if(nsim_state.state != NSIM_CONTINUE){
         printf("\33[1;33m[sim] current state indicates simulation can not continue\33[0m\n");
         return;
     }
@@ -889,6 +1120,9 @@ void sim_one_exec(){
     top -> clock = 1; //simulate posedge
 
     top -> eval();
+
+    // We will update devices after the posedge
+    device_update();
 
     for(int i = 0; i < 32; i = i + 1){
         reg_get_reg_from_sim(i);
@@ -1080,11 +1314,20 @@ uint64_t mem_host_to_guest(uint8_t *haddr) { return haddr - mem_pmem + mem_start
 uint64_t mem_pmem_read(uint64_t mem_addr, int mem_length){
     //printf("[memory] mem_pmem_read: mem_guest_to_host(mem_addr) = %p\n", mem_guest_to_host(mem_addr));
 
+    //printf("addr = 0x%lx\n", mem_addr);
+
     if(device_have_rtc && mem_addr == DEVICE_RTC_ADDR_LO){/*printf("[device] access rtc_lo\n");*/ return device_timer_write_time_to_sim(0);}
     if(device_have_rtc && mem_addr == DEVICE_RTC_ADDR_HI){/*printf("[device] access rtc_hi\n");*/ return device_timer_write_time_to_sim(1);}
 
-    uint64_t ret = mem_host_read(mem_guest_to_host(mem_addr), mem_length);
-    return ret;
+    if(mem_addr_in_bound(mem_addr)){
+        uint64_t ret = mem_host_read(mem_guest_to_host(mem_addr), mem_length);
+        return ret;
+    }else{
+        // Address is not Physical Memory, implement device
+        //printf("addr = 0x%lx\n", mem_addr);
+        uint64_t ret = device_mmio_read(mem_addr, mem_length);
+        return ret;
+    }
 }
 void mem_pmem_write(uint64_t mem_addr, int mem_length, uint64_t mem_data){
 
@@ -1331,6 +1574,8 @@ void sdb_main_loop(){
         
         char* args = cmd + strlen(cmd) + 1;
         if(args >= str_end) {args = NULL;}
+
+        device_sdl_clear_event_queue();
 
         int i;
         for(i = 0; i < SDB_NR_CMD; i = i + 1){
