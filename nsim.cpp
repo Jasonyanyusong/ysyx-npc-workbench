@@ -1491,8 +1491,8 @@ uint64_t mem_pmem_read(uint64_t mem_addr, int mem_length){
 
     //printf("addr = 0x%lx\n", mem_addr);
 
-    if(device_have_rtc && mem_addr == DEVICE_RTC_ADDR_LO){/*printf("[device] access rtc_lo\n");*/ return device_timer_write_time_to_sim(0);}
-    if(device_have_rtc && mem_addr == DEVICE_RTC_ADDR_HI){/*printf("[device] access rtc_hi\n");*/ return device_timer_write_time_to_sim(1);}
+    //if(device_have_rtc && mem_addr == DEVICE_RTC_ADDR_LO){/*printf("[device] access rtc_lo\n");*/ return device_timer_write_time_to_sim(0);}
+    //if(device_have_rtc && mem_addr == DEVICE_RTC_ADDR_HI){/*printf("[device] access rtc_hi\n");*/ return device_timer_write_time_to_sim(1);}
 
     if(mem_addr_in_bound(mem_addr)){
         uint64_t ret = mem_host_read(mem_guest_to_host(mem_addr), mem_length);
@@ -1508,7 +1508,7 @@ uint64_t mem_pmem_read(uint64_t mem_addr, int mem_length){
 }
 void mem_pmem_write(uint64_t mem_addr, int mem_length, uint64_t mem_data){
 
-    if(device_have_serial && mem_addr == DEVICE_SERIAL_ADDR){device_serial_putchar(mem_data); return;}
+    //if(device_have_serial && mem_addr == DEVICE_SERIAL_ADDR){device_serial_putchar(mem_data); return;}
 
     if(mem_addr_in_bound(mem_addr)){
         //printf("[memory] normal write, addr = 0x%lx, len = %d, data = 0x%lx\n", mem_addr, mem_length, mem_data);
