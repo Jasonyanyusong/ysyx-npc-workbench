@@ -506,6 +506,7 @@ int device_find_mapID_by_addr(IOMap *maps, int size, uint64_t addr){
         }
     }
     // should not reach here!
+    assert(0);
     return -1;
 }
 
@@ -513,6 +514,7 @@ static IOMap* device_mmio_fetch_mmio_map(uint64_t addr){
     //printf("[fetch_mmio_map] paddr is 0x%lx\n", addr);
     //printf("device_nr_map = %d\n", device_nr_map);
     int mapid = device_find_mapID_by_addr(device_maps, device_nr_map, addr);
+    //printf("[device-mmio-fetch-mmio-map]\n");
     //printf("[fetch_mmio_map] mapid = %d\n", mapid);
     return (mapid == -1 ? NULL : &device_maps[mapid]);
 }
@@ -578,26 +580,31 @@ uint64_t device_map_read(uint64_t addr, int len, IOMap *map){
     uint64_t offset = addr - map -> low;
     device_mmio_invoke_callback(map -> callback, offset, len, false);
     uint64_t ret = mem_host_read((uint8_t *)map -> space + offset, len);
+    printf("[device-map-read] read map \"%s\", at addr = 0x%lx, with len = %d, ret = 0x%lx\n", map -> name, addr, len, ret);
     return ret;
 }
 
 void device_map_write(uint64_t addr, int len, uint64_t data, IOMap *map){
     assert(len >= 1 && len <= 8);
+    if(strcmp(map -> name, "vmem") != 0) {printf("[device-map-write] write map \"%s\", at addr = 0x%lx, with len = %d, data = 0x%lx\n", map -> name, addr, len, data);}
     device_mmio_check_bound(map, addr);
     uint64_t offset = addr - map -> low;
-    mem_host_write(map -> space, len, data);
+    if(strcmp(map -> name, "vmem") != 0) {printf("[device-map-write] offset = 0x%lx\n", offset);}
+    mem_host_write(map -> space + offset, len, data);
     device_mmio_invoke_callback(map -> callback, offset, len, true);
     return;
 }
 
 uint64_t device_mmio_read(uint64_t addr, int len){
-    //printf("[mmio_read] paddr is 0x%8x\n", addr);
+    if(print_debug_informations) {printf("[mmio_read] paddr is 0x%lx\n", addr);}
     return device_map_read(addr, len, device_mmio_fetch_mmio_map(addr));
 }
 
 void device_mmio_write(uint64_t addr, int len, uint64_t data){
-    //printf("[mmio_write] paddr is 0x%8x\n", addr);
+    if(print_debug_informations) {printf("[mmio_write] paddr is 0x%lx\n", addr);}
+    if(addr == 0xa0000100 || addr == 0xa0000104){printf("[device-mmio-write] catch vgactl write, addr = 0x%lx, len = %d, data = 0x%lx\n", addr, len, data);}
     device_map_write(addr, len, data, device_mmio_fetch_mmio_map(addr));
+    if(addr == 0xa0000100 || addr == 0xa0000104) {printf("device_vga_ctl_port_base[0] = 0x%x, device_vga_ctl_port_base[1] = 0x%x\n", device_vga_ctl_port_base[0], device_vga_ctl_port_base[1]);}
     return;
 }
 
@@ -892,6 +899,7 @@ void device_vga_init_screen(){
 }
 
 void device_vga_update_screen(){
+    if(true) {printf("[device-vga] calling SDL2 functions to update screen\n");}
     SDL_UpdateTexture(device_vga_texture, NULL, device_vga_vmem, DEVICE_VGA_SCREEN_W * sizeof(uint32_t));
     SDL_RenderClear(device_vga_renderer);
     SDL_RenderCopy(device_vga_renderer, device_vga_texture, NULL, NULL);
@@ -899,7 +907,9 @@ void device_vga_update_screen(){
 }
 
 void device_vga_vga_update_screen(){
+    if(print_debug_informations) {printf("[device-vga] vga sync register hold val = 0x%x\n", device_vga_ctl_port_base[1]);}
     if(device_vga_ctl_port_base[1] != 0){
+        if(true) {printf("[device-vga] ready to update screen\n");}
         if(DEVICE_VGA_SHOW_SCREEN) {device_vga_update_screen();}
         device_vga_ctl_port_base[1] = 0;
         return;
@@ -1032,10 +1042,10 @@ void sim_sim_init(){
     top -> clock = 0;
     top -> io_NPC_startPC = mem_start_addr;
     top -> reset = 1;
-    top -> eval();
+    //top -> eval();
     sim_step_and_dump_wave();
     top -> clock = 1;
-    top -> eval();
+    //top -> eval();
     sim_step_and_dump_wave();
     top -> reset = 0;
     top -> eval();
@@ -1073,11 +1083,11 @@ void sim_one_exec(){
 
     // Step II: decode instruction
     if(print_debug_informations) {printf("\33[1;33m[sim] Phase II: Instruction decode\33[0m\n");}
-    top -> eval();
+    //top -> eval();
 
     // Step III: EXU execution
     if(print_debug_informations) {printf("\33[1;33m[sim] Phase III: execute\33[0m\n");}
-    top -> eval();
+    //top -> eval();
 
     // Step IV: Load and store
     if(print_debug_informations) {printf("\33[1;33m[sim] Phase IV: load and store\33[0m\n");}
@@ -1109,11 +1119,11 @@ void sim_one_exec(){
     else{
         top -> io_NPC_LSU_I_memR = 0;
     }
-    top -> eval();
+    //top -> eval();
 
     // Step V: Write back
     if(print_debug_informations) {printf("\33[1;33m[sim] Phase V: write back\33[0m\n");}
-    top -> eval();
+    //top -> eval();
 
     sim_step_and_dump_wave();
 
@@ -1333,7 +1343,21 @@ void mem_pmem_write(uint64_t mem_addr, int mem_length, uint64_t mem_data){
 
     if(device_have_serial && mem_addr == DEVICE_SERIAL_ADDR){device_serial_putchar(mem_data); return;}
 
-    mem_host_write(mem_guest_to_host(mem_addr), mem_length, mem_data);
+    if(mem_addr_in_bound(mem_addr)){
+        //printf("[memory] normal write, addr = 0x%lx, len = %d, data = 0x%lx\n", mem_addr, mem_length, mem_data);
+        mem_host_write(mem_guest_to_host(mem_addr), mem_length, mem_data);
+        return;
+    }else{
+        //printf("[memory] device write, addr = 0x%lx, len = %d, data = 0x%lx\n", mem_addr, mem_length, mem_data);
+        device_mmio_write(mem_addr, mem_length, mem_data);
+        return;
+    }
+
+    // should not reach here!
+    printf("[mem-pmem-write] error: address not in physical memory bound and failed with device mem write\n");
+    assert(0);
+    return;
+    
 }
 
 uint64_t mem_paddr_read(uint64_t mem_addr, int mem_length){
