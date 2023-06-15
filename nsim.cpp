@@ -1258,12 +1258,12 @@ void reg_display(bool sdb_print_regs){
 
 bool state_check_can_continue(){
     switch(nsim_state.state){
-        case NSIM_CONTINUE: printf("[state] state is NSIM_CONTINUE, can continue\n"); return true;  break;
-        case NSIM_STOP:     printf("[state] state is NSIM_STOP, can continue\n");     return true;  break;
-        case NSIM_ABORT:    printf("[state] state is NSIM_ABORT, can't continue\n");  return false; break;
-        case NSIM_END:      printf("[state] state is NSIM_END, can't continue\n");    return false; break;
-        case NSIM_HALT:     printf("[state] state is NSIM_HALT, can't continue\n");   return false; break;
-        case NSIM_QUIT:     printf("[state] state is NSIM_QUIT, can't continue\n");   return false; break;
+        case NSIM_CONTINUE: /*printf("[state] state is NSIM_CONTINUE, can continue\n");*/ return true;  break;
+        case NSIM_STOP:     /*printf("[state] state is NSIM_STOP, can continue\n");*/     return true;  break;
+        case NSIM_ABORT:    /*printf("[state] state is NSIM_ABORT, can't continue\n");*/  return false; break;
+        case NSIM_END:      /*printf("[state] state is NSIM_END, can't continue\n");*/    return false; break;
+        case NSIM_HALT:     /*printf("[state] state is NSIM_HALT, can't continue\n");*/   return false; break;
+        case NSIM_QUIT:     /*printf("[state] state is NSIM_QUIT, can't continue\n");*/   return false; break;
         default:            printf("[state] unknown state, error\n"); assert(0);      return false; break;
     }
     return false;
@@ -1278,9 +1278,9 @@ void state_set_state(int state_get_state){
     bool state_normal_cant_continue   = state_get_state == NSIM_END      || state_get_state == NSIM_QUIT;
     bool state_abnormal_cant_continue = state_get_state == NSIM_ABORT    || state_get_state == NSIM_HALT;
     assert(state_continue || (state_normal_cant_continue || state_abnormal_cant_continue));
-    if(state_continue)                {printf("[state] state update to a can continue state\n");}
-    if(state_normal_cant_continue)    {printf("[state] state update to a normal can't continue state\n");}
-    if(state_abnormal_cant_continue)  {printf("[state] state update to an abnormal can't continue state\n");}
+    //if(state_continue)                {printf("[state] state update to a can continue state\n");}
+    //if(state_normal_cant_continue)    {printf("[state] state update to a normal can't continue state\n");}
+    //if(state_abnormal_cant_continue)  {printf("[state] state update to an abnormal can't continue state\n");}
     nsim_state.state = state_get_state;
 }
 
@@ -1486,7 +1486,7 @@ char* sdb_rl_gets(){
 }
 
 int sdb_cmd_c(char* args){
-    printf("[sdb] continue NPC execution\n");
+    //printf("[sdb] continue NPC execution\n");
     if(nsim_state.state == NSIM_STOP){state_set_state(NSIM_CONTINUE);}
     while((nsim_state.state == NSIM_CONTINUE)){
         sim_one_exec();
@@ -1497,7 +1497,7 @@ int sdb_cmd_c(char* args){
 
 int sdb_cmd_s(char* args){
     if (args == NULL){
-        printf("[sdb] 1 setp NPC execution\n");
+        //printf("[sdb] 1 setp NPC execution\n");
         sim_one_exec();
         //cpu_exec(1);
     }
@@ -1507,7 +1507,7 @@ int sdb_cmd_s(char* args){
         printf("Invalid input\n");
         return 0;
     }
-    printf("[sdb] %d setp NPC execution\n", sdb_cmd_si_n);
+    //printf("[sdb] %d setp NPC execution\n", sdb_cmd_si_n);
     for(int i = 0; i < sdb_cmd_si_n; i = i + 1){
         sim_one_exec();
     }
@@ -1523,12 +1523,12 @@ int sdb_cmd_i(char* args){
     }
     else{
         if (strcmp(args, "r") == 0){
-        printf("[sdb] list registers\n");
+        //printf("[sdb] list registers\n");
         reg_display(true);
         //isa_gpr_display();
     }
     else if (strcmp(args, "w") == 0){
-        printf("[sdb] list watchpoints\n");
+        //printf("[sdb] list watchpoints\n");
         //print_WP();
     }
     else{
@@ -1539,14 +1539,14 @@ int sdb_cmd_i(char* args){
 } // informations (register and watchpoint)
 
 int sdb_cmd_x(char* args){
-    printf("[sdb] scan and print memory\n");
+    //printf("[sdb] scan and print memory\n");
     int print_length;
     uint64_t start_memory_address;
     char *last_part_of_args;
     char *string_token_first = strtok_r(args, " ", &last_part_of_args);
     print_length = atoi(string_token_first);
     sscanf(last_part_of_args, "%lx", &start_memory_address);
-    printf("start mem addr is 0x%lx\n", start_memory_address);
+    //printf("start mem addr is 0x%lx\n", start_memory_address);
     printf("******************************************************************************\n");
     printf("|  Address   | 4b Phys (Hex) | 4b Virt (Hex) | 4b Phys (Dec) | 4b Virt (Dec) |\n");
     for (uint64_t i = start_memory_address; i < start_memory_address + print_length; i = i + 4){
@@ -1558,7 +1558,7 @@ int sdb_cmd_x(char* args){
 } // scan and print memory
 
 int sdb_cmd_p(char* args){
-    printf("[sdb] expression evaluation\n");
+    //printf("[sdb] expression evaluation\n");
     bool expression_success;
     expression_success = false;
     u_int64_t cmd_p_result = 0;
@@ -1569,17 +1569,17 @@ int sdb_cmd_p(char* args){
 } // expression evaluation
 
 int sdb_cmd_w(char* args){
-    printf("[sdb] add watchpoint\n");
+    //printf("[sdb] add watchpoint\n");
     return 0;
 } // add watchpoint
 
 int sdb_cmd_d(char* args){
-    printf("[sdb] delete watchpoint\n");
+    //printf("[sdb] delete watchpoint\n");
     return 0;
 } // delete watchpoint
 
 int sdb_cmd_q(char* args){
-    printf("[sdb] quit NSIM\n");
+    //printf("[sdb] quit NSIM\n");
     return -1;
 } // quit NSIM
 
