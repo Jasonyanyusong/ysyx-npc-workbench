@@ -36,6 +36,11 @@
 #define device_have_disk     false
 #define device_have_sdcard   false
 
+#define trace_enable_itrace true
+#define trace_enable_mtrace true
+#define trace_enable_rtrace true
+#define trace_enable_dtrace true
+
 //========== Macros ==========
 
 #define concat_temp(x, y) x ## y
@@ -475,6 +480,147 @@ uint8_t* device_map_new_space(int size);
 
 #define DEVICE_SERIAL_ADDR 0xa00003f8
 void device_serial_putchar(uint64_t device_serial_mem_write_data);
+
+//---------- Trace ----------
+
+uint64_t trace_pc = 0;
+
+void trace_init_trace();
+
+void trace_itrace_init();
+void trace_itrace_write(uint32_t itrace_inst);
+
+void trace_mtrace_init();
+void trace_mtrace_write(uint64_t mtrace_addr, bool mtrace_is_write, uint64_t mtrace_data, int mtrace_len);
+
+typedef struct{
+    uint64_t gpr[32];
+    uint64_t pc;
+} trace_rtrace_context;
+void trace_rtrace_init();
+void trace_rtrace_write(trace_rtrace_context rtrace_context);
+
+void trace_dtrace_init();
+void trace_dtrace_write(char* dtrace_device_name, uint64_t dtrace_addr, int dtrace_len, bool dtrace_is_write, uint64_t dtrace_data);
+
+//========== Trace ==========
+
+void trace_init_trace(){
+    printf("[trace] initializing tracer(s)\n");
+    if(trace_enable_itrace) {trace_itrace_init();}
+    if(trace_enable_mtrace) {trace_mtrace_init();}
+    if(trace_enable_rtrace) {trace_rtrace_init();}
+    if(trace_enable_dtrace) {trace_dtrace_init();}
+    return;
+}
+
+void trace_itrace_init(){
+    printf("[trace-itrace] initializing\n");
+    if(remove("itrace.txt") == 0){
+        printf("[trace-itrace] previous itrace record deleted\n");
+    }
+    return;
+}
+
+void trace_itrace_write(uint32_t itrace_inst){
+    FILE *trace_itrace_file = fopen("itrace.txt", "a+");
+    if(trace_itrace_file == NULL){
+        // should not reach here!
+        printf("[trace-itrace] error: itrace file can not be opened\n");
+        assert(0);
+        return;
+    }
+    char itrace_to_be_written[128];
+    sprintf(itrace_to_be_written, "[itrace] pc: 0x%lx, inst: 0x%x\n", trace_pc, itrace_inst);
+    fputs(itrace_to_be_written, trace_itrace_file);
+    fclose(trace_itrace_file);
+    return;
+}
+
+void trace_mtrace_init(){
+    printf("[trace-mtrace] initializing\n");
+    if(remove("mtrace.txt") == 0){
+        printf("[trace-mtrace] previous mtrace record deleted\n");
+    }
+    return;
+}
+
+void trace_mtrace_write(uint64_t mtrace_addr, bool mtrace_is_write, uint64_t mtrace_data, int mtrace_len){
+    FILE *trace_mtrace_file = fopen("mtrace.txt", "a+");
+    if(trace_mtrace_file == NULL){
+        // should not reach here!
+        printf("[trace-mtrace] error: mtrace file can not be opened\n");
+        assert(0);
+        return;
+    }
+    char mtrace_to_be_written[128];
+    if(mtrace_is_write == true){
+        sprintf(mtrace_to_be_written, "[mtrace] pc: 0x%lx, mem_W, addr = 0x%lx, len = %d, data = 0x%lx\n", trace_pc, mtrace_addr, mtrace_len, mtrace_data);
+    }else{
+        sprintf(mtrace_to_be_written, "[mtrace] pc: 0x%lx, mem_R, addr = 0x%lx, len = %d, data = 0x%lx\n", trace_pc, mtrace_addr, mtrace_len, mtrace_data);
+    }
+    fputs(mtrace_to_be_written, trace_mtrace_file);
+    fclose(trace_mtrace_file);
+    return;
+}
+
+void trace_rtrace_init(){
+    printf("[trace-rtrace] initializing\n");
+    if(remove("rtrace.txt") == 0){
+        printf("[trace-rtrace] previous rtrace record deleted\n");
+    }
+    return;
+}
+
+void trace_rtrace_write(trace_rtrace_context rtrace_context){
+    FILE *trace_rtrace_file = fopen("rtrace.txt", "a+");
+    if(trace_rtrace_file == NULL){
+        // should not reach here!
+        printf("[trace-rtrace] error: rtrace file can not be opened\n");
+        assert(0);
+        return;
+    }
+    char rtrace_to_be_written[1024];
+    sprintf(rtrace_to_be_written, "[trace-rtrace] pc: 0x%lx, ", trace_pc);
+    for(int i = 0; i < 32; i = i + 1){
+        char rtrace_single_gpr[64];
+        sprintf(rtrace_single_gpr, "x%2d: 0x%16lx, ", i, rtrace_context.gpr[i]);
+        strcat(rtrace_to_be_written, rtrace_single_gpr);
+    }
+    char rtrace_pc_reg[64];
+    sprintf(rtrace_pc_reg,  "pc: 0x%16lx\n\0", trace_pc);
+    strcat(rtrace_to_be_written, rtrace_pc_reg);
+    fputs(rtrace_to_be_written, trace_rtrace_file);
+    fclose(trace_rtrace_file);
+    return;
+}
+
+void trace_dtrace_init(){
+    printf("[trace-dtrace] initializing\n");
+    if(remove("dtrace.txt") == 0){
+        printf("[trace-dtrace] previous dtrace record deleted\n");
+    }
+    return;
+}
+
+void trace_dtrace_write(char* dtrace_device_name, uint64_t dtrace_addr, int dtrace_len, bool dtrace_is_write, uint64_t dtrace_data){
+    FILE *trace_dtrace_file = fopen("dtrace.txt", "a+");
+    if(trace_dtrace_file == NULL){
+        // should not reach here!
+        printf("[trace-dtrace] error: dtrace file can not be opened\n");
+        assert(0);
+        return;
+    }
+    char mtrace_to_be_written[128];
+    if(dtrace_is_write == true){
+        sprintf(mtrace_to_be_written, "[dtrace] pc: 0x%lx, mmio_W, name = \"%s\", addr = 0x%lx, len = %d, data = 0x%lx\n", trace_pc, dtrace_device_name, dtrace_addr, dtrace_len, dtrace_data);
+    }else{
+        sprintf(mtrace_to_be_written, "[dtrace] pc: 0x%lx, mmio_R, name = \"%s\", addr = 0x%lx, len = %d, data = 0x%lx\n", trace_pc, dtrace_device_name, dtrace_addr, dtrace_len, dtrace_data);
+    }
+    fputs(mtrace_to_be_written, trace_dtrace_file);
+    fclose(trace_dtrace_file);
+    return;
+}
 
 //========== Statistics ==========
 
@@ -1079,9 +1225,13 @@ void sim_one_exec(){
     if(print_debug_informations) {printf("\33[1;33m[sim] Phase I: Instruction fetch\33[0m\n");}
     uint64_t sim_getCurrentPC = top -> io_NPC_sendCurrentPC;
     if(print_debug_informations) {printf("\33[1;33m[sim] current pc is 0x%lx\33[0m\n", sim_getCurrentPC);}
+
+    trace_pc = sim_getCurrentPC; // Update current pc counter's val so trace can work
+
     uint32_t sim_currentInst = mem_paddr_read(sim_getCurrentPC, 4);
     top -> io_NPC_getInst = sim_currentInst;
     if(print_debug_informations) {printf("\33[1;33m[sim] current instruction is 0x%x\33[0m\n", sim_currentInst);}
+    if(trace_enable_itrace) {trace_itrace_write(sim_currentInst);}
     top -> eval();
 
     // Step II: decode instruction
@@ -1146,6 +1296,13 @@ void sim_one_exec(){
     }
     cpu.pc = top -> io_NPC_sendCurrentPC;
     reg_display(false);
+
+    trace_rtrace_context context_in_sim;
+    for(int i = 0; i < 32; i = i + 1){
+        context_in_sim.gpr[i] = nsim_gpr[i].value;
+    }
+    context_in_sim.pc = top -> io_NPC_sendCurrentPC;
+    trace_rtrace_write(context_in_sim);
 
     //nsim_state.state = NSIM_CONTINUE;
     nsim_state.halt_pc = reg_pc;
@@ -1339,11 +1496,13 @@ uint64_t mem_pmem_read(uint64_t mem_addr, int mem_length){
 
     if(mem_addr_in_bound(mem_addr)){
         uint64_t ret = mem_host_read(mem_guest_to_host(mem_addr), mem_length);
+        trace_mtrace_write(mem_addr, false, ret, mem_length);
         return ret;
     }else{
         // Address is not Physical Memory, implement device
         //printf("addr = 0x%lx\n", mem_addr);
         uint64_t ret = device_mmio_read(mem_addr, mem_length);
+        trace_dtrace_write((char *)device_mmio_fetch_mmio_map(mem_addr) -> name, mem_addr, mem_length, false, ret);
         return ret;
     }
 }
@@ -1354,10 +1513,12 @@ void mem_pmem_write(uint64_t mem_addr, int mem_length, uint64_t mem_data){
     if(mem_addr_in_bound(mem_addr)){
         //printf("[memory] normal write, addr = 0x%lx, len = %d, data = 0x%lx\n", mem_addr, mem_length, mem_data);
         mem_host_write(mem_guest_to_host(mem_addr), mem_length, mem_data);
+        trace_mtrace_write(mem_addr, true, mem_data, mem_length);
         return;
     }else{
         //printf("[memory] device write, addr = 0x%lx, len = %d, data = 0x%lx\n", mem_addr, mem_length, mem_data);
         device_mmio_write(mem_addr, mem_length, mem_data);
+        trace_dtrace_write((char *)device_mmio_fetch_mmio_map(mem_addr) -> name, mem_addr, mem_length, false, mem_data);
         return;
     }
 
@@ -1634,6 +1795,7 @@ void sdb_init_sdb(){
 int main(int argc, char *argv[]){
     mem_init_mem();
     device_init_devices();
+    trace_init_trace();
     monitor_init_monitor(argc, argv);
     //memcpy(mem_guest_to_host(mem_start_addr), img, sizeof(img));
     state_set_state(NSIM_CONTINUE);
