@@ -484,7 +484,7 @@ void statistics_show(){
     if(statistics_time_exec == 0){
         printf("[statistics] time is so low, can not show statistics\n");
     }else{
-        printf("[statistics] NSIM simulation frequency: %ld\n", (statistics_nr_exec / statistics_time_exec));
+        printf("[statistics] NSIM simulation frequency: %ld inst/second\n", (statistics_nr_exec / (statistics_time_exec / 10000000)));
     }
     return;
 }
@@ -1070,6 +1070,8 @@ void sim_one_exec(){
         return;
     }
 
+    uint64_t sim_start_time = host_timer_get_time();
+
     if(print_debug_informations) {printf("\33[1;33m[sim] execution one round\33[0m\n");}
     top -> clock = 0;// simulate posedge
 
@@ -1175,6 +1177,11 @@ void sim_one_exec(){
     }*/
 
     sim_step_and_dump_wave();
+
+    uint64_t sim_finish_time = host_timer_get_time();
+
+    statistics_time_exec += (sim_finish_time - sim_start_time);
+    statistics_nr_exec = statistics_nr_exec + 1;
 
     return;
 }
@@ -1484,6 +1491,7 @@ int sdb_cmd_c(char* args){
     while((nsim_state.state == NSIM_CONTINUE)){
         sim_one_exec();
     }
+    statistics_show();
     return 0;
 } // continue execution
 
