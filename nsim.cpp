@@ -580,16 +580,16 @@ uint64_t device_map_read(uint64_t addr, int len, IOMap *map){
     uint64_t offset = addr - map -> low;
     device_mmio_invoke_callback(map -> callback, offset, len, false);
     uint64_t ret = mem_host_read((uint8_t *)map -> space + offset, len);
-    printf("[device-map-read] read map \"%s\", at addr = 0x%lx, with len = %d, ret = 0x%lx\n", map -> name, addr, len, ret);
+    //printf("[device-map-read] read map \"%s\", at addr = 0x%lx, with len = %d, ret = 0x%lx\n", map -> name, addr, len, ret);
     return ret;
 }
 
 void device_map_write(uint64_t addr, int len, uint64_t data, IOMap *map){
     assert(len >= 1 && len <= 8);
-    if(strcmp(map -> name, "vmem") != 0) {printf("[device-map-write] write map \"%s\", at addr = 0x%lx, with len = %d, data = 0x%lx\n", map -> name, addr, len, data);}
+    //if(strcmp(map -> name, "vmem") != 0) {printf("[device-map-write] write map \"%s\", at addr = 0x%lx, with len = %d, data = 0x%lx\n", map -> name, addr, len, data);}
     device_mmio_check_bound(map, addr);
     uint64_t offset = addr - map -> low;
-    if(strcmp(map -> name, "vmem") != 0) {printf("[device-map-write] offset = 0x%lx\n", offset);}
+    //if(strcmp(map -> name, "vmem") != 0) {printf("[device-map-write] offset = 0x%lx\n", offset);}
     mem_host_write(map -> space + offset, len, data);
     device_mmio_invoke_callback(map -> callback, offset, len, true);
     return;
@@ -602,9 +602,9 @@ uint64_t device_mmio_read(uint64_t addr, int len){
 
 void device_mmio_write(uint64_t addr, int len, uint64_t data){
     if(print_debug_informations) {printf("[mmio_write] paddr is 0x%lx\n", addr);}
-    if(addr == 0xa0000100 || addr == 0xa0000104){printf("[device-mmio-write] catch vgactl write, addr = 0x%lx, len = %d, data = 0x%lx\n", addr, len, data);}
+    //if(addr == 0xa0000100 || addr == 0xa0000104){printf("[device-mmio-write] catch vgactl write, addr = 0x%lx, len = %d, data = 0x%lx\n", addr, len, data);}
     device_map_write(addr, len, data, device_mmio_fetch_mmio_map(addr));
-    if(addr == 0xa0000100 || addr == 0xa0000104) {printf("device_vga_ctl_port_base[0] = 0x%x, device_vga_ctl_port_base[1] = 0x%x\n", device_vga_ctl_port_base[0], device_vga_ctl_port_base[1]);}
+    //if(addr == 0xa0000100 || addr == 0xa0000104) {printf("device_vga_ctl_port_base[0] = 0x%x, device_vga_ctl_port_base[1] = 0x%x\n", device_vga_ctl_port_base[0], device_vga_ctl_port_base[1]);}
     return;
 }
 
@@ -899,7 +899,7 @@ void device_vga_init_screen(){
 }
 
 void device_vga_update_screen(){
-    if(true) {printf("[device-vga] calling SDL2 functions to update screen\n");}
+    //if(true) {printf("[device-vga] calling SDL2 functions to update screen\n");}
     SDL_UpdateTexture(device_vga_texture, NULL, device_vga_vmem, DEVICE_VGA_SCREEN_W * sizeof(uint32_t));
     SDL_RenderClear(device_vga_renderer);
     SDL_RenderCopy(device_vga_renderer, device_vga_texture, NULL, NULL);
@@ -907,9 +907,9 @@ void device_vga_update_screen(){
 }
 
 void device_vga_vga_update_screen(){
-    if(print_debug_informations) {printf("[device-vga] vga sync register hold val = 0x%x\n", device_vga_ctl_port_base[1]);}
+    //if(print_debug_informations) {printf("[device-vga] vga sync register hold val = 0x%x\n", device_vga_ctl_port_base[1]);}
     if(device_vga_ctl_port_base[1] != 0){
-        if(true) {printf("[device-vga] ready to update screen\n");}
+        //if(true) {printf("[device-vga] ready to update screen\n");}
         if(DEVICE_VGA_SHOW_SCREEN) {device_vga_update_screen();}
         device_vga_ctl_port_base[1] = 0;
         return;
@@ -1020,6 +1020,7 @@ bool diff_difftest_check_reg(){
     if(cpu.pc != ref.pc)
     {
         printf("[difftest] pc different, difftest failed\n");
+        state_set_state(NSIM_ABORT);
         return false;
     }
     if(print_debug_informations) {printf("[difftest] success at current pc\n");}
@@ -1144,7 +1145,7 @@ void sim_one_exec(){
     cpu.pc = top -> io_NPC_sendCurrentPC;
     reg_display(false);
 
-    nsim_state.state = NSIM_CONTINUE;
+    //nsim_state.state = NSIM_CONTINUE;
     nsim_state.halt_pc = reg_pc;
 
     if(difftest_enable)
@@ -1479,7 +1480,8 @@ char* sdb_rl_gets(){
 
 int sdb_cmd_c(char* args){
     printf("[sdb] continue NPC execution\n");
-    while((nsim_state.state == NSIM_CONTINUE || nsim_state.state == NSIM_STOP)){
+    if(nsim_state.state == NSIM_STOP){state_set_state(NSIM_CONTINUE);}
+    while((nsim_state.state == NSIM_CONTINUE)){
         sim_one_exec();
     }
     return 0;
