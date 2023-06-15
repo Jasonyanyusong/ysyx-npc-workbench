@@ -479,8 +479,8 @@ void device_serial_putchar(uint64_t device_serial_mem_write_data);
 //========== Statistics ==========
 
 void statistics_show(){
-    printf("[statistics] total insturction executed by NSIM: %ld\n", statistics_nr_exec);
-    printf("[statistics] total time cost for execution instructions: %ld\n", statistics_time_exec);
+    printf("[statistics] total insturction executed by NSIM: %ld instructions\n", statistics_nr_exec);
+    printf("[statistics] total time cost for execution instructions: %ld us\n", statistics_time_exec);
     if(statistics_time_exec == 0){
         printf("[statistics] time is so low, can not show statistics\n");
     }else{
