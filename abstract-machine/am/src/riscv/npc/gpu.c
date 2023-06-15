@@ -49,7 +49,9 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
     }
   }
   if (ctl->sync) {
-    outl(SYNC_ADDR, 1);
+    printf("ctl->sync == 1\n");
+    outl(VGACTL_ADDR + 4, 1);
+    printf("sync reg written, with data %d\n", inl(VGACTL_ADDR + 4));
   }
 }
 
