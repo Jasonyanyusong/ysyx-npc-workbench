@@ -206,17 +206,17 @@ config RegisterTrace
   default n
 
 config FunctionTrace
-  bool "Enable ftrace (pa2, implementing)"
+  bool "Enable ftrace (pa2, have wrong, do not use)"
   depends on TRACE
   default n
 
 config DeviceTrace
-  bool "Enable dtrace (pa2, implementing)"
+  bool "Enable dtrace (pa2, implemented)"
   depends on TRACE
   default n
 
 config ErrorTrace
-  bool "Enable etrace (pa3, implementing)"
+  bool "Enable etrace (pa3, implemented)"
   depends on TRACE
   default n
 
