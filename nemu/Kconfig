@@ -76,7 +76,7 @@ endchoice
 menu "RISCV Unprivileged Settings"
 config RV64M
   bool "M   Standard Extension for Integer Multiplication and Division"
-  default n
+  default y
 config RV64A
   bool "A   Standard Extension for Atomic Instructions"
   default n
@@ -176,7 +176,7 @@ config ShowInstInfo
 
 config ShowInstName
   bool "Show informations name every execution (will be bad for input/output cases)"
-  default y
+  default n
 
 config NPCDiffTest
   bool "DiffTest NPC by comparing with NEMU's result"
@@ -211,18 +211,18 @@ config FunctionTrace
   default n
 
 config DeviceTrace
-  bool "Enable dtrace (pa2, implemented)"
+  bool "Enable dtrace (pa2, tested)"
   depends on TRACE
   default n
 
 config ErrorTrace
-  bool "Enable etrace (pa3, implemented)"
+  bool "Enable etrace (pa3, tested)"
   depends on TRACE
   default n
 
 config TRACE
   bool "Enable tracer"
-  default y
+  default n
 
 config TRACE_START
   depends on TRACE
@@ -237,7 +237,7 @@ config TRACE_END
 config ITRACE
   depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
   bool "Enable instruction tracer"
-  default y
+  default n
 
 config ITRACE_COND
   depends on ITRACE
