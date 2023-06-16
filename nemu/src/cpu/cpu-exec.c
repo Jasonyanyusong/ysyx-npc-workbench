@@ -83,12 +83,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
   iringbuf_write(s->pc, s->snpc, s->dnpc, s->isa.inst.val, p);
 #endif
 
-#ifdef CONFIG_MemoryTrace
-  mtrace_updatePC(s->pc);
-#endif
-
 #ifdef CONFIG_RegisterTrace
-  rtrace_updatePC(s->pc);
   rtrace_write();
 #endif
 }

@@ -4,6 +4,8 @@
 #include<elf.h>
 #include<stdlib.h>
 
+#include "isa.h"
+
 #define iringbuf_size 64
 #define ftrace_elf_nr_Phdr 1024
 #define ftrace_elf_nr_Shdr 1024
@@ -23,6 +25,31 @@ void itrace_write(char* messageWrite){
     printf("trace-itrace: %s", messageWrite);
     fputs(messageWrite, itrace_file);
     fclose(itrace_file);
+    return;
+}
+
+void dtrace_init(){
+    printf("trace: dtrace enabled\n");
+    if(remove("dtrace.txt")==0){
+        printf("NEMU removed previous dtrace records.\n");
+    } // So previous traces will not be recorded
+    return;
+}
+
+void dtrace_write(uint64_t dtrace_pc, char* dtrace_device_name, uint64_t dtrace_addr, int dtrace_len, bool dtrace_is_write, uint64_t dtrace_data){
+    FILE *dtrace_file = fopen("dtrace.txt", "a+");
+    assert(dtrace_file != NULL);
+
+    char mtrace_to_be_written[128];
+    if(dtrace_is_write == true){
+        sprintf(mtrace_to_be_written, "pc: 0x%lx, mmio_W, name = \"%s\", addr = 0x%lx, len = %d, data = 0x%lx\n", cpu.pc, dtrace_device_name, dtrace_addr, dtrace_len, dtrace_data);
+    }else{
+        sprintf(mtrace_to_be_written, "pc: 0x%lx, mmio_R, name = \"%s\", addr = 0x%lx, len = %d, data = 0x%lx\n", cpu.pc, dtrace_device_name, dtrace_addr, dtrace_len, dtrace_data);
+    }
+
+    printf("trace-dtrace: %s", mtrace_to_be_written);
+    fputs(mtrace_to_be_written, dtrace_file);
+    fclose(dtrace_file);
     return;
 }
 
@@ -51,17 +78,10 @@ void iringbuf_write(word_t pc, word_t snpc, word_t dnpc, word_t inst, char* dias
     return;
 }
 
-word_t mtrace_pc = 0;
-void mtrace_updatePC(word_t new_pc){
-    mtrace_pc = new_pc;
-    printf("trace-mtrace: current pc is 0x%lx\n", mtrace_pc);
-    return;
-}
-
 void mtrace_write(bool mem_RW, word_t addr, int mem_len, word_t mem_data){
     char written_to_mtrace[128];
     if(mem_RW){
-        sprintf(written_to_mtrace, "pc: 0x%lx  mem_w  addr: 0x%lx  len: %d  data: 0x%lx\n", mtrace_pc, addr, mem_len, mem_data);
+        sprintf(written_to_mtrace, "pc: 0x%lx  mem_w  addr: 0x%lx  len: %d  data: 0x%lx\n", cpu.pc, addr, mem_len, mem_data);
         printf("trace-mtrace: %s", written_to_mtrace);
         FILE *mtrace_file = fopen("mtrace.txt", "a+");
         assert(mtrace_file != NULL);
@@ -69,7 +89,7 @@ void mtrace_write(bool mem_RW, word_t addr, int mem_len, word_t mem_data){
         fclose(mtrace_file);
     }
     else{
-        sprintf(written_to_mtrace, "pc: 0x%lx  mem_r  addr: 0x%lx  len: %d  data: 0x%lx\n", mtrace_pc, addr, mem_len, mem_data);
+        sprintf(written_to_mtrace, "pc: 0x%lx  mem_r  addr: 0x%lx  len: %d  data: 0x%lx\n", cpu.pc, addr, mem_len, mem_data);
         printf("trace-mtrace: %s", written_to_mtrace);
         FILE *mtrace_file = fopen("mtrace.txt", "a+");
         assert(mtrace_file != NULL);
@@ -86,13 +106,6 @@ void mtrace_init(){
     return;
 }
 
-word_t rtrace_pc = 0;
-void rtrace_updatePC(word_t new_pc){
-    rtrace_pc = new_pc;
-    printf("trace-rtrace: current pc is 0x%lx\n", rtrace_pc);
-    return;
-}
-
 void rtrace_init(){
     printf("trace: rtrace enabled\n");
     if(remove("rtrace.txt")==0){
@@ -104,7 +117,7 @@ void rtrace_init(){
 void rtrace_write(){
     char written_to_rtrace[1024] = {0};
     char rtrace_pc_msg[64];
-    sprintf(rtrace_pc_msg, "At pc = 0x%lx, \0", rtrace_pc);
+    sprintf(rtrace_pc_msg, "At pc = 0x%lx, \0", cpu.pc);
     strcat(written_to_rtrace, rtrace_pc_msg);
     for(int i = 0; i < 32; i = i + 1){
         char rtrace_gpr_msg[64];
@@ -367,5 +380,6 @@ void trace_init(char* elf, char* diasm){
     IFDEF(CONFIG_MemoryTrace, mtrace_init());
     IFDEF(CONFIG_FunctionTrace, ftrace_init(elf, diasm));
     IFDEF(CONFIG_RegisterTrace, rtrace_init());
+    IFDEF(CONFIG_DeviceTrace, dtrace_init());
     return;
 }
