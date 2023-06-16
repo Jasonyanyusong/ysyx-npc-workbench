@@ -44,7 +44,7 @@ static debug_module_config_t difftest_dm_config = {
 struct diff_context_t {
   word_t gpr[32];
   word_t csr[4096];
-  uint128_t fpr[32];
+  //uint128_t fpr[32];
   word_t pc;
 };
 
