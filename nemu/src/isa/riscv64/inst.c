@@ -201,6 +201,8 @@ static int decode_exec(Decode *s) {
   INSTPAT("??????? ????? ????? 110 ????? 11100 11", csrrsi , I, IFDEF(CONFIG_ShowInstName, printf("CSRRSI\n")); IFDEF(CONFIG_DIFFTEST, difftest_skip_ref()); printf("Zicsr-exec\n"); uint64_t oldCSR = C(imm); C(imm) = rs1 | oldCSR; R(rd) = oldCSR);
   INSTPAT("??????? ????? ????? 111 ????? 11100 11", csrrci , I, IFDEF(CONFIG_ShowInstName, printf("CSRRCI\n")); IFDEF(CONFIG_DIFFTEST, difftest_skip_ref()); printf("Zicsr-exec\n"); uint64_t oldCSR = C(imm); C(imm) = rs1 & oldCSR; R(rd) = oldCSR);
 
+  INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , N, IFDEF(CONFIG_ShowInstName, printf("MRET\n"))  ; s -> dnpc = cpu.csr[0x341] + 4); // csr[0x341] is mepc
+
   // RV64M
   #ifdef CONFIG_RV64M
   INSTPAT("0000001 ????? ????? 000 ????? 01100 11", mul    , R, IFDEF(CONFIG_ShowInstName, printf("MUL\n"));    R(rd) = BITS(src1 * src2, 63, 0));
