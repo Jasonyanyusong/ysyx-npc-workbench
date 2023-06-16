@@ -80,7 +80,7 @@ static int cmd_info(char *args){
     if      (strcmp(args, "r") == 0)   {isa_reg_display();}
     else if (strcmp(args, "w") == 0)   {print_WP();       }
     else if (strcmp(args, "gpr") == 0) {isa_display_gpr();}
-    else if (strcmp(args, "fpr") == 0) {isa_display_fpr();}
+    //else if (strcmp(args, "fpr") == 0) {isa_display_fpr();}
     else if (strcmp(args, "csr") == 0) {isa_display_csr();}
   else{
       printf("Subcommand Not Defined\n");
