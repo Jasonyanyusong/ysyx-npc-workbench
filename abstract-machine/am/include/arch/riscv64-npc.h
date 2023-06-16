@@ -3,7 +3,16 @@
 
 struct Context {
   // TODO: fix the order of these members to match trap.S
-  uintptr_t mepc, mcause, gpr[32], mstatus;
+  //uintptr_t mepc, mcause, gpr[32], mstatus;
+
+  //#define CONTEXT_SIZE  ((32 + 3 + 1) * XLEN)
+  //#define OFFSET_SP     ( 2 * XLEN)
+  //#define OFFSET_CAUSE  (32 * XLEN)
+  //#define OFFSET_STATUS (33 * XLEN)
+  //#define OFFSET_EPC    (34 * XLEN)
+
+  uintptr_t gpr[32], mcause, mstatus, mepc;
+  void *pdir;
 };
 
 #define GPR1 gpr[17] // a7
