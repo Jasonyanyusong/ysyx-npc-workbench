@@ -28,6 +28,25 @@ void itrace_write(char* messageWrite){
     return;
 }
 
+void etrace_init(){
+    printf("trace: etrace enabled\n");
+    if(remove("etrace.txt")==0){
+        printf("NEMU removed previous etrace records.\n");
+    } // So previous traces will not be recorded
+    return;
+}
+
+void etrace_write(uint64_t mstatus, uint64_t mtvec, uint64_t mepc, uint64_t mcause){
+    FILE *etrace_file = fopen("etrace.txt", "a+");
+    assert(etrace_file != NULL);
+    char etrace_msg[128];
+    sprintf(etrace_msg, "pc: 0x%lx, mstatus: 0x%lx, mtvec: 0x%lx, mepc: 0x%lx, mcause: 0x%lx\n\0", cpu.pc, mstatus, mtvec, mepc, mcause);
+    printf("trace-etrace: %s", etrace_msg);
+    fputs(etrace_msg, etrace_file);
+    fclose(etrace_file);
+    return;
+}
+
 void dtrace_init(){
     printf("trace: dtrace enabled\n");
     if(remove("dtrace.txt")==0){

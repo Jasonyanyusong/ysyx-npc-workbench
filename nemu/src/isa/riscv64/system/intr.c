@@ -28,6 +28,10 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   cpu.csr[CSR_MEPC] = epc;
   cpu.csr[CSR_MCAUSE] = NO;
 
+#ifdef CONFIG_ErrorTrace
+  etrace_write(cpu.csr[CSR_MSTATUS], cpu.csr[CSR_MTVEC], cpu.csr[CSR_MEPC], cpu.csr[CSR_MCAUSE]);
+#endif
+
   return cpu.csr[CSR_MTVEC];
 }
 
