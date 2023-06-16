@@ -18,13 +18,7 @@
 #include "../local-include/reg.h"
 #include<math.h>
 
-#ifdef CONFIG_DIFFTEST_NOABORT_MODE
-uint64_t exec_count = 0;
-uint64_t success_count = 0;
-uint64_t fail_count = 0;
-#endif
-
-const char *rvint_regs[] = {
+/*const char *rvint_regs[] = {
   "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
   "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
   "a6", "a7", "s2", "s3", "s4", "s5", "s6", "s7",
@@ -36,43 +30,28 @@ const char *rvint_regs_alias[] = {
   "x8", "x9", "x10", "x11", "x12", "x13", "x14", "x15",
   "x16", "x17", "x18", "x19", "x20", "x21", "x22", "x23",
   "x24", "x25", "x26", "x27", "x28", "x29", "x30", "x31"
-};
+};*/
 
-void isa_print_regcompare(CPU_state ref_r, vaddr_t pc, int error_integer_register_number);
-void isa_print_reg();
+//void isa_print_regcompare(CPU_state ref_r, vaddr_t pc, int error_integer_register_number);
+//void isa_print_reg();
 
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
   for(int integer_register_index = 0; integer_register_index < 32; integer_register_index = integer_register_index + 1)
   {
     if((unsigned)cpu.gpr[integer_register_index] != (unsigned)ref_r -> gpr[integer_register_index])
     {
-      isa_print_regcompare(*ref_r, pc, integer_register_index);
-#ifndef CONFIG_DIFFTEST_NOABORT_MODE
+      //isa_print_regcompare(*ref_r, pc, integer_register_index);
+      printf("Difftest Reg Compare failed at GPR[%d], Difftest Get 0x%lx, NEMU Get 0x%lx\n", integer_register_index, ref_r -> gpr[integer_register_index], cpu.gpr[integer_register_index]);
       return false;
-#endif
-#ifdef CONFIG_DIFFTEST_NOABORT_MODE
-      fail_count = fail_count + 1;
-      return true;
-#endif
     }
-#ifdef CONFIG_DIFFTEST_NOABORT_MODE
-    else{
-      success_count = success_count + 1;
-    }
-#endif
   }
-#ifdef CONFIG_ShowInstInfo
-  isa_print_reg(pc);
-#endif
 
-#ifdef CONFIG_DIFFTEST_NOABORT_MODE
-    printf("Up to now, we have executed %ld steps,\033[1;44;32m with %ld steps success\033[0m,\033[1;44;31m and %ld steps fail\033[0m\n", exec_count, success_count / 32, fail_count);
-#endif
+  // M-State CSR checkings
 
   return true;
 }
 
-void isa_print_regcompare(CPU_state ref_r, vaddr_t pc, int error_integer_register_number)
+/*void isa_print_regcompare(CPU_state ref_r, vaddr_t pc, int error_integer_register_number)
 {
   printf("\n\033[1;31;43mAt pc = 0x%lx, register x%d(%s) FAILED DiffTest!\033[0m\n", pc, error_integer_register_number, rvint_regs[error_integer_register_number]);
   printf("*****************************************************************************RV64 Integer Registers*****************************************************************************\n");
@@ -143,9 +122,9 @@ void isa_print_regcompare(CPU_state ref_r, vaddr_t pc, int error_integer_registe
     }
   }
   printf("*****************************************************************************RV64 Integer Registers*****************************************************************************\n");
-}
+}*/
 
-void isa_print_reg(vaddr_t pc)
+/*void isa_print_reg(vaddr_t pc)
 {
   printf("\n\033[1;32;43mAt pc = 0x%lx, all registers PASSED DiffTest!\033[0m\n", pc);
   // Preserved function, if we need to print the value of all register even if DiffTest is CORRECT, we can implement this function.
@@ -188,7 +167,7 @@ void isa_print_reg(vaddr_t pc)
     printf("| %4s (%4s) | 0x %16lx | 0d %20ld | 0o %22lo | 0b %s |\n", rvint_regs[print_integer_register], rvint_regs_alias[print_integer_register], cpu.gpr[print_integer_register], cpu.gpr[print_integer_register], cpu.gpr[print_integer_register], inverse_nemu_register);
   }
   printf("*****************************************************************************RV64 Integer Registers*****************************************************************************\n");
-}
+}*/
 
 
 void isa_difftest_attach() {
