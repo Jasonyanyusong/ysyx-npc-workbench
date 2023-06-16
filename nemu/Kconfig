@@ -215,6 +215,11 @@ config DeviceTrace
   depends on TRACE
   default n
 
+config ErrorTrace
+  bool "Enable etrace (pa3, implementing)"
+  depends on TRACE
+  default n
+
 config TRACE
   bool "Enable tracer"
   default y
