@@ -383,7 +383,7 @@ void ftrace_init(char* ftrace_elf, char* ftrace_das){
         printf("NEMU removed previous ftrace records.\n");
     } // So previous traces will not be recorded
     // TODO: elf and disassembly file location is parsed here, read ELF and diasm to get location of each function
-    ftrace_process_elf(ftrace_elf);
+    //ftrace_process_elf(ftrace_elf);
     return;
 }
 
