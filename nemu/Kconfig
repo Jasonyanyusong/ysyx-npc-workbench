@@ -210,6 +210,11 @@ config FunctionTrace
   depends on TRACE
   default n
 
+config DeviceTrace
+  bool "Enable dtrace (pa2, implementing)"
+  depends on TRACE
+  default n
+
 config TRACE
   bool "Enable tracer"
   default y
