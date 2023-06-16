@@ -194,12 +194,12 @@ static int decode_exec(Decode *s) {
   INSTPAT("0000000 ????? ????? 101 ????? 01110 11", srlw   , R, IFDEF(CONFIG_ShowInstName, printf("SRLW\n"));   R(rd) = SEXT((unsigned)BITS(src1, 31, 0) >> src2, 32));
   INSTPAT("0100000 ????? ????? 101 ????? 01110 11", sraw   , R, IFDEF(CONFIG_ShowInstName, printf("SRAW\n"));   R(rd) = SEXT((signed)BITS(src1, 31, 0) >> src2, 32));
 
-  INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , I, IFDEF(CONFIG_ShowInstName, printf("CSRRW\n"));  uint64_t oldCSR = C(imm); C(imm) = src1; R(rd) = oldCSR);
-  INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  , I, IFDEF(CONFIG_ShowInstName, printf("CSRRS\n"));  uint64_t oldCSR = C(imm); C(imm) = src1 | oldCSR; R(rd) = oldCSR);
-  INSTPAT("??????? ????? ????? 011 ????? 11100 11", csrrc  , I, IFDEF(CONFIG_ShowInstName, printf("CSRRC\n"));  uint64_t oldCSR = C(imm); C(imm) = src1 & oldCSR; R(rd) = oldCSR);
-  INSTPAT("??????? ????? ????? 101 ????? 11100 11", csrrwi , I, IFDEF(CONFIG_ShowInstName, printf("CSRRWI\n")); uint64_t oldCSR = C(imm); C(imm) = rs1; R(rd) = oldCSR);
-  INSTPAT("??????? ????? ????? 110 ????? 11100 11", csrrsi , I, IFDEF(CONFIG_ShowInstName, printf("CSRRSI\n")); uint64_t oldCSR = C(imm); C(imm) = rs1 | oldCSR; R(rd) = oldCSR);
-  INSTPAT("??????? ????? ????? 111 ????? 11100 11", csrrci , I, IFDEF(CONFIG_ShowInstName, printf("CSRRCI\n")); uint64_t oldCSR = C(imm); C(imm) = rs1 & oldCSR; R(rd) = oldCSR);
+  INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , I, IFDEF(CONFIG_ShowInstName, printf("CSRRW\n"));  IFDEF(CONFIG_DIFFTEST, difftest_skip_ref()); printf("Zicsr-exec CSRRW, imm = 0x%lx\n", imm); word_t oldCSR = C(imm); C(imm) = src1; R(rd) = oldCSR);
+  INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  , I, IFDEF(CONFIG_ShowInstName, printf("CSRRS\n"));  IFDEF(CONFIG_DIFFTEST, difftest_skip_ref()); printf("Zicsr-exec CSRRS, imm = 0x%lx\n", imm); word_t oldCSR = C(imm); C(imm) = src1 | oldCSR; R(rd) = oldCSR);
+  INSTPAT("??????? ????? ????? 011 ????? 11100 11", csrrc  , I, IFDEF(CONFIG_ShowInstName, printf("CSRRC\n"));  IFDEF(CONFIG_DIFFTEST, difftest_skip_ref()); printf("Zicsr-exec CSRRC, imm = 0x%lx\n", imm); word_t oldCSR = C(imm); C(imm) = src1 & oldCSR; R(rd) = oldCSR);
+  INSTPAT("??????? ????? ????? 101 ????? 11100 11", csrrwi , I, IFDEF(CONFIG_ShowInstName, printf("CSRRWI\n")); IFDEF(CONFIG_DIFFTEST, difftest_skip_ref()); printf("Zicsr-exec\n"); uint64_t oldCSR = C(imm); C(imm) = rs1; R(rd) = oldCSR);
+  INSTPAT("??????? ????? ????? 110 ????? 11100 11", csrrsi , I, IFDEF(CONFIG_ShowInstName, printf("CSRRSI\n")); IFDEF(CONFIG_DIFFTEST, difftest_skip_ref()); printf("Zicsr-exec\n"); uint64_t oldCSR = C(imm); C(imm) = rs1 | oldCSR; R(rd) = oldCSR);
+  INSTPAT("??????? ????? ????? 111 ????? 11100 11", csrrci , I, IFDEF(CONFIG_ShowInstName, printf("CSRRCI\n")); IFDEF(CONFIG_DIFFTEST, difftest_skip_ref()); printf("Zicsr-exec\n"); uint64_t oldCSR = C(imm); C(imm) = rs1 & oldCSR; R(rd) = oldCSR);
 
   // RV64M
   #ifdef CONFIG_RV64M
