@@ -36,10 +36,10 @@
 #define device_have_disk     false
 #define device_have_sdcard   false
 
-#define trace_enable_itrace true
-#define trace_enable_mtrace true
-#define trace_enable_rtrace true
-#define trace_enable_dtrace true
+#define trace_enable_itrace false
+#define trace_enable_mtrace false
+#define trace_enable_rtrace false
+#define trace_enable_dtrace false
 
 //========== Macros ==========
 
@@ -109,13 +109,15 @@ char* monitor_das_file = NULL;
 int   monitor_difftest_port = 1234;
 long  monitor_img_size = -1;
 
+bool  monitor_script_mode = false;
+
 long monitor_load_img();
 int monitor_parse_args(int argc, char*argv[]);
 void monitor_init_monitor(int argc, char*argv[]);
 
 //---------- Simple Debugger (SDB) User Interface ----------
 
-int sdb_is_batch_mode = false;
+//int sdb_is_batch_mode = false;
 
 char* sdb_rl_gets();
 
@@ -147,7 +149,7 @@ static struct {
 
 #define SDB_NR_CMD 9
 
-void sdb_set_batch_mode();
+//void sdb_set_batch_mode();
 void sdb_main_loop();
 void sdb_init_sdb();
 
@@ -1297,12 +1299,14 @@ void sim_one_exec(){
     cpu.pc = top -> io_NPC_sendCurrentPC;
     reg_display(false);
 
-    trace_rtrace_context context_in_sim;
-    for(int i = 0; i < 32; i = i + 1){
-        context_in_sim.gpr[i] = nsim_gpr[i].value;
+    if(trace_enable_mtrace){
+        trace_rtrace_context context_in_sim;
+        for(int i = 0; i < 32; i = i + 1){
+            context_in_sim.gpr[i] = nsim_gpr[i].value;
+        }
+        context_in_sim.pc = top -> io_NPC_sendCurrentPC;
+        trace_rtrace_write(context_in_sim);
     }
-    context_in_sim.pc = top -> io_NPC_sendCurrentPC;
-    trace_rtrace_write(context_in_sim);
 
     //nsim_state.state = NSIM_CONTINUE;
     nsim_state.halt_pc = reg_pc;
@@ -1496,13 +1500,13 @@ uint64_t mem_pmem_read(uint64_t mem_addr, int mem_length){
 
     if(mem_addr_in_bound(mem_addr)){
         uint64_t ret = mem_host_read(mem_guest_to_host(mem_addr), mem_length);
-        trace_mtrace_write(mem_addr, false, ret, mem_length);
+        if(trace_enable_mtrace) {trace_mtrace_write(mem_addr, false, ret, mem_length);}
         return ret;
     }else{
         // Address is not Physical Memory, implement device
         //printf("addr = 0x%lx\n", mem_addr);
         uint64_t ret = device_mmio_read(mem_addr, mem_length);
-        trace_dtrace_write((char *)device_mmio_fetch_mmio_map(mem_addr) -> name, mem_addr, mem_length, false, ret);
+        if(trace_enable_dtrace) {trace_dtrace_write((char *)device_mmio_fetch_mmio_map(mem_addr) -> name, mem_addr, mem_length, false, ret);}
         return ret;
     }
 }
@@ -1513,12 +1517,12 @@ void mem_pmem_write(uint64_t mem_addr, int mem_length, uint64_t mem_data){
     if(mem_addr_in_bound(mem_addr)){
         //printf("[memory] normal write, addr = 0x%lx, len = %d, data = 0x%lx\n", mem_addr, mem_length, mem_data);
         mem_host_write(mem_guest_to_host(mem_addr), mem_length, mem_data);
-        trace_mtrace_write(mem_addr, true, mem_data, mem_length);
+        if(trace_enable_mtrace) {trace_mtrace_write(mem_addr, true, mem_data, mem_length);}
         return;
     }else{
         //printf("[memory] device write, addr = 0x%lx, len = %d, data = 0x%lx\n", mem_addr, mem_length, mem_data);
         device_mmio_write(mem_addr, mem_length, mem_data);
-        trace_dtrace_write((char *)device_mmio_fetch_mmio_map(mem_addr) -> name, mem_addr, mem_length, false, mem_data);
+        if(trace_enable_dtrace) {trace_dtrace_write((char *)device_mmio_fetch_mmio_map(mem_addr) -> name, mem_addr, mem_length, false, mem_data);}
         return;
     }
 
@@ -1595,18 +1599,20 @@ int monitor_parse_args(int argc, char*argv[]){
         {"readbin"  , required_argument, NULL, 'i'},
         {"readelf"  , required_argument, NULL, 'r'},
         {"readdiasm", required_argument, NULL, 'a'},
+        {"script"   , no_argument      , NULL, 's'},
         {0          , 0                , NULL,  0 },
     };
     int o;
-    while ( (o = getopt_long(argc, argv, "-bhl:d:p:r:a:", table, NULL)) != -1) {
+    while ( (o = getopt_long(argc, argv, "-sbhl:d:p:r:a:", table, NULL)) != -1) {
         switch (o) {
-            case 'b': sdb_set_batch_mode(); break;
+            //case 'b': sdb_set_batch_mode(); break;
             case 'p': sscanf(optarg, "%d", &monitor_difftest_port); break;
             case 'l': monitor_log_file = optarg; printf("log_file = \"%s\"\n", monitor_log_file); break;
             case 'd': monitor_diff_so_file = optarg; printf("diff_so_file = \"%s\"\n", monitor_diff_so_file); break;
             case 'r': monitor_elf_file = optarg; printf("elf_file = \"%s\"\n", monitor_elf_file); break;
             case 'a': monitor_das_file = optarg; printf("das_file = \"%s\"\n", monitor_das_file); break;
             case 'i': monitor_img_file = optarg; printf("bin_file = \"%s\"\n", monitor_img_file); break;
+            case 's': monitor_script_mode = true; printf("using script mode, automatically execute\n"); break;
             case 1:   monitor_img_file = optarg; printf("img_file = \"%s\"\n", monitor_img_file); return 0;
             default:
                 printf("Usage: %s [OPTION...] IMAGE [args]\n\n", argv[0]);
@@ -1751,13 +1757,18 @@ int sdb_cmd_h(char* args){
     return 0;
 } // help
 
-void sdb_set_batch_mode(){
+/*void sdb_set_batch_mode(){
     sdb_is_batch_mode = true;
     return;
-}
+}*/
 
 void sdb_main_loop(){
-    if(sdb_is_batch_mode){
+    /*if(sdb_is_batch_mode){
+        sdb_cmd_c(NULL);
+        return;
+    }*/
+
+    if(monitor_script_mode){
         sdb_cmd_c(NULL);
         return;
     }
