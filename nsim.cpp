@@ -231,6 +231,8 @@ void diff_difftest_init();
 void diff_difftest_one_exec();
 bool diff_difftest_check_reg();
 
+bool diff_skip_ref_exec = false;
+
 void (*ref_difftest_memcpy)(uint64_t addr, void *buf, size_t n, bool direction) = NULL;
 void (*ref_difftest_regcpy)(void *dut, bool direction) = NULL;
 void (*ref_difftest_exec)(uint64_t n) = NULL;
@@ -649,6 +651,7 @@ int device_find_mapID_by_addr(IOMap *maps, int size, uint64_t addr){
     //printf("[find_mapid_by_addr] paddr is 0x%8x\n", addr);
     for(i = 0; i < size; i = i + 1){
         if(device_map_inside(maps + i, addr)){
+            diff_skip_ref_exec = true;
             //difftest_skip_ref(); //As we use NEMU to difftest, the behavior of decices are same with NSIM
             return i;
         }
@@ -1151,10 +1154,19 @@ void diff_difftest_init(long img_size){
 }
 
 void diff_difftest_one_exec(){
+    if(diff_skip_ref_exec){
+        ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
+        //printf("[difftest] skipped ref\n");
+        diff_skip_ref_exec = false;
+        return;
+    }
     ref_difftest_exec(1);
 }
 
 bool diff_difftest_check_reg(){
+    if(diff_skip_ref_exec){
+        return true;
+    }
     riscv64_CPU_State ref;
     ref_difftest_regcpy(&ref, DIFFTEST_TO_DUT);
     for(int i = 0; i < 32; i = i + 1){
