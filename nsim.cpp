@@ -26,7 +26,7 @@
 #define print_debug_informations false
 #define generate_dump_wave_file  false
 
-#define difftest_enable false
+#define difftest_enable true
 
 #define device_have_serial   true
 #define device_have_rtc      true
@@ -1159,7 +1159,7 @@ bool diff_difftest_check_reg(){
     ref_difftest_regcpy(&ref, DIFFTEST_TO_DUT);
     for(int i = 0; i < 32; i = i + 1){
         if(cpu.gpr[i] != ref.gpr[i]){
-            printf("[difftest] gpr x%d different, difftest failed, NSIM's val: 0x%16lx, NEMU's val: 0x%16lx\n", i, cpu.gpr[i], ref.gpr[i]);
+            printf("[difftest] at pc = 0x%lx, gpr x%d different, difftest failed, NSIM's val: 0x%16lx, NEMU's val: 0x%16lx\n", reg_pc, i, cpu.gpr[i], ref.gpr[i]);
             state_set_state(NSIM_ABORT);
             //assert(0);
             return false;
@@ -1322,9 +1322,9 @@ void sim_one_exec(){
 
     if(top -> io_NPC_halt == 0b1){
         if(nsim_gpr[10].value == 0){
-            printf("\33[1;33m[sim] \33[1;32mHIT GOOD TRAP\33[1;33m at pc 0x%lx\33[0m\n", top -> io_NPC_sendCurrentPC);
+            printf("\33[1;33m[sim] \33[1;32mHIT GOOD TRAP\33[1;33m at pc 0x%lx\33[0m\n", top -> io_NPC_sendCurrentPC - 4);
         }else{
-            printf("\33[1;33m[sim] \33[1;31mHIT BAD  TRAP\33[1;33m at pc 0x%lx\33[0m\n", top -> io_NPC_sendCurrentPC);
+            printf("\33[1;33m[sim] \33[1;31mHIT BAD  TRAP\33[1;33m at pc 0x%lx\33[0m\n", top -> io_NPC_sendCurrentPC - 4);
         }
         sim_step_and_dump_wave();
         state_set_state(NSIM_END);
@@ -1397,7 +1397,7 @@ void reg_get_reg_from_sim(int reg_idx){
 }
 void reg_get_pcreg_from_sim(){
     if(print_debug_informations) {printf("\33[1;34m[reg] getting PC registers from simulation environment\33[0m\n");}
-    reg_pc = top -> io_NPC_sendCurrentPC;
+    reg_pc = top -> io_NPC_sendCurrentPC - 4;
     reg_snpc = top -> io_NPC_sendCurrentPC + 4;
     reg_dnpc = top -> io_NPC_sendNextPC;
     return;
