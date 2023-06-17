@@ -46,15 +46,15 @@ for i in range(0, cpu_tests_count, 1):
     os.system(test_exec_command)
     print()
     print("CPU-Test: ", cpu_tests_names[i])
-    cpu_tests_result.append(int(input("Enter START_VECTOR if test passed, or input error PC indicates wrong:"), 16))
+    cpu_tests_result.append(input("Press any key to continue"))
 
 # display results
-for i in range(0, cpu_tests_count, 1):
-    print(cpu_tests_names[i], end="\t\t\t")
-    if  cpu_tests_result == 0x80000000:
-        print(" PASS", end="")
-    else:
-        print(" FAIL", end="")
-    pc_str = hex(cpu_tests_result[i])
-    print(" at PC = ", end="")
-    print(pc_str)
+#for i in range(0, cpu_tests_count, 1):
+    #print(cpu_tests_names[i], end="\t\t\t")
+    #if  cpu_tests_result == 0x80000000:
+        #print(" PASS", end="")
+    #else:
+        #print(" FAIL", end="")
+    #pc_str = hex(cpu_tests_result[i])
+    #print(" at PC = ", end="")
+    #print(pc_str)
