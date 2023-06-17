@@ -61,6 +61,7 @@ void isa_display_csr(){
   }*/
 
   // M state CSRs
+  #ifdef CONFIG_RV_Privileged
   printf("(csr[0xF11] MRO) mvendorid  = 0x%lx\n", cpu.csr[0xF11]);
   printf("(csr[0xF12] MRO) marchid    = 0x%lx\n", cpu.csr[0xF12]);
   printf("(csr[0xF13] MRO) mimpid     = 0x%lx\n", cpu.csr[0xF13]);
@@ -80,6 +81,7 @@ void isa_display_csr(){
   printf("(csr[0x344] MRW) mscratch   = 0x%lx\n", cpu.csr[0x344]);
   printf("(csr[0x34A] MRW) mtinst     = 0x%lx\n", cpu.csr[0x34A]);
   printf("(csr[0x34B] MRW) mtval2     = 0x%lx\n", cpu.csr[0x34B]);
+  #endif
 
   printf("\n");
   return;

@@ -20,7 +20,7 @@
 
 typedef struct {
   word_t gpr[32];
-  word_t csr[4096];
+  IFDEF(CONFIG_RV_Privileged, word_t csr[4096]);
   //uint128_t fpr[32];
   // word_t yield half. single and double precision float point, not quad precision yet
   vaddr_t pc;

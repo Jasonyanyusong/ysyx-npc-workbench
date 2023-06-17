@@ -101,16 +101,21 @@ config RV64V
 endmenu
 
 menu "RISCV Privileged Settings"
-choice 
-  prompt "Supported privilege modes"
-  default RPS_M
+config RV_Privileged
+  bool "Enable RV Priviledged Architecture"
+  default n
 config RPS_M
-  bool "M Mode (Simple embedded systems)"
-config RPS_MS
-  bool "M, S Mode (Secure embedded systems)"
-config RPS_MSU
-  bool "M, S, U Mode (Systems running Unix-like operating systems)"
-endchoice
+  depends on RV_Privileged
+  bool "Support M Mode (Simple embedded systems)"
+  default y
+config RPS_S
+  depends on RV_Privileged
+  bool "Support S Mode (Secure embedded systems)"
+  default n
+config RPS_U
+  depends on RV_Privileged
+  bool "Support U Mode (Systems running Unix-like operating systems)"
+  default n
 endmenu
 
 menu "Build Options"

@@ -24,6 +24,7 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   /* TODO: Trigger an interrupt/exception with ``NO''.
    * Then return the address of the interrupt/exception vector.
    */
+#ifdef CONFIG_RV_Privileged
   Log("CPU raised interupt at pc 0x%lx with interrupt NO.0x%lx, mevtc = 0x%lx", epc, NO, cpu.csr[CSR_MTVEC]);
   cpu.csr[CSR_MEPC] = epc;
   cpu.csr[CSR_MCAUSE] = NO;
@@ -33,6 +34,9 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
 #endif
 
   return cpu.csr[CSR_MTVEC];
+#endif
+
+  return 0;
 }
 
 word_t isa_query_intr() {
