@@ -45,6 +45,12 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
       return false;
     }
   }
+  
+  if(cpu.pc != ref_r -> pc)
+  {
+    printf("Difftest failed at PC, Difftest get 0x%lx, NEMU get 0x%lx\n", ref_r -> pc, cpu.pc);
+    return false;
+  }
 
   // M-State CSR checkings
 
