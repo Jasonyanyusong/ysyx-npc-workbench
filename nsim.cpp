@@ -1179,7 +1179,7 @@ bool diff_difftest_check_reg(){
     }
     if(cpu.pc != ref.pc)
     {
-        printf("[difftest] pc different, difftest failed\n");
+        printf("[difftest] pc different, difftest failed, dut = 0x%lx, ref = 0x%lx\n", cpu.pc, ref.pc);
         state_set_state(NSIM_ABORT);
         return false;
     }
