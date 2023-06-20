@@ -634,7 +634,7 @@ void statistics_show(){
     if(statistics_time_exec == 0){
         printf("[statistics] time is so low, can not show statistics\n");
     }else{
-        printf("[statistics] NSIM simulation frequency: %ld inst/second\n", (statistics_nr_exec * 10000000 / statistics_time_exec));
+        printf("[statistics] NSIM simulation frequency: %ld inst/second\n", (statistics_nr_exec * 1000000 / statistics_time_exec));
     }
     return;
 }
