@@ -3,7 +3,7 @@ import argparse
 import os
 
 # prepare local variables
-verilator_name = "verilator --threads 2"
+verilator_name = "verilator -O3"
 verilator_compile_flags = "--cc --exe --trace --build --Wno-lint -Wno-style"
 verilator_ld_flags = "-LDFLAGS -lreadline -LDFLAGS -lSDL2"
 
