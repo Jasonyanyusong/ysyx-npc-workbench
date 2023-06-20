@@ -88,6 +88,7 @@ void isa_display_csr(){
 }
 
 void isa_reg_display() {
+  printf("PC: 0x%lx\n", cpu.pc);
   isa_display_gpr();
   //isa_display_fpr();
   isa_display_csr();
