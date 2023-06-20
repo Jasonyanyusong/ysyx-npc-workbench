@@ -52,6 +52,16 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
     return false;
   }
 
+  #ifdef CONFIG_RV_Privileged
+  int check_csr_index[] = {0x300, 0x305, 0x341, 0x342, 0x304};
+  for(int i = 0; i < ARRLEN(check_csr_index); i = i + 1){
+    if(cpu.csr[i] != ref_r -> csr[i]){
+      printf("Difftest failed at CSR[%3x], Difftest get 0x%lx, NEMU get 0x%lx\n", i, ref_r -> csr[i], cpu.csr[i]);
+      return false;
+    }
+  }
+  #endif
+
   // M-State CSR checkings
 
   return true;
