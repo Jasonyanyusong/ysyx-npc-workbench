@@ -43,7 +43,7 @@ static debug_module_config_t difftest_dm_config = {
 
 struct diff_context_t {
   word_t gpr[32];
-  //word_t csr[4096];
+  IFDEF(CONFIG_RV_Privileged, word_t csr[4096]);
   //uint128_t fpr[32];
   word_t pc;
 };
@@ -65,6 +65,10 @@ void sim_t::diff_get_regs(void* diff_context) {
   struct diff_context_t* ctx = (struct diff_context_t*)diff_context;
   for (int i = 0; i < NXPR; i++) {
     ctx->gpr[i] = state->XPR[i];
+  }
+  for (int i = 0; i < 4096; i = i + 1){
+    //printf("Get CSR No.0x%x, with val = 0x%lx\n", i, p -> get_csr(i));
+    IFDEF(CONFIG_RV_Privileged, ctx->csr[i] = p -> get_csr(i));
   }
   ctx->pc = state->pc;
 }
