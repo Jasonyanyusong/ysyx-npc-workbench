@@ -36,10 +36,10 @@
 #define device_have_disk     false
 #define device_have_sdcard   false
 
-#define trace_enable_itrace false
-#define trace_enable_mtrace false
-#define trace_enable_rtrace false
-#define trace_enable_dtrace false
+//#define trace_enable_itrace 
+//#define trace_enable_mtrace 
+//#define trace_enable_rtrace 
+//#define trace_enable_dtrace 
 
 //========== Macros ==========
 
@@ -191,7 +191,7 @@ NSIMGetGPR nsim_gpr[32];
 
 uint64_t reg_pc, reg_snpc, reg_dnpc;
 
-void reg_get_reg_from_sim(int reg_idx);
+void reg_get_reg_from_sim();
 void reg_get_pcreg_from_sim();
 void reg_display(bool sdb_print_regs);
 
@@ -511,10 +511,10 @@ void trace_dtrace_write(char* dtrace_device_name, uint64_t dtrace_addr, int dtra
 
 void trace_init_trace(){
     printf("[trace] initializing tracer(s)\n");
-    if(trace_enable_itrace) {trace_itrace_init();}
-    if(trace_enable_mtrace) {trace_mtrace_init();}
-    if(trace_enable_rtrace) {trace_rtrace_init();}
-    if(trace_enable_dtrace) {trace_dtrace_init();}
+    trace_itrace_init();
+    trace_mtrace_init();
+    trace_rtrace_init();
+    trace_dtrace_init();
     return;
 }
 
@@ -1245,7 +1245,11 @@ void sim_one_exec(){
     uint32_t sim_currentInst = mem_paddr_read(sim_getCurrentPC, 4);
     top -> io_NPC_getInst = sim_currentInst;
     if(print_debug_informations) {printf("\33[1;33m[sim] current instruction is 0x%x\33[0m\n", sim_currentInst);}
-    if(trace_enable_itrace) {trace_itrace_write(sim_currentInst);}
+
+    #ifdef trace_enable_itrace
+    trace_itrace_write(sim_currentInst);
+    #endif
+
     top -> eval();
 
     // Step II: decode instruction
@@ -1301,24 +1305,22 @@ void sim_one_exec(){
     // We will update devices after the posedge
     device_update();
 
-    for(int i = 0; i < 32; i = i + 1){
-        reg_get_reg_from_sim(i);
-    }
-    reg_get_pcreg_from_sim();
-    for(int i = 0; i < 32; i = i + 1){
+    reg_get_reg_from_sim();
+    //reg_get_pcreg_from_sim();
+    /*for(int i = 0; i < 32; i = i + 1){
         cpu.gpr[i] = nsim_gpr[i].value;
-    }
-    cpu.pc = top -> io_NPC_sendCurrentPC;
+    }*/
+    //cpu.pc = top -> io_NPC_sendCurrentPC;
     reg_display(false);
 
-    if(trace_enable_mtrace){
+    #ifdef trace_enable_rtrace
         trace_rtrace_context context_in_sim;
         for(int i = 0; i < 32; i = i + 1){
             context_in_sim.gpr[i] = nsim_gpr[i].value;
         }
         context_in_sim.pc = top -> io_NPC_sendCurrentPC;
         trace_rtrace_write(context_in_sim);
-    }
+    #endif
 
     //nsim_state.state = NSIM_CONTINUE;
     nsim_state.halt_pc = reg_pc;
@@ -1368,50 +1370,50 @@ void sim_step_and_dump_wave(){
 
 //========== Register manipulations ==========
 
-void reg_get_reg_from_sim(int reg_idx){
+void reg_get_reg_from_sim(){
     //printf("[reg] getting GPR No.%d from simulation environment\n", reg_idx);
-    switch(reg_idx){
-        case 0:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR00; break;
-        case 1:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR01; break;
-        case 2:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR02; break;
-        case 3:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR03; break;
-        case 4:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR04; break;
-        case 5:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR05; break;
-        case 6:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR06; break;
-        case 7:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR07; break;
-        case 8:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR08; break;
-        case 9:   nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR09; break;
-        case 10:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR10; break;
-        case 11:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR11; break;
-        case 12:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR12; break;
-        case 13:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR13; break;
-        case 14:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR14; break;
-        case 15:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR15; break;
-        case 16:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR16; break;
-        case 17:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR17; break;
-        case 18:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR18; break;
-        case 19:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR19; break;
-        case 20:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR20; break;
-        case 21:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR21; break;
-        case 22:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR22; break;
-        case 23:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR23; break;
-        case 24:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR24; break;
-        case 25:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR25; break;
-        case 26:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR26; break;
-        case 27:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR27; break;
-        case 28:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR28; break;
-        case 29:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR29; break;
-        case 30:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR30; break;
-        case 31:  nsim_gpr[reg_idx].index = reg_idx; nsim_gpr[reg_idx].value = top -> io_NPC_GPR31; break;
-        default:  printf("\33[1;34m[reg] unknown register index\33[0m\n"); assert(0);               break;
-    }
+    cpu.gpr[0]  = top -> io_NPC_GPR00;
+    cpu.gpr[1]  = top -> io_NPC_GPR01;
+    cpu.gpr[2]  = top -> io_NPC_GPR02;
+    cpu.gpr[3]  = top -> io_NPC_GPR03;
+    cpu.gpr[4]  = top -> io_NPC_GPR04;
+    cpu.gpr[5]  = top -> io_NPC_GPR05;
+    cpu.gpr[6]  = top -> io_NPC_GPR06;
+    cpu.gpr[7]  = top -> io_NPC_GPR07;
+    cpu.gpr[8]  = top -> io_NPC_GPR08;
+    cpu.gpr[9]  = top -> io_NPC_GPR09;
+    cpu.gpr[10] = top -> io_NPC_GPR10;
+    cpu.gpr[11] = top -> io_NPC_GPR11;
+    cpu.gpr[12] = top -> io_NPC_GPR12;
+    cpu.gpr[13] = top -> io_NPC_GPR13;
+    cpu.gpr[14] = top -> io_NPC_GPR14;
+    cpu.gpr[15] = top -> io_NPC_GPR15;
+    cpu.gpr[16] = top -> io_NPC_GPR16;
+    cpu.gpr[17] = top -> io_NPC_GPR17;
+    cpu.gpr[18] = top -> io_NPC_GPR18;
+    cpu.gpr[19] = top -> io_NPC_GPR19;
+    cpu.gpr[20] = top -> io_NPC_GPR20;
+    cpu.gpr[21] = top -> io_NPC_GPR21;
+    cpu.gpr[22] = top -> io_NPC_GPR22;
+    cpu.gpr[23] = top -> io_NPC_GPR23;
+    cpu.gpr[24] = top -> io_NPC_GPR24;
+    cpu.gpr[25] = top -> io_NPC_GPR25;
+    cpu.gpr[26] = top -> io_NPC_GPR26;
+    cpu.gpr[27] = top -> io_NPC_GPR27;
+    cpu.gpr[28] = top -> io_NPC_GPR28;
+    cpu.gpr[29] = top -> io_NPC_GPR29;
+    cpu.gpr[30] = top -> io_NPC_GPR30;
+    cpu.gpr[31] = top -> io_NPC_GPR31;
+
+    cpu.pc = top -> io_NPC_sendCurrentPC;
     return;
 }
+
 void reg_get_pcreg_from_sim(){
     if(print_debug_informations) {printf("\33[1;34m[reg] getting PC registers from simulation environment\33[0m\n");}
-    reg_pc = top -> io_NPC_sendCurrentPC - 4;
-    reg_snpc = top -> io_NPC_sendCurrentPC + 4;
-    reg_dnpc = top -> io_NPC_sendNextPC;
+    //cpu.pc = top -> io_NPC_sendCurrentPC - 4;
+    //reg_snpc = top -> io_NPC_sendCurrentPC + 4;
+    //reg_dnpc = top -> io_NPC_sendNextPC;
     return;
 }
 void reg_display(bool sdb_print_regs){
@@ -1419,7 +1421,7 @@ void reg_display(bool sdb_print_regs){
         printf("\33[1;34m[reg] print registers\n");
         printf("pc = 0x%lx, snpc = 0x%lx, dnpc = 0x%lx\n", reg_pc, reg_snpc, reg_dnpc);
         for(int i = 0; i < 32; i = i + 1){
-            printf("x%2d = 0x%16lx\t", i, nsim_gpr[i].value);
+            printf("x%2d = 0x%16lx\t", i, cpu.gpr[i]);
             if((i + 1) % 4 == 0) {printf("\n");}
         }
         printf("\33[0m");
@@ -1512,13 +1514,21 @@ uint64_t mem_pmem_read(uint64_t mem_addr, int mem_length){
 
     if(mem_addr_in_bound(mem_addr)){
         uint64_t ret = mem_host_read(mem_guest_to_host(mem_addr), mem_length);
-        if(trace_enable_mtrace) {trace_mtrace_write(mem_addr, false, ret, mem_length);}
+
+        #ifdef trace_enable_mtrace
+        trace_mtrace_write(mem_addr, false, ret, mem_length);
+        #endif
+
         return ret;
     }else{
         // Address is not Physical Memory, implement device
         //printf("addr = 0x%lx\n", mem_addr);
         uint64_t ret = device_mmio_read(mem_addr, mem_length);
-        if(trace_enable_dtrace) {trace_dtrace_write((char *)device_mmio_fetch_mmio_map(mem_addr) -> name, mem_addr, mem_length, false, ret);}
+
+        #ifdef trace_enable_dtrace 
+        trace_dtrace_write((char *)device_mmio_fetch_mmio_map(mem_addr) -> name, mem_addr, mem_length, false, ret);
+        #endif
+
         return ret;
     }
 }
@@ -1529,12 +1539,20 @@ void mem_pmem_write(uint64_t mem_addr, int mem_length, uint64_t mem_data){
     if(mem_addr_in_bound(mem_addr)){
         //printf("[memory] normal write, addr = 0x%lx, len = %d, data = 0x%lx\n", mem_addr, mem_length, mem_data);
         mem_host_write(mem_guest_to_host(mem_addr), mem_length, mem_data);
-        if(trace_enable_mtrace) {trace_mtrace_write(mem_addr, true, mem_data, mem_length);}
+
+        #ifdef trace_enable_mtrace 
+        trace_mtrace_write(mem_addr, true, mem_data, mem_length);
+        #endif
+
         return;
     }else{
         //printf("[memory] device write, addr = 0x%lx, len = %d, data = 0x%lx\n", mem_addr, mem_length, mem_data);
         device_mmio_write(mem_addr, mem_length, mem_data);
-        if(trace_enable_dtrace) {trace_dtrace_write((char *)device_mmio_fetch_mmio_map(mem_addr) -> name, mem_addr, mem_length, false, mem_data);}
+
+        #ifdef trace_enable_dtrace 
+        trace_dtrace_write((char *)device_mmio_fetch_mmio_map(mem_addr) -> name, mem_addr, mem_length, false, mem_data);
+        #endif
+
         return;
     }
 
