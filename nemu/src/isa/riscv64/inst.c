@@ -196,13 +196,13 @@ static int decode_exec(Decode *s) {
   INSTPAT("0100000 ????? ????? 101 ????? 01110 11", sraw   , R, IFDEF(CONFIG_ShowInstName, printf("SRAW\n"));   R(rd) = SEXT((signed)BITS(src1, 31, 0) >> src2, 32));
 
   #ifdef CONFIG_RV_Privileged
-  INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , I, IFDEF(CONFIG_ShowInstName, printf("CSRRW\n"));  /*IFDEF(CONFIG_DIFFTEST, difftest_skip_ref());*/ printf("Zicsr-exec CSRRW, imm = 0x%lx\n", imm); word_t oldCSR = C(imm); C(imm) = src1; R(rd) = oldCSR);
-  INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  , I, IFDEF(CONFIG_ShowInstName, printf("CSRRS\n"));  /*IFDEF(CONFIG_DIFFTEST, difftest_skip_ref());*/ printf("Zicsr-exec CSRRS, imm = 0x%lx\n", imm); word_t oldCSR = C(imm); C(imm) = src1 | oldCSR; R(rd) = oldCSR);
-  INSTPAT("??????? ????? ????? 011 ????? 11100 11", csrrc  , I, IFDEF(CONFIG_ShowInstName, printf("CSRRC\n"));  /*IFDEF(CONFIG_DIFFTEST, difftest_skip_ref());*/ printf("Zicsr-exec CSRRC, imm = 0x%lx\n", imm); word_t oldCSR = C(imm); C(imm) = src1 & oldCSR; R(rd) = oldCSR);
+  INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , I, IFDEF(CONFIG_ShowInstName, printf("CSRRW\n"));  /*IFDEF(CONFIG_DIFFTEST, difftest_skip_ref());*/ /*printf("Zicsr-exec CSRRW, imm = 0x%lx\n", imm);*/ word_t oldCSR = C(imm); C(imm) = src1; R(rd) = oldCSR);
+  INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  , I, IFDEF(CONFIG_ShowInstName, printf("CSRRS\n"));  /*IFDEF(CONFIG_DIFFTEST, difftest_skip_ref());*/ /*printf("Zicsr-exec CSRRS, imm = 0x%lx\n", imm);*/ word_t oldCSR = C(imm); C(imm) = src1 | oldCSR; R(rd) = oldCSR);
+  INSTPAT("??????? ????? ????? 011 ????? 11100 11", csrrc  , I, IFDEF(CONFIG_ShowInstName, printf("CSRRC\n"));  /*IFDEF(CONFIG_DIFFTEST, difftest_skip_ref());*/ /*printf("Zicsr-exec CSRRC, imm = 0x%lx\n", imm);*/ word_t oldCSR = C(imm); C(imm) = src1 & oldCSR; R(rd) = oldCSR);
   INSTPAT("??????? ????? ????? 101 ????? 11100 11", csrrwi , I, IFDEF(CONFIG_ShowInstName, printf("CSRRWI\n")); /*IFDEF(CONFIG_DIFFTEST, difftest_skip_ref());*/ /*printf("Zicsr-exec\n");*/ uint64_t oldCSR = C(imm); C(imm) = rs1; R(rd) = oldCSR);
   INSTPAT("??????? ????? ????? 110 ????? 11100 11", csrrsi , I, IFDEF(CONFIG_ShowInstName, printf("CSRRSI\n")); /*IFDEF(CONFIG_DIFFTEST, difftest_skip_ref());*/ /*printf("Zicsr-exec\n");*/ uint64_t oldCSR = C(imm); C(imm) = rs1 | oldCSR; R(rd) = oldCSR);
   INSTPAT("??????? ????? ????? 111 ????? 11100 11", csrrci , I, IFDEF(CONFIG_ShowInstName, printf("CSRRCI\n")); /*IFDEF(CONFIG_DIFFTEST, difftest_skip_ref());*/ /*printf("Zicsr-exec\n");*/ uint64_t oldCSR = C(imm); C(imm) = rs1 & oldCSR; R(rd) = oldCSR);
-  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, IFDEF(CONFIG_ShowInstName, printf("ECALL\n"));  s -> dnpc = isa_raise_intr(R(17), s -> pc));
+  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, IFDEF(CONFIG_ShowInstName, printf("ECALL\n"));  s -> dnpc = isa_raise_intr(R(17), s -> pc)); // 11 is error code for M-State Environment Call
   INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , N, IFDEF(CONFIG_ShowInstName, printf("MRET\n"))  ; s -> dnpc = cpu.csr[0x341] + 4); // csr[0x341] is mepc
   #endif
 

@@ -28,7 +28,7 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   Log("CPU raised interupt at pc 0x%lx with interrupt NO.0x%lx, mevtc = 0x%lx", epc, NO, cpu.csr[CSR_MTVEC]);
   cpu.csr[CSR_MSTATUS] = 0xa00001800;
   cpu.csr[CSR_MEPC] = epc;
-  cpu.csr[CSR_MCAUSE] = 0xb;
+  cpu.csr[CSR_MCAUSE] = NO;
 
 #ifdef CONFIG_ErrorTrace
   etrace_write(cpu.csr[CSR_MSTATUS], cpu.csr[CSR_MTVEC], cpu.csr[CSR_MEPC], cpu.csr[CSR_MCAUSE]);
