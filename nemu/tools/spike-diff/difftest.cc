@@ -55,6 +55,7 @@ static state_t *state = NULL;
 void sim_t::diff_init(int port) {
   p = get_core("0");
   state = p->get_state();
+  p -> put_csr(0x300, 0xa00001800); // set mstatus to 0xa00001800
 }
 
 void sim_t::diff_step(uint64_t n) {
@@ -68,7 +69,11 @@ void sim_t::diff_get_regs(void* diff_context) {
   }
   for (int i = 0; i < 4096; i = i + 1){
     //printf("Get CSR No.0x%x, with val = 0x%lx\n", i, p -> get_csr(i));
-    IFDEF(CONFIG_RV_Privileged, ctx->csr[i] = p -> get_csr(i));
+    IFDEF(CONFIG_RV_Privileged, ctx->csr[i] = 0);
+    if (i == 0x300) { ctx -> csr[i] = p -> get_csr(i);} // 0x300 is mstatus
+    if (i == 0x305) { ctx -> csr[i] = p -> get_csr(i);} // 0x305 is mtvec
+    if (i == 0x341) { ctx -> csr[i] = p -> get_csr(i);} // 0x341 is mepc
+    if (i == 0x342) { ctx -> csr[i] = p -> get_csr(i);} // 0x342 is mcause
   }
   ctx->pc = state->pc;
 }

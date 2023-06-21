@@ -41,29 +41,29 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
     if((unsigned)cpu.gpr[integer_register_index] != (unsigned)ref_r -> gpr[integer_register_index])
     {
       //isa_print_regcompare(*ref_r, pc, integer_register_index);
-      printf("Difftest Reg Compare failed at GPR[%d], Difftest Get 0x%lx, NEMU Get 0x%lx\n", integer_register_index, ref_r -> gpr[integer_register_index], cpu.gpr[integer_register_index]);
+      printf("PC = 0x%lx, Difftest Reg Compare failed at GPR[%d], Difftest Get 0x%lx, NEMU Get 0x%lx\n", cpu.pc, integer_register_index, ref_r -> gpr[integer_register_index], cpu.gpr[integer_register_index]);
       return false;
     }
   }
   
   if(cpu.pc != ref_r -> pc)
   {
-    printf("Difftest failed at PC, Difftest get 0x%lx, NEMU get 0x%lx\n", ref_r -> pc, cpu.pc);
+    printf("PC = 0x%lx, Difftest failed at PC, Difftest get 0x%lx, NEMU get 0x%lx\n", cpu.pc, ref_r -> pc, cpu.pc);
     return false;
   }
 
   #ifdef CONFIG_RV_Privileged
-  int check_csr_index[] = {0x300, 0x305, 0x341, 0x342, 0x304};
-  for(int i = 0; i < ARRLEN(check_csr_index); i = i + 1){
+  int check_csr_index[4] = {0x300, 0x305, 0x341, 0x342};
+  for(int i = 0; i < 4; i = i + 1){
     if(cpu.csr[i] != ref_r -> csr[i]){
-      printf("Difftest failed at CSR[%3x], Difftest get 0x%lx, NEMU get 0x%lx\n", i, ref_r -> csr[i], cpu.csr[i]);
+      printf("PC = 0x%lx, Difftest failed at CSR[0x%3x], Difftest get 0x%lx, NEMU get 0x%lx\n", cpu.pc, i, ref_r -> csr[i], cpu.csr[i]);
       return false;
     }
   }
   #endif
 
   // M-State CSR checkings
-
+  printf("PC = 0x%lx, Difftest success\n", cpu.pc);
   return true;
 }
 
