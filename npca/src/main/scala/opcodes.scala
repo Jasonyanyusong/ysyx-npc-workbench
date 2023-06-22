@@ -198,3 +198,17 @@ object rv64_bitpat{
     def bitpat_CSRRSI = BitPat("b???????_?????_?????_110_?????_11100_11")
     def bitpat_CSRRCI = BitPat("b???????_?????_?????_111_?????_11100_11")
 }
+
+object opcodes_EXU_Int{
+    def Int_SHL =  0.U(4.W) // Integer Shift Left  (Both signed and unsigned)
+    def Int_SHR =  1.U(4.W) // Integer Shift Right (Both signed and unsigned)
+    def Int_ADD =  2.U(4.W) // Integer Add (ADD, ADDI, ADDW, ADDIW and Load-Store)
+    def Int_SUB =  3.U(4.W) // Integer Subtraction (SUB)
+    def Int_MUL =  4.U(4.W) // Integer Multiply (MUL, MULH, MULHU, MULHSU, MULW)
+    def Int_DIV =  5.U(4.W) // Integer Division (DIV, DIVU, DIVUW, DIVW)
+    def Int_REM =  6.U(4.W) // Integer Remainder (REM, REMU, REMW, REMUW)
+    def Int_AND =  7.U(4.W) // Integer And (AND, ANDI)
+    def Int_OR  =  8.U(4.W) // Integer Or (OR, ORI)
+    def Int_XOR =  9.U(4.W) // Integer Xor (XOR, XORI)
+    def Int_NOP = 10.U(4.W) // Do not perform any integer operations
+}
