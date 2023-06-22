@@ -246,27 +246,27 @@ object opcodes_LSU_sign{
     def LSU_Unsigned = false.B
 }
 
-object opcode_LSU_len{
+object opcodes_LSU_len{
     def LSU_Byte   = 0.U(2.W)
     def LSU_Half   = 1.U(2.W)
     def LSU_Word   = 2.U(2.W)
     def LSU_Double = 3.U(2.W)
 }
 
-object opcode_LSU_memOpreationType{
+object opcodes_LSU_memOpreationType{
     def LSU_NOP = 0.U(2.W) // Normal not Load-Store Instructions
     def LSU_R   = 1.U(2.W) // Read-Only: Load Instructions
     def LSU_W   = 2.U(2.W) // Write-Only: Store Instructions
     def LSU_RW  = 3.U(2.W) // Atomic Instruction Extension
 }
 
-object opcode_writeBackGPRType{
+object opcodes_writeBackGPRType{
     def WB_GPR_NOP = 0.U(4.W)
     def WB_GPR_EXU = 1.U(4.W)
     def WB_GPR_LSU = 2.U(4.W)
 }
 
-object opcode_IDU_isHalt{
+object opcodes_IDU_isHalt{
     def IDU_NOTHALT = false.B
     def IDU_HALT    = true.B
 }
