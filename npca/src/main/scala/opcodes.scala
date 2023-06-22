@@ -229,6 +229,12 @@ object opcodes_EXU_Int_resultPart{
     def Int_High = true.B
 }
 
+object opcodes_EXU_Int_opreand{
+    // distinguish rs1 & imm or rs1 & rs2
+    def Int_TwoReg = 0.U(4.W)
+    def Int_RegImm = 1.U(4.W)
+}
+
 object opcodes_LSU{
     def LSU_NOPE  = 0.U(4.W)
     def LSU_LOAD  = 1.U(4.W)
@@ -247,8 +253,20 @@ object opcode_LSU_len{
     def LSU_Double = 3.U(2.W)
 }
 
+object opcode_LSU_memOpreationType{
+    def LSU_NOP = 0.U(2.W) // Normal not Load-Store Instructions
+    def LSU_R   = 1.U(2.W) // Read-Only: Load Instructions
+    def LSU_W   = 2.U(2.W) // Write-Only: Store Instructions
+    def LSU_RW  = 3.U(2.W) // Atomic Instruction Extension
+}
+
 object opcode_writeBackGPRType{
     def WB_GPR_NOP = 0.U(4.W)
     def WB_GPR_EXU = 1.U(4.W)
     def WB_GPR_LSU = 2.U(4.W)
+}
+
+object opcode_IDU_isHalt{
+    def IDU_NOTHALT = false.B
+    def IDU_HALT    = true.B
 }
