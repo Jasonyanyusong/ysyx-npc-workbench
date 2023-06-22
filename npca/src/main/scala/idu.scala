@@ -50,4 +50,19 @@ class IDU extends Module{
     io.IDU_O_rd  := io.IDU_I_inst(11,  7)
 
     io.IDU_O_isHalt := opcode_IDU_isHalt.IDU_NOTHALT
+
+    // all types of immediates are bit-manipulated, concated
+    val immI = io.IDU_I_inst(31, 20)
+    val immS = Cat(io.IDU_I_inst(31, 25), io.IDU_I_inst(11, 7))
+    val immB = Cat(io.IDU_I_inst(31, 31), io.IDU_I_inst(7, 7), io.IDU_I_inst(30, 25), io.IDU_I_inst(11, 8), 0.U)
+    val immU = Cat(io.IDU_I_inst(31, 12), Fill(12, 0.U))
+    val immJ = Cat(io.IDU_I_inst(31, 31), io.IDU_I_inst(19, 12), io.IDU_I_inst(20, 20), io.IDU_I_inst(30, 21), 0.U)
+
+    // sign-extend these immediates for later calculation
+    val SignExtend_immI = Cat(Fill(52, immI(11)), immI)
+    val SignExtend_immS = Cat(Fill(52, immS(11)), immS)
+    val SignExtend_immB = Cat(Fill(51, immB(12)), immB)
+    val SignExtend_immU = Cat(Fill(32, immU(31)), immU)
+    val SignExtend_immJ = Cat(Fill(43, immJ(20)), immJ)
+    val NoImmediateNum  = Fill(64, 0.U) // if an instruction's type is not I, S, B, U, J
 }
