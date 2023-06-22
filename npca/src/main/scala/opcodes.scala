@@ -217,3 +217,8 @@ object opcodes_EXU_Int_sign{
     def Int_Signed   = true.B
     def Int_Unsigned = false.B
 }
+
+object opcodes_EXU_Int_computeLength{
+    def Int_Word   = 0.U(2.W)
+    def Int_Double = 1.U(2.W)
+}
