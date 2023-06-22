@@ -222,3 +222,33 @@ object opcodes_EXU_Int_computeLength{
     def Int_Word   = 0.U(2.W)
     def Int_Double = 1.U(2.W)
 }
+
+object opcodes_EXU_Int_resultPart{
+    // This is ued for MULH, MULHSU, MULHU, these instructions will need to return the upper half of 2*XLEN result
+    def Int_Low  = false.B
+    def Int_High = true.B
+}
+
+object opcodes_LSU{
+    def LSU_NOPE  = 0.U(4.W)
+    def LSU_LOAD  = 1.U(4.W)
+    def LSU_STORE = 2.U(4.W)
+}
+
+object opcodes_LSU_sign{
+    def LSU_Signed   = true.B
+    def LSU_Unsigned = false.B
+}
+
+object opcode_LSU_len{
+    def LSU_Byte   = 0.U(2.W)
+    def LSU_Half   = 1.U(2.W)
+    def LSU_Word   = 2.U(2.W)
+    def LSU_Double = 3.U(2.W)
+}
+
+object opcode_writeBackGPRType{
+    def WB_GPR_NOP = 0.U(4.W)
+    def WB_GPR_EXU = 1.U(4.W)
+    def WB_GPR_LSU = 2.U(4.W)
+}
