@@ -212,3 +212,8 @@ object opcodes_EXU_Int{
     def Int_XOR =  9.U(4.W) // Integer Xor (XOR, XORI)
     def Int_NOP = 10.U(4.W) // Do not perform any integer operations
 }
+
+object opcodes_EXU_Int_sign{
+    def Int_Signed   = true.B
+    def Int_Unsigned = false.B
+}
