@@ -63,7 +63,7 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
   #endif
 
   // M-State CSR checkings
-  printf("PC = 0x%lx, Difftest success\n", cpu.pc);
+  //printf("PC = 0x%lx, Difftest success\n", cpu.pc);
   return true;
 }
 
