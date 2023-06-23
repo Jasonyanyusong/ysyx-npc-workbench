@@ -189,6 +189,7 @@ object rv64_bitpat{
     // Priv
     def bitpat_ECALL  = BitPat("b0000000_00000_00000_000_00000_11100_11")
     def bitpat_EBREAK = BitPat("b0000000_00001_00000_000_00000_11100_11")
+    def bitpat_MRET   = BitPat("b0011000_00010_00000_000_00000_11100_11")
 
     // RV64 Zicsr
     def bitpat_CSRRW  = BitPat("b???????_?????_?????_001_?????_11100_11")
