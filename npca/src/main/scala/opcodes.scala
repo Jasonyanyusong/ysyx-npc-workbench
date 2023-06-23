@@ -210,12 +210,20 @@ object opcodes_EXU_Int{
     def Int_AND =  7.U(4.W) // Integer And (AND, ANDI)
     def Int_OR  =  8.U(4.W) // Integer Or (OR, ORI)
     def Int_XOR =  9.U(4.W) // Integer Xor (XOR, XORI)
+
     def Int_NOP = 10.U(4.W) // Do not perform any integer operations
+
+    def Int_BEQ = 11.U(4.W)
+    def Int_BNE = 12.U(4.W)
+    def Int_BLT = 13.U(4.W)
+    def Int_BGE = 14.U(4.W)
 }
 
 object opcodes_EXU_Int_sign{
-    def Int_Signed   = true.B
-    def Int_Unsigned = false.B
+    def Int_Signed_Signed     = 0.U(2.W)
+    def Int_Unsigned_Unsigned = 1.U(2.W)
+    def Int_Signed_Unsigned   = 2.U(2.W)
+    def Int_Unsigned_Signed   = 3.U(2.W)
 }
 
 object opcodes_EXU_Int_computeLength{
@@ -233,6 +241,10 @@ object opcodes_EXU_Int_opreand{
     // distinguish rs1 & imm or rs1 & rs2
     def Int_TwoReg = 0.U(4.W)
     def Int_RegImm = 1.U(4.W)
+    def Int_OneImm = 2.U(4.W)
+    def Int_PCwReg = 3.U(4.W)
+    def Int_PCwImm = 4.U(4.W)
+    def Int_UseAll = 5.U(4.W)
 }
 
 object opcodes_LSU{
@@ -261,12 +273,30 @@ object opcodes_LSU_memOpreationType{
 }
 
 object opcodes_writeBackGPRType{
-    def WB_GPR_NOP = 0.U(4.W)
-    def WB_GPR_EXU = 1.U(4.W)
-    def WB_GPR_LSU = 2.U(4.W)
+    def WB_GPR_NOP       = 0.U(4.W)
+    def WB_GPR_EXU_Val   = 1.U(4.W)
+    def WB_GPR_EXU_Bool  = 2.U(4.W)
+    def WB_GPR_LSU       = 3.U(4.W)
+    def WB_GPR_SNPC      = 4.U(4.W)
 }
 
-object opcodes_IDU_isHalt{
-    def IDU_NOTHALT = false.B
-    def IDU_HALT    = true.B
+object opcodes_nextPCTypes{
+    def PC_Next_Static  = true.B
+    def PC_Next_Dynamic = false.B
+}
+
+object opcodes_PCJumpReason{
+    def NoJumpPC   = 0.U(4.W)
+    def BranchInst = 1.U(4.W)
+    def JAL_Inst   = 2.U(4.W)
+    def JALR_Inst  = 3.U(4.W)
+}
+
+object opcodes_IDU_privState{
+    def NORMAL = 0.U(4.W)
+    def EBREAK = 1.U(4.W)
+    def ECALL  = 2.U(4.W)
+    def MRET   = 3.U(4.W)
+
+    def ERROR  = 15.U(4.W)
 }
