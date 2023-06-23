@@ -291,6 +291,8 @@ object opcodes_PCJumpReason{
     def BranchInst = 1.U(4.W)
     def JAL_Inst   = 2.U(4.W)
     def JALR_Inst  = 3.U(4.W)
+    def ECALL_Inst = 4.U(4.W)
+    def MRET_Inst  = 5.U(4.W)
 }
 
 object opcodes_IDU_privState{
