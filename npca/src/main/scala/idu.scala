@@ -132,7 +132,7 @@ class IDU extends Module{
         rv64_bitpat.bitpat_SRA    -> List(opcodes_EXU_Int.Int_SRA, opcodes_EXU_Int_sign.Int_Signed_Signed,     opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg),
         rv64_bitpat.bitpat_OR     -> List(opcodes_EXU_Int.Int_OR,  opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg),
         rv64_bitpat.bitpat_AND    -> List(opcodes_EXU_Int.Int_AND, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg),
-        rv64_bitpat.bitpat_LUW    -> List(opcodes_EXU_Int.Int_ADD, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_RegImm),
+        rv64_bitpat.bitpat_LWU    -> List(opcodes_EXU_Int.Int_ADD, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_RegImm),
         rv64_bitpat.bitpat_LD     -> List(opcodes_EXU_Int.Int_ADD, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_RegImm),
         rv64_bitpat.bitpat_SD     -> List(opcodes_EXU_Int.Int_ADD, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_RegImm),
         rv64_bitpat.bitpat_ADDIW  -> List(opcodes_EXU_Int.Int_ADD, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Word,   opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_RegImm),
@@ -162,8 +162,18 @@ class IDU extends Module{
 
     var IDU_opcodes_LSU = ListLookup(
         /*Compare Item: */           io.IDU_I_inst,
-        /*Default Vals: */           List(opcodes_LSU.LSU_NOPE, opcodes_LSU_sign.LSU_Unsigned, opcodes_LSU_len.LSU_Byte, opcodes_LSU_memOpreationType.LSU_NOP), Array(
-        // TODO: Add more Instructions here
+        /*Default Vals: */           List(opcodes_LSU.LSU_NOPE,  opcodes_LSU_sign.LSU_Unsigned, opcodes_LSU_len.LSU_Byte,   opcodes_LSU_memOpreationType.LSU_NOP), Array(
+        rv64_bitpat.bitpat_LB     -> List(opcodes_LSU.LSU_LOAD,  opcodes_LSU_sign.LSU_Signed,   opcodes_LSU_len.LSU_Byte,   opcodes_LSU_memOpreationType.LSU_R),
+        rv64_bitpat.bitpat_LH     -> List(opcodes_LSU.LSU_LOAD,  opcodes_LSU_sign.LSU_Signed,   opcodes_LSU_len.LSU_Half,   opcodes_LSU_memOpreationType.LSU_R),
+        rv64_bitpat.bitpat_LW     -> List(opcodes_LSU.LSU_LOAD,  opcodes_LSU_sign.LSU_Signed,   opcodes_LSU_len.LSU_Word,   opcodes_LSU_memOpreationType.LSU_R),
+        rv64_bitpat.bitpat_LBU    -> List(opcodes_LSU.LSU_LOAD,  opcodes_LSU_sign.LSU_Unsigned, opcodes_LSU_len.LSU_Byte,   opcodes_LSU_memOpreationType.LSU_R),
+        rv64_bitpat.bitpat_LHU    -> List(opcodes_LSU.LSU_LOAD,  opcodes_LSU_sign.LSU_Unsigned, opcodes_LSU_len.LSU_Half,   opcodes_LSU_memOpreationType.LSU_R),
+        rv64_bitpat.bitpat_SB     -> List(opcodes_LSU.LSU_LOAD,  opcodes_LSU_sign.LSU_Signed,   opcodes_LSU_len.LSU_Byte,   opcodes_LSU_memOpreationType.LSU_W),
+        rv64_bitpat.bitpat_SH     -> List(opcodes_LSU.LSU_LOAD,  opcodes_LSU_sign.LSU_Signed,   opcodes_LSU_len.LSU_Half,   opcodes_LSU_memOpreationType.LSU_W),
+        rv64_bitpat.bitpat_SW     -> List(opcodes_LSU.LSU_LOAD,  opcodes_LSU_sign.LSU_Signed,   opcodes_LSU_len.LSU_Word,   opcodes_LSU_memOpreationType.LSU_W),
+        rv64_bitpat.bitpat_LWU    -> List(opcodes_LSU.LSU_LOAD,  opcodes_LSU_sign.LSU_Unsigned, opcodes_LSU_len.LSU_Word,   opcodes_LSU_memOpreationType.LSU_R),
+        rv64_bitpat.bitpat_LD     -> List(opcodes_LSU.LSU_LOAD,  opcodes_LSU_sign.LSU_Signed,   opcodes_LSU_len.LSU_Double, opcodes_LSU_memOpreationType.LSU_R),
+        rv64_bitpat.bitpat_SD     -> List(opcodes_LSU.LSU_LOAD,  opcodes_LSU_sign.LSU_Signed,   opcodes_LSU_len.LSU_Double, opcodes_LSU_memOpreationType.LSU_W)
         )
     )
 
