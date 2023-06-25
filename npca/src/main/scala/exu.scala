@@ -192,6 +192,11 @@ class EXU extends Module{
         (io.EXU_I_Int_sign === opcodes_EXU_Int_sign.Int_Unsigned_Signed  ) -> (ValuRes_Unsigned_Signed  )
     ))
 
+    Pre_ValuRes = MuxCase(Pre_ValuRes, Array(
+        (io.EXU_I_Int_computeLength === opcodes_EXU_Int_computeLength.Int_Double) -> (Pre_ValuRes),
+        (io.EXU_I_Int_computeLength === opcodes_EXU_Int_computeLength.Int_Word  ) -> (Cat(Fill(32, Pre_ValuRes(31, 31)), Pre_ValuRes(31, 0)))
+    ))
+
     val Ret_ValuRes = MuxCase(0.U(64.W), Array(
         (io.EXU_I_Int_resultPart === opcodes_EXU_Int_resultPart.IntLow ) -> (Pre_ValuRes(63 , 0 )),
         (io.EXU_I_Int_resultPart === opcodes_EXU_Int_resultPart.IntHigh) -> (Pre_ValuRes(127, 64))
