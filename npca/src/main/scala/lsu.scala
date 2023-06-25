@@ -17,3 +17,26 @@
 package npca
 import chisel3._
 import chisel3-util._
+
+class LSU extends Module{
+    val io = IO(new Bundle{
+        val LSU_I_optype           = Input(UInt(4.W))
+        val LSU_I_sign             = Input(Bool())
+        val LSU_I_len              = Input(UInt(2.W))
+        val LSU_I_memOperationType = Input(UInt(2.W))
+
+        val LSU_I_EXUresult        = Input(UInt(64.W)) // Normal Load-Store Instructions
+        val LSU_I_src1             = Input(UInt(64.W)) // Atomic Load-Store Instructions
+        val LSU_I_src2             = Input(UInt(64.W))
+
+        val LSU_O_memReadEnable    = Output(Bool())
+        val LSU_O_memReadAddress   = Output(UInt(64.W))
+        val LSU_I_memReadResult    = Input(UInt(64.W))
+
+        val LSU_O_memWriteEnable   = Output(Bool())
+        val LSU_O_memWriteAddress  = Output(UInt(64.W))
+        val LSU_O_memWriteData     = Output(UInt(64.W))
+
+        val LSU_O_resultWriteBack  = Output(UInt(64.W))
+    })
+}
