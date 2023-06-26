@@ -61,16 +61,16 @@ class WBU extends Module{
     ))
 
     // Write Back PC
+    val static_nextPC  = io.WBU_I_PC + 4.U
+
     val dynamic_nextPC = MuxCase(0.U(64.W), Array(
-        (io.WBU_I_PCJumpReason === opcodes_PCJumpReason.NoJumpPC  ) -> (io.WBU_I_PC + 4.U   ),
-        (io.WBU_I_PCJumpReason === opcodes_PCJumpReason.BranchInst) -> (WBU_I_EXU_CompResult),
-        (io.WBU_I_PCJumpReason === opcodes_PCJumpReason.JAL_Inst  ) -> (WBU_I_EXU_CompResult),
-        (io.WBU_I_PCJumpReason === opcodes_PCJumpReason.JALR_Inst ) -> (WBU_I_EXU_CompResult & (Cat(Fill(63, 1.U(1.W)), 0.U(1.W)))),
+        (io.WBU_I_PCJumpReason === opcodes_PCJumpReason.NoJumpPC  ) -> (static_nextPC),
+        (io.WBU_I_PCJumpReason === opcodes_PCJumpReason.BranchInst) -> (Mux(io.WBU_I_EXU_CompResult, io.WBU_I_EXU_ValuResult, static_nextPC)),
+        (io.WBU_I_PCJumpReason === opcodes_PCJumpReason.JAL_Inst  ) -> (io.WBU_I_EXU_ValuResult),
+        (io.WBU_I_PCJumpReason === opcodes_PCJumpReason.JALR_Inst ) -> (io.WBU_I_EXU_ValuResult & (Cat(Fill(63, 1.U(1.W)), 0.U(1.W)))),
         (io.WBU_I_PCJumpReason === opcodes_PCJumpReason.ECALL_Inst) -> (io.WBU_I_PC + 4.U), // Need Change later
         (io.WBU_I_PCJumpReason === opcodes_PCJumpReason.MRET_Inst ) -> (io.WBU_I_PC + 4.U), // Need Change later
     ))
-
-    val static_nextPC  = io.WBU_I_PC + 4.U
 
     io.WBU_O_nextPC := MuxCase(0.U(64.W), Array(
         (io.WBU_I_nextPCType === opcodes_nextPCTypes.PC_Next_Static ) -> (static_nextPC ),
