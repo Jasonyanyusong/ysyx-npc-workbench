@@ -36,7 +36,7 @@ class LSU extends Module{
 
         val LSU_O_memWriteEnable   = Output(Bool())
         val LSU_O_memWriteAddress  = Output(UInt(64.W))
-        val LSU_O_memWriteLength    = Output(UInt(2.W))
+        val LSU_O_memWriteLength   = Output(UInt(2.W))
         val LSU_O_memWriteData     = Output(UInt(64.W))
 
         val LSU_O_resultWriteBack  = Output(UInt(64.W))
@@ -49,8 +49,8 @@ class LSU extends Module{
     ))
 
     io.LSU_O_memReadAddress := MuxCase(0.U(64.W), Array(
-        (io.LSU_I_memOperationType === opcodes_LSU_memOpreationType.LSU_R)  -> (LSU_I_src1),
-        (io.LSU_I_memOperationType === opcodes_LSU_memOpreationType.LSU_RW) -> (LSU_I_src1)
+        (io.LSU_I_memOperationType === opcodes_LSU_memOpreationType.LSU_R)  -> (io.LSU_I_EXUresult),
+        (io.LSU_I_memOperationType === opcodes_LSU_memOpreationType.LSU_RW) -> (io.LSU_I_EXUresult)
     ))
 
     io.LSU_O_memReadLength := io.LSU_I_len
@@ -86,8 +86,8 @@ class LSU extends Module{
     ))
 
     io.LSU_O_memWriteAddress := MuxCase(0.U(64.W), Array(
-        (io.LSU_I_memOperationType === opcodes_LSU_memOpreationType.LSU_W)  -> (io.LSU_I_src1),
-        (io.LSU_I_memOperationType === opcodes_LSU_memOpreationType.LSU_RW) -> (io.LSU_I_src1)
+        (io.LSU_I_memOperationType === opcodes_LSU_memOpreationType.LSU_W)  -> (io.LSU_I_EXUresult),
+        (io.LSU_I_memOperationType === opcodes_LSU_memOpreationType.LSU_RW) -> (io.LSU_I_EXUresult)
     ))
 
     io.LSU_O_memWriteData := MuxCase(0.U(64.W), Array(
