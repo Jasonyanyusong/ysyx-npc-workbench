@@ -78,7 +78,7 @@ class WBU extends Module{
     ))
 
     // Write Back CSR (TODO)
-    io.WBU_O_CSR_RD := io.WBU_I_CSR_RD
-    io.WBU_O_CSR_WBenable := false.b
-    WBU_O_CSR_WBdata := 0.U(64.W)
+    io.WBU_O_CSR_RD       := io.WBU_I_CSR_RD
+    io.WBU_O_CSR_WBenable := false.B
+    io.WBU_O_CSR_WBdata   := 0.U(64.W)
 }

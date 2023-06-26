@@ -106,14 +106,15 @@ object rv64_opcodes{
     // Priv
     def opcode_ECALL     = 63.U(10.W)
     def opcode_EBREAK    = 64.U(10.W)
+    def opcode_MRET      = 65.U(10.W)
 
     // RV64 Zicsr
-    def opcode_CSRRW     = 65.U(10.W)
-    def opcode_CSRRS     = 66.U(10.W)
-    def opcode_CSRRC     = 67.U(10.W)
-    def opcode_CSRRWI    = 68.U(10.W)
-    def opcode_CSRRSI    = 69.U(10.W)
-    def opcode_CSRRCI    = 70.U(10.W)
+    def opcode_CSRRW     = 66.U(10.W)
+    def opcode_CSRRS     = 67.U(10.W)
+    def opcode_CSRRC     = 68.U(10.W)
+    def opcode_CSRRWI    = 69.U(10.W)
+    def opcode_CSRRSI    = 70.U(10.W)
+    def opcode_CSRRCI    = 71.U(10.W)
 }
 
 object rv64_bitpat{

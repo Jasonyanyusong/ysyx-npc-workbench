@@ -64,14 +64,14 @@ class LSU extends Module{
         (io.LSU_I_len === opcodes_LSU_len.LSU_Byte  ) -> (Cat(Fill(56, 0.U), Fill( 8, 1.U))),
         (io.LSU_I_len === opcodes_LSU_len.LSU_Half  ) -> (Cat(Fill(48, 0.U), Fill(16, 1.U))),
         (io.LSU_I_len === opcodes_LSU_len.LSU_Word  ) -> (Cat(Fill(32, 0.U), Fill(32, 1.U))),
-        (io.LSU_I_len === opcodes_LSU_len.LSU_Double) -> (Cat(Fill( 0, 0.U), Fill(64, 1.U)))
+        (io.LSU_I_len === opcodes_LSU_len.LSU_Double) -> (Fill(64, 1.U))
     ))
 
     val LoadStoreSignedMask = MuxCase(0.U(64.W), Array(
         (io.LSU_I_len === opcodes_LSU_len.LSU_Byte  ) -> (Cat(Fill(56, ReadMemInput( 7)), Fill( 8, 0.U))),
         (io.LSU_I_len === opcodes_LSU_len.LSU_Half  ) -> (Cat(Fill(48, ReadMemInput(15)), Fill(16, 0.U))),
         (io.LSU_I_len === opcodes_LSU_len.LSU_Word  ) -> (Cat(Fill(32, ReadMemInput(31)), Fill(32, 0.U))),
-        (io.LSU_I_len === opcodes_LSU_len.LSU_Double) -> (Cat(Fill( 0, ReadMemInput(63)), Fill(64, 0.U)))
+        (io.LSU_I_len === opcodes_LSU_len.LSU_Double) -> (Fill(64, 0.U))
     ))
 
     io.LSU_O_resultWriteBack := MuxCase(0.U(64.W), Array(

@@ -18,7 +18,7 @@ package npca
 import chisel3._
 import chisel3.util._
 
-class npc extends Module{
+class npca extends Module{
     // TODO
     val io = IO(new Bundle{
         // IFU
@@ -83,7 +83,7 @@ class npc extends Module{
     val EXU_BoolResult                   = npca_EXU.io.EXU_O_BoolResult
 
     // LSU
-    val npca_LSU = Mudule(new LSU)
+    val npca_LSU = Module(new LSU)
     npca_LSU.io.LSU_I_optype            := npca_IDU.io.IDU_O_LSU_optype
     npca_LSU.io.LSU_I_sign              := npca_IDU.io.IDU_O_LSU_sign
     npca_LSU.io.LSU_I_len               := npca_IDU.io.IDU_O_LSU_len
@@ -117,8 +117,8 @@ class npc extends Module{
 
     npca_WBU.io.WBU_I_GPR_RD            := RD
     npca_WBU.io.WBU_I_CSR_RD            := 0.U(12.W) // do not toatlly support CSR now
-    GPR(npca_WBU.io.WBU_O_GPR_RD)        = Mux(npca_WBU.io.WBU_O_GPR_WBenable, npca_WBU.io.WBU_O_GPR_WBdata, GPR_Read(npca_WBU.io.WBU_O_GPR_RD))
-    CSR(npca_WBU.io.WBU_O_CSR_RD)        = Mux(npca_WBU.io.WBU_O_CSR_WBenable, npca_WBU.io.WBU_O_CSR_WBdata, CSR_Read(npca_WBU.io.WBU_O_CSR_RD))
+    GPR(npca_WBU.io.WBU_O_GPR_RD)       := Mux(npca_WBU.io.WBU_O_GPR_WBenable, npca_WBU.io.WBU_O_GPR_WBdata, GPR_Read(npca_WBU.io.WBU_O_GPR_RD))
+    CSR(npca_WBU.io.WBU_O_CSR_RD)       := Mux(npca_WBU.io.WBU_O_CSR_WBenable, npca_WBU.io.WBU_O_CSR_WBdata, CSR_Read(npca_WBU.io.WBU_O_CSR_RD))
 
     PC := npca_WBU.io.WBU_O_nextPC
 }

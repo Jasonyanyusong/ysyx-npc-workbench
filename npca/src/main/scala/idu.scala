@@ -52,8 +52,6 @@ class IDU extends Module{
     io.IDU_O_rs2 := io.IDU_I_inst(24, 20)
     io.IDU_O_rd  := io.IDU_I_inst(11,  7)
 
-    io.IDU_O_isHalt := opcode_IDU_isHalt.IDU_NOTHALT
-
     // all types of immediates are bit-manipulated, concated
     val immI = io.IDU_I_inst(31, 20)
     val immS = Cat(io.IDU_I_inst(31, 25), io.IDU_I_inst(11, 7))
@@ -121,7 +119,7 @@ class IDU extends Module{
         rv64_bitpat.bitpat_ANDI   -> List(opcodes_EXU_Int.Int_AND, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_RegImm),
         rv64_bitpat.bitpat_SLLI   -> List(opcodes_EXU_Int.Int_SHL, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_RegImm),
         rv64_bitpat.bitpat_SRLI   -> List(opcodes_EXU_Int.Int_SHR, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_RegImm),
-        rv64_bitpat.bitpat_SRAI   -> List(opcodes_EXU_Int.Int_SRA, opcodes_EXU_Int_sign.Int_Signed_Signed,     opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_RegImm),
+        rv64_bitpat.bitpat_SRAI   -> List(opcodes_EXU_Int.Int_SHR, opcodes_EXU_Int_sign.Int_Signed_Signed,     opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_RegImm),
         rv64_bitpat.bitpat_ADD    -> List(opcodes_EXU_Int.Int_ADD, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg),
         rv64_bitpat.bitpat_SUB    -> List(opcodes_EXU_Int.Int_SUB, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg),
         rv64_bitpat.bitpat_SLL    -> List(opcodes_EXU_Int.Int_SHL, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg),
@@ -129,7 +127,7 @@ class IDU extends Module{
         rv64_bitpat.bitpat_SLTU   -> List(opcodes_EXU_Int.Int_BLT, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg),
         rv64_bitpat.bitpat_XOR    -> List(opcodes_EXU_Int.Int_XOR, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg),
         rv64_bitpat.bitpat_SRL    -> List(opcodes_EXU_Int.Int_SHR, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg),
-        rv64_bitpat.bitpat_SRA    -> List(opcodes_EXU_Int.Int_SRA, opcodes_EXU_Int_sign.Int_Signed_Signed,     opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg),
+        rv64_bitpat.bitpat_SRA    -> List(opcodes_EXU_Int.Int_SHR, opcodes_EXU_Int_sign.Int_Signed_Signed,     opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg),
         rv64_bitpat.bitpat_OR     -> List(opcodes_EXU_Int.Int_OR,  opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg),
         rv64_bitpat.bitpat_AND    -> List(opcodes_EXU_Int.Int_AND, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg),
         rv64_bitpat.bitpat_LWU    -> List(opcodes_EXU_Int.Int_ADD, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_RegImm),
@@ -138,12 +136,12 @@ class IDU extends Module{
         rv64_bitpat.bitpat_ADDIW  -> List(opcodes_EXU_Int.Int_ADD, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Word,   opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_RegImm),
         rv64_bitpat.bitpat_SLLIW  -> List(opcodes_EXU_Int.Int_SHL, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Word,   opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_RegImm),
         rv64_bitpat.bitpat_SRLIW  -> List(opcodes_EXU_Int.Int_SHR, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Word,   opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_RegImm),
-        rv64_bitpat.bitpat_SRAIW  -> List(opcodes_EXU_Int.Int_SRA, opcodes_EXU_Int_sign.Int_Signed_Signed,     opcodes_EXU_Int_computeLength.Int_Word,   opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_RegImm),
+        rv64_bitpat.bitpat_SRAIW  -> List(opcodes_EXU_Int.Int_SHR, opcodes_EXU_Int_sign.Int_Signed_Signed,     opcodes_EXU_Int_computeLength.Int_Word,   opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_RegImm),
         rv64_bitpat.bitpat_ADDW   -> List(opcodes_EXU_Int.Int_ADD, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Word,   opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg),
         rv64_bitpat.bitpat_SUBW   -> List(opcodes_EXU_Int.Int_SUB, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Word,   opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg),
         rv64_bitpat.bitpat_SLLW   -> List(opcodes_EXU_Int.Int_SHL, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Word,   opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg),
         rv64_bitpat.bitpat_SRLW   -> List(opcodes_EXU_Int.Int_SHR, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Word,   opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg),
-        rv64_bitpat.bitpat_SRAW   -> List(opcodes_EXU_Int.Int_SRA, opcodes_EXU_Int_sign.Int_Signed_Signed,     opcodes_EXU_Int_computeLength.Int_Word,   opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg),
+        rv64_bitpat.bitpat_SRAW   -> List(opcodes_EXU_Int.Int_SHR, opcodes_EXU_Int_sign.Int_Signed_Signed,     opcodes_EXU_Int_computeLength.Int_Word,   opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg),
         rv64_bitpat.bitpat_MUL    -> List(opcodes_EXU_Int.Int_MUL, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg),
         rv64_bitpat.bitpat_MULH   -> List(opcodes_EXU_Int.Int_MUL, opcodes_EXU_Int_sign.Int_Signed_Signed,     opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_High, opcodes_EXU_Int_opreand.Int_TwoReg),
         rv64_bitpat.bitpat_MULHSU -> List(opcodes_EXU_Int.Int_MUL, opcodes_EXU_Int_sign.Int_Signed_Unsigned,   opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_High, opcodes_EXU_Int_opreand.Int_TwoReg),
