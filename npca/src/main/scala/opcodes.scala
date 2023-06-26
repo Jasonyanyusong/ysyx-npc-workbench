@@ -16,7 +16,7 @@
 
 package npca
 import chisel3._
-import chisel3-util._
+import chisel3.util._
 
 object inst_types{
     // We will use a four bit representation of inst types, so it will be very easy to add/modify or optimize our codes
