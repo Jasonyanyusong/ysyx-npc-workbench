@@ -51,7 +51,7 @@ for i in range(0, cpu_tests_count, 1):
     cpu_tests_names.append(cpu_tests_csrcs[i][0:cpu_tests_csrcs[i].index(".c")])
 
 # to run single test, write test name here
-single_test_name = "movsx"
+single_test_name = "8s-muldivrem"
 test_exec_command = YSYX_HOME  + "/obj_dir/Vnpc -d " + YSYX_HOME + "/nemu/build/" + test_difftest_so_file + " --readbin " + TEST_HOME + "/build/" + single_test_name + "-riscv64-npc.bin" + " -s"
 os.system(test_exec_command)
 input("Press any key to continue")
