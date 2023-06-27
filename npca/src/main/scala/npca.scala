@@ -18,12 +18,12 @@ package npca
 import chisel3._
 import chisel3.util._
 
-class npca extends Module{
+class npc extends Module{
     // TODO
     val io = IO(new Bundle{
         // IFU
         val NPC_sendCurrentPC   = Output(UInt(64.W))
-        val NPC_getCurrentInst  = Input(UInt(64.W))
+        val NPC_getCurrentInst  = Input(UInt(32.W))
 
         // IDU (debug/simulation)
         val NPC_InstIndicator   = Output(UInt(10.W))
@@ -40,6 +40,40 @@ class npca extends Module{
         val NPC_memWriteAddress = Output(UInt(64.W))
         val NPC_memWriteLength  = Output(UInt(2.W))
         val NPC_memWriteData    = Output(UInt(64.W))
+
+        // Used for debugging (sdb and difftest)
+        val NPC_GPR00 = Output(UInt(64.W))
+        val NPC_GPR01 = Output(UInt(64.W))
+        val NPC_GPR02 = Output(UInt(64.W))
+        val NPC_GPR03 = Output(UInt(64.W))
+        val NPC_GPR04 = Output(UInt(64.W))
+        val NPC_GPR05 = Output(UInt(64.W))
+        val NPC_GPR06 = Output(UInt(64.W))
+        val NPC_GPR07 = Output(UInt(64.W))
+        val NPC_GPR08 = Output(UInt(64.W))
+        val NPC_GPR09 = Output(UInt(64.W))
+        val NPC_GPR10 = Output(UInt(64.W))
+        val NPC_GPR11 = Output(UInt(64.W))
+        val NPC_GPR12 = Output(UInt(64.W))
+        val NPC_GPR13 = Output(UInt(64.W))
+        val NPC_GPR14 = Output(UInt(64.W))
+        val NPC_GPR15 = Output(UInt(64.W))
+        val NPC_GPR16 = Output(UInt(64.W))
+        val NPC_GPR17 = Output(UInt(64.W))
+        val NPC_GPR18 = Output(UInt(64.W))
+        val NPC_GPR19 = Output(UInt(64.W))
+        val NPC_GPR20 = Output(UInt(64.W))
+        val NPC_GPR21 = Output(UInt(64.W))
+        val NPC_GPR22 = Output(UInt(64.W))
+        val NPC_GPR23 = Output(UInt(64.W))
+        val NPC_GPR24 = Output(UInt(64.W))
+        val NPC_GPR25 = Output(UInt(64.W))
+        val NPC_GPR26 = Output(UInt(64.W))
+        val NPC_GPR27 = Output(UInt(64.W))
+        val NPC_GPR28 = Output(UInt(64.W))
+        val NPC_GPR29 = Output(UInt(64.W))
+        val NPC_GPR30 = Output(UInt(64.W))
+        val NPC_GPR31 = Output(UInt(64.W))
     })
 
     val PC = RegInit("h80000000".asUInt)
@@ -121,4 +155,38 @@ class npca extends Module{
     CSR(npca_WBU.io.WBU_O_CSR_RD)       := Mux(npca_WBU.io.WBU_O_CSR_WBenable, npca_WBU.io.WBU_O_CSR_WBdata, CSR_Read(npca_WBU.io.WBU_O_CSR_RD))
 
     PC := npca_WBU.io.WBU_O_nextPC
+
+    // Debug
+    io.NPC_GPR00 := GPR_Read(0.U)
+    io.NPC_GPR01 := GPR_Read(1.U)
+    io.NPC_GPR02 := GPR_Read(2.U)
+    io.NPC_GPR03 := GPR_Read(3.U)
+    io.NPC_GPR04 := GPR_Read(4.U)
+    io.NPC_GPR05 := GPR_Read(5.U)
+    io.NPC_GPR06 := GPR_Read(6.U)
+    io.NPC_GPR07 := GPR_Read(7.U)
+    io.NPC_GPR08 := GPR_Read(8.U)
+    io.NPC_GPR09 := GPR_Read(9.U)
+    io.NPC_GPR10 := GPR_Read(10.U)
+    io.NPC_GPR11 := GPR_Read(11.U)
+    io.NPC_GPR12 := GPR_Read(12.U)
+    io.NPC_GPR13 := GPR_Read(13.U)
+    io.NPC_GPR14 := GPR_Read(14.U)
+    io.NPC_GPR15 := GPR_Read(15.U)
+    io.NPC_GPR16 := GPR_Read(16.U)
+    io.NPC_GPR17 := GPR_Read(17.U)
+    io.NPC_GPR18 := GPR_Read(18.U)
+    io.NPC_GPR19 := GPR_Read(19.U)
+    io.NPC_GPR20 := GPR_Read(20.U)
+    io.NPC_GPR21 := GPR_Read(21.U)
+    io.NPC_GPR22 := GPR_Read(22.U)
+    io.NPC_GPR23 := GPR_Read(23.U)
+    io.NPC_GPR24 := GPR_Read(24.U)
+    io.NPC_GPR25 := GPR_Read(25.U)
+    io.NPC_GPR26 := GPR_Read(26.U)
+    io.NPC_GPR27 := GPR_Read(27.U)
+    io.NPC_GPR28 := GPR_Read(28.U)
+    io.NPC_GPR29 := GPR_Read(29.U)
+    io.NPC_GPR30 := GPR_Read(30.U)
+    io.NPC_GPR31 := GPR_Read(31.U)
 }
