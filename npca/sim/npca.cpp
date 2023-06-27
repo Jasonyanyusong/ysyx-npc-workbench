@@ -1183,7 +1183,7 @@ bool diff_difftest_check_reg(){
 
     for(int i = 0; i < 32; i = i + 1){
         if(cpu.gpr[i] != ref.gpr[i]){
-            printf("[difftest] at pc = 0x%lx, gpr x%d different, difftest failed, NSIM's val: 0x%16lx, NEMU's val: 0x%16lx\n", top -> io_NPC_sendCurrentPC, i, cpu.gpr[i], ref.gpr[i]);
+            printf("[difftest] at pc = 0x%lx, gpr x%d different, difftest failed, NSIM's val: 0x%16lx, NEMU's val: 0x%16lx\n", top -> io_NPC_sendCurrentPC - 4, i, cpu.gpr[i], ref.gpr[i]);
             state_set_state(NSIM_ABORT);
             //assert(0);
             return false;
@@ -1245,7 +1245,7 @@ void sim_one_exec(){
     if(print_debug_informations) {printf("\33[1;33m[sim] Phase I: Instruction fetch\33[0m\n");}
     uint64_t sim_getCurrentPC = top -> io_NPC_sendCurrentPC;
     if(print_debug_informations) {printf("\33[1;33m[sim] current pc is 0x%lx\33[0m\n", sim_getCurrentPC);}
-    printf("\33[1;33m[sim] current pc is 0x%lx\33[0m\n", sim_getCurrentPC);
+    //printf("\33[1;33m[sim] current pc is 0x%lx\33[0m\n", sim_getCurrentPC);
 
     trace_pc = sim_getCurrentPC; // Update current pc counter's val so trace can work
 
@@ -1863,6 +1863,10 @@ void sdb_init_sdb(){
 
 //========== Main function ==========
 int main(int argc, char *argv[]){
+    if(generate_dump_wave_file == true){
+        printf("Do you want to make this computer have no space left?\n");
+        assert(0);
+    }
     mem_init_mem();
     device_init_devices();
     trace_init_trace();
