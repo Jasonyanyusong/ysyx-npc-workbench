@@ -55,8 +55,8 @@ class EXU extends Module{
     ))
     
     val Val_CompareValu1 = MuxCase(0.U(64.W), Array(
-        (io.EXU_I_Int_operand === opcodes_EXU_Int_opreand.Int_TwoReg) -> (0.U(64.W)    ).asUInt,
-        (io.EXU_I_Int_operand === opcodes_EXU_Int_opreand.Int_RegImm) -> (0.U(64.W)    ).asUInt,
+        (io.EXU_I_Int_operand === opcodes_EXU_Int_opreand.Int_TwoReg) -> (io.EXU_I_src1).asUInt,
+        (io.EXU_I_Int_operand === opcodes_EXU_Int_opreand.Int_RegImm) -> (io.EXU_I_src1).asUInt,
         (io.EXU_I_Int_operand === opcodes_EXU_Int_opreand.Int_OneImm) -> (0.U(64.W)    ).asUInt,
         (io.EXU_I_Int_operand === opcodes_EXU_Int_opreand.Int_PCwReg) -> (0.U(64.W)    ).asUInt,
         (io.EXU_I_Int_operand === opcodes_EXU_Int_opreand.Int_PCwImm) -> (0.U(64.W)    ).asUInt,
@@ -64,8 +64,8 @@ class EXU extends Module{
     ))
 
     val Val_CompareValu2 = MuxCase(0.U(64.W), Array(
-        (io.EXU_I_Int_operand === opcodes_EXU_Int_opreand.Int_TwoReg) -> (0.U(64.W)    ).asUInt,
-        (io.EXU_I_Int_operand === opcodes_EXU_Int_opreand.Int_RegImm) -> (0.U(64.W)    ).asUInt,
+        (io.EXU_I_Int_operand === opcodes_EXU_Int_opreand.Int_TwoReg) -> (io.EXU_I_src2).asUInt,
+        (io.EXU_I_Int_operand === opcodes_EXU_Int_opreand.Int_RegImm) -> (io.EXU_I_imm ).asUInt,
         (io.EXU_I_Int_operand === opcodes_EXU_Int_opreand.Int_OneImm) -> (0.U(64.W)    ).asUInt,
         (io.EXU_I_Int_operand === opcodes_EXU_Int_opreand.Int_PCwReg) -> (0.U(64.W)    ).asUInt,
         (io.EXU_I_Int_operand === opcodes_EXU_Int_opreand.Int_PCwImm) -> (0.U(64.W)    ).asUInt,
@@ -74,25 +74,28 @@ class EXU extends Module{
 
     // Stage II: Bit-Cut manipulation, distinguish operating with "Word" and "Double Word"
     val Val_ValuOperand1 = MuxCase(0.U(64.W), Array(
-        (io.EXU_I_Int_sign === opcodes_EXU_Int_computeLength.Int_Word  ) -> (Get_ValuOperand1(31, 0)).asUInt,
-        (io.EXU_I_Int_sign === opcodes_EXU_Int_computeLength.Int_Double) -> (Get_ValuOperand1(63, 0)).asUInt
+        (io.EXU_I_Int_computeLength === opcodes_EXU_Int_computeLength.Int_Word  ) -> (Get_ValuOperand1(31, 0)).asUInt,
+        //(io.EXU_I_Int_sign === opcodes_EXU_Int_computeLength.Int_Word  ) -> (Get_ValuOperand1(31, 0)).asUInt,
+        (io.EXU_I_Int_computeLength === opcodes_EXU_Int_computeLength.Int_Double) -> (Get_ValuOperand1(63, 0)).asUInt
     ))
 
     val Val_ValuOperand2 = MuxCase(0.U(64.W), Array(
-        (io.EXU_I_Int_sign === opcodes_EXU_Int_computeLength.Int_Word  ) -> (Get_ValuOperand2(31, 0)).asUInt,
-        (io.EXU_I_Int_sign === opcodes_EXU_Int_computeLength.Int_Double) -> (Get_ValuOperand2(63, 0)).asUInt
+        (io.EXU_I_Int_computeLength === opcodes_EXU_Int_computeLength.Int_Word  ) -> (Get_ValuOperand2(31, 0)).asUInt,
+        //(io.EXU_I_Int_sign === opcodes_EXU_Int_computeLength.Int_Word  ) -> (Get_ValuOperand2(31, 0)).asUInt,
+        (io.EXU_I_Int_computeLength === opcodes_EXU_Int_computeLength.Int_Double) -> (Get_ValuOperand2(63, 0)).asUInt
     ))
 
     // Stage III: Compute, by distinguishing sign
     val ValuRes_Signed_Signed = MuxCase(0.U(64.W), Array(
         (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_NOP) -> (Val_ValuOperand1.asSInt).asUInt,
-        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_SHL) -> (Val_ValuOperand1.asSInt << Val_ValuOperand2(5, 0) ).asUInt,
-        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_SHR) -> (Val_ValuOperand1.asSInt >> Val_ValuOperand2(5, 0) ).asUInt,
+        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_SHL) -> (Val_ValuOperand1.asSInt << Val_ValuOperand2(5, 0).asUInt ).asUInt,
+        //(io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_SHR) -> (Val_ValuOperand1.asSInt >> Val_ValuOperand2(5, 0).asUInt ).asUInt,
+        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_SHR) -> (MuxCase(0.U(64.W), Array((io.EXU_I_Int_computeLength === opcodes_EXU_Int_computeLength.Int_Word) -> (Val_ValuOperand1(31, 0).asSInt >> Val_ValuOperand2(5, 0)).asUInt, (io.EXU_I_Int_computeLength === opcodes_EXU_Int_computeLength.Int_Double) -> (Val_ValuOperand1(63, 0).asSInt >> Val_ValuOperand2(5, 0)).asUInt))).asUInt,
         (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_ADD) -> (Val_ValuOperand1.asSInt +  Val_ValuOperand2.asSInt).asUInt,
         (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_SUB) -> (Val_ValuOperand1.asSInt -  Val_ValuOperand2.asSInt).asUInt,
         (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_MUL) -> (Val_ValuOperand1.asSInt *  Val_ValuOperand2.asSInt).asUInt,
         (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_DIV) -> (Mux(Val_ValuOperand2.asSInt === 0.asSInt, ("hffffffffffffffff".U).asSInt, Val_ValuOperand1.asSInt / Val_ValuOperand2.asSInt)).asUInt,
-        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_REM) -> (Mux(Val_ValuOperand2.asSInt === 0.asSInt, Val_ValuOperand1.asSInt,        Val_ValuOperand1.asSInt / Val_ValuOperand2.asSInt)).asUInt,
+        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_REM) -> (Mux(Val_ValuOperand2.asSInt === 0.asSInt, Val_ValuOperand1.asSInt,        Val_ValuOperand1.asSInt % Val_ValuOperand2.asSInt)).asUInt,
         (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_AND) -> (Val_ValuOperand1.asSInt &  Val_ValuOperand2.asSInt).asUInt,
         (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_OR ) -> (Val_ValuOperand1.asSInt |  Val_ValuOperand2.asSInt).asUInt,
         (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_XOR) -> (Val_ValuOperand1.asSInt ^  Val_ValuOperand2.asSInt).asUInt,
@@ -110,7 +113,7 @@ class EXU extends Module{
         (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_SUB) -> (Val_ValuOperand1.asUInt -  Val_ValuOperand2.asUInt).asUInt,
         (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_MUL) -> (Val_ValuOperand1.asUInt *  Val_ValuOperand2.asUInt).asUInt,
         (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_DIV) -> (Mux(Val_ValuOperand2.asUInt === 0.asUInt, ("hffffffffffffffff".U).asUInt, Val_ValuOperand1.asUInt / Val_ValuOperand2.asUInt)).asUInt,
-        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_REM) -> (Mux(Val_ValuOperand2.asUInt === 0.asUInt, Val_ValuOperand1.asUInt,        Val_ValuOperand1.asUInt / Val_ValuOperand2.asUInt)).asUInt,
+        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_REM) -> (Mux(Val_ValuOperand2.asUInt === 0.asUInt, Val_ValuOperand1.asUInt,        Val_ValuOperand1.asUInt % Val_ValuOperand2.asUInt)).asUInt,
         (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_AND) -> (Val_ValuOperand1.asUInt &  Val_ValuOperand2.asUInt).asUInt,
         (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_OR ) -> (Val_ValuOperand1.asUInt |  Val_ValuOperand2.asUInt).asUInt,
         (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_XOR) -> (Val_ValuOperand1.asUInt ^  Val_ValuOperand2.asUInt).asUInt,
@@ -142,28 +145,18 @@ class EXU extends Module{
     ))
 
     val CompRes_Unsigned_Unsigned = MuxCase(false.B, Array(
-        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_BEQ) -> (Val_CompareValu1.asSInt === Val_CompareValu2.asSInt),
-        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_BNE) -> (Val_CompareValu1.asSInt =/= Val_CompareValu2.asSInt),
-        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_BLT) -> (Val_CompareValu1.asSInt <   Val_CompareValu2.asSInt),
-        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_BGE) -> (Val_CompareValu1.asSInt >=  Val_CompareValu2.asSInt)
+        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_BEQ) -> (Val_CompareValu1.asUInt === Val_CompareValu2.asUInt),
+        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_BNE) -> (Val_CompareValu1.asUInt =/= Val_CompareValu2.asUInt),
+        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_BLT) -> (Val_CompareValu1.asUInt <   Val_CompareValu2.asUInt),
+        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_BGE) -> (Val_CompareValu1.asUInt >=  Val_CompareValu2.asUInt)
     ))
 
-    val CompRes_Signed_Unsigned =MuxCase(false.B, Array(
-        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_BEQ) -> (Val_CompareValu1.asSInt === Val_CompareValu2.asSInt),
-        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_BNE) -> (Val_CompareValu1.asSInt =/= Val_CompareValu2.asSInt),
-        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_BLT) -> (Val_CompareValu1.asSInt <   Val_CompareValu2.asSInt),
-        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_BGE) -> (Val_CompareValu1.asSInt >=  Val_CompareValu2.asSInt)
-    ))
+    val CompRes_Signed_Unsigned = false.B
 
-    val CompRes_Unsigned_Signed =MuxCase(false.B, Array(
-        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_BEQ) -> (Val_CompareValu1.asSInt === Val_CompareValu2.asSInt),
-        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_BNE) -> (Val_CompareValu1.asSInt =/= Val_CompareValu2.asSInt),
-        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_BLT) -> (Val_CompareValu1.asSInt <   Val_CompareValu2.asSInt),
-        (io.EXU_I_Int_opcode === opcodes_EXU_Int.Int_BGE) -> (Val_CompareValu1.asSInt >=  Val_CompareValu2.asSInt)
-    ))
+    val CompRes_Unsigned_Signed = false.B
 
     // Stage IV: Bit cut for Upper or Lower part of result
-    val Pre_ValuRes = MuxCase(0.U(64.W), Array(
+    val Pre_ValuRes = MuxCase(0.U(128.W), Array(
         (io.EXU_I_Int_sign === opcodes_EXU_Int_sign.Int_Signed_Signed    ) -> (ValuRes_Signed_Signed    ),
         (io.EXU_I_Int_sign === opcodes_EXU_Int_sign.Int_Unsigned_Unsigned) -> (ValuRes_Unsigned_Unsigned),
         (io.EXU_I_Int_sign === opcodes_EXU_Int_sign.Int_Signed_Unsigned  ) -> (ValuRes_Signed_Unsigned  ),
@@ -172,7 +165,7 @@ class EXU extends Module{
 
     val Pre_ValuRet = MuxCase(Pre_ValuRes, Array(
         (io.EXU_I_Int_computeLength === opcodes_EXU_Int_computeLength.Int_Double) -> (Pre_ValuRes),
-        (io.EXU_I_Int_computeLength === opcodes_EXU_Int_computeLength.Int_Word  ) -> (Cat(Fill(32, Pre_ValuRes(31, 31)), Pre_ValuRes(31, 0)))
+        (io.EXU_I_Int_computeLength === opcodes_EXU_Int_computeLength.Int_Word  ) -> (Cat(Fill(32, Pre_ValuRes(31)), Pre_ValuRes(31, 0)))
     ))
 
     val Ret_ValuRes = MuxCase(0.U(64.W), Array(
@@ -180,7 +173,7 @@ class EXU extends Module{
         (io.EXU_I_Int_resultPart === opcodes_EXU_Int_resultPart.Int_High) -> (Pre_ValuRet(127, 64))
     ))
 
-    val Ret_CompRes = MuxCase(0.U(64.W), Array(
+    val Ret_CompRes = MuxCase(false.B, Array(
         (io.EXU_I_Int_sign === opcodes_EXU_Int_sign.Int_Signed_Signed    ) -> (CompRes_Signed_Signed    ),
         (io.EXU_I_Int_sign === opcodes_EXU_Int_sign.Int_Unsigned_Unsigned) -> (CompRes_Unsigned_Unsigned),
         (io.EXU_I_Int_sign === opcodes_EXU_Int_sign.Int_Signed_Unsigned  ) -> (CompRes_Signed_Unsigned  ),
