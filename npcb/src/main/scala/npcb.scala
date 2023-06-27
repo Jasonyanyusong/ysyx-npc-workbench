@@ -444,7 +444,7 @@ class EXU extends Module{
         (io.EXU_I_opcode === EXU_opcode.EXU_ANDI)      -> (EXU_src1_unsigned & EXU_imm_unsigned).asUInt,
         (io.EXU_I_opcode === EXU_opcode.EXU_SLLI)      -> (EXU_src1_unsigned << EXU_imm_unsigned(5, 0)).asUInt,
         (io.EXU_I_opcode === EXU_opcode.EXU_SRLI)      -> (EXU_src1_unsigned >> EXU_imm_unsigned(5, 0)).asUInt,
-        (io.EXU_I_opcode === EXU_opcode.EXU_SRAI)      -> (EXU_src1_unsigned >> EXU_imm_unsigned(5, 0)).asUInt,
+        (io.EXU_I_opcode === EXU_opcode.EXU_SRAI)      -> (EXU_src1_signed >> EXU_imm_unsigned(5, 0)).asUInt,
         (io.EXU_I_opcode === EXU_opcode.EXU_ADD)       -> (EXU_src1_unsigned + EXU_src2_unsigned).asUInt,
         (io.EXU_I_opcode === EXU_opcode.EXU_SUB)       -> (EXU_src1_unsigned - EXU_src2_unsigned).asUInt,
         (io.EXU_I_opcode === EXU_opcode.EXU_SLL)       -> (EXU_src1_unsigned << EXU_src2_unsigned(5, 0)).asUInt,
@@ -644,7 +644,7 @@ class WBU extends Module{
     //io.WBU_O_error := false.B
 }
 
-class npcb extends Module{
+class npc extends Module{
     val io = IO(new Bundle{
         val NPC_startPC = Input(UInt(64.W))
 
