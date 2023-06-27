@@ -70,10 +70,12 @@ void sim_t::diff_get_regs(void* diff_context) {
   for (int i = 0; i < 4096; i = i + 1){
     //printf("Get CSR No.0x%x, with val = 0x%lx\n", i, p -> get_csr(i));
     IFDEF(CONFIG_RV_Privileged, ctx->csr[i] = 0);
+    #ifdef CONFIG_RV_Privileged
     if (i == 0x300) { ctx -> csr[i] = p -> get_csr(i);} // 0x300 is mstatus
     if (i == 0x305) { ctx -> csr[i] = p -> get_csr(i);} // 0x305 is mtvec
     if (i == 0x341) { ctx -> csr[i] = p -> get_csr(i);} // 0x341 is mepc
     if (i == 0x342) { ctx -> csr[i] = p -> get_csr(i);} // 0x342 is mcause
+    #endif
   }
   ctx->pc = state->pc;
 }
