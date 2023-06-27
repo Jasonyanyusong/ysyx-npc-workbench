@@ -56,7 +56,7 @@
 
 #include "verilated.h"
 #include "verilated_vcd_c.h"
-#include "obj_dir/Vnpc.h"
+#include "../obj_dir/Vnpc.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1044,7 +1044,7 @@ void device_vga_init_screen(){
     SDL_Window *device_vga_window = NULL;
     SDL_Init(SDL_INIT_VIDEO);
     SDL_CreateWindowAndRenderer(DEVICE_VGA_SCREEN_W * 2, DEVICE_VGA_SCREEN_H * 2, 0, &device_vga_window, &device_vga_renderer);
-    SDL_SetWindowTitle(device_vga_window, "YSYX NPC (Baisc Level) Simulator By Jasonyanyusong");
+    SDL_SetWindowTitle(device_vga_window, "YSYX NPC (Advanced Level) Simulator By Jasonyanyusong");
     device_vga_texture = SDL_CreateTexture(device_vga_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, DEVICE_VGA_SCREEN_W, DEVICE_VGA_SCREEN_H);
     return;
 }
@@ -1143,8 +1143,12 @@ void diff_difftest_init(long img_size){
         void (*ref_difftest_init)(int) = (void (*)(int)) dlsym(handle, "difftest_init");
         assert(ref_difftest_init);
 
+        if(print_debug_informations) {printf("[difftest] all handeler exist\n");}
+
         ref_difftest_init(1234);
+        if(print_debug_informations) {printf("[difftest] copy mem with start addr 0x%lx\n", mem_start_addr);}
         ref_difftest_memcpy(mem_start_addr, mem_guest_to_host(mem_start_addr), img_size, DIFFTEST_TO_REF);
+        if(print_debug_informations) {printf("[difftest] copy mem OK\n");}
         ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF); // Need later changes
     }else{
         if(print_debug_informations) {printf("[difftest] not enabled, skipping\n");}
@@ -1169,19 +1173,21 @@ bool diff_difftest_check_reg(){
     }
     riscv64_CPU_State ref;
     ref_difftest_regcpy(&ref, DIFFTEST_TO_DUT);
-    for(int i = 0; i < 32; i = i + 1){
-        if(cpu.gpr[i] != ref.gpr[i]){
-            printf("[difftest] at pc = 0x%lx, gpr x%d different, difftest failed, NSIM's val: 0x%16lx, NEMU's val: 0x%16lx\n", reg_pc, i, cpu.gpr[i], ref.gpr[i]);
-            state_set_state(NSIM_ABORT);
-            //assert(0);
-            return false;
-        }
-    }
+
     if(cpu.pc != ref.pc)
     {
         printf("[difftest] pc different, difftest failed, dut = 0x%lx, ref = 0x%lx\n", cpu.pc, ref.pc);
         state_set_state(NSIM_ABORT);
         return false;
+    }
+
+    for(int i = 0; i < 32; i = i + 1){
+        if(cpu.gpr[i] != ref.gpr[i]){
+            printf("[difftest] at pc = 0x%lx, gpr x%d different, difftest failed, NSIM's val: 0x%16lx, NEMU's val: 0x%16lx\n", top -> io_NPC_sendCurrentPC, i, cpu.gpr[i], ref.gpr[i]);
+            state_set_state(NSIM_ABORT);
+            //assert(0);
+            return false;
+        }
     }
     if(print_debug_informations) {printf("[difftest] success at current pc\n");}
     return true;
@@ -1201,7 +1207,7 @@ void sim_sim_init(){
 
     // tell NPC the correct start PC
     top -> clock = 0;
-    top -> io_NPC_startPC = mem_start_addr;
+    //top -> io_NPC_startPC = mem_start_addr; // In NPC Advanced, we will automatically set start PC value to 0x80000000
     top -> reset = 1;
     //top -> eval();
     sim_step_and_dump_wave();
@@ -1239,11 +1245,12 @@ void sim_one_exec(){
     if(print_debug_informations) {printf("\33[1;33m[sim] Phase I: Instruction fetch\33[0m\n");}
     uint64_t sim_getCurrentPC = top -> io_NPC_sendCurrentPC;
     if(print_debug_informations) {printf("\33[1;33m[sim] current pc is 0x%lx\33[0m\n", sim_getCurrentPC);}
+    printf("\33[1;33m[sim] current pc is 0x%lx\33[0m\n", sim_getCurrentPC);
 
     trace_pc = sim_getCurrentPC; // Update current pc counter's val so trace can work
 
     uint32_t sim_currentInst = mem_paddr_read(sim_getCurrentPC, 4);
-    top -> io_NPC_getInst = sim_currentInst;
+    top -> io_NPC_getCurrentInst = sim_currentInst;
     if(print_debug_informations) {printf("\33[1;33m[sim] current instruction is 0x%x\33[0m\n", sim_currentInst);}
 
     #ifdef trace_enable_itrace
@@ -1262,7 +1269,29 @@ void sim_one_exec(){
 
     // Step IV: Load and store
     if(print_debug_informations) {printf("\33[1;33m[sim] Phase IV: load and store\33[0m\n");}
-    if(top -> io_NPC_LSU_O_accessMem == 0b1)
+
+    if(top -> io_NPC_memReadEnable == 0b1){
+        u_int64_t sim_mem_read_addr = top -> io_NPC_memReadAddress;
+        switch(top -> io_NPC_memReadLength){
+            case 0b00: top -> io_NPC_memReadResult = mem_pmem_read(sim_mem_read_addr, 1);     break;
+            case 0b01: top -> io_NPC_memReadResult = mem_pmem_read(sim_mem_read_addr, 2);     break;
+            case 0b10: top -> io_NPC_memReadResult = mem_pmem_read(sim_mem_read_addr, 4);     break;
+            case 0b11: top -> io_NPC_memReadResult = mem_pmem_read(sim_mem_read_addr, 8);     break;
+            default:   printf("[sim] NPC returned an unknown memory length\n"); assert(0);    break;
+        }
+    }else {top -> io_NPC_memReadResult = 0;}
+
+    if(top -> io_NPC_memWriteEnable == 0b1){
+        uint64_t sim_mem_write_addr = top -> io_NPC_memWriteAddress;
+        switch(top -> io_NPC_memWriteLength){
+            case 0b00: mem_pmem_write(sim_mem_write_addr, 1, top -> io_NPC_memWriteData);    break;
+            case 0b01: mem_pmem_write(sim_mem_write_addr, 2, top -> io_NPC_memWriteData);    break;
+            case 0b10: mem_pmem_write(sim_mem_write_addr, 4, top -> io_NPC_memWriteData);    break;
+            case 0b11: mem_pmem_write(sim_mem_write_addr, 8, top -> io_NPC_memWriteData);    break;
+            default:   printf("[sim] NPC returned an unknown memory length\n"); assert(0);   break;
+        }
+    }
+    /*if(top -> io_NPC_LSU_O_accessMem == 0b1)
     {
         if(top -> io_NPC_LSU_O_memRW == 0b1){
             // memory write
@@ -1289,7 +1318,7 @@ void sim_one_exec(){
     }
     else{
         top -> io_NPC_LSU_I_memR = 0;
-    }
+    }*/
     //top -> eval();
 
     // Step V: Write back
@@ -1334,7 +1363,7 @@ void sim_one_exec(){
         }
     }
 
-    if(top -> io_NPC_halt == 0b1){
+    if(top -> io_NPC_PrivStatus == 1){ // In NPCA we set 1 to EBREAK, sim need to be stopped
         if(nsim_gpr[10].value == 0){
             printf("\33[1;33m[sim] \33[1;32mHIT GOOD TRAP\33[1;33m at pc 0x%lx\33[0m\n", top -> io_NPC_sendCurrentPC - 4);
         }else{
