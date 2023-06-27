@@ -186,9 +186,9 @@ static int decode_exec(Decode *s) {
   INSTPAT("??????? ????? ????? 011 ????? 00000 11", ld     , I, IFDEF(CONFIG_ShowInstName, printf("LD\n"));     R(rd) = Mr(src1 + imm, 8));
   INSTPAT("??????? ????? ????? 011 ????? 01000 11", sd     , S, IFDEF(CONFIG_ShowInstName, printf("SD\n"));     Mw(src1 + imm, 8, src2));
   INSTPAT("??????? ????? ????? 000 ????? 00110 11", addiw  , I, IFDEF(CONFIG_ShowInstName, printf("ADDIW\n"));  R(rd) = SEXT(BITS((signed)(src1 + imm), 31, 0), 32));
-  INSTPAT("0000000 ????? ????? 001 ????? 00110 11", slliw  , R, IFDEF(CONFIG_ShowInstName, printf("SLLIW\n"));  R(rd) = SEXT((unsigned)BITS(src1, 31, 0) << BITS(s->isa.inst.val, 24, 20), 32));
-  INSTPAT("0000000 ????? ????? 101 ????? 00110 11", srliw  , R, IFDEF(CONFIG_ShowInstName, printf("SRLIW\n"));  R(rd) = SEXT((unsigned)BITS(src1, 31, 0) >> BITS(s->isa.inst.val, 24, 20), 32));
-  INSTPAT("0100000 ????? ????? 101 ????? 00110 11", sraiw  , R, IFDEF(CONFIG_ShowInstName, printf("SRAIW\n"));  R(rd) = SEXT((signed)BITS(src1, 31, 0) >> BITS(s->isa.inst.val, 24, 20), 32));
+  INSTPAT("0000000 ????? ????? 001 ????? 00110 11", slliw  , I, IFDEF(CONFIG_ShowInstName, printf("SLLIW\n"));  R(rd) = SEXT((unsigned)BITS(src1, 31, 0) << (imm & 0b11111), 32));
+  INSTPAT("0000000 ????? ????? 101 ????? 00110 11", srliw  , I, IFDEF(CONFIG_ShowInstName, printf("SRLIW\n"));  R(rd) = SEXT((unsigned)BITS(src1, 31, 0) >> (imm & 0b11111), 32));
+  INSTPAT("0100000 ????? ????? 101 ????? 00110 11", sraiw  , I, IFDEF(CONFIG_ShowInstName, printf("SRAIW\n"));  R(rd) = SEXT((signed)BITS(src1, 31, 0) >> (imm & 0b11111), 32));
   INSTPAT("0000000 ????? ????? 000 ????? 01110 11", addw   , R, IFDEF(CONFIG_ShowInstName, printf("ADDW\n"));   R(rd) = SEXT(BITS((signed)(src1 + src2), 31, 0), 32));
   INSTPAT("0100000 ????? ????? 000 ????? 01110 11", subw   , R, IFDEF(CONFIG_ShowInstName, printf("SUBW\n"));   R(rd) = SEXT(BITS((signed)(src1 - src2), 31, 0), 32));
   INSTPAT("0000000 ????? ????? 001 ????? 01110 11", sllw   , R, IFDEF(CONFIG_ShowInstName, printf("SLLW\n"));   R(rd) = SEXT(BITS((unsigned)BITS(src1, 31, 0) << src2, 31, 0), 32));
