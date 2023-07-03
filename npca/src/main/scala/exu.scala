@@ -31,9 +31,18 @@ class EXU extends Module{
         val EXU_I_Int_resultPart = Input(Bool())
         val EXU_I_Int_operand = Input(UInt(4.W))
 
+        val EXU_I_csrOp        = Input(UInt(4.W))
+        //val EXU_I_privOp       = Input(UInt(4.W))
+        val EXU_I_csrValu      = Input(UInt(64.W))
+        val EXU_O_csrWriteBack = Output(UInt(64.W))
+
         val EXU_O_BoolResult = Output(Bool())
         val EXU_O_ValuResult = Output(UInt(64.W))
     })
+
+    // When Zicsr instructions are added, we will first assume this is not a CSR related inst,
+    // Then if it is a csr inst, we will re-assign value for EXU_O_ValuResult
+    // It is the Instruction-Decode Unit's role to decide where to write back
 
     // Stage I: Get the correct operand
     val Get_ValuOperand1 = MuxCase(0.U(64.W), Array(
@@ -183,4 +192,22 @@ class EXU extends Module{
     // Stage V: Write back to output port
     io.EXU_O_BoolResult := Ret_CompRes
     io.EXU_O_ValuResult := Ret_ValuRes
+
+    // Now a normal compute step is over, we will preform priv compute
+
+    val OldCSR = io.EXU_I_csrValu.asUInt // CSRRS and CSRRC
+
+    io.EXU_O_csrWriteBack := MuxCase(0.U(64.W), Array(
+        (io.EXU_I_csrOp === opcodes_IDU_csrOps.csr_nope ) -> (0.U(64.W).asUInt      ),
+        (io.EXU_I_csrOp === opcodes_IDU_csrOps.csr_write) -> (io.EXU_I_src1         ),
+        (io.EXU_I_csrOp === opcodes_IDU_csrOps.csr_set  ) -> (OldCSR | io.EXU_I_src1),
+        (io.EXU_I_csrOp === opcodes_IDU_csrOps.csr_clear) -> (OldCSR & io.EXU_I_src1)
+    ))
+
+    // Finally, check if this is a csr instruction, if so, re-assign io.EXU_O_ValuResult to OldCSR
+    io.EXU_O_ValuResult := MuxCase(Ret_ValuRes, Array(
+        (io.EXU_I_csrOp === opcodes_IDU_csrOps.csr_write) -> (OldCSR),
+        (io.EXU_I_csrOp === opcodes_IDU_csrOps.csr_set  ) -> (OldCSR),
+        (io.EXU_I_csrOp === opcodes_IDU_csrOps.csr_clear) -> (OldCSR)
+    ))
 }

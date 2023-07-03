@@ -43,7 +43,11 @@ class IDU extends Module{
         val IDU_O_writeBackRegType = Output(UInt(4.W))
         val IDU_O_privState = Output(UInt(4.W))
         val IDU_O_nextPCStatic = Output(Bool())
-        val IDU_O_PCJumpReadson = Output(UInt(4.W))
+        val IDU_O_PCJumpReason = Output(UInt(4.W))
+
+        val IDU_O_csrOperation  = Output(UInt(4.W))
+        val IDU_O_privOperation = Output(UInt(4.W))
+        val IDU_O_csrAddr       = Output(UInt(12.W)) // 0-4095 CSR index
 
         val IDU_O_imm = Output(UInt(64.W))
     })
@@ -89,7 +93,7 @@ class IDU extends Module{
     // 13) Instruction Type Indicator, debug-only signal, every instruction type have unique number, this will be diabled if not debugging, bind output with "IDU_O_InstType"
     // 14) Immediate Value, bind output with "IDU_O_imm"
     // 15) next PC type, static (+4) or may be dynamic, bind output with "IDU_O_nextPCStatic"
-    // 16) reason of PC jump (if not jump then select NoJumpPC), so Write-Back Unit can process PC Mask if needed, bind output with "IDU_O_PCJumpReadson"
+    // 16) reason of PC jump (if not jump then select NoJumpPC), so Write-Back Unit can process PC Mask if needed, bind output with "IDU_O_PCJumpReason"
     var IDU_opcodes_EXU_Int = ListLookup(
         /*Compare Item: */           io.IDU_I_inst,
         /*Default Vals: */           List(opcodes_EXU_Int.Int_NOP, opcodes_EXU_Int_sign.Int_Unsigned_Unsigned, opcodes_EXU_Int_computeLength.Int_Double, opcodes_EXU_Int_resultPart.Int_Low,  opcodes_EXU_Int_opreand.Int_TwoReg), Array(
@@ -158,7 +162,16 @@ class IDU extends Module{
         )
     )
 
-    // TODO: EXU add a previledge computing unit
+    val IDU_opcodes_priv = ListLookup(
+        /*Compare Item: */            io.IDU_I_inst,
+        /*Default Vals: */            List(opcodes_IDU_csrOps.csr_nope , opcodes_IDU_privOps.priv_nope ), Array(
+        rv64_bitpat.bitpat_CSRRW   -> List(opcodes_IDU_csrOps.csr_write, opcodes_IDU_privOps.priv_nope ),
+        rv64_bitpat.bitpat_CSRRS   -> List(opcodes_IDU_csrOps.csr_set  , opcodes_IDU_privOps.priv_nope ),
+        rv64_bitpat.bitpat_CSRRC   -> List(opcodes_IDU_csrOps.csr_clear, opcodes_IDU_privOps.priv_nope ),
+        rv64_bitpat.bitpat_ECALL   -> List(opcodes_IDU_csrOps.csr_nope , opcodes_IDU_privOps.priv_ecall),
+        rv64_bitpat.bitpat_MRET    -> List(opcodes_IDU_csrOps.csr_nope , opcodes_IDU_privOps.priv_mret )
+        )
+    )
 
     var IDU_opcodes_LSU = ListLookup(
         /*Compare Item: */           io.IDU_I_inst,
@@ -245,7 +258,9 @@ class IDU extends Module{
         rv64_bitpat.bitpat_ECALL  -> List(opcodes_writeBackGPRType.WB_GPR_NOP,      opcodes_IDU_privState.ECALL,  rv64_opcodes.opcode_ECALL,     inst_types.inst_N, NoImmediateNum,  opcodes_nextPCTypes.PC_Next_Dynamic, opcodes_PCJumpReason.ECALL_Inst),
         rv64_bitpat.bitpat_EBREAK -> List(opcodes_writeBackGPRType.WB_GPR_NOP,      opcodes_IDU_privState.EBREAK, rv64_opcodes.opcode_EBREAK,    inst_types.inst_N, NoImmediateNum,  opcodes_nextPCTypes.PC_Next_Static,  opcodes_PCJumpReason.NoJumpPC),
         rv64_bitpat.bitpat_MRET   -> List(opcodes_writeBackGPRType.WB_GPR_NOP,      opcodes_IDU_privState.MRET,   rv64_opcodes.opcode_MRET,      inst_types.inst_N, NoImmediateNum,  opcodes_nextPCTypes.PC_Next_Dynamic, opcodes_PCJumpReason.MRET_Inst)
-        // TODO: Add more Instructions here (Zicsr)
+        rv64_bitpat.bitpat_CSRRW  -> List(opcodes_writeBackGPRType.WB_GPR_EXU_Val,  opcodes_IDU_privState.NORMAL, rv64_opcodes.opcode_CSRRW,     inst_types.inst_I, SignExtend_immI, opcodes_nextPCTypes.PC_Next_Static,  opcodes_PCJumpReason.NoJumpPC),
+        rv64_bitpat.bitpat_CSRRS  -> List(opcodes_writeBackGPRType.WB_GPR_EXU_Val,  opcodes_IDU_privState.NORMAL, rv64_opcodes.opcode_CSRRS,     inst_types.inst_I, SignExtend_immI, opcodes_nextPCTypes.PC_Next_Static,  opcodes_PCJumpReason.NoJumpPC),
+        rv64_bitpat.bitpat_CSRRC  -> List(opcodes_writeBackGPRType.WB_GPR_EXU_Val,  opcodes_IDU_privState.NORMAL, rv64_opcodes.opcode_CSRRC,     inst_types.inst_I, SignExtend_immI, opcodes_nextPCTypes.PC_Next_Static,  opcodes_PCJumpReason.NoJumpPC)
         )
     )
 
@@ -267,5 +282,9 @@ class IDU extends Module{
     io.IDU_O_InstType              := IDU_opcodes_MACRO(3)
     io.IDU_O_imm                   := IDU_opcodes_MACRO(4)
     io.IDU_O_nextPCStatic          := IDU_opcodes_MACRO(5)
-    io.IDU_O_PCJumpReadson         := IDU_opcodes_MACRO(6)
+    io.IDU_O_PCJumpReason          := IDU_opcodes_MACRO(6)
+
+    io.IDU_O_csrOperation          := IDU_opcodes_priv(0)
+    io.IDU_O_privOperation         := IDU_opcodes_priv(1)
+    io.IDU_O_csrAddr               := immI.asUInt
 }

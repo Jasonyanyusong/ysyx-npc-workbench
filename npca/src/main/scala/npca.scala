@@ -74,13 +74,29 @@ class npc extends Module{
         val NPC_GPR29 = Output(UInt(64.W))
         val NPC_GPR30 = Output(UInt(64.W))
         val NPC_GPR31 = Output(UInt(64.W))
+
+        val NPC_CSR_mstatus = Output(UInt(64.W))
+        val NPC_CSR_mtvec   = Output(UInt(64.W))
+        val NPC_CSR_mepc    = Output(UInt(64.W))
+        val NPC_CSR_mcause  = Output(UInt(64.W))
     })
 
     val PC = RegInit("h80000000".asUInt)
     val GPR = Mem(32, UInt(64.W))
-    val CSR = Mem(4096, UInt(64.W))
+    //val CSR = Mem(4096, UInt(64.W))
+    val mstatus = RegInit("ha00001800".asUInt)
+    val mepc    = RegInit(0.U(64.W).asUInt)
+    val mtvec   = RegInit(0.U(64.W).asUInt)
+    val mcause  = RegInit(0.U(64.W).asUInt)
     def GPR_Read (index : UInt) = Mux(index === 0.U, 0.U(64.W), GPR(index))
-    def CSR_Read (index : UInt) = CSR(index)
+    //def CSR_Read (index : UInt) = CSR(index)
+
+    def CSR_Read (index : UInt) = MuxCase(0.U(64.W), Array(
+        (index === "h300".U) -> (mstatus.asUInt), // mstatus
+        (index === "h305".U) -> (mtvec.asUInt  ), // mtvec
+        (index === "h341".U) -> (mepc.asUInt   ), // mepc
+        (index === "h342".U) -> (mcause.asUInt )  // mcause
+    ))
 
     // IFU
     val npca_IFU = Module(new IFU)
@@ -147,12 +163,14 @@ class npc extends Module{
 
     npca_WBU.io.WBU_I_WriteBackType     := npca_IDU.io.IDU_O_writeBackRegType
     npca_WBU.io.WBU_I_nextPCType        := npca_IDU.io.IDU_O_nextPCStatic
-    npca_WBU.io.WBU_I_PCJumpReason      := npca_IDU.io.IDU_O_PCJumpReadson
+    npca_WBU.io.WBU_I_PCJumpReason      := npca_IDU.io.IDU_O_PCJumpReason
+
+    npca_WBU.io.WBU_I_privOpcode        := npca_IDU.io.IDU_O_privOperation
 
     npca_WBU.io.WBU_I_GPR_RD            := RD
     npca_WBU.io.WBU_I_CSR_RD            := 0.U(12.W) // do not toatlly support CSR now
     GPR(npca_WBU.io.WBU_O_GPR_RD)       := Mux(npca_WBU.io.WBU_O_GPR_WBenable, npca_WBU.io.WBU_O_GPR_WBdata, GPR_Read(npca_WBU.io.WBU_O_GPR_RD))
-    CSR(npca_WBU.io.WBU_O_CSR_RD)       := Mux(npca_WBU.io.WBU_O_CSR_WBenable, npca_WBU.io.WBU_O_CSR_WBdata, CSR_Read(npca_WBU.io.WBU_O_CSR_RD))
+    //CSR(npca_WBU.io.WBU_O_CSR_RD)       := Mux(npca_WBU.io.WBU_O_CSR_WBenable, npca_WBU.io.WBU_O_CSR_WBdata, CSR_Read(npca_WBU.io.WBU_O_CSR_RD))
 
     PC := npca_WBU.io.WBU_O_nextPC
 
@@ -189,4 +207,9 @@ class npc extends Module{
     io.NPC_GPR29 := GPR_Read(29.U)
     io.NPC_GPR30 := GPR_Read(30.U)
     io.NPC_GPR31 := GPR_Read(31.U)
+
+    io.NPC_CSR_mstatus := mstatus
+    io.NPC_CSR_mtvec   := mtvec
+    io.NPC_CSR_mepc    := mepc
+    io.NPC_CSR_mcause  := mcause
 }
