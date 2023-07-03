@@ -23,7 +23,7 @@ Context* __am_irq_handle(Context *c) {
 
     c = user_handler(ev, c);
 
-    c -> mepc = c -> mepc + 4; // set error pc to the next inst using software
+    // c -> mepc = c -> mepc + 4; // set error pc to the next inst using software
 
     assert(c != NULL);
   }
