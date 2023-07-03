@@ -241,7 +241,7 @@ object rv64_bitpat{
     def bitpat_AMOMAXUD = BitPat("b11100??_?????_?????_011_?????_01011_11")
 }
 
-def rv64c_bitpat{
+object rv64c_bitpat{
     def bitpat_invalid   = BitPat("b000_0_00_000_00_000_00")
 
     // RVC Quadrant 0:

@@ -36,12 +36,12 @@ class WBU extends Module{
         val WBU_O_GPR_WBenable   = Output(Bool())
         val WBU_O_GPR_WBdata     = Output(UInt(64.W))
 
-        val WBU_I_CSR_RD         = Input(UInt(12.W))
-        val WBU_O_CSR_RD         = Output(UInt(12.W))
-        val WBU_I_CSR_WBenable   = Input(Bool())
-        val WBU_O_CSR_WBenable   = Output(Bool())
-        val WBU_I_CSR_WBdata     = Input(UInt(64.W))
-        val WBU_O_CSR_WBdata     = Output(UInt(64.W))
+        // val WBU_I_CSR_RD         = Input(UInt(12.W))
+        // WBU_O_CSR_RD         = Output(UInt(12.W))
+        // val WBU_I_CSR_WBenable   = Input(Bool())
+        // val WBU_O_CSR_WBenable   = Output(Bool())
+        // val WBU_I_CSR_WBdata     = Input(UInt(64.W))
+        // val WBU_O_CSR_WBdata     = Output(UInt(64.W))
 
         val WBU_I_privOpcode     = Input(UInt(4.W))
 
@@ -54,11 +54,11 @@ class WBU extends Module{
         val WBU_O_CSR_mepc_writeData   = Output(UInt(64.W))
 
         val WBU_O_CSR_mtvec_writeEnable = Output(Bool())
-        val WBU_I_CSR_mtvec_readData    = Output(UInt(64.W))
+        val WBU_I_CSR_mtvec_readData    = Input(UInt(64.W))
         val WBU_O_CSR_mtvec_writeData   = Output(UInt(64.W))
 
         val WBU_O_CSR_mcause_writeEnable = Output(Bool())
-        val WBU_I_CSR_mcause_readData    = Output(UInt(64.W))
+        val WBU_I_CSR_mcause_readData    = Input(UInt(64.W))
         val WBU_O_CSR_mcause_writeData   = Output(UInt(64.W))
     })
 
@@ -97,9 +97,9 @@ class WBU extends Module{
     ))
 
     // Write Back CSR (Zicsr Instructions)
-    io.WBU_O_CSR_RD       := io.WBU_I_CSR_RD
-    io.WBU_O_CSR_WBenable := io.WBU_I_CSR_WBenable
-    io.WBU_O_CSR_WBdata   := io.WBU_I_CSR_WBdata
+    // io.WBU_O_CSR_RD       := io.WBU_I_CSR_RD
+    // io.WBU_O_CSR_WBenable := io.WBU_I_CSR_WBenable
+    // io.WBU_O_CSR_WBdata   := io.WBU_I_CSR_WBdata
 
     // Write Back CSR (Priv Instructions)
     // CSR manipulations I: write enable
