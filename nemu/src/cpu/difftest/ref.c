@@ -39,18 +39,18 @@ void difftest_regcpy(void *dut, bool direction) {
   }else{
     for(int i = 0; i < 32; i = i + 1){
       _dut->gpr[i] = cpu.gpr[i];
-      Log("gpr x%d is 0x%lx", i, cpu.gpr[i]);
+      //Log("gpr x%d is 0x%lx", i, cpu.gpr[i]);
     }
     for(int i = 0; i < 4096; i = i + 1){
       _dut->csr[i] = cpu.csr[i];
     }
     _dut->csr[0x300] = 0xa00001800; // need later refinements
-    Log("csr0x300 is 0x%lx", cpu.csr[0x300]);
-    Log("csr0x305 is 0x%lx", cpu.csr[0x305]);
-    Log("csr0x341 is 0x%lx", cpu.csr[0x341]);
-    Log("csr0x342 is 0x%lx", cpu.csr[0x342]);
+    //Log("csr0x300 is 0x%lx", cpu.csr[0x300]);
+    //Log("csr0x305 is 0x%lx", cpu.csr[0x305]);
+    //Log("csr0x341 is 0x%lx", cpu.csr[0x341]);
+    //Log("csr0x342 is 0x%lx", cpu.csr[0x342]);
     _dut->pc = cpu.pc;
-    Log("pc is 0x%lx", cpu.pc);
+    //Log("pc is 0x%lx", cpu.pc);
   }
 }
 

@@ -23,7 +23,7 @@
 #define mem_end_addr    0x08fffffff
 #define mem_size        mem_end_addr - mem_start_addr + 1
 
-#define print_debug_informations true
+#define print_debug_informations false
 #define generate_dump_wave_file  true
 
 #define difftest_enable true
@@ -1375,7 +1375,7 @@ void sim_one_exec(){
     }
 
     if(top -> io_NPC_PrivStatus == 1){ // In NPCA we set 1 to EBREAK, sim need to be stopped
-        if(nsim_gpr[10].value == 0){
+        if(cpu.gpr[10] == 0){
             printf("\33[1;33m[sim] \33[1;32mHIT GOOD TRAP\33[1;33m at pc 0x%lx\33[0m\n", top -> io_NPC_sendCurrentPC - 4);
         }else{
             printf("\33[1;33m[sim] \33[1;31mHIT BAD  TRAP\33[1;33m at pc 0x%lx\33[0m\n", top -> io_NPC_sendCurrentPC - 4);

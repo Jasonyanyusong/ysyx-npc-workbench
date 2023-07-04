@@ -181,11 +181,15 @@ class npc extends Module{
     npca_WBU.io.WBU_I_CSR_mtvec_readData   := mtvec
     npca_WBU.io.WBU_I_CSR_mcause_readData  := mcause
 
+    npca_WBU.io.WBU_I_csrOperation := npca_IDU.io.IDU_O_csrOperation
+    npca_WBU.io.WBU_I_csrAddr      := npca_IDU.io.IDU_O_csrAddr
+    npca_WBU.io.WBU_I_EXU_CSRWB    := npca_EXU.io.EXU_O_csrWriteBack
+
     // Zicsr Instruction's CSR WriteBack
-    mstatus := Mux((npca_IDU.io.IDU_O_csrOperation =/= opcodes_IDU_csrOps.csr_nope) && (npca_IDU.io.IDU_O_csrAddr === "h300".asUInt), npca_EXU.io.EXU_O_csrWriteBack, mstatus)
-    mepc    := Mux((npca_IDU.io.IDU_O_csrOperation =/= opcodes_IDU_csrOps.csr_nope) && (npca_IDU.io.IDU_O_csrAddr === "h341".asUInt), npca_EXU.io.EXU_O_csrWriteBack, mepc)
-    mtvec   := Mux((npca_IDU.io.IDU_O_csrOperation =/= opcodes_IDU_csrOps.csr_nope) && (npca_IDU.io.IDU_O_csrAddr === "h305".asUInt), npca_EXU.io.EXU_O_csrWriteBack, mtvec)
-    mcause  := Mux((npca_IDU.io.IDU_O_csrOperation =/= opcodes_IDU_csrOps.csr_nope) && (npca_IDU.io.IDU_O_csrAddr === "h342".asUInt), npca_EXU.io.EXU_O_csrWriteBack, mcause)
+    // mstatus := Mux((npca_IDU.io.IDU_O_csrOperation =/= opcodes_IDU_csrOps.csr_nope) && (npca_IDU.io.IDU_O_csrAddr === "h300".asUInt), npca_EXU.io.EXU_O_csrWriteBack, mstatus)
+    // mepc    := Mux((npca_IDU.io.IDU_O_csrOperation =/= opcodes_IDU_csrOps.csr_nope) && (npca_IDU.io.IDU_O_csrAddr === "h341".asUInt), npca_EXU.io.EXU_O_csrWriteBack, mepc)
+    // mtvec   := Mux((npca_IDU.io.IDU_O_csrOperation =/= opcodes_IDU_csrOps.csr_nope) && (npca_IDU.io.IDU_O_csrAddr === "h305".asUInt), npca_EXU.io.EXU_O_csrWriteBack, mtvec)
+    // mcause  := Mux((npca_IDU.io.IDU_O_csrOperation =/= opcodes_IDU_csrOps.csr_nope) && (npca_IDU.io.IDU_O_csrAddr === "h342".asUInt), npca_EXU.io.EXU_O_csrWriteBack, mcause)
 
     // Priv Instruction's CSR WriteBack
     mstatus := Mux(npca_WBU.io.WBU_O_CSR_mstatus_writeEnable, npca_WBU.io.WBU_O_CSR_mstatus_writeData, mstatus)
