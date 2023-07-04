@@ -23,8 +23,8 @@
 #define mem_end_addr    0x08fffffff
 #define mem_size        mem_end_addr - mem_start_addr + 1
 
-#define print_debug_informations false
-#define generate_dump_wave_file  false
+#define print_debug_informations true
+#define generate_dump_wave_file  true
 
 #define difftest_enable true
 
@@ -203,6 +203,7 @@ static Vnpc* top;
 
 typedef struct{
     uint64_t gpr[32];
+    uint64_t csr[4096];
     uint64_t pc = mem_start_addr;
 } riscv64_CPU_State;
 
@@ -1150,6 +1151,7 @@ void diff_difftest_init(long img_size){
         ref_difftest_memcpy(mem_start_addr, mem_guest_to_host(mem_start_addr), img_size, DIFFTEST_TO_REF);
         if(print_debug_informations) {printf("[difftest] copy mem OK\n");}
         ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF); // Need later changes
+        if(print_debug_informations) {printf("[difftest] difftest init OK\n");}
     }else{
         if(print_debug_informations) {printf("[difftest] not enabled, skipping\n");}
         return;
@@ -1184,6 +1186,15 @@ bool diff_difftest_check_reg(){
     for(int i = 0; i < 32; i = i + 1){
         if(cpu.gpr[i] != ref.gpr[i]){
             printf("[difftest] at pc = 0x%lx, gpr x%d different, difftest failed, NSIM's val: 0x%16lx, NEMU's val: 0x%16lx\n", top -> io_NPC_sendCurrentPC - 4, i, cpu.gpr[i], ref.gpr[i]);
+            state_set_state(NSIM_ABORT);
+            //assert(0);
+            return false;
+        }
+    }
+
+    for(int i = 0; i < 4096; i = i + 1){
+        if(cpu.csr[i] != ref.csr[i]){
+            printf("[difftest] at pc = 0x%lx, csr x%x different, difftest failed, NSIM's val: 0x%16lx, NEMU's val: 0x%16lx\n", top -> io_NPC_sendCurrentPC - 4, i, cpu.csr[i], ref.csr[i]);
             state_set_state(NSIM_ABORT);
             //assert(0);
             return false;
@@ -1434,6 +1445,11 @@ void reg_get_reg_from_sim(){
     cpu.gpr[30] = top -> io_NPC_GPR30;
     cpu.gpr[31] = top -> io_NPC_GPR31;
 
+    cpu.csr[0x300] = top -> io_NPC_CSR_mstatus;
+    cpu.csr[0x305] = top -> io_NPC_CSR_mtvec;
+    cpu.csr[0x341] = top -> io_NPC_CSR_mepc;
+    cpu.csr[0x342] = top -> io_NPC_CSR_mcause;
+
     cpu.pc = top -> io_NPC_sendCurrentPC;
     return;
 }
@@ -1453,6 +1469,10 @@ void reg_display(bool sdb_print_regs){
             printf("x%2d = 0x%16lx\t", i, cpu.gpr[i]);
             if((i + 1) % 4 == 0) {printf("\n");}
         }
+        printf("mstatus = 0x%lx\n", top -> io_NPC_CSR_mstatus);
+        printf("mtvec = 0x%lx\n",   top -> io_NPC_CSR_mtvec);
+        printf("mepc = 0x%lx\n",    top -> io_NPC_CSR_mepc);
+        printf("mcause = 0x%lx\n",  top -> io_NPC_CSR_mcause);
         printf("\33[0m");
     }
     return;
@@ -1865,7 +1885,7 @@ void sdb_init_sdb(){
 int main(int argc, char *argv[]){
     if(generate_dump_wave_file == true){
         printf("Do you want to make this computer have no space left?\n");
-        assert(0);
+        //assert(0);
     }
     mem_init_mem();
     device_init_devices();
