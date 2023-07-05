@@ -21,3 +21,9 @@ image: $(IMAGE).elf
 	@$(OBJDUMP) -d $(IMAGE).elf > $(IMAGE).txt
 	@echo + OBJCOPY "->" $(IMAGE_REL).bin
 	@$(OBJCOPY) -S --set-section-flags .bss=alloc,contents -O binary $(IMAGE).elf $(IMAGE).bin
+
+run: image
+    $(MAKE) -C $(NPC_HOME) run IMG=$(IMAGE).bin ELF=$(IMAGE).elf
+
+gbd: image
+    $(MAKE) -C $(NPC_HOME) gdb IMG=$(IMAGE).bin ELF=$(IMAGE).elf
