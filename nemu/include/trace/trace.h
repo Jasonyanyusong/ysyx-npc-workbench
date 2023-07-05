@@ -233,9 +233,27 @@ void ftrace_init(char* ftrace_elf, char* ftrace_das){
     return;
 }
 
-void ftrace_write(uint32_t ftrace_inst, uint64_t ftrace_pc, uint64_t ftrace_dnpc){
+// false means function call
+// true  means function return
+void ftrace_write(bool type, uint64_t ftrace_pc, uint64_t ftrace_dnpc){
     // JAL: function call
     // JALR: function return
+
+    char written_to_ftrace[1024] = {0};
+    for(int i = 0; i < nr_ftrace_function; i = i + 1){
+        if(ftrace_dnpc == ftrace_functions[i].func_startAddr){
+            sprintf(written_to_ftrace, "call @0x%lx -> 0x%lx (%s@[0x%lx, 0x%lx])\n\0", ftrace_pc, ftrace_dnpc, ftrace_functions[i].func_name, ftrace_functions[i].func_startAddr, ftrace_functions[i].func_endAddr);
+        }
+        if(ftrace_dnpc > ftrace_functions[i].func_startAddr && ftrace_dnpc < ftrace_functions[i].func_endAddr){
+            sprintf(written_to_ftrace, "retu @0x%lx -> 0x%lx (%s@[0x%lx, 0x%lx])\n\0", ftrace_pc, ftrace_dnpc, ftrace_functions[i].func_name, ftrace_functions[i].func_startAddr, ftrace_functions[i].func_endAddr);
+        }
+    }
+
+    FILE *ftrace_file = fopen("ftrace.txt", "a+");
+    assert(ftrace_file != NULL);
+    fputs(written_to_ftrace, ftrace_file);
+    fclose(ftrace_file);
+
     return;
 }
 
