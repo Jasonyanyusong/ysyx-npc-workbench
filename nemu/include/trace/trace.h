@@ -3,6 +3,11 @@
 #include<string.h>
 #include<elf.h>
 #include<stdlib.h>
+#include<stdint.h>
+#include<sys/mman.h>
+#include<sys/stat.h>
+#include<common.h>
+#include<fcntl.h>
 
 #include "isa.h"
 
@@ -152,102 +157,83 @@ void rtrace_write(){
     return;
 }
 
-struct ftrace_function{
-    char * ftrace_name;
-    word_t ftrace_start_addr;
-    word_t ftrace_end_addr;
-}ftrace_functions[1024];
+#define nr_ftrace_func 1024
+struct ftrace_function
+{
+    char func_name[256];
+    uint64_t func_startAddr;
+    uint64_t func_endAddr;
+}ftrace_functions[nr_ftrace_func];
 
-word_t ftrace_exec_depth = 0;
-word_t ftrace_exec_count = 0;
-int ftrace_nr_function = 0;
-char ftrace_stringtable[ftrace_nr_stirng_table];
-
-void ftrace_process_elf(char* elf_addr){
-    FILE * elf_file;
-
-    Elf64_Ehdr ftrace_efl_header;
-    elf_file = fopen(elf_addr, "r");
-    assert(elf_file != NULL);
-
-    int ftrace_check_elf = 0;
-    ftrace_check_elf = fread(&ftrace_efl_header, sizeof(ftrace_efl_header), 1, elf_file);
-
-    // Check: decide if we have processed a vaild ELF file
-    assert(ftrace_check_elf != 0);
-    assert(ftrace_efl_header.e_ident[0] == 0x7F);
-    assert(ftrace_efl_header.e_ident[1] == 'E');
-    assert(ftrace_efl_header.e_ident[2] == 'L');
-    assert(ftrace_efl_header.e_ident[3] == 'F');
-    printf("trace: ftrace get vaild ELF file at \"%s\"\n", elf_addr);
-
-    // Process Section Headers using fseek and fread
-    Elf64_Shdr ftrace_elf_section_header[ftrace_elf_nr_Shdr];
-    fseek(elf_file, ftrace_efl_header.e_shoff, SEEK_SET);
-    fread(&ftrace_elf_section_header, ftrace_efl_header.e_shnum, sizeof(Elf64_Shdr), elf_file);
-    fseek(elf_file, ftrace_elf_section_header[ftrace_efl_header.e_shstrndx].sh_size, SEEK_SET);
-    fread(&ftrace_stringtable, ftrace_elf_section_header[ftrace_efl_header.e_shstrndx].sh_size, 1, elf_file);
-
-    // Find which Section header is symtap
-    printf("trace: ftrace ELF Section header: number of header(s) is %d, starting at offset 0x%lx\n", ftrace_efl_header.e_shnum, ftrace_efl_header.e_shoff);
-    int symtap_index = -1;
-    for(int i = 0; i < ftrace_efl_header.e_shnum; i = i + 1){
-        // elf.h defined that SHT_SYMTAP's sh_type is 2
-        if(ftrace_elf_section_header[i].sh_type == 2){
-            symtap_index = i;
-        }
-    }
-    assert(symtap_index > 0);
-    printf("trace: in this elf file, symbole table's index is %d\n", symtap_index);
-
-    // Find which Section header is strtap
-    printf("trace: ftrace ELF Section header: number of header(s) is %d, starting at offset 0x%lx\n", ftrace_efl_header.e_shnum, ftrace_efl_header.e_shoff);
-    int strtap_index = -1;
-    for(int i = 0; i < ftrace_efl_header.e_shnum; i = i + 1){
-        // elf.h defined that SHT_STRTAP's sh_type is 3
-        if(ftrace_elf_section_header[i].sh_type == 3){
-            strtap_index = i;
-        }
-    }
-    assert(strtap_index > 0);
-    printf("trace: in this elf file, string table's index is %d\n", strtap_index);
-
-    // now we know which is the symbole table and the string table, then we need to fetch function name and address
-    char string_array[ftrace_elf_section_header[strtap_index].sh_size];
-    fseek(elf_file, ftrace_elf_section_header[strtap_index].sh_offset, SEEK_SET);
-    fread(&string_array, sizeof(string_array), 1, elf_file);
-
-    Elf64_Xword nr_symbol = ftrace_elf_section_header[symtap_index].sh_size / ftrace_elf_section_header[symtap_index].sh_entsize;
-    printf("ftrace: number of symbol is %ld\n", nr_symbol);
-
-    Elf64_Sym symbol_array[nr_symbol];
-    fseek(elf_file, ftrace_elf_section_header[strtap_index].sh_offset, SEEK_SET);
-    fread(&symbol_array, ftrace_elf_section_header[symtap_index].sh_size, 1, elf_file);
-
-    // All data need for ftrace is initialized, use these datas to init ftrace
-    for(int i = 0; i < nr_symbol; i = i + 1){
-        uint8_t stinfo = symbol_array[i].st_info;
-        printf("trace: at symbol %ld, st_info is 0x%x, process -> 0x%x\n", i, stinfo, ELF64_ST_TYPE(stinfo));
-        if(ELF64_ST_TYPE(stinfo) == STT_FUNC){
-            printf("trace: symbol_array[%d]'s value hold a function\n", i);
-        }
-    }
-    return;
-}
+int nr_ftrace_function = 0;
 
 void ftrace_init(char* ftrace_elf, char* ftrace_das){
     printf("trace: ftrace enabled\n");
     printf("trace: ftrace ELF file is \"%s\"\n", ftrace_elf);
-    //printf("trace: ftrace TXT file is \"%s\"\n", ftrace_das);
     if(remove("ftrace.txt")==0){
         printf("NEMU removed previous ftrace records.\n");
     } // So previous traces will not be recorded
-    // TODO: elf and disassembly file location is parsed here, read ELF and diasm to get location of each function
-    ftrace_process_elf(ftrace_elf);
+
+    assert(ftrace_elf != NULL);
+
+    uint8_t *mem;
+    Elf64_Ehdr *Ehdr; // ELF file header
+    Elf64_Shdr *Shdr; // ELF Section(s)
+    Elf64_Sym  *Sym;  // ELF Symbol(s)
+    char *strtab = NULL;
+
+    int openfile;
+    openfile = open(ftrace_elf, O_RDONLY);
+
+    struct stat st;
+    fstat(openfile, &st);
+
+    mem = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, openfile, 0);
+
+    Ehdr = (Elf64_Ehdr *)mem;
+    Shdr = (Elf64_Shdr *)&mem[Ehdr -> e_shoff];
+    int nr_sectionHeader = Ehdr -> e_shnum;
+
+    uint64_t Sym_total  = -1;
+    uint64_t Sym_single = -1;
+
+    for(int i = 0; i < nr_sectionHeader; i = i + 1){
+        if(Shdr[i].sh_type == SHT_SYMTAB){
+            printf("trace: ftrace find Symbole Table at index %d\n", i);
+            Sym = (Elf64_Sym *)&mem[Shdr[i].sh_offset];
+            Sym_total = Shdr[i].sh_size;
+            assert(Sym_total > 0);
+            Sym_single = Shdr[i].sh_entsize;
+            assert(Sym_single > 0);
+            strtab = (char *)&mem[Shdr[Shdr[i].sh_link].sh_offset];
+            assert(strtab != NULL);
+        }
+    }
+
+    int nr_Sym = -1;
+    nr_Sym = Sym_total / Sym_single;
+    assert(nr_Sym > 0);
+    printf("trace: ftrace get Symbol number is %d\n", nr_Sym);
+
+    for(int i = 0; i < nr_Sym; i = i + 1){
+        if(ELF64_ST_TYPE(Sym[i].st_info) == STT_FUNC){
+            printf("trace: ftrace catch a function at Sym[%d]\n", i);
+            if(i >= nr_ftrace_func){
+                printf("trace: ftrace reach max amount of function record, change in trace.h\n");
+                assert(0);
+            }
+            strcpy(ftrace_functions[nr_ftrace_function].func_name, &strtab[Sym[i].st_name]);
+            ftrace_functions[nr_ftrace_function].func_startAddr = Sym[i].st_value;
+            ftrace_functions[nr_ftrace_function].func_endAddr = Sym[i].st_value + Sym[i].st_size;
+            printf("trace: ftrace find function \"%s\"@[0x%lx, 0x%lx]\n",ftrace_functions[nr_ftrace_function].func_name, ftrace_functions[nr_ftrace_function].func_startAddr, ftrace_functions[nr_ftrace_function].func_endAddr);
+            nr_ftrace_function = nr_ftrace_function + 1;
+        }
+    }
+
     return;
 }
 
-void ftrace_write(uint32_t ftrace_inst, uint64_t ftrace_pc){
+void ftrace_write(uint32_t ftrace_inst, uint64_t ftrace_pc, uint64_t ftrace_dnpc){
     // JAL: function call
     // JALR: function return
     return;
