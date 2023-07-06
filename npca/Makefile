@@ -14,9 +14,9 @@
 # See the Mulan PSL v2 for more details.
 #**************************************************************************************/
 
-CSRC += $(shell find $(abspath ./sim/src) -name "*.cpp")
+CSRC += $(shell find $(abspath ./sim) -name "npca.cpp")
 VSRC += $(shell find $(abspath ./generated/npc) -name "*.v")
-HSRC += $(shell find $(abspath ./sim/src) -name "*.h")
+HSRC += $(shell find $(abspath ./sim) -name "*.h")
 TOP_NAME := npc
 SEARCHPATH := $(NPC_HOME)/generated/npc
 
@@ -27,9 +27,9 @@ VERILATOR_FLAGS += -Wno-lint
 VERILATOR_FLAGS += -Wno-style
 VERILATOR_FLAGS += -Wno-UNUSED
 
-INC_PATH		?= $(NPC_HOME)/sim/include
+INC_PATH		?= $(NPC_HOME)/sim
 CFLAGS			+= -g -I$(INC_PATH)
-LDFLAGS			+= -lreadline -lSDL2
+LDFLAGS			+= -lreadline -lSDL2 -ldl
 
 DIFFTEST		:= $(NEMU_HOME)/build/riscv64-nemu-interpreter-so
 OBJ_DIR			:= ./obj_dir
@@ -44,7 +44,7 @@ NPC_EXEC		:= ${BIN} ${RUN_FLAGS}
 .PHONY:run gdb wave clean
 
 com:${CSRC} ${VSRC}
-	@verilator ${VERILATOR_FLAGS} ${CSRC} ${VSRC} $(addprefix -CFLAGS , $(CFLAGS))
+	@verilator ${VERILATOR_FLAGS} ${CSRC} ${VSRC} $(addprefix -CFLAGS , $(CFLAGS)) -LDFLAGS -lSDL2 -LDFLAGS -lreadline
 
 run:com
 	$(call git_commit, "sim NPC")
