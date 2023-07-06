@@ -24,7 +24,7 @@
 #define mem_size        mem_end_addr - mem_start_addr + 1
 
 #define print_debug_informations false
-#define generate_dump_wave_file  true
+#define generate_dump_wave_file  false
 
 #define difftest_enable true
 
