@@ -15,7 +15,9 @@ Context* __am_irq_handle(Context *c) {
       if(c -> GPR1 == -1){
         ev.event  = EVENT_YIELD;
       }
-      if(c -> GPR1 == 1){
+      else if(c -> GPR1 >= 0 && c -> GPR1 <= 19){
+        // 0: SYS_exit
+        // 19: SYS_gettimeofday
         ev.event  = EVENT_SYSCALL;
       }
       else{
