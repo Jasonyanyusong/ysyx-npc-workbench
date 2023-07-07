@@ -26,7 +26,7 @@
 #include "trace/trace.h"
 #include "npc.h"
 
-static int is_batch_mode = false;
+static int is_batch_mode = true;
 
 void init_regex();
 void init_wp_pool();
