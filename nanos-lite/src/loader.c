@@ -16,9 +16,6 @@
 #endif
 
 static uintptr_t loader(PCB *pcb, const char *filename) {
-  //TODO();
-  //return 0;
-
   // In PA3.2 just treat pcb and filename as NULL
 
   // Read ELF Header
@@ -59,7 +56,8 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
       Log("\tFinished: Clear [VirtAddr + FileSiz, VirtAddr + MemSiz) To 0");
     }
   }
-  //return 0;
+  
+  return Ehdr.e_entry;
 }
 
 void naive_uload(PCB *pcb, const char *filename) {
