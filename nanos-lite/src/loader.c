@@ -42,6 +42,23 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   Elf_Phdr Phdr[Ehdr.e_phnum];
   int Phdr_readSize = ramdisk_read(&Phdr, Ehdr.e_phoff, Ehdr.e_phnum * sizeof(Elf_Phdr));
   Log("Read ELF Function data to Phdr with size %d", Phdr_readSize);
+
+  for(int i = 0; i < Ehdr.e_phnum; i = i + 1){
+    if(Phdr[i].p_type == PT_LOAD){
+      // This is a LOAD segment, so we need to load to memory
+      Log("Phdr[%d] holds a loadable segment", i);
+      Log("\tFile Size = %d", Phdr[i].p_filesz);
+      Log("\tMem  Size = %d", Phdr[i].p_memsz);
+      Log("\tPhys Addr = 0x%x", Phdr[i].p_paddr);
+      Log("\tVirt Size = 0x%x", Phdr[i].p_vaddr);
+
+      ramdisk_read((void *)Phdr[i].p_vaddr, Phdr[i].p_offset, Phdr[i].p_memsz);
+      Log("\tFinished: Write [VirtAddr, VirtAddr + MemSiz) To Memory");
+
+      memset((void *)(Phdr[i].p_vaddr + Phdr[i].p_filesz), 0, Phdr[i].p_memsz - Phdr[i].p_filesz);
+      Log("\tFinished: Clear [VirtAddr + FileSiz, VirtAddr + MemSiz) To 0");
+    }
+  }
   //return 0;
 }
 
