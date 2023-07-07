@@ -27,10 +27,27 @@ enum {
 void do_syscall(Context *c) {
   uintptr_t a[4];
   a[0] = c->GPR1;
+  a[1] = c->GPR2;
+  a[2] = c->GPR3;
+  a[3] = c->GPR4;
 
   switch (a[0]) {
     case SYS_yield: sys_yield(c); break;
-    case SYS_exit:  sys_exit(c); break;
+    case SYS_exit:  sys_exit(c);  break;
+    case SYS_write:{
+      uintptr_t i = 0;
+      if(a[1] == 1 || a[1] == 2){
+        for(; a[3] > 0; a[3] --){
+          putch(((char*)a[2])[i]);
+          i ++;
+        }
+        c->GPRx = i;
+      }
+      else{
+        c->GPRx = -1;
+      }
+      break;
+  }
     default: panic("Unhandled syscall ID = %d", a[0]); break;
   }
 }

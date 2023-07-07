@@ -8,7 +8,7 @@ static Context* do_event(Event e, Context* c) {
       break;
     }
     case EVENT_SYSCALL: {
-      Log("find EVENT_SYSCALL"); 
+      //Log("find EVENT_SYSCALL"); 
       do_syscall(c);
       //c -> mepc = c -> mepc + 4; // set error pc to the next inst using software
       break;
