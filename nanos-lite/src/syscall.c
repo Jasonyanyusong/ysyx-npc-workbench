@@ -30,6 +30,7 @@ void do_syscall(Context *c) {
 
   switch (a[0]) {
     case SYS_yield: sys_yield(c); break;
+    case SYS_exit:  sys_exit(c); break;
     default: panic("Unhandled syscall ID = %d", a[0]); break;
   }
 }
@@ -38,4 +39,9 @@ void sys_yield(Context *c){
   Log("Do SYSCALL: YIELD");
   yield();
   c->GPRx = 0;
+}
+
+void sys_exit(Context *c){
+  Log("Do SYSCALL: EXIT");
+  halt(c->gpr[17]);
 }
