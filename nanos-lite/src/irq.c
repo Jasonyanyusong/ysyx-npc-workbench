@@ -4,13 +4,13 @@ static Context* do_event(Event e, Context* c) {
   switch (e.event) {
     case EVENT_YIELD: {
       Log("find EVENT_YIELD"); 
-      c -> mepc = c -> mepc + 4; // set error pc to the next inst using software
+      // set error pc to the next inst using software
       break;
     }
     case EVENT_SYSCALL: {
       Log("find EVENT_SYSCALL"); 
       do_syscall(c);
-      c -> mepc = c -> mepc + 4; // set error pc to the next inst using software
+      //c -> mepc = c -> mepc + 4; // set error pc to the next inst using software
       break;
     }
     default: panic("Unhandled event ID = %d", e.event);

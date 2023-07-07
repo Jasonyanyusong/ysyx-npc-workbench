@@ -15,11 +15,13 @@ Context* __am_irq_handle(Context *c) {
     if(c -> mcause == 11) {
       if(c -> GPR1 == -1){
         ev.event  = EVENT_YIELD;
+        c -> mepc = c -> mepc + 4;
       }
       else if(c -> GPR1 >= 0 && c -> GPR1 <= 19){
         // 0: SYS_exit
         // 19: SYS_gettimeofday
         ev.event  = EVENT_SYSCALL;
+        c -> mepc = c -> mepc + 4;
       }
       else{
         ev.event = EVENT_ERROR;
