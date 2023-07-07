@@ -1,5 +1,4 @@
 #include <memory.h>
-
 static void *pf = NULL;
 
 void* new_page(size_t nr_page) {
@@ -23,6 +22,7 @@ int mm_brk(uintptr_t brk) {
 
 void init_mm() {
   pf = (void *)ROUNDUP(heap.start, PGSIZE);
+  Log("heap.start %p", &heap.start);
   Log("free physical pages starting from %p", pf);
 
 #ifdef HAS_VME
