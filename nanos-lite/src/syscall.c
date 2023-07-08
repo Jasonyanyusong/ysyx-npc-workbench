@@ -48,6 +48,7 @@ void do_syscall(Context *c) {
       }
       break;
   }
+    case SYS_brk: sys_brk(c); break;
     default: panic("Unhandled syscall ID = %d", a[0]); break;
   }
 }
@@ -61,4 +62,9 @@ void sys_yield(Context *c){
 void sys_exit(Context *c){
   Log("Do SYSCALL: EXIT");
   halt(c->gpr[17]);
+}
+
+void sys_brk(Context *c){
+  Log("Do SYSCALL: BRK");
+  c->GPRx = 0;
 }
