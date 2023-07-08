@@ -103,7 +103,7 @@ endmenu
 menu "RISCV Privileged Settings"
 config RV_Privileged
   bool "Enable RV Priviledged Architecture"
-  default n
+  default y
 config RPS_M
   depends on RV_Privileged
   bool "Support M Mode (Simple embedded systems)"
