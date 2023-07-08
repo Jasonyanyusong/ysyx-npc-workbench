@@ -21,7 +21,7 @@ void init_log(const char *log_file);
 void init_mem();
 void init_difftest(char *ref_so_file, long img_size, int port);
 void init_device();
-void init_sdb(char* trace_ftrace_elf, char* trace_ftrace_diasm);
+void init_sdb(char* trace_ftrace_elf, char* trace_ftrace_diasm, char* trace_ftrace_next_elf);
 void init_disasm(const char *triple);
 
 static void welcome() {
@@ -47,6 +47,7 @@ static char *img_file = NULL;
 static char *elf_file = NULL;
 static char *das_file = NULL;
 static int difftest_port = 1234;
+static char *next_elf = NULL;
 
 static long load_img() {
   if (img_file == NULL) {
@@ -84,10 +85,11 @@ static int parse_args(int argc, char *argv[]) {
     {"help"     , no_argument      , NULL, 'h'},
     {"readelf"  , required_argument, NULL, 'r'},
     {"readdiasm", required_argument, NULL, 'a'},
+    {"nextelf"  , required_argument, NULL, 'n'},
     {0          , 0                , NULL,  0 },
   };
   int o;
-  while ( (o = getopt_long(argc, argv, "-bhl:d:p:r:a:", table, NULL)) != -1) {
+  while ( (o = getopt_long(argc, argv, "-bhl:d:p:r:a:n:", table, NULL)) != -1) {
     switch (o) {
       case 'b': sdb_set_batch_mode(); break;
       case 'p': sscanf(optarg, "%d", &difftest_port); break;
@@ -95,6 +97,7 @@ static int parse_args(int argc, char *argv[]) {
       case 'd': diff_so_file = optarg; printf("diff_so_file = \"%s\"\n", diff_so_file); break;
       case 'r': elf_file = optarg; printf("elf_file = \"%s\"\n", elf_file); break;
       case 'a': das_file = optarg; printf("das_file = \"%s\"\n", das_file); break;
+      case 'n': next_elf = optarg; printf("next_elf = \"%s\"\n", next_elf); break;
       case 1: img_file = optarg; printf("img_file = \"%s\"\n", img_file); return 0;
       default:
         printf("Usage: %s [OPTION...] IMAGE [args]\n\n", argv[0]);
@@ -137,7 +140,7 @@ void init_monitor(int argc, char *argv[]) {
   init_difftest(diff_so_file, img_size, difftest_port);
 
   /* Initialize the simple debugger. */
-  init_sdb(elf_file, das_file);
+  init_sdb(elf_file, das_file, next_elf);
 
 #ifndef CONFIG_ISA_loongarch32r
   IFDEF(CONFIG_ITRACE, init_disasm(

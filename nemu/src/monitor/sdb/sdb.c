@@ -290,7 +290,7 @@ void sdb_mainloop() {
   }
 }
 
-void init_sdb(char* trace_ftrace_elf, char* trace_ftrace_diasm) {
+void init_sdb(char* trace_ftrace_elf, char* trace_ftrace_diasm, char* trace_ftrace_next_elf) {
   /* Compile the regular expressions. */
   init_regex();
 
@@ -298,5 +298,5 @@ void init_sdb(char* trace_ftrace_elf, char* trace_ftrace_diasm) {
   init_wp_pool();
 
   /* Initialize tracers*/
-  trace_init(trace_ftrace_elf, trace_ftrace_diasm);
+  trace_init(trace_ftrace_elf, trace_ftrace_diasm, trace_ftrace_next_elf);
 }

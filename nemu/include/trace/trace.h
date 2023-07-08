@@ -167,7 +167,7 @@ struct ftrace_function
 
 int nr_ftrace_function = 0;
 
-void ftrace_init(char* ftrace_elf, char* ftrace_das){
+void ftrace_init(char* ftrace_elf, char* ftrace_das, char* ftrace_next_elf){
     printf("trace: ftrace enabled\n");
     printf("trace: ftrace ELF file is \"%s\"\n", ftrace_elf);
     if(remove("ftrace.txt")==0){
@@ -225,8 +225,66 @@ void ftrace_init(char* ftrace_elf, char* ftrace_das){
             strcpy(ftrace_functions[nr_ftrace_function].func_name, &strtab[Sym[i].st_name]);
             ftrace_functions[nr_ftrace_function].func_startAddr = Sym[i].st_value;
             ftrace_functions[nr_ftrace_function].func_endAddr = Sym[i].st_value + Sym[i].st_size;
-            printf("trace: ftrace find function \"%s\"@[0x%lx, 0x%lx]\n",ftrace_functions[nr_ftrace_function].func_name, ftrace_functions[nr_ftrace_function].func_startAddr, ftrace_functions[nr_ftrace_function].func_endAddr);
+            printf("trace: ftrace find function \"%s\"@[0x%lx, 0x%lx] in OS/Runtime ELF\n",ftrace_functions[nr_ftrace_function].func_name, ftrace_functions[nr_ftrace_function].func_startAddr, ftrace_functions[nr_ftrace_function].func_endAddr);
             nr_ftrace_function = nr_ftrace_function + 1;
+        }
+    }
+
+    if(open(ftrace_next_elf, O_RDONLY) < 0){
+        printf("trace: ftrace only need to process one ELF file\n");
+    }else{
+        uint8_t *next_mem;
+        Elf64_Ehdr *next_Ehdr; // ELF file header
+        Elf64_Shdr *next_Shdr; // ELF Section(s)
+        Elf64_Sym  *next_Sym;  // ELF Symbol(s)
+        char *next_strtab = NULL;
+
+        int next_openfile;
+        next_openfile = open(ftrace_next_elf, O_RDONLY);
+
+        struct stat next_st;
+        fstat(next_openfile, &next_st);
+
+        next_mem = mmap(NULL, next_st.st_size, PROT_READ, MAP_PRIVATE, next_openfile, 0);
+
+        next_Ehdr = (Elf64_Ehdr *)next_mem;
+        next_Shdr = (Elf64_Shdr *)&next_mem[next_Ehdr -> e_shoff];
+        int next_nr_sectionHeader = next_Ehdr -> e_shnum;
+
+        uint64_t next_Sym_total  = -1;
+        uint64_t next_Sym_single = -1;
+
+        for(int i = 0; i <next_nr_sectionHeader; i = i + 1){
+            if(next_Shdr[i].sh_type == SHT_SYMTAB){
+                printf("trace: ftrace find Symbole Table at index %d\n", i);
+                next_Sym = (Elf64_Sym *)&next_mem[next_Shdr[i].sh_offset];
+                next_Sym_total = next_Shdr[i].sh_size;
+                assert(next_Sym_total > 0);
+                next_Sym_single = next_Shdr[i].sh_entsize;
+                assert(next_Sym_single > 0);
+                next_strtab = (char *)&next_mem[next_Shdr[next_Shdr[i].sh_link].sh_offset];
+                assert(next_strtab != NULL);
+            }
+        }
+
+        int next_nr_Sym = -1;
+        next_nr_Sym = next_Sym_total / next_Sym_single;
+        assert(next_nr_Sym > 0);
+        printf("trace: ftrace get Symbol number is %d\n", next_nr_Sym);
+
+        for(int i = 0; i < next_nr_Sym; i = i + 1){
+            if(ELF64_ST_TYPE(next_Sym[i].st_info) == STT_FUNC){
+                printf("trace: ftrace catch a function at next_Sym[%d]\n", i);
+                if(i >= nr_ftrace_func){
+                    printf("trace: ftrace reach max amount of function record, change in trace.h\n");
+                    assert(0);
+                }
+                strcpy(ftrace_functions[nr_ftrace_function].func_name, &next_strtab[next_Sym[i].st_name]);
+                ftrace_functions[nr_ftrace_function].func_startAddr = next_Sym[i].st_value;
+                ftrace_functions[nr_ftrace_function].func_endAddr = next_Sym[i].st_value + next_Sym[i].st_size;
+                printf("trace: ftrace find function \"%s\"@[0x%lx, 0x%lx] in nanos/navy ELF\n",ftrace_functions[nr_ftrace_function].func_name, ftrace_functions[nr_ftrace_function].func_startAddr, ftrace_functions[nr_ftrace_function].func_endAddr);
+                nr_ftrace_function = nr_ftrace_function + 1;
+            }
         }
     }
 
@@ -257,11 +315,11 @@ void ftrace_write(bool type, uint64_t ftrace_pc, uint64_t ftrace_dnpc){
     return;
 }
 
-void trace_init(char* elf, char* diasm){
+void trace_init(char* elf, char* diasm, char* nextELF){
     IFDEF(CONFIG_InstructionTrace, itrace_init());
     IFDEF(CONFIG_InstructionRingBuffer, iringbuf_init());
     IFDEF(CONFIG_MemoryTrace, mtrace_init());
-    IFDEF(CONFIG_FunctionTrace, ftrace_init(elf, diasm));
+    IFDEF(CONFIG_FunctionTrace, ftrace_init(elf, diasm, nextELF));
     IFDEF(CONFIG_RegisterTrace, rtrace_init());
     IFDEF(CONFIG_DeviceTrace, dtrace_init());
     return;
