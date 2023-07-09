@@ -31,6 +31,19 @@ static Finfo file_table[] __attribute__((used)) = {
 #include "files.h"
 };
 
+int fs_open(const char *pathname, int flags, int mode){
+  int fileTabLen = LENGTH(file_table);
+  Log("Size of file-table is %d", fileTabLen);
+  for(int i = 0; i < fileTabLen; i = i + 1){
+    if(strcmp(pathname, file_table[i].name) == 0){
+      Log("Find file \"%s\" with index %d", file_table[i].name, i);
+      return i;
+    }
+  }
+  // should not reach here
+  panic("No such file in file-table");
+}
+
 void init_fs() {
   // TODO: initialize the size of /dev/fb
 }
