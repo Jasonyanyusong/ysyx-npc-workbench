@@ -50,6 +50,29 @@ int fs_close(int fd){
   return 0;
 }
 
+size_t fs_read(int fd, void *buf, size_t len){
+  assert(fd >= 0);
+
+  // check read will not exceed the boundry of file
+  if(file_table[fd].open_offset + len > file_table[fd].size){
+    size_t old_len = len;
+    len = file_table[fd].size - file_table[fd].open_offset;
+    Log("File No.%d -> %s: read exceed size, reduce read length from %d to %d", fd, file_table[fd].name, old_len, len);
+  }
+
+  // calculate the offset in ramdisk
+  size_t ramdiskOffset = file_table[fd].disk_offset + file_table[fd].open_offset;
+
+  // call ramdisk_read to read, the length of read is ret
+  size_t ret = ramdisk_read(buf, ramdiskOffset, len);
+
+  // add open_offset to how much we read
+  file_table[fd].open_offset = file_table[fd].open_offset + ret;
+
+  // return the read length
+  return ret;
+}
+
 void init_fs() {
   // TODO: initialize the size of /dev/fb
 }
