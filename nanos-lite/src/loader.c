@@ -22,7 +22,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
 
   // open file
   int fileNo = fs_open(filename);
-  
+  assert(fileNo >= 0);
 
   // Read ELF Header using fs_read()
   Elf_Ehdr Ehdr;
