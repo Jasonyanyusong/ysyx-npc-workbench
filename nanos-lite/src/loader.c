@@ -1,5 +1,6 @@
 #include <proc.h>
 #include <elf.h>
+#include <fs.h>
 
 #ifdef __LP64__
 # define Elf_Ehdr Elf64_Ehdr
@@ -44,6 +45,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
 
   Elf_Phdr Phdr[Ehdr.e_phnum];
   //int Phdr_readSize = ramdisk_read(&Phdr, Ehdr.e_phoff, Ehdr.e_phnum * sizeof(Elf_Phdr));
+  fs_lseek(fileNo, Ehdr.e_phoff, SEEK_SET);
   int Phdr_readSize = fs_read(fileNo, Phdr, Ehdr.e_phnum * sizeof(Elf_Phdr));
   Log("Read ELF Function data to Phdr with size %d", Phdr_readSize);
 
@@ -57,6 +59,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
       Log("\tVirt Size = 0x%x", Phdr[i].p_vaddr);
 
       //ramdisk_read((void *)Phdr[i].p_vaddr, Phdr[i].p_offset, Phdr[i].p_memsz);
+      fs_lseek(fileNo, Phdr[i].p_offset, SEEK_SET);
       fs_read(fileNo, (void *)Phdr[i].p_vaddr, Phdr[i].p_memsz);
       Log("\tFinished: Write [VirtAddr, VirtAddr + MemSiz) To Memory");
 
