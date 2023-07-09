@@ -17,11 +17,17 @@
 
 static uintptr_t loader(PCB *pcb, const char *filename) {
   // In PA3.2 just treat pcb and filename as NULL
+  // In PA3.3 need to add fs_open to get the file number and call fs_read to read from ramdisk
 
-  // Read ELF Header
+  // open file
+  int fileNo = fs_open(filename);
+  
+
+  // Read ELF Header using fs_read()
   Elf_Ehdr Ehdr;
   int Ehdr_readSize = -1;
-  Ehdr_readSize = ramdisk_read(&Ehdr, 0, sizeof(Elf_Ehdr));
+  //Ehdr_readSize = ramdisk_read(&Ehdr, 0, sizeof(Elf_Ehdr));
+  Ehdr_readSize = fs_read(fileNo, &Ehdr, sizeof(Elf_Ehdr));
   Log("Read ELF Header with size %d", Ehdr_readSize);
   assert(Ehdr_readSize == sizeof(Elf_Ehdr));
 
@@ -37,7 +43,8 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   Log("Program Header number is %d", Ehdr.e_phnum);
 
   Elf_Phdr Phdr[Ehdr.e_phnum];
-  int Phdr_readSize = ramdisk_read(&Phdr, Ehdr.e_phoff, Ehdr.e_phnum * sizeof(Elf_Phdr));
+  //int Phdr_readSize = ramdisk_read(&Phdr, Ehdr.e_phoff, Ehdr.e_phnum * sizeof(Elf_Phdr));
+  int Phdr_readSize = fs_read(fileNo, Phdr, Ehdr.e_phnum * sizeof(Elf_Phdr));
   Log("Read ELF Function data to Phdr with size %d", Phdr_readSize);
 
   for(int i = 0; i < Ehdr.e_phnum; i = i + 1){
@@ -49,7 +56,8 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
       Log("\tPhys Addr = 0x%x", Phdr[i].p_paddr);
       Log("\tVirt Size = 0x%x", Phdr[i].p_vaddr);
 
-      ramdisk_read((void *)Phdr[i].p_vaddr, Phdr[i].p_offset, Phdr[i].p_memsz);
+      //ramdisk_read((void *)Phdr[i].p_vaddr, Phdr[i].p_offset, Phdr[i].p_memsz);
+      fs_read(fileNo, (void *)Phdr[i].p_vaddr, Phdr[i].p_memsz);
       Log("\tFinished: Write [VirtAddr, VirtAddr + MemSiz) To Memory");
 
       memset((void *)(Phdr[i].p_vaddr + Phdr[i].p_filesz), 0, Phdr[i].p_memsz - Phdr[i].p_filesz);
