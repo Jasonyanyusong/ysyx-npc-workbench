@@ -44,6 +44,11 @@ int fs_open(const char *pathname, int flags, int mode){
   panic("No such file in file-table");
 }
 
+int fs_close(int fd){
+  Log("Close file \"%s\" with fd = %d", file_table[fd].name, fd);
+  return 0;
+}
+
 void init_fs() {
   // TODO: initialize the size of /dev/fb
 }
