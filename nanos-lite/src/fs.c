@@ -73,6 +73,42 @@ size_t fs_read(int fd, void *buf, size_t len){
   return ret;
 }
 
+size_t fs_lseek(int fd, size_t offset, int whence){
+  // SEEK_SET: The file offset is set to offset bytes
+  // SEEK_CUR: The file offset is set to its current location plus offset bytes
+  // SEEK_END: The file offset is set to the size of the file plus offset bytes
+  switch(whence){
+    case SEEK_SET:{
+      size_t oldOffset = file_table[fd].open_offset;
+      file_table[fd].open_offset = offset;
+      Log("File No.%d -> \"%s\": change open_offset %x -> %x (SEEK_SET)", fd, file_table[fd].name, oldOffset, file_table[fd].open_offset);
+      return offset;
+      break;
+    }
+    case SEEK_CUR:{
+      size_t oldOffset = file_table[fd].open_offset;
+      file_table[fd].open_offset = oldOffset + offset;
+      Log("File No.%d -> \"%s\": change open_offset %x -> %x (SEEK_CUR)", fd, file_table[fd].name, oldOffset, file_table[fd].open_offset);
+      return offset;
+      break;
+    }
+    case SEEK_END:{
+      size_t oldOffset = file_table[fd].open_offset;
+      file_table[fd].open_offset = file_table[fd].size + offset;
+      Log("File No.%d -> \"%s\": change open_offset %x -> %x (SEEK_END)", fd, file_table[fd].name, oldOffset, file_table[fd].open_offset);
+      return offset;
+      break;
+    }
+    default: panic("Wrong lseek() operation");
+  }
+  return 0;
+}
+
+size_t fs_write(int fd, const void *buf, size_t len){
+  // TODO
+  return 0;
+}
+
 void init_fs() {
   // TODO: initialize the size of /dev/fb
 }
