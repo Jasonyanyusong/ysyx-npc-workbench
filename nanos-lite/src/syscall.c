@@ -1,29 +1,6 @@
 #include <common.h>
 #include "syscall.h"
 
-enum {
-  SYS_exit,
-  SYS_yield,
-  SYS_open,
-  SYS_read,
-  SYS_write,
-  SYS_kill,
-  SYS_getpid,
-  SYS_close,
-  SYS_lseek,
-  SYS_brk,
-  SYS_fstat,
-  SYS_time,
-  SYS_signal,
-  SYS_execve,
-  SYS_fork,
-  SYS_link,
-  SYS_unlink,
-  SYS_wait,
-  SYS_times,
-  SYS_gettimeofday
-};
-
 void do_syscall(Context *c) {
   uintptr_t a[4];
   a[0] = c->GPR1;
@@ -44,11 +21,15 @@ void do_syscall(Context *c) {
         c->GPRx = i;
       }
       else{
-        c->GPRx = -1;
+        c->GPRx = fs_read(a[1], (void *)a[2], a[3]);
       }
       break;
   }
     case SYS_brk: sys_brk(c); break;
+    case SYS_read: c->GPRx = fs_read(a[1], (void *)a[2], a[3]); break;
+    case SYS_close: c->GPRx = fs_close(a[1]); break;
+    case SYS_lseek: c->GPRx = fs_lseek(a[1], a[2], a[3]); break;
+    case SYS_open: c->GPRx = fs_open((char *)a[1], a[2], a[3]); break;
     default: panic("Unhandled syscall ID = %d", a[0]); break;
   }
 }
