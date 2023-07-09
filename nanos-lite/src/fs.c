@@ -82,21 +82,21 @@ size_t fs_lseek(int fd, size_t offset, int whence){
       size_t oldOffset = file_table[fd].open_offset;
       file_table[fd].open_offset = offset;
       Log("File No.%d -> \"%s\": change open_offset %x -> %x (SEEK_SET)", fd, file_table[fd].name, oldOffset, file_table[fd].open_offset);
-      return offset;
+      return file_table[fd].open_offset;
       break;
     }
     case SEEK_CUR:{
       size_t oldOffset = file_table[fd].open_offset;
       file_table[fd].open_offset = oldOffset + offset;
       Log("File No.%d -> \"%s\": change open_offset %x -> %x (SEEK_CUR)", fd, file_table[fd].name, oldOffset, file_table[fd].open_offset);
-      return offset;
+      return file_table[fd].open_offset;
       break;
     }
     case SEEK_END:{
       size_t oldOffset = file_table[fd].open_offset;
       file_table[fd].open_offset = file_table[fd].size + offset;
       Log("File No.%d -> \"%s\": change open_offset %x -> %x (SEEK_END)", fd, file_table[fd].name, oldOffset, file_table[fd].open_offset);
-      return offset;
+      return file_table[fd].open_offset;
       break;
     }
     default: panic("Wrong lseek() operation");
@@ -105,8 +105,31 @@ size_t fs_lseek(int fd, size_t offset, int whence){
 }
 
 size_t fs_write(int fd, const void *buf, size_t len){
-  // TODO
-  return 0;
+  assert(fd >= 0);
+
+  // check write will not exceed the boundry of file
+  if(file_table[fd].open_offset >= file_table[fd].size){
+    panic("Write file No.%d -> \"%s\" with offset %x exceed size %x", fd, file_table[fd].name, (file_table[fd].open_offset + len), file_table[fd].size);
+    return -1;
+  }
+
+  if(file_table[fd].open_offset + len > file_table[fd].size){
+    size_t old_len = len;
+    len = file_table[fd].size - file_table[fd].open_offset;
+    Log("File No.%d -> %s: read exceed size, reduce read length from %d to %d", fd, file_table[fd].name, old_len, len);
+  }
+
+  // calculate the offset in ramdisk
+  size_t ramdiskOffset = file_table[fd].disk_offset + file_table[fd].open_offset;
+
+  // call ramdisk_write to write, the length of write is ret
+  size_t ret = ramdisk_write(buf, ramdiskOffset, len);
+
+  // add open_offset to how much we write
+  file_table[fd].open_offset = file_table[fd].open_offset + ret;
+
+  // return the write length
+  return ret;
 }
 
 void init_fs() {
