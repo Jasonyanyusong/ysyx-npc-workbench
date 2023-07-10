@@ -1,9 +1,12 @@
 #include <fs.h>
 
+//#define FS_LOG
+
 typedef size_t (*ReadFn) (void *buf, size_t offset, size_t len);
 typedef size_t (*WriteFn) (const void *buf, size_t offset, size_t len);
 
 extern size_t serial_write(const void *buf, size_t offset, size_t len);
+extern size_t events_read(void *buf, size_t offset, size_t len);
 
 typedef struct {
   char *name;
@@ -14,7 +17,7 @@ typedef struct {
   size_t open_offset;
 } Finfo;
 
-enum {FD_STDIN, FD_STDOUT, FD_STDERR, FD_FB};
+enum {FD_STDIN, FD_STDOUT, FD_STDERR, FD_EVENT, FD_FB};
 
 size_t invalid_read(void *buf, size_t offset, size_t len) {
   panic("should not reach here");
@@ -31,15 +34,20 @@ static Finfo file_table[] __attribute__((used)) = {
   [FD_STDIN]  = {"stdin", 0, 0, invalid_read, invalid_write, 0},
   [FD_STDOUT] = {"stdout", 0, 0, invalid_read, serial_write, 0},
   [FD_STDERR] = {"stderr", 0, 0, invalid_read, serial_write, 0},
+  [FD_EVENT]  = {"/dev/events", 0, 0, events_read, invalid_write, 0},
 #include "files.h"
 };
 
 int fs_open(const char *pathname, int flags, int mode){
   int fileTabLen = LENGTH(file_table);
+  #ifdef FS_LOG
   Log("Size of file-table is %d", fileTabLen);
+  #endif
   for(int i = 0; i < fileTabLen; i = i + 1){
     if(strcmp(pathname, file_table[i].name) == 0){
+      #ifdef FS_LOG
       Log("Find file \"%s\" with index %d", file_table[i].name, i);
+      #endif
       return i;
     }
   }
@@ -48,18 +56,28 @@ int fs_open(const char *pathname, int flags, int mode){
 }
 
 int fs_close(int fd){
+  #ifdef FS_LOG
   Log("Close file \"%s\" with fd = %d", file_table[fd].name, fd);
+  #endif
   return 0;
 }
 
 size_t fs_read(int fd, void *buf, size_t len){
   assert(fd >= 0);
 
+  Finfo *file = &file_table[fd];
+
+  if(file->read != NULL){
+    return file->read(buf, 0, len);
+  }
+
   // check read will not exceed the boundry of file
   if(file_table[fd].open_offset + len > file_table[fd].size){
     size_t old_len = len;
     len = file_table[fd].size - file_table[fd].open_offset;
+    #ifdef FS_LOG
     Log("File No.%d -> %s: read exceed size, reduce read length from %d to %d", fd, file_table[fd].name, old_len, len);
+    #endif
   }
 
   // calculate the offset in ramdisk
@@ -83,21 +101,27 @@ size_t fs_lseek(int fd, size_t offset, int whence){
     case SEEK_SET:{
       size_t oldOffset = file_table[fd].open_offset;
       file_table[fd].open_offset = offset;
+      #ifdef FS_LOG
       Log("File No.%d -> \"%s\": change open_offset %x -> %x (SEEK_SET)", fd, file_table[fd].name, oldOffset, file_table[fd].open_offset);
+      #endif
       return file_table[fd].open_offset;
       break;
     }
     case SEEK_CUR:{
       size_t oldOffset = file_table[fd].open_offset;
       file_table[fd].open_offset = oldOffset + offset;
+      #ifdef FS_LOG
       Log("File No.%d -> \"%s\": change open_offset %x -> %x (SEEK_CUR)", fd, file_table[fd].name, oldOffset, file_table[fd].open_offset);
+      #endif
       return file_table[fd].open_offset;
       break;
     }
     case SEEK_END:{
       size_t oldOffset = file_table[fd].open_offset;
       file_table[fd].open_offset = file_table[fd].size + offset;
+      #ifdef FS_LOG
       Log("File No.%d -> \"%s\": change open_offset %x -> %x (SEEK_END)", fd, file_table[fd].name, oldOffset, file_table[fd].open_offset);
+      #endif
       return file_table[fd].open_offset;
       break;
     }
@@ -117,14 +141,18 @@ size_t fs_write(int fd, const void *buf, size_t len){
 
   // check write will not exceed the boundry of file
   if(file_table[fd].open_offset >= file_table[fd].size){
+    #ifdef FS_LOG
     panic("Write file No.%d -> \"%s\" with offset %x exceed size %x", fd, file_table[fd].name, (file_table[fd].open_offset + len), file_table[fd].size);
+    #endif
     return -1;
   }
 
   if(file_table[fd].open_offset + len > file_table[fd].size){
     size_t old_len = len;
     len = file_table[fd].size - file_table[fd].open_offset;
+    #ifdef FS_LOG
     Log("File No.%d -> %s: read exceed size, reduce read length from %d to %d", fd, file_table[fd].name, old_len, len);
+    #endif
   }
 
   // calculate the offset in ramdisk
