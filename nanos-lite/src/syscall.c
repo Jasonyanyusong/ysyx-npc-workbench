@@ -17,6 +17,7 @@ void do_syscall(Context *c) {
     case SYS_close: c->GPRx = fs_close(a[1]); break;
     case SYS_lseek: c->GPRx = fs_lseek(a[1], a[2], a[3]); break;
     case SYS_open: c->GPRx = fs_open((char *)a[1], a[2], a[3]); break;
+    case SYS_gettimeofday: AM_TIMER_UPTIME_T syscallUptime = io_read(AM_TIMER_UPTIME); c->GPRx = syscallUptime.us; break;
     default: panic("Unhandled syscall ID = %d", a[0]); break;
   }
 }
