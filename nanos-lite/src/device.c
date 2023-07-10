@@ -24,6 +24,29 @@ size_t serial_write(const void *buf, size_t offset, size_t len) {
 }
 
 size_t events_read(void *buf, size_t offset, size_t len) {
+  // TODO: change to snprintf when kilb is implemented!
+  //Log("In function");
+  size_t sizeCount = 0;
+  AM_INPUT_KEYBRD_T keyboardData = io_read(AM_INPUT_KEYBRD);
+  if(keyboardData.keycode == 0){
+    //Log("No Keyboard Event");
+    return 0;
+  }
+  switch(keyboardData.keydown){
+    case 1:{
+      // KeyDown
+      //Log("keydown: %d -> \"%s\"", keyboardData.keycode, keyname[keyboardData.keycode]);
+      sprintf((char *)buf, "kd %s", keyname[keyboardData.keycode]);
+      return strlen(buf);
+    }
+    case 0:{
+      // KeyUp
+      //Log("keyup: %d -> \"%s\"", keyboardData.keycode, keyname[keyboardData.keycode]);
+      sprintf((char *)buf, "ku %s", keyname[keyboardData.keycode]);
+      return strlen(buf);
+    }
+    default: assert(0); return -1;
+  }
   return 0;
 }
 
