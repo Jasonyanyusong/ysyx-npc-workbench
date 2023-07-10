@@ -112,7 +112,7 @@ size_t fs_write(int fd, const void *buf, size_t len){
   Finfo *file = &file_table[fd];
 
   if(file->write != NULL){
-    return file->write(fd, buf, len);
+    return file->write(buf, 0, len);
   }
 
   // check write will not exceed the boundry of file
