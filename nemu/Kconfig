@@ -116,6 +116,10 @@ config RPS_U
   depends on RV_Privileged
   bool "Support U Mode (Systems running Unix-like operating systems)"
   default n
+config ShowLogForInterrupt
+  depends on RV_Privileged
+  bool "Print a line of Log if interrupt is raised"
+  default n
 endmenu
 
 menu "Build Options"
