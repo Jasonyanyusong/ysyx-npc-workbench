@@ -8,6 +8,7 @@ typedef size_t (*WriteFn) (const void *buf, size_t offset, size_t len);
 extern size_t serial_write(const void *buf, size_t offset, size_t len);
 extern size_t events_read(void *buf, size_t offset, size_t len);
 extern size_t dispinfo_read(void *buf, size_t offset, size_t len);
+extern size_t fb_write(const void *buf, size_t offset, size_t len);
 
 typedef struct {
   char *name;
@@ -36,7 +37,8 @@ static Finfo file_table[] __attribute__((used)) = {
   [FD_STDOUT] = {"stdout", 0, 0, invalid_read, serial_write, 0},
   [FD_STDERR] = {"stderr", 0, 0, invalid_read, serial_write, 0},
   [FD_EVENT]  = {"/dev/events", 0, 0, events_read, invalid_write, 0},
-  [FD_DISPINFO] = {"/proc/dispinfo", 0, 0, dispinfo_read, invalid_write, 0},  
+  [FD_DISPINFO] = {"/proc/dispinfo", 0, 0, dispinfo_read, invalid_write, 0},
+  [FD_FB] = {"/dev/fb", 0, 0, invalid_read, fb_write, 0},
 #include "files.h"
 };
 
@@ -171,5 +173,9 @@ size_t fs_write(int fd, const void *buf, size_t len){
 }
 
 void init_fs() {
-  // TODO: initialize the size of /dev/fb
+  AM_GPU_CONFIG_T GPUConfig = io_read(AM_GPU_CONFIG);
+  int sizeOfFB = GPUConfig.width * GPUConfig.height * 32; // each pixel is a 32 bit integer!
+  Log("GPU: width = %d, height = %d -> FrameBuffer size = %d", GPUConfig.width, GPUConfig.height, sizeOfFB);
+  file_table[FD_FB].size = sizeOfFB;
+  assert(file_table[FD_FB].size > 0);
 }
