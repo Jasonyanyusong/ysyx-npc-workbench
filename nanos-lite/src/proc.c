@@ -26,7 +26,8 @@ void init_proc() {
 
   // load program here
 
-  naive_uload(NULL, "/bin/bmp-test");
+  naive_uload(NULL, "/bin/fixedptc-test");
+  //naive_uload(NULL, "/bin/bmp-test");
   //naive_uload(NULL, "/bin/event-test");
   //naive_uload(NULL, "/bin/timer-test");
   //naive_uload(NULL, "/bin/file-test");
