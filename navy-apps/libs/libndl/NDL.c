@@ -37,8 +37,10 @@ void NDL_OpenCanvas(int *w, int *h) {
 
   printf("[libndl] width = %d, height = %d\n", screen_w, screen_h);
 
-  *w = screen_w;
-  *h = screen_h;
+  if(*w == 0 || *h == 0){
+    *w = screen_w;
+    *h = screen_h;
+  }
 
 
   if (getenv("NWM_APP")) {
@@ -61,6 +63,14 @@ void NDL_OpenCanvas(int *w, int *h) {
 }
 
 void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
+  printf("[lib-ndl] w = %d, h = %d\n", w, h);
+  int FBFile = open("/dev/fb", 0, 0);
+  for(int i = 0; i < h; i = i + 1){
+    lseek(FBFile, ((y + i) * screen_w + x) * 4, SEEK_SET);
+    //printf("offset = %d\n", ((y + i) * screen_w + x) * 4);
+    write(FBFile, pixels + (w * i), w * 4);
+    //printf("data = %x\n", *(pixels + w * i));
+  }
 }
 
 void NDL_OpenAudio(int freq, int channels, int samples) {

@@ -58,6 +58,27 @@ size_t dispinfo_read(void *buf, size_t offset, size_t len) {
 }
 
 size_t fb_write(const void *buf, size_t offset, size_t len) {
+  AM_GPU_CONFIG_T GPUConfig = io_read(AM_GPU_CONFIG);
+
+  int writeRow = -1;
+  int writeColumn = -1;
+  writeRow    = (offset / 4) / GPUConfig.width;
+  writeColumn = (offset / 4) % GPUConfig.width;
+  //writeColumn = 10;
+  //Log("offset = %d, writeRow = %d, writeColumn = %d, len = %d", offset, writeRow, writeColumn, len);
+
+  AM_GPU_FBDRAW_T frameBuffer;
+  frameBuffer.x = writeColumn;
+  frameBuffer.y = writeRow;
+
+  frameBuffer.pixels = buf;
+  frameBuffer.w = len / 4;
+  frameBuffer.h = 1;
+  frameBuffer.sync = true;
+
+  //Log("x = %d, y = %d, w = %d, h = %d", frameBuffer.x, frameBuffer.y, frameBuffer.w, frameBuffer.h);
+
+  io_write(AM_GPU_FBDRAW, frameBuffer.x, frameBuffer.y, frameBuffer.pixels, frameBuffer.w, frameBuffer.h, frameBuffer.sync);
   return 0;
 }
 

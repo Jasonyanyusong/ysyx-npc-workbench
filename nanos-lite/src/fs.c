@@ -140,7 +140,7 @@ size_t fs_write(int fd, const void *buf, size_t len){
   Finfo *file = &file_table[fd];
 
   if(file->write != NULL){
-    return file->write(buf, 0, len);
+    return file->write(buf, file->open_offset, len);
   }
 
   // check write will not exceed the boundry of file
@@ -174,7 +174,7 @@ size_t fs_write(int fd, const void *buf, size_t len){
 
 void init_fs() {
   AM_GPU_CONFIG_T GPUConfig = io_read(AM_GPU_CONFIG);
-  int sizeOfFB = GPUConfig.width * GPUConfig.height * 32; // each pixel is a 32 bit integer!
+  int sizeOfFB = GPUConfig.width * GPUConfig.height * 4; // each pixel is a 32 bit integer!
   Log("GPU: width = %d, height = %d -> FrameBuffer size = %d", GPUConfig.width, GPUConfig.height, sizeOfFB);
   file_table[FD_FB].size = sizeOfFB;
   assert(file_table[FD_FB].size > 0);
