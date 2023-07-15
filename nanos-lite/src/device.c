@@ -36,13 +36,15 @@ size_t events_read(void *buf, size_t offset, size_t len) {
     case 1:{
       // KeyDown
       //Log("keydown: %d -> \"%s\"", keyboardData.keycode, keyname[keyboardData.keycode]);
-      sprintf((char *)buf, "kd %s", keyname[keyboardData.keycode]);
+      //sprintf((char *)buf, "kd %s", keyname[keyboardData.keycode]);
+      sprintf((char *)buf, "kd %d", keyboardData.keycode);
       return strlen(buf);
     }
     case 0:{
       // KeyUp
       //Log("keyup: %d -> \"%s\"", keyboardData.keycode, keyname[keyboardData.keycode]);
-      sprintf((char *)buf, "ku %s", keyname[keyboardData.keycode]);
+      //sprintf((char *)buf, "ku %s", keyname[keyboardData.keycode]);
+      sprintf((char *)buf, "ku %d", keyboardData.keycode);
       return strlen(buf);
     }
     default: assert(0); return -1;
