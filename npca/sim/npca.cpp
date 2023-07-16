@@ -24,7 +24,7 @@
 #define mem_size        mem_end_addr - mem_start_addr + 1
 
 #define print_debug_informations false
-#define generate_dump_wave_file  false
+//#define generate_dump_wave_file
 
 #define difftest_enable true
 
@@ -1208,12 +1208,18 @@ bool diff_difftest_check_reg(){
 
 void sim_sim_init(){
     printf("\33[1;33m[sim] initializing simulation\33[0m\n");
-    if(generate_dump_wave_file) {contextp = new VerilatedContext;}
-    if(generate_dump_wave_file) {tfp = new VerilatedVcdC;}
+    #ifdef generate_dump_wave_file
+    contextp = new VerilatedContext;
+    tfp = new VerilatedVcdC;
+    #endif
+
     top = new Vnpc;
-    if(generate_dump_wave_file) {contextp -> traceEverOn(true);}
-    if(generate_dump_wave_file) {top -> trace(tfp, 0);}
-    if(generate_dump_wave_file) {tfp -> open("dump.vcd");}
+
+    #ifdef generate_dump_wave_file
+    contextp -> traceEverOn(true);
+    top -> trace(tfp, 0);
+    tfp -> open("dump.vcd");
+    #endif
     printf("\33[1;33m[sim] initialize finished\33[0m\n");
 
     // tell NPC the correct start PC
@@ -1237,7 +1243,11 @@ void sim_sim_init(){
 void sim_sim_exit(){
     printf("\33[1;33m[sim] exit simulation\33[0m\n");
     sim_step_and_dump_wave();
-    if(generate_dump_wave_file) {tfp -> close();}
+
+    #ifdef generate_dump_wave_file
+    tfp -> close();
+    #endif
+
     return;
 }
 
@@ -1403,8 +1413,12 @@ void sim_one_exec(){
 
 void sim_step_and_dump_wave(){
     top -> eval();
-    if(generate_dump_wave_file) {contextp -> timeInc(1);}
-    if(generate_dump_wave_file) {tfp -> dump(contextp -> time());}
+
+    #ifdef generate_dump_wave_file
+    contextp -> timeInc(1);
+    tfp -> dump(contextp -> time());
+    #endif
+
     return;
 }
 
@@ -1883,10 +1897,10 @@ void sdb_init_sdb(){
 
 //========== Main function ==========
 int main(int argc, char *argv[]){
-    if(generate_dump_wave_file == true){
+    #ifdef generate_dump_wave_file
         printf("Do you want to make this computer have no space left?\n");
         //assert(0);
-    }
+    #endif
     mem_init_mem();
     device_init_devices();
     trace_init_trace();

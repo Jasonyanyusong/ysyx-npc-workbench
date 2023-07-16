@@ -22,7 +22,9 @@ SEARCHPATH := $(NPC_HOME)/generated/npc
 
 VERILATOR_FLAGS += -I$(SEARCHPATH)
 VERILATOR_FLAGS += --top $(TOP_NAME)
-VERILATOR_FLAGS += --trace --cc --exe --debug --build
+#Usage: Debug -> GDB, Trace -> wave
+#VERILATOR_FLAGS += --trace --cc --exe --debug --build
+VERILATOR_FLAGS += --cc --exe --build
 VERILATOR_FLAGS += -Wno-lint
 VERILATOR_FLAGS += -Wno-style
 VERILATOR_FLAGS += -Wno-UNUSED
