@@ -4,13 +4,85 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 
 void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect) {
   assert(dst && src);
   assert(dst->format->BitsPerPixel == src->format->BitsPerPixel);
+  printf("[miniSDL-BlitSurface] BitsPerPixel = %d\n", src->format->BitsPerPixel);
+
+  int copyH = -1;
+  int copyW = -1;
+
+  int copySrcX = -1;
+  int copySrcY = -1;
+
+  if(srcrect == NULL){
+    copyH = src -> h;
+    copyW = src -> w;
+    copySrcX = 0;
+    copySrcY = 0;
+  }else{
+    copyH = srcrect -> h;
+    copyW = srcrect -> w;
+    copySrcX = srcrect -> x;
+    copySrcY = srcrect -> y;
+  }
+
+  assert(copyH >= 0);
+  assert(copyW >= 0);
+  assert(copySrcX >= 0);
+  assert(copySrcY >= 0);
+
+  int copyDstX = -1;
+  int copyDstY = -1;
+
+  copyDstX = dstrect -> x;
+  copyDstY = dstrect -> y;
+
+  uint32_t* srcPixels = (uint32_t*)src -> pixels;
+  uint32_t* dstPixels = (uint32_t*)dst -> pixels;
+
+  for(int row = 0; row < copyH; row = row + 1){
+    for(int col = 0; col < copyW; col = col + 1){
+      dstPixels[(copyDstY + row) * (dst -> w) + (copyDstX + col)] = srcPixels[(copySrcY + row) * (src -> w) + (copySrcX + col)];
+    }
+  }
 }
 
 void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
+  printf("[miniSDL-FillRect] dstrect->w = %d, dstrect->h = %d, dstrect->x = %d, dstrect->y = %d, color = 0x%x\n", dstrect -> w, dstrect -> h, dstrect -> x, dstrect -> y, color);
+
+  int fillX = -1;
+  int fillY = -1;
+  int fillW = -1;
+  int fillH = -1;
+
+  if(dstrect == NULL){
+    fillX = 0;
+    fillY = 0;
+    fillW = dst -> w;
+    fillH = dst -> h;
+  }else{
+    fillX = dstrect -> x;
+    fillY = dstrect -> y;
+    fillW = dstrect -> w;
+    fillH = dstrect -> h;
+  }
+
+  assert(fillX >= 0);
+  assert(fillY >= 0);
+  assert(fillW >= 0);
+  assert(fillH >= 0);
+
+  printf("[miniSDL-FillRect] fillX = %d, fillY = %d, fillW = %d, fillH = %d\n", fillX, fillY, fillW, fillH);
+
+  uint32_t* pixels = (uint32_t*)dst->pixels;
+  for(int row = 0; row < fillH; row = row + 1){
+    for(int col = 0; col < fillW; col = col + 1){
+      pixels[((fillY + row) * (dst->w)) + (fillX + col)] = color;
+    }
+  }
 }
 
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
