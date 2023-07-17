@@ -64,11 +64,12 @@ static void prev() {
 }
 
 static void clear_display(void) {
+  printf("[menu] call SDL_FillRect\n");
   SDL_FillRect(screen, NULL, 0xffffff);
 }
 
 int main(int argc, char *argv[], char *envp[]) {
-  printf("[menu] staring");
+  printf("[menu] staring\n");
   SDL_Init(0);
   screen = SDL_SetVideoMode(0, 0, 32, SDL_HWSURFACE);
 
@@ -78,7 +79,9 @@ int main(int argc, char *argv[], char *envp[]) {
   set_i_max();
 
   while (1) {
+    printf("[menu] before display menu\n");
     display_menu(i_max);
+    printf("[menu] adter display menu\n");
 
     SDL_Event e;
     do {
@@ -141,6 +144,7 @@ static void draw_text_row(char *s, int r) {
 }
 
 static void display_menu(int n) {
+  printf("[menu] clear display\n");
   clear_display();
   SDL_Rect rect = { .x = screen->w - logo_sf->w, .y = 0 };
   SDL_BlitSurface(logo_sf, NULL, screen, &rect);
