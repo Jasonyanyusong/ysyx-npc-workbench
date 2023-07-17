@@ -38,10 +38,20 @@ const char *rvint_regs_alias[] = {
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
   for(int integer_register_index = 0; integer_register_index < 32; integer_register_index = integer_register_index + 1)
   {
-    if((unsigned)cpu.gpr[integer_register_index] != (unsigned)ref_r -> gpr[integer_register_index])
+    if(cpu.gpr[integer_register_index] != ref_r -> gpr[integer_register_index])
     {
       //isa_print_regcompare(*ref_r, pc, integer_register_index);
       printf("PC = 0x%lx, Difftest Reg Compare failed at GPR[%d], Difftest Get 0x%lx, NEMU Get 0x%lx\n", cpu.pc, integer_register_index, ref_r -> gpr[integer_register_index], cpu.gpr[integer_register_index]);
+      /*printf("NEMU -> ");
+      for(int i = 63; i >= 0; i = i - 1){
+        printf("%1d", BITS(cpu.gpr[integer_register_index], i, i));
+      }
+      printf("\n");
+      printf("REFR -> ");
+      for(int i = 63; i >= 0; i = i - 1){
+        printf("%1d", BITS(ref_r -> gpr[integer_register_index], i, i));
+      }
+      printf("\n");*/
       return false;
     }
   }

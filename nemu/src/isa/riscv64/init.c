@@ -40,7 +40,9 @@ static void restart() {
   cpu.gpr[0] = 0;
 
   IFDEF(CONFIG_RV_Privileged, cpu.csr[0x300] = 0xa00001800); // initialize mstatus to 0xa00001800
+  #ifdef CONFIG_RV_Privileged
   Log("csr0x300 is 0x%lx", cpu.csr[0x300]);
+  #endif
 }
 
 void init_isa() {

@@ -32,15 +32,18 @@ void difftest_regcpy(void *dut, bool direction) {
     for(int i = 0; i < 32; i = i + 1){
       cpu.gpr[i] = _dut->gpr[i];
     }
+    #ifdef CONFIG_RV_Privileged
     for(int i = 0; i < 4096; i = i + 1){
       cpu.csr[i] = _dut->csr[i];
     }
+    #endif
     cpu.pc = _dut->pc;
   }else{
     for(int i = 0; i < 32; i = i + 1){
       _dut->gpr[i] = cpu.gpr[i];
       //Log("gpr x%d is 0x%lx", i, cpu.gpr[i]);
     }
+    #ifdef CONFIG_RV_Privileged
     for(int i = 0; i < 4096; i = i + 1){
       _dut->csr[i] = cpu.csr[i];
     }
@@ -49,6 +52,7 @@ void difftest_regcpy(void *dut, bool direction) {
     //Log("csr0x305 is 0x%lx", cpu.csr[0x305]);
     //Log("csr0x341 is 0x%lx", cpu.csr[0x341]);
     //Log("csr0x342 is 0x%lx", cpu.csr[0x342]);
+    #endif
     _dut->pc = cpu.pc;
     //Log("pc is 0x%lx", cpu.pc);
   }
