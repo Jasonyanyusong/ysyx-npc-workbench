@@ -53,9 +53,9 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
 void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
 
   if(dstrect != NULL){
-    printf("[miniSDL-FillRect] dstrect->w = %d, dstrect->h = %d, dstrect->x = %d, dstrect->y = %d, color = 0x%x\n", dstrect -> w, dstrect -> h, dstrect -> x, dstrect -> y, color);
+    //printf("[miniSDL-FillRect] dstrect->w = %d, dstrect->h = %d, dstrect->x = %d, dstrect->y = %d, color = 0x%x\n", dstrect -> w, dstrect -> h, dstrect -> x, dstrect -> y, color);
   }else{
-    printf("[miniSDL-FillRect] dstrect is NULL, color = 0x%x\n", color);
+    //printf("[miniSDL-FillRect] dstrect is NULL, color = 0x%x\n", color);
   }
 
   int fillX = -1;
@@ -91,10 +91,10 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
 }
 
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
-  printf("[miniSDL] x = %d, y = %d, w = %d, h = %d\n", x, y, w, h);
+  //printf("[miniSDL] x = %d, y = %d, w = %d, h = %d\n", x, y, w, h);
   //assert(0);
   NDL_DrawRect((uint32_t *)s->pixels, x, y, s->w, s->h);
-  printf("[miniSDL] x = %d, y = %d, s->w = %d, s->h = %d\n", x, y, s->w, s->h);
+  //printf("[miniSDL] x = %d, y = %d, s->w = %d, s->h = %d\n", x, y, s->w, s->h);
 }
 
 // APIs below are already implemented.
