@@ -9,7 +9,7 @@
 void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect) {
   assert(dst && src);
   assert(dst->format->BitsPerPixel == src->format->BitsPerPixel);
-  printf("[miniSDL-BlitSurface] BitsPerPixel = %d\n", src->format->BitsPerPixel);
+  //printf("[miniSDL-BlitSurface] BitsPerPixel = %d\n", src->format->BitsPerPixel);
 
   int copyH = -1;
   int copyW = -1;
@@ -51,7 +51,12 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
 }
 
 void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
-  printf("[miniSDL-FillRect] dstrect->w = %d, dstrect->h = %d, dstrect->x = %d, dstrect->y = %d, color = 0x%x\n", dstrect -> w, dstrect -> h, dstrect -> x, dstrect -> y, color);
+
+  if(dstrect != NULL){
+    printf("[miniSDL-FillRect] dstrect->w = %d, dstrect->h = %d, dstrect->x = %d, dstrect->y = %d, color = 0x%x\n", dstrect -> w, dstrect -> h, dstrect -> x, dstrect -> y, color);
+  }else{
+    printf("[miniSDL-FillRect] dstrect is NULL, color = 0x%x\n", color);
+  }
 
   int fillX = -1;
   int fillY = -1;
