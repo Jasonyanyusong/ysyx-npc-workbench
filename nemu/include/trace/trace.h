@@ -27,7 +27,7 @@ void itrace_init(){
 void itrace_write(char* messageWrite){
     FILE *itrace_file = fopen("itrace.txt", "a+");
     assert(itrace_file != NULL);
-    printf("trace-itrace: %s", messageWrite);
+    //printf("trace-itrace: %s", messageWrite);
     fputs(messageWrite, itrace_file);
     fclose(itrace_file);
     return;
@@ -46,7 +46,7 @@ void etrace_write(uint64_t mstatus, uint64_t mtvec, uint64_t mepc, uint64_t mcau
     assert(etrace_file != NULL);
     char etrace_msg[128];
     sprintf(etrace_msg, "pc: 0x%lx, mstatus: 0x%lx, mtvec: 0x%lx, mepc: 0x%lx, mcause: 0x%lx\n\0", cpu.pc, mstatus, mtvec, mepc, mcause);
-    printf("trace-etrace: %s", etrace_msg);
+    //printf("trace-etrace: %s", etrace_msg);
     fputs(etrace_msg, etrace_file);
     fclose(etrace_file);
     return;
@@ -71,7 +71,7 @@ void dtrace_write(uint64_t dtrace_pc, char* dtrace_device_name, uint64_t dtrace_
         sprintf(mtrace_to_be_written, "pc: 0x%lx, mmio_R, name = \"%s\", addr = 0x%lx, len = %d, data = 0x%lx\n", cpu.pc, dtrace_device_name, dtrace_addr, dtrace_len, dtrace_data);
     }
 
-    printf("trace-dtrace: %s", mtrace_to_be_written);
+    //printf("trace-dtrace: %s", mtrace_to_be_written);
     fputs(mtrace_to_be_written, dtrace_file);
     fclose(dtrace_file);
     return;
@@ -106,7 +106,7 @@ void mtrace_write(bool mem_RW, word_t addr, int mem_len, word_t mem_data){
     char written_to_mtrace[128];
     if(mem_RW){
         sprintf(written_to_mtrace, "pc: 0x%lx  mem_w  addr: 0x%lx  len: %d  data: 0x%lx\n", cpu.pc, addr, mem_len, mem_data);
-        printf("trace-mtrace: %s", written_to_mtrace);
+        //printf("trace-mtrace: %s", written_to_mtrace);
         FILE *mtrace_file = fopen("mtrace.txt", "a+");
         assert(mtrace_file != NULL);
         fputs(written_to_mtrace, mtrace_file);
@@ -114,7 +114,7 @@ void mtrace_write(bool mem_RW, word_t addr, int mem_len, word_t mem_data){
     }
     else{
         sprintf(written_to_mtrace, "pc: 0x%lx  mem_r  addr: 0x%lx  len: %d  data: 0x%lx\n", cpu.pc, addr, mem_len, mem_data);
-        printf("trace-mtrace: %s", written_to_mtrace);
+        //printf("trace-mtrace: %s", written_to_mtrace);
         FILE *mtrace_file = fopen("mtrace.txt", "a+");
         assert(mtrace_file != NULL);
         fputs(written_to_mtrace, mtrace_file);
@@ -149,7 +149,7 @@ void rtrace_write(){
         strcat(written_to_rtrace, rtrace_gpr_msg);
     }
     strcat(written_to_rtrace, "\n\0");
-    printf("\n\n%s\n\n", written_to_rtrace);
+    //printf("\n\n%s\n\n", written_to_rtrace);
     FILE *rtrace_file = fopen("rtrace.txt", "a+");
     assert(rtrace_file != NULL);
     fputs(written_to_rtrace, rtrace_file);
