@@ -70,11 +70,16 @@ int strncmp(const char *s1, const char *s2, size_t n) {
 }
 
 void *memset(void *s, int c, size_t n) {
-  char * chars = (char *) s;
+  /*char * chars = (char *) s;
   while(n-- > 0){
     if(*chars != '\0'){
       *chars++ = c;
     }
+  }
+  return s;*/
+  unsigned char *p = (unsigned char *)s;
+  for(size_t i = 0; i < n; i = i + 1){
+    *(p + i) = c;
   }
   return s;
 }
