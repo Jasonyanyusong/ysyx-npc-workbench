@@ -1,6 +1,8 @@
 #include <common.h>
 #include "syscall.h"
 
+//#define SYSCALL_LOG
+
 void do_syscall(Context *c) {
   uintptr_t a[4];
   a[0] = c->GPR1;
@@ -23,17 +25,23 @@ void do_syscall(Context *c) {
 }
 
 void sys_yield(Context *c){
+  #ifdef SYSCALL_LOG
   Log("Do SYSCALL: YIELD");
+  #endif
   yield();
   c->GPRx = 0;
 }
 
 void sys_exit(Context *c){
+  #ifdef SYSCALL_LOG
   Log("Do SYSCALL: EXIT");
+  #endif
   halt(c->gpr[17]);
 }
 
 void sys_brk(Context *c){
+  #ifdef SYSCALL_LOG
   Log("Do SYSCALL: BRK");
+  #endif
   c->GPRx = 0;
 }
