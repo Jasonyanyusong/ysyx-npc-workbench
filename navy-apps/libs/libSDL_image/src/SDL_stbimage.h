@@ -191,13 +191,17 @@ SDL_STBIMG_DEF SDL_Surface* STBIMG_LoadFromMemory(const unsigned char* buffer, i
 	SDL_Surface* ret = NULL;
 	int origin_has_alpha;
 
+	//printf("Enter STBIMG_LoadFromMemory function\n");
+
 	if(buffer == NULL)
 	{
+		//printf("STBIMG_LoadFromMemory(): passed buffer was NULL!\n");
 		SDL_SetError("STBIMG_LoadFromMemory(): passed buffer was NULL!");
 		return NULL;
 	}
 	if(length <= 0)
 	{
+		//printf("STBIMG_LoadFromMemory(): passed invalid length: %d!\n", length);
 		SDL_SetError("STBIMG_LoadFromMemory(): passed invalid length: %d!", length);
 		return NULL;
 	}
@@ -205,6 +209,7 @@ SDL_STBIMG_DEF SDL_Surface* STBIMG_LoadFromMemory(const unsigned char* buffer, i
 	inforet = stbi_info_from_memory(buffer, length, &img.w, &img.h, &img.format);
 	if(!inforet)
 	{
+		//printf("STBIMG_LoadFromMemory(): Couldn't get image info: %s!\n", stbi_failure_reason());
 		SDL_SetError("STBIMG_LoadFromMemory(): Couldn't get image info: %s!\n", stbi_failure_reason());
 		return NULL;
 	}
