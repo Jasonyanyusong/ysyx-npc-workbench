@@ -124,6 +124,7 @@ libs:
 $(APP): $(OBJS) libs
 	@echo + LD "->" $(shell realpath $@ --relative-to .)
 	@$(LD) $(LDFLAGS) -o $@ $(WL)--start-group $(LINKAGE) $(WL)--end-group
+	@$(LD) $(LDFLAGS) -o $(APP).elf --start-group $(LINKAGE) --end-group
 	@$(OBJDUMP) -d $(APP) > $(APP).txt
 
 ### Rule (archive): objects (`*.o`) -> `ARCHIVE.a` (ar)
@@ -168,7 +169,7 @@ $(CLEAN_ALL):
 .PHONY: clean-all $(CLEAN_ALL)
 
 ### Build fsimg and ramdisk for Nanos-lite
-APPS = nslider nterm menu
+APPS = nslider nterm menu bird pal
 TESTS = dummy hello file-test timer-test event-test bmp-test fixedptc-test
 
 fsimg: $(addprefix apps/, $(APPS)) $(addprefix tests/, $(TESTS))
