@@ -60,7 +60,7 @@ size_t dispinfo_read(void *buf, size_t offset, size_t len) {
 }
 
 size_t fb_write(const void *buf, size_t offset, size_t len) {
-  AM_GPU_CONFIG_T GPUConfig = io_read(AM_GPU_CONFIG);
+  /*AM_GPU_CONFIG_T GPUConfig = io_read(AM_GPU_CONFIG);
 
   int writeRow = -1;
   int writeColumn = -1;
@@ -81,6 +81,23 @@ size_t fb_write(const void *buf, size_t offset, size_t len) {
   //Log("x = %d, y = %d, w = %d, h = %d", frameBuffer.x, frameBuffer.y, frameBuffer.w, frameBuffer.h);
 
   io_write(AM_GPU_FBDRAW, frameBuffer.x, frameBuffer.y, frameBuffer.pixels, frameBuffer.w, frameBuffer.h, frameBuffer.sync);
+  return 0;*/
+
+
+  AM_GPU_CONFIG_T HighPerformanceGPUConfig = io_read(AM_GPU_CONFIG);
+
+  AM_GPU_FBDRAW_T HighPerformanceFrameBuffer;
+  HighPerformanceFrameBuffer.pixels = (void *)buf;
+  HighPerformanceFrameBuffer.sync = true;
+
+  HighPerformanceFrameBuffer.x = offset % HighPerformanceGPUConfig.width;
+  HighPerformanceFrameBuffer.y = offset / HighPerformanceGPUConfig.width;
+  HighPerformanceFrameBuffer.w = len >> 32;
+  HighPerformanceFrameBuffer.h = len & 0x00000000FFFFFFFF;
+
+  io_write(AM_GPU_FBDRAW, HighPerformanceFrameBuffer.x, HighPerformanceFrameBuffer.y,\
+   HighPerformanceFrameBuffer.pixels, HighPerformanceFrameBuffer.w, HighPerformanceFrameBuffer.h, HighPerformanceFrameBuffer.sync);
+
   return 0;
 }
 
