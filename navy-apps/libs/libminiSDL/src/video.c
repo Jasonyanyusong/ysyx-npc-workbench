@@ -40,14 +40,30 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
   copyDstX = dstrect -> x;
   copyDstY = dstrect -> y;
 
-  uint32_t* srcPixels = (uint32_t*)src -> pixels;
-  uint32_t* dstPixels = (uint32_t*)dst -> pixels;
+  if(src->format->BitsPerPixel == 32){
+    uint32_t* srcPixels = (uint32_t*)src -> pixels;
+    uint32_t* dstPixels = (uint32_t*)dst -> pixels;
 
-  for(int row = 0; row < copyH; row = row + 1){
-    for(int col = 0; col < copyW; col = col + 1){
-      dstPixels[(copyDstY + row) * (dst -> w) + (copyDstX + col)] = srcPixels[(copySrcY + row) * (src -> w) + (copySrcX + col)];
+    for(int row = 0; row < copyH; row = row + 1){
+      for(int col = 0; col < copyW; col = col + 1){
+        dstPixels[(copyDstY + row) * (dst -> w) + (copyDstX + col)] = srcPixels[(copySrcY + row) * (src -> w) + (copySrcX + col)];
+      }
     }
+    return;
   }
+
+  if(src->format->BitsPerPixel == 8){
+    //dst->format->BitsPerPixel = 8;
+    for(int row = 0; row < copyH; row = row + 1){
+      for(int col = 0; col < copyW; col = col + 1){
+        dst -> pixels[(copyDstY + row) * (dst -> w) + (copyDstX + col)] = src -> pixels[(copySrcY + row) * (src -> w) + (copySrcX + col)];
+      }
+    }
+    return;
+  }
+
+  printf("[miniSDL-video] format error (BitsPerPixel)\n");
+  assert(0);
 }
 
 void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
@@ -93,7 +109,35 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
   //printf("[miniSDL] x = %d, y = %d, w = %d, h = %d\n", x, y, w, h);
   //assert(0);
-  NDL_DrawRect((uint32_t *)s->pixels, x, y, s->w, s->h);
+  printf("[miniSDL=video] s -> format -> BitsPerPixel = %d\n", s -> format -> BitsPerPixel);
+  if(x == 0 && y == 0 && w == 0 && h == 0){
+    x = 0;
+    y = 0;
+    w = s -> w;
+    h = s -> h;
+  }
+
+  if(s -> format -> BitsPerPixel == 32){
+    NDL_DrawRect((uint32_t *)s->pixels, x, y, w, h);
+    return;
+  }
+
+  if(s -> format -> BitsPerPixel == 8){
+    int numPixels = w * h;
+    uint32_t* pixels = (uint32_t *)malloc(4 * numPixels);
+    for(int i = 0; i < numPixels; i = i + 1){
+      SDL_Color thisPixel = s -> format -> palette -> colors[s -> pixels[i]];
+      pixels[i] = ((uint32_t)thisPixel.a << 24) | ((uint32_t)thisPixel.r << 16) | ((uint32_t)thisPixel.g << 8) | ((uint32_t)thisPixel.b);
+      printf("colors index = 0x%x -> color = 0x%8x\n", s -> pixels[i], pixels[i]);
+    }
+    NDL_DrawRect(pixels, x, y, w, h);
+    free(pixels);
+    return;
+  }
+
+  printf("[miniSDL-video] format error (BitsPerPixel)\n");
+  assert(0);
+  
   //printf("[miniSDL] x = %d, y = %d, s->w = %d, s->h = %d\n", x, y, s->w, s->h);
 }
 
