@@ -65,12 +65,16 @@ void NDL_OpenCanvas(int *w, int *h) {
 void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
   //printf("[lib-ndl] w = %d, h = %d\n", w, h);
   int FBFile = open("/dev/fb", 0, 0);
-  for(int i = 0; i < h; i = i + 1){
+  /*for(int i = 0; i < h; i = i + 1){
     lseek(FBFile, ((y + i) * screen_w + x) * 4, SEEK_SET);
     //printf("offset = %d\n", ((y + i) * screen_w + x) * 4);
     write(FBFile, pixels + (w * i), w * 4);
     //printf("data = %x\n", *(pixels + w * i));
-  }
+  }*/
+
+  lseek(FBFile, (x * y), SEEK_SET);
+  write(FBFile, pixels, ((w << 32) | (h & 0xFFFFFFFF)));
+  close(FBFile);
 }
 
 void NDL_OpenAudio(int freq, int channels, int samples) {
