@@ -1,8 +1,10 @@
 #include <NDL.h>
 #include <sdl-timer.h>
 #include <stdio.h>
+#include <assert.h>
 
 SDL_TimerID SDL_AddTimer(uint32_t interval, SDL_NewTimerCallback callback, void *param) {
+  assert(0);
   return NULL;
 }
 
