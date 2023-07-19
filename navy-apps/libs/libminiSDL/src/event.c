@@ -3,12 +3,16 @@
 #include <assert.h>
 #include <string.h>
 
+#define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
+
 #define keyname(k) #k,
 
 static const char *keyname[] = {
   "NONE",
   _KEYS(keyname)
 };
+
+uint8_t keystates [ARRLEN(keyname)];
 
 int SDL_PushEvent(SDL_Event *ev) {
   return 0;
@@ -32,10 +36,12 @@ int SDL_PollEvent(SDL_Event *ev) {
       //printf("[miniSDL-event: PollEvent] KEYDOWN, keycode = %d\n", keyCode);
       ev -> type = SDL_KEYDOWN;
       ev -> key.keysym.sym = keyCode;
+      keystates[keyCode] = 1;
     }else if(strcmp(keyType, "ku") == 0){
       //printf("[miniSDL-event: PollEvent] KEY UP , keycode = %d\n", keyCode);
       ev -> type = SDL_KEYUP;
       ev -> key.keysym.sym = keyCode;
+      keystates[keyCode] = 0;
     }else{
       assert(0); // should not reach here!
     }
@@ -45,7 +51,7 @@ int SDL_PollEvent(SDL_Event *ev) {
 }
 
 int SDL_WaitEvent(SDL_Event *event) {
-  char buf[64];
+  /*char buf[64];
   if (NDL_PollEvent(buf, sizeof(buf))) {
     printf("receive event: %s\n", buf);
     char keyType[3];
@@ -64,13 +70,19 @@ int SDL_WaitEvent(SDL_Event *event) {
       assert(0); // should not reach here!
     }
   }
+  return 1;*/
+  while (SDL_PollEvent(event) == 1);
   return 1;
 }
 
 int SDL_PeepEvents(SDL_Event *ev, int numevents, int action, uint32_t mask) {
+  assert(0);
   return 0;
 }
 
 uint8_t* SDL_GetKeyState(int *numkeys) {
-  return NULL;
+  if(numkeys != NULL){
+    *numkeys = ARRLEN(keyname);
+  }
+  return keystates;
 }
