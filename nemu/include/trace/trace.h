@@ -157,7 +157,7 @@ void rtrace_write(){
     return;
 }
 
-#define nr_ftrace_func 1024
+#define nr_ftrace_func 4096
 struct ftrace_function
 {
     char func_name[256];
@@ -166,6 +166,7 @@ struct ftrace_function
 }ftrace_functions[nr_ftrace_func];
 
 int nr_ftrace_function = 0;
+int ftrace_depth = 0;
 
 void ftrace_init(char* ftrace_elf, char* ftrace_das, char* ftrace_next_elf){
     printf("trace: ftrace enabled\n");
