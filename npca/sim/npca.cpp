@@ -26,7 +26,7 @@
 #define print_debug_informations false
 //#define generate_dump_wave_file
 
-#define difftest_enable true
+#define difftest_enable false
 
 #define device_have_serial   true
 #define device_have_rtc      true
