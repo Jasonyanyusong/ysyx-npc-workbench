@@ -114,7 +114,7 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
   //printf("[miniSDL] x = %d, y = %d, w = %d, h = %d\n", x, y, w, h);
   //assert(0);
-  //printf("[miniSDL=video] s -> format -> BitsPerPixel = %d\n", s -> format -> BitsPerPixel);
+  //printf("[miniSDL-video] s -> format -> BitsPerPixel = %d\n", s -> format -> BitsPerPixel);
   if(x == 0 && y == 0 && w == 0 && h == 0){
     x = 0;
     y = 0;
@@ -129,6 +129,7 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
 
   if(s -> format -> BitsPerPixel == 8){
     int numPixels = w * h;
+    //printf("numPixels = %d\n", numPixels);
     uint32_t* pixels = (uint32_t *)malloc(4 * numPixels);
     for(int i = 0; i < numPixels; i = i + 1){
       SDL_Color thisPixel = s -> format -> palette -> colors[s -> pixels[i]];
