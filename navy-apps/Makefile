@@ -124,7 +124,7 @@ libs:
 $(APP): $(OBJS) libs
 	@echo + LD "->" $(shell realpath $@ --relative-to .)
 	@$(LD) $(LDFLAGS) -o $@ $(WL)--start-group $(LINKAGE) $(WL)--end-group
-	@$(LD) $(LDFLAGS) -o $(APP).elf --start-group $(LINKAGE) --end-group
+	@$(LD) $(LDFLAGS) -o $(APP).elf $(WL)--start-group $(LINKAGE) $(WL)--end-group
 	@$(OBJDUMP) -d $(APP) > $(APP).txt
 
 ### Rule (archive): objects (`*.o`) -> `ARCHIVE.a` (ar)
