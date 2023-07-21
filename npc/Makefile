@@ -30,7 +30,8 @@ VERILATOR_FLAGS += -Wno-style
 VERILATOR_FLAGS += -Wno-UNUSED
 
 INC_PATH		?= $(NPC_HOME)/sim
-CFLAGS			+= -g -I$(INC_PATH)
+#CFLAGS			+= -g -I$(INC_PATH)
+CFLAGS			+= -I$(INC_PATH)
 LDFLAGS			+= -lreadline -lSDL2 -ldl
 
 DIFFTEST		:= $(NEMU_HOME)/build/riscv64-nemu-interpreter-so
