@@ -43,6 +43,7 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
   for(int j = 0; j < h; j = j + 1){
     for(int i = 0; i < w; i = i + 1){
       fb[(y + j) * am_gpu_width + (x + i)] = *(pixels + j * w + i);
+      //outl(FB_ADDR + ((y + j) * am_gpu_width + x + i) * 4, *pixels++);
     }
   }
   if (ctl->sync) {
