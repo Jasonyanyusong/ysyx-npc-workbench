@@ -23,21 +23,27 @@ object iFetchInternal extends Bundle{
     val oInstData = Output(UInt(InstWidth.W))
 }
 
-object iFetchExternal extends Bundle{
+/*object iFetchExternal extends Bundle{
     val iPC = Input(UInt(AddrWidth.W))
     val iInst = Input(UInt(InstWidth.W))
     val oPC = Input(UInt(AddrWidth.W))
     val oInst = Input(UInt(InstWidth.W))
-}
+}*/
 
 class IFU extends Module{
     val ioInternal = IO(new iFetchInternal)
-    val ioExternal = IO(new iFetchExternal)
+    //val ioExternal = IO(new iFetchExternal)
 
-    def iFetch(addr: UInt(AddrWidth.W))
+    val ioExternalAR = IO(new AXIMasterAR)
+    val ioExternalR  = IO(new AXIMasterR)
+    //def iFetch(addr: UInt(AddrWidth.W))
 
-    // Only fetch instruction when slave is ready
+    val PC := ioInternal.iPC
+
+    // Only fetch instruction when slave (IDU) is ready
     if(io.iReady.asBool){
-
+        // AXI Interface get inst
+    }else{
+        // Hold signals, do nor perform iFetch
     }
 }

@@ -15,3 +15,34 @@
 ***************************************************************************************/
 
 package npc.axi
+
+class AXIArbiter extends Module{
+    // Rule: LSU Read > IFU iFetch
+    // This is the interface between the "module parts external" to "SoC/simulation external"
+
+    val IFU_AR = IO(new Flipped(AXIMasterAR))
+    val IFU_R  = IO(new Flipped(AXIMasterR))
+    val LSU_AR = IO(new Flipped(AXIMasterAR))
+    val LSU_R  = IO(new Flipped(AXIMasterR))
+
+    val ArbitAR = IO(new AXIMasterAR)
+    val ArbitR  = IO(new AXIMasterR)
+
+    if(IFU_AR.oMasterARvalid.asBool && LSU_AR.oMasterARvalid.asBool){
+        // Both LSU and IFU send read request, satisfy LSU first
+        LSU_AR <> ArbitAR
+        LSU_R  <> ArbitR
+    }else if(IFU_AR.oMasterARvalid.asBool && (!LSU_AR.oMasterARvalid.asBool)){
+        // Only IFU
+        IFU_AR <> ArbitAR
+        IFU_R  <> ArbitR
+    }else if((!IFU_AR.oMasterARvalid.asBool) && LSU_AR.oMasterARvalid.asBool){
+        // Only LSU
+        LSU_AR <> ArbitAR
+        LSU_R  <> ArbitR
+    }else{
+        // No read request
+        ArbitAR.oMasterARvalid := false.B
+        ArbitR.oMasterRready   := false.B
+    }
+}
