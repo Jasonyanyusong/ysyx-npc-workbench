@@ -22,8 +22,8 @@ import chisel3.util._
 import npc.axi.master._
 
 object iFetchInternal extends Bundle{
-    val iReady = Input(Bool())
-    val oValid = Output(Bool())
+    val iMasterReady = Input(Bool())
+    val oMasterValid = Output(Bool())
     val iPC = Input(UInt(AddrWidth.W))
     val oInst = Output(UInt(InstWidth.W))
     //val iResetInstBuffer = Input(Bool())
@@ -63,9 +63,9 @@ class IFU extends Module{
     Mux(iFetchEnable.asBool, iFetchEnable := false.B,          iFetchEnable := true.B)
 
     ioInternal.oInst := Inst
-    ioInternal.oValid := true.B
+    ioInternal.oMasterValid := true.B
 
-    when(ioInternal.iReady.asBool){
+    when(ioInternal.iMasterReady.asBool){
         // Shake hand success, re-enable iFetch, fetch next PC's instruction
         iFetchEnable := true.B
     }
@@ -113,7 +113,7 @@ class IFU extends Module{
     }
 
     // Only fetch instruction when slave (IDU) is ready
-    if(io.iReady.asBool){
+    if(io.iMasterReady.asBool){
         // AXI Interface get inst
     }else{
         // Hold signals, do nor perform iFetch

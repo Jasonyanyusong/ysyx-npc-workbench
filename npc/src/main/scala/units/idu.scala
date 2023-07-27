@@ -21,10 +21,16 @@ import chisel3.util._
 
 import npc.helper.defs.Base._
 import npc.helper.rv64im.Inst._
+import npc.helper.opcode.OpEXU._
+import npc.helper.opcode.OpLSU._
+import npc.helper.opcode.OpWBU._
 
 object iDecodeInternal extends Bundle{
-    val iReady = Input(Bool())
-    val oValid = Output(Bool())
+    val oSlaveReady = Input(Bool())
+    val iSlaveValid = Output(Bool())
+
+    val iMasterReady = Input(Bool())
+    val oMasterValid = Output(Bool())
 
     val iInst = Input(UInt(InstWidth.W))
     val oDynamicNextPC = Output(UInt(AddrWidth.W))
@@ -36,6 +42,11 @@ object iDecodeInternal extends Bundle{
     // |---|   |-----------------------|   |---|   |---|   |---|   |
     // Priv               EXU              LSlen   LSfunc  WBTyp  Debug State
     val oDecodeBundle = Output(UInt(16.W))
+
+    val EX_src1 = Output(UInt(DataWidth.W))
+    val EX_src2 = Output(UInt(DataWidth.W))
+    // Load-Store's src1 is EXU's result
+    val LS_src2 = Output(UInt(DataWidth.W))
 }
 
 class IDU extends Module{

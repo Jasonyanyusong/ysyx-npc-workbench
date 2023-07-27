@@ -14,16 +14,23 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-package npc.helper
+package npc.helper.opcode
 
-def OpEXU{
+object OpEXU{
+    // TODO: Add more operation codes
+    def EX_NOP  = 0.U(7.W)
+    def EX_PS1  = 1.U(7.W)
+    def EX_ADD  = 2.U(7.W)
+    def EX_SLT  = 3.U(7.W)
+    def EX_SLTU = 4.U(7.W)
+    def EX_XOR  = 5.U(7.W)
+    def EX_OR   = 6.U(7.W)
+}
+
+object OpLSU{
     // TODO: Add more operation codes
 }
 
-def OpLSU{
-    // TODO: Add more operation codes
-}
-
-def OpWBU{
+object OpWBU{
     // TODO: Add more operation codes
 }
