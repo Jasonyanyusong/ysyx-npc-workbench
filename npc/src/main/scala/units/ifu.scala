@@ -16,11 +16,17 @@
 
 package npc.units
 
+import chisel3._
+import chisel3.util._
+
+import npc.axi.master._
+
 object iFetchInternal extends Bundle{
     val iReady = Input(Bool())
     val oValid = Output(Bool())
     val iPC = Input(UInt(AddrWidth.W))
     val oInstData = Output(UInt(InstWidth.W))
+    val iResetInstBuffer = Input(Bool())
 }
 
 /*object iFetchExternal extends Bundle{
@@ -32,6 +38,9 @@ object iFetchInternal extends Bundle{
 
 class IFU extends Module{
     val ioInternal = IO(new iFetchInternal)
+    
+    /*
+
     //val ioExternal = IO(new iFetchExternal)
 
     val ioExternalAR = IO(new AXIMasterAR)
@@ -40,10 +49,44 @@ class IFU extends Module{
 
     val PC := ioInternal.iPC
 
+    //val HoldVal = RegInit(false.B)
+    //val Instruction = RegInit(0.U(InstWidth.W))
+
+    val BufferSize = 8.U // Hold 8 Instructions in Buffer
+    val InstBuffer = Mem(BufferSize.asUInt, UInt(InstWidth.W))
+    val InstBufferStart = RegInit(0.U(InstWidth.W).asUInt)
+    val InstBufferEnd = RegInit(0.U(InstWidth.W).asUInt)
+    val InstBufferIdx = RegInit(0.U(3.W).asUInt) // Idx from 0 - 7, need to change with BufferSize
+    val InstBufferOK = RegInit(false.B)
+
+    // (InstBufferOK && (!iResetInstBuffer)) --YES--> No operation now
+    //                                       --N O--> clear all buffer & record -> buffer fetch -> update Buffer Idx & OK
+
+    // Get PC -> Check Inst in buffer --YES--> assign output + (clear buffer -> optional) & record
+    //                                --N O--> clear all buffer & record -> buffer fetch -> assign output + clear buffer & record
+
+    if((!InstBufferOK.asBool) || ioInternal.iResetInstBuffer){
+        // Current IFU does not hold instruction or current instructions are invalid, fetch new
+        ioExternalAR.oMasterARaddr := PC // Assigne current PC to AXI AR address channel
+        ioExternalAR.oMasterARid := 0.U(4.W) // Use default ID now
+        ioExternalAR.oMasterARlen := 0.U(8.W) // Just fetch 1 inst using AXI
+        ioExternalAR.oMasterARsize := 2.U(3.W) // Size of one transfer event is 0b010
+        ioExternalAR.oMasterARburst := 1.U(2.W) // Incrementing brust access
+        ioExternalAR.oMasterARvalid := true.B // These data are ready
+
+        ioExternalR.oMasterRready := true.B
+    }
+
+    when(ioExternalAR.iMasterARready.asBool && ioExternalR.iMasterRvalid.asBool){
+
+    }
+
     // Only fetch instruction when slave (IDU) is ready
     if(io.iReady.asBool){
         // AXI Interface get inst
     }else{
         // Hold signals, do nor perform iFetch
     }
+
+    */
 }
