@@ -25,23 +25,54 @@ object iFetchInternal extends Bundle{
     val iReady = Input(Bool())
     val oValid = Output(Bool())
     val iPC = Input(UInt(AddrWidth.W))
-    val oInstData = Output(UInt(InstWidth.W))
-    val iResetInstBuffer = Input(Bool())
+    val oInst = Output(UInt(InstWidth.W))
+    //val iResetInstBuffer = Input(Bool())
 }
 
-/*object iFetchExternal extends Bundle{
-    val iPC = Input(UInt(AddrWidth.W))
+object iFetchExternal extends Bundle{
+    //val iPC = Input(UInt(AddrWidth.W))
     val iInst = Input(UInt(InstWidth.W))
-    val oPC = Input(UInt(AddrWidth.W))
-    val oInst = Input(UInt(InstWidth.W))
-}*/
+    val oPC = Output(UInt(AddrWidth.W))
+    val oMemEnable = Output(Bool())
+    //val oInst = Input(UInt(InstWidth.W))
+}
 
 class IFU extends Module{
     val ioInternal = IO(new iFetchInternal)
+    val ioExternal = IO(new iFetchExternal)
+
+    // Non-AXI, pipelined Version IFU
+
+    val Inst = RegInit(0.U(InstWidth.W))
+
+    val iFetchEnable = RegInit(true.B)
+
+    /*if(iFetchEnable.asBool){
+        ioExternal.oMemEnable := true.B
+        ioExternal.oPC := ioInternal.iPC
+        Inst := ioExternal.iInst
+        iFetchEnable := false.B
+    }else{
+        ioExternal.oMemEnable := false.B
+        ioExternal.oPC := 0.U(AddrWidth.W)
+    }*/
+
+    Mux(iFetchEnable.asBool, ioExternal.oMemEnable := true.B,  ioExternal.oMemEnable := false.B)
+    Mux(iFetchEnable.asBool, ioExternal.oPC := ioInternal.iPC, ioExternal.oPC := 0.U(AddrWidth.W))
+    Mux(iFetchEnable.asBool, Inst := ioExternal.iInst,         Inst := Inst.asUInt)
+    Mux(iFetchEnable.asBool, iFetchEnable := false.B,          iFetchEnable := true.B)
+
+    ioInternal.oInst := Inst
+    ioInternal.oValid := true.B
+
+    when(ioInternal.iReady.asBool){
+        // Shake hand success, re-enable iFetch, fetch next PC's instruction
+        iFetchEnable := true.B
+    }
     
     /*
 
-    //val ioExternal = IO(new iFetchExternal)
+    // AXI Version IFU
 
     val ioExternalAR = IO(new AXIMasterAR)
     val ioExternalR  = IO(new AXIMasterR)
