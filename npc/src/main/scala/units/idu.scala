@@ -19,8 +19,23 @@ package npc.units
 import chisel3._
 import chisel3.util._
 
+import npc.helper.defs.Base._
+import npc.helper.rv64im.Inst._
+
 object iDecodeInternal extends Bundle{
-    // TODO: Add CPU internal signals for IDU
+    val iReady = Input(Bool())
+    val oValid = Output(Bool())
+
+    val iInst = Input(UInt(InstWidth.W))
+    val oDynamicNextPC = Output(UInt(AddrWidth.W))
+    val oStaticNextPC = Output(UInt(AddrWidth.W))
+    
+    // Combine EXU, LSU, WBU 's decode information together
+    // 1   1   1   1   1   1   0   0   0   0   0   0   0   0   0   0
+    // 5   4   3   2   1   0   9   8   7   6   5   4   3   2   1   0
+    // |---|   |-----------------------|   |---|   |---|   |---|   |
+    // Priv               EXU              LSlen   LSfunc  WBTyp  Debug State
+    val oDecodeBundle = Output(UInt(16.W))
 }
 
 class IDU extends Module{
