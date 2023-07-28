@@ -26,7 +26,6 @@ import npc.helper.opcode.OpLSU._
 import npc.helper.opcode.OpWBU._
 
 object iDecodeInternal extends Bundle{
-
     // ON-PIPELINE VALUES
     val oSlaveReady = Input(Bool())
     val iSlaveValid = Output(Bool())
