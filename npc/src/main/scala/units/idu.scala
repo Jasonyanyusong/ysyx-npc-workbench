@@ -26,6 +26,8 @@ import npc.helper.opcode.OpLSU._
 import npc.helper.opcode.OpWBU._
 
 object iDecodeInternal extends Bundle{
+
+    // ON-PIPELINE VALUES
     val oSlaveReady = Input(Bool())
     val iSlaveValid = Output(Bool())
 
@@ -47,6 +49,18 @@ object iDecodeInternal extends Bundle{
     val EX_src2 = Output(UInt(DataWidth.W))
     // Load-Store's src1 is EXU's result
     val LS_src2 = Output(UInt(DataWidth.W))
+
+    // OFF-PIPELINE VALUES
+    val CSR_FetchAddr = Output(UInt(CSRIDWidth.W)) // RV have 4096 CSRs
+    val CSR_FetchRetu = Input(UInt(DataWidth.W))
+    val CSR_ChangeVal = Output(UInt(DataWidth.W))
+
+    val oRS1 = Output(UInt(RegIDWidth.W))
+    val oRS2 = Output(UInt(RegIDWidth.W))
+    val oRD  = Output(UInt(RegIDWidth.W))
+
+    val iSRC1 = Input(UInt(DataWidth.W))
+    val iSRC2 = Input(UInt(DataWidth.W))
 }
 
 class IDU extends Module{

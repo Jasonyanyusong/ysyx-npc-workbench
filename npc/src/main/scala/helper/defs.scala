@@ -24,4 +24,7 @@ object Base{
     val InstWidth = 32
     
     val AddrWidth = 32
+
+    val RegIDWidth = 5
+    val CSRIDWidth = 12
 }
