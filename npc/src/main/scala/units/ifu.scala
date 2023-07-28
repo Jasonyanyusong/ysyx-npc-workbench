@@ -60,7 +60,8 @@ class IFU extends Module{
     Mux(iFetchEnable.asBool, ioExternal.oMemEnable := true.B,  ioExternal.oMemEnable := false.B)
     Mux(iFetchEnable.asBool, ioExternal.oPC := ioInternal.iPC, ioExternal.oPC := 0.U(AddrWidth.W))
     Mux(iFetchEnable.asBool, Inst := ioExternal.iInst,         Inst := Inst.asUInt)
-    Mux(iFetchEnable.asBool, iFetchEnable := false.B,          iFetchEnable := true.B)
+    
+    iFetchEnable := false.B
 
     ioInternal.oInst := Inst
     ioInternal.oMasterValid := true.B

@@ -27,8 +27,8 @@ import npc.helper.opcode.OpWBU._
 
 object iDecodeInternal extends Bundle{
     // ON-PIPELINE VALUES
-    val oSlaveReady = Input(Bool())
-    val iSlaveValid = Output(Bool())
+    val oSlaveReady = Output(Bool())
+    val iSlaveValid = Input(Bool())
 
     val iMasterReady = Input(Bool())
     val oMasterValid = Output(Bool())
@@ -41,8 +41,8 @@ object iDecodeInternal extends Bundle{
     // 1   1   1   1   1   1   0   0   0   0   0   0   0   0   0   0
     // 5   4   3   2   1   0   9   8   7   6   5   4   3   2   1   0
     // |---|   |-----------------------|   |---|   |---|   |---|   |
-    // Priv               EXU              LSlen   LSfunc  WBTyp  Debug State
-    val oDecodeBundle = Output(UInt(16.W))
+    // Priv               EXU              LSlen   LSfunc  WBTyp  Debug State (DS)
+    val oDecodeBundle = Output(UInt(DecodeWidth.W))
 
     val EX_src1 = Output(UInt(DataWidth.W))
     val EX_src2 = Output(UInt(DataWidth.W))
@@ -65,4 +65,51 @@ object iDecodeInternal extends Bundle{
 class IDU extends Module{
     ioInternal = IO(new iDecodeInternal)
     // TODO: Write IDU Logic
+
+    val DecodeReg = RegInit(0.U(DecodeWidth.W))
+    val iDecodeEnable = RegInit(true.B)
+
+    val iDecPrivReg = RegInit(0.U(2.W))
+    val iDecEXUReg = RegInit(0.U(7.W))
+    val iDecLSlenReg = RegInit(0.U(2.W))
+    val iDecLSfuncReg = RegInit(0.U(2.W))
+    val iDecWBTypReg = RegInit(0.U(2.W))
+    val iDecDSReg = RegInit(0.U(1.W))
+
+    // Only can decode instruction if Master (IFU) 's output is valid
+    Mux(ioInternal.iSlaveValid.asBool, iDecodeEnable := true.B, iDecodeEnable := false.B)
+
+    // Decode PrivReg
+    Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
+
+    // Decode EXUReg
+    Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
+
+    // Decode LSlenReg
+    Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
+
+    // Decode LSfuncReg
+    Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
+
+    // Decode WBTypReg
+    Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
+
+    // Decode DSReg
+    Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
+
+    // Combine these decode results together when iDecodeEnable is true
+    Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
+
+    // Disable instruction decoding
+    iDecodeEnable := false.B
+
+    ioInternal.oDecodeBundle := DecodeReg
+    // TODO: connect more decode signals
+
+    ioInternal.oMasterValid := true.B
+
+    when(ioInternal.iMasterReady.asBool){
+        // Shake hand success, re-enable iDecode, decode next instruction if IFU have result
+        iDecodeEnable := true.B
+    }
 }

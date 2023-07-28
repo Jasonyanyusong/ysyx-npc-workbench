@@ -27,4 +27,6 @@ object Base{
 
     val RegIDWidth = 5
     val CSRIDWidth = 12
+
+    val DecodeWidth = 16
 }
