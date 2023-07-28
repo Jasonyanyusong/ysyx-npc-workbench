@@ -15,6 +15,7 @@ static const char *keyname[] = {
 uint8_t keystates [ARRLEN(keyname)];
 
 int SDL_PushEvent(SDL_Event *ev) {
+  assert(ev);
   return 0;
 }
 
@@ -72,6 +73,7 @@ int SDL_WaitEvent(SDL_Event *event) {
   }
   return 1;*/
   while (SDL_PollEvent(event) == 1);
+  assert(event);
   return 1;
 }
 

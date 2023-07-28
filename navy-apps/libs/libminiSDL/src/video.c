@@ -109,6 +109,7 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
       pixels[((fillY + row) * (dst->w)) + (fillX + col)] = color;
     }
   }
+  assert(dst);
 }
 
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
@@ -123,6 +124,7 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
   }
 
   if(s -> format -> BitsPerPixel == 32){
+    assert(s->pixels);
     NDL_DrawRect((uint32_t *)s->pixels, x, y, w, h);
     return;
   }
@@ -136,6 +138,7 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
       pixels[i] = ((uint32_t)thisPixel.a << 24) | ((uint32_t)thisPixel.r << 16) | ((uint32_t)thisPixel.g << 8) | ((uint32_t)thisPixel.b);
       //printf("colors index = 0x%x -> color = 0x%8x\n", s -> pixels[i], pixels[i]);
     }
+    assert(pixels);
     NDL_DrawRect(pixels, x, y, w, h);
     free(pixels);
     return;

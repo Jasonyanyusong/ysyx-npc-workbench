@@ -13,6 +13,7 @@ static int screen_w = 0, screen_h = 0;
 uint32_t NDL_GetTicks() {
   struct timeval getTime;
   gettimeofday(&getTime, NULL);
+  //assert(&getTime);
   //printf("gettime: %d, return: %d\n", getTime.tv_usec, (getTime.tv_usec / 1000));
   return (getTime.tv_usec / 1000);
   //return 0;
@@ -31,9 +32,12 @@ void NDL_OpenCanvas(int *w, int *h) {
 
   char readBuffer[64];
   read(dispinfoFile, readBuffer, sizeof(readBuffer));
+  assert(readBuffer);
 
   //printf("[libndl] Read:\n\n%s\n", readBuffer);
   sscanf(readBuffer, "WIDTH:%d\nHEIGHT:%d\n", &screen_w, &screen_h);
+  assert(&screen_w);
+  assert(&screen_h);
 
   //printf("[libndl] width = %d, height = %d\n", screen_w, screen_h);
 
@@ -72,6 +76,7 @@ void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
     //printf("data = %x\n", *(pixels + w * i));
   }*/
 
+  assert(pixels);
   lseek(FBFile, (x * y), SEEK_SET);
   write(FBFile, pixels, (((uint64_t)w << 32) | ((uint64_t)h & 0x00000000FFFFFFFF)));
   close(FBFile);
