@@ -81,7 +81,11 @@ class IDU extends Module{
     Mux(ioInternal.iSlaveValid.asBool, iDecodeEnable := true.B, iDecodeEnable := false.B)
 
     // Decode PrivReg
-    Mux(iDecodeEnable.asBool, iDecPrivReg := 0.U(2.W), iDecPrivReg := Lookup(ioInternal.iInst, 0.U(2.W), Array(ECALL -> 1.U(2.W), MRET -> 2.U(2.W), EBREAK -> 3.U(2.W))))
+    Mux(iDecodeEnable.asBool, iDecPrivReg := 0.U(2.W), iDecPrivReg := Lookup(
+        ioInternal.iInst, 0.U(2.W), Array(
+            ECALL -> 1.U(2.W), MRET -> 2.U(2.W), EBREAK -> 3.U(2.W)
+        )
+    ))
 
     // Decode EXUReg
     Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
@@ -97,7 +101,13 @@ class IDU extends Module{
     ))
 
     // Decode LSfuncReg
-    Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
+    Mux(iDecodeEnable.asBool, iDecLSfuncReg := 0.U(2.W), iDecLSfuncReg := Lookup(
+        ioInternal.iInst, 0.U(2.W), Array(
+            LB  -> 1.U(2.W),  LH -> 1.U(2.W),  LW -> 1.U(2.W),  LD -> 1.U(2.W),
+            SB  -> 2.U(2.W),  SH -> 2.U(2.W),  SW -> 2.U(2.W),  SD -> 2.U(2.W),
+            LBU -> 3.U(2.W), LHU -> 3.U(2.W), LWU -> 3.U(2.W)
+        )
+    ))
 
     // Decode WBTypReg
     Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
