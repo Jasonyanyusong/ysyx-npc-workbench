@@ -110,7 +110,12 @@ class IDU extends Module{
     ))
 
     // Decode WBTypReg
-    Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
+    Mux(iDecodeEnable.asBool, iDecWBTypReg := 0.U(2.W), iDecWBTypReg := Lookup(
+        ioInternal.iInst, 1.U(2.W), Array(
+            // TODO: add more instructions
+            
+        )
+    ))
 
     // Decode DSReg
     Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
