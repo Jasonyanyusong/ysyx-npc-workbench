@@ -89,8 +89,32 @@ class IDU extends Module{
 
     // Decode EXUReg
     Mux(iDecodeEnable.asBool, iDecEXUReg := 0.U(7.W), iDecEXUReg := Lookup(
-        ioInternal.iInst, 0.U(7.W), Array(
-            // TODO: Add EXU decode
+        ioInternal.iInst, EX_NOP, Array(
+            LUI -> EX_PS1, 
+
+            AUIPC -> EX_ADD, SB -> EX_ADD, SH -> EX_ADD, SW -> EX_ADD, SD -> EX_ADD, ADD -> EX_ADD, ADDI -> EX_ADD,
+            LB -> EX_ADD, LBU -> EX_ADD, LH -> EX_ADD, LHU -> EX_ADD, LW -> EX_ADD, LWU -> EX_ADD, LD -> EX_ADD,
+            ADDW -> EX_ADDW, ADDIW -> EX_ADDW,
+
+            SUB -> EX_SUB, SUBW -> EX_SUBW,
+
+            AND -> EX_AND, ANDI -> EX_AND,
+
+            OR -> EX_OR, ORI -> EX_OR,
+
+            XOR -> EX_XOR, XORI -> EX_XOR,
+
+            SLT -> EX_SLT, SLTI -> EX_SLT,
+
+            SLTU -> EX_SLTU, SLTIU -> EX_SLTU,
+
+            SLL -> EX_SLL, SLLI -> EX_SLL, SLLW -> EX_SLLW, SLLIW -> EX_SLLW,
+
+            SRL -> EX_SRL, SRLI -> EX_SRL, SRLW -> EX_SRLW, SRLIW -> EX_SRLW,
+
+            SRA -> EX_SRA, SRAI -> EX_SRA, SRAW -> EX_SRAW, SRLIW -> EX_SRAW,
+
+            //JAL -> EX_NOP, JALR -> EX_NOP, BEQ -> EX_NOP, BNE -> EX_NOP, BLT -> EX_NOP, BLTU -> EX_NOP, BGE -> EX_NOP, BGEU -> EX_NOP,
         )
     ))
 

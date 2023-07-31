@@ -47,6 +47,7 @@ object OpEXU{
     def EX_DIVUW  = 26.U(7.W)
     def EX_REMW   = 27.U(7.W)
     def EX_REMUW  = 28.U(7.W)
+    def EX_SUBW   = 29.U(7.W)
 }
 
 object OpLSULen{
