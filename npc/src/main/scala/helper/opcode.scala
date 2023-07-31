@@ -62,6 +62,7 @@ object OpLSUFunc{
     def LS_NOP = 0.U(2.W)
     def LS_LD  = 1.U(2.W)
     def LS_ST  = 2.U(2.W)
+    def LS_LDU = 3.U(2.W)
 }
 
 object OpWBU{

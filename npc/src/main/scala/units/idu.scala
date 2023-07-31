@@ -87,7 +87,14 @@ class IDU extends Module{
     Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
 
     // Decode LSlenReg
-    Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
+    Mux(iDecodeEnable.asBool, iDecLSlenReg := 0.U(2.W), iDecLSlenReg := Lookup(
+        ioInternal.iInst, 0.U(2.W), Array(
+            LB -> 0.U(2.W), LBU -> 0.U(2.W), SB -> 0.U(2.W),
+            LH -> 1.U(2.W), LHU -> 1.U(2.W), SH -> 1.U(2.W),
+            LW -> 2.U(2.W), LWU -> 2.U(2.W), SW -> 2.U(2.W),
+            LD -> 3.U(2.W),                  SD -> 3.U(2.W)
+        )
+    ))
 
     // Decode LSfuncReg
     Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
