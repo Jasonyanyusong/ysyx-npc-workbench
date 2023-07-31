@@ -123,7 +123,11 @@ class IDU extends Module{
     ))
 
     // Decode DSReg
-    Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
+    Mux(iDecodeEnable.asBool, iDecDSReg := 0.U(1.W), iDecDSReg := Lookup(
+        ioInternal.iInst, 0.U(1.W), Array(
+            EBREAK -> 1.U(1.W)
+        )
+    ))
 
     // Combine these decode results together when iDecodeEnable is true
     Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
