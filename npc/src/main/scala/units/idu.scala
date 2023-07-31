@@ -88,7 +88,11 @@ class IDU extends Module{
     ))
 
     // Decode EXUReg
-    Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
+    Mux(iDecodeEnable.asBool, iDecEXUReg := 0.U(7.W), iDecEXUReg := Lookup(
+        ioInternal.iInst, 0.U(7.W), Array(
+            // TODO: Add EXU decode
+        )
+    ))
 
     // Decode LSlenReg
     Mux(iDecodeEnable.asBool, iDecLSlenReg := 0.U(2.W), iDecLSlenReg := Lookup(
