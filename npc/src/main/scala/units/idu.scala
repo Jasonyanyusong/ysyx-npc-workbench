@@ -64,6 +64,7 @@ object iDecodeInternal extends Bundle{
 
 class IDU extends Module{
     ioInternal = IO(new iDecodeInternal)
+    // Instruction Decode Unit: First generate opreation code, then send operands to EXU and LSU (for operand send to LSU, it needs to be delivered to EXU first), last write back PC and CSR (WBU only write back GPR)
     // TODO: Write IDU Logic
 
     val DecodeReg = RegInit(0.U(DecodeWidth.W))
@@ -80,7 +81,7 @@ class IDU extends Module{
     Mux(ioInternal.iSlaveValid.asBool, iDecodeEnable := true.B, iDecodeEnable := false.B)
 
     // Decode PrivReg
-    Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
+    Mux(iDecodeEnable.asBool, iDecPrivReg := 0.U(2.W), iDecPrivReg := Lookup(ioInternal.iInst, 0.U(2.W), Array(ECALL -> 1.U(2.W), MRET -> 2.U(2.W), EBREAK -> 3.U(2.W))))
 
     // Decode EXUReg
     Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
