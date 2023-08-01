@@ -128,19 +128,19 @@ class IDU extends Module{
     // Decode LSlenReg
     Mux(iDecodeEnable.asBool, iDecLSlenReg := 0.U(2.W), iDecLSlenReg := Lookup(
         ioInternal.iInst, 0.U(2.W), Array(
-            LB -> 0.U(2.W), LBU -> 0.U(2.W), SB -> 0.U(2.W),
-            LH -> 1.U(2.W), LHU -> 1.U(2.W), SH -> 1.U(2.W),
-            LW -> 2.U(2.W), LWU -> 2.U(2.W), SW -> 2.U(2.W),
-            LD -> 3.U(2.W),                  SD -> 3.U(2.W)
+            LB -> LS_B, LBU -> LS_B, SB -> LS_B,
+            LH -> LS_H, LHU -> LS_H, SH -> LS_H,
+            LW -> LS_W, LWU -> LS_W, SW -> LS_W,
+            LD -> LS_D,              SD -> LS_D
         )
     ))
 
     // Decode LSfuncReg
-    Mux(iDecodeEnable.asBool, iDecLSfuncReg := 0.U(2.W), iDecLSfuncReg := Lookup(
-        ioInternal.iInst, 0.U(2.W), Array(
-            LB  -> 1.U(2.W),  LH -> 1.U(2.W),  LW -> 1.U(2.W),  LD -> 1.U(2.W),
-            SB  -> 2.U(2.W),  SH -> 2.U(2.W),  SW -> 2.U(2.W),  SD -> 2.U(2.W),
-            LBU -> 3.U(2.W), LHU -> 3.U(2.W), LWU -> 3.U(2.W)
+    Mux(iDecodeEnable.asBool, iDecLSfuncReg := LS_NOP, iDecLSfuncReg := Lookup(
+        ioInternal.iInst, LS_NOP, Array(
+            LB  -> LS_LD ,  LH -> LS_LD ,  LW -> LS_LD ,  LD -> LS_LD ,
+            SB  -> LS_ST ,  SH -> LS_ST ,  SW -> LS_ST ,  SD -> LS_ST ,
+            LBU -> LS_LDU, LHU -> LS_LDU, LWU -> LS_LDU
         )
     ))
 
