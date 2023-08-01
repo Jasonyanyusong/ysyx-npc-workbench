@@ -145,15 +145,15 @@ class IDU extends Module{
     ))
 
     // Decode WBTypReg
-    Mux(iDecodeEnable.asBool, iDecWBTypReg := 0.U(2.W), iDecWBTypReg := Lookup(
-        ioInternal.iInst, 1.U(2.W), Array(
-            SB -> 0.U(2.W), SH -> 0.U(2.W), SW -> 0.U(2.W), SD -> 0.U(2.W),
-            ECALL -> 0.U(2.W), EBREAK -> 0.U(2.W), MRET -> 0.U(2.W),
-            BEQ -> 0.U(2.W), BNE -> 0.U(2.W), BGE -> 0.U(2.W), BGEU -> 0.U(2.W), BLT -> 0.U(2.W), BLTU -> 0.U(2.W),
+    Mux(iDecodeEnable.asBool, iDecWBTypReg := WB_NOP, iDecWBTypReg := Lookup(
+        ioInternal.iInst, WB_EXU, Array(
+            SB -> WB_NOP, SH -> WB_NOP, SW -> WB_NOP, SD -> WB_NOP,
+            ECALL -> WB_NOP, EBREAK -> WB_NOP, MRET -> WB_NOP,
+            BEQ -> WB_NOP, BNE -> WB_NOP, BGE -> WB_NOP, BGEU -> WB_NOP, BLT -> WB_NOP, BLTU -> WB_NOP,
 
-            LB -> 2.U(2.W), LBU -> 2.U(2.W), LH -> 2.U(2.W), LHU -> 2.U(2.W), LW -> 2.U(2.W), LWU -> 2.U(2.W), LD -> 2.U(2.W),
+            LB -> WB_LSU, LBU -> WB_LSU, LH -> WB_LSU, LHU -> WB_LSU, LW -> WB_LSU, LWU -> WB_LSU, LD -> WB_LSU,
 
-            JAL -> 3.U(2.W), JALR -> 3.U(2.W)
+            JAL -> WB_SNPC, JALR -> WB_SNPC
         )
     ))
 
