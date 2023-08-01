@@ -164,7 +164,7 @@ class IDU extends Module{
     ))
 
     // Combine these decode results together when iDecodeEnable is true
-    Mux(iDecodeEnable.asBool, /*TODO: Add decode behaviors*/)
+    Mux(iDecodeEnable.asBool, Cat(iDecPrivReg.asUInt, Cat(iDecEXUReg.asUInt, Cat(iDecLSlenReg.asUInt, Cat(iDecLSfuncReg.asUInt, Cat(iDecWBTypReg.asUInt, iDecDSReg.asUInt))))), 0.U(DecodeWidth.W))
 
     // Disable instruction decoding
     iDecodeEnable := false.B
