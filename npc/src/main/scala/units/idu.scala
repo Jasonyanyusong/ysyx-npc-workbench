@@ -61,6 +61,21 @@ object iDecodeInternal extends Bundle{
 
     val iSRC1 = Input(UInt(DataWidth.W))
     val iSRC2 = Input(UInt(DataWidth.W))
+
+    val iPC = Input(UInt(AddrWidth.W))
+    val oPC = Output(UInt(AddrWidth.W))
+    val oSNPC = Output(UInt(AddrWidth.W))
+    val oDNPC = Output(UInt(AddrWidth.W))
+
+    val iCSR_mcause = Input(UInt(DataWidth.W))
+    val iCSR_mtvec = Input(UInt(DataWidth.W))
+    val iCSR_mstatus = Input(UInt(DataWidth.W))
+    val iCSR_mepc = Input(UInt(DataWidth.W))
+
+    val oCSR_mcause = Output(UInt(DataWidth.W))
+    val oCSR_mtvec = Output(UInt(DataWidth.W))
+    val oCSR_mstatus = Output(UInt(DataWidth.W))
+    val oCSR_mepc = Output(UInt(DataWidth.W))
 }
 
 class IDU extends Module{
@@ -167,7 +182,11 @@ class IDU extends Module{
     // Combine these decode results together when iDecodeEnable is true
     Mux(iDecodeEnable.asBool, Cat(iDecPrivReg.asUInt, Cat(iDecEXUReg.asUInt, Cat(iDecLSlenReg.asUInt, Cat(iDecLSfuncReg.asUInt, Cat(iDecWBTypReg.asUInt, iDecDSReg.asUInt))))), 0.U(DecodeWidth.W))
 
-    // TODO: Calculate SNPC and DNPC, decide PC update val
+    ioInternal.oSNPC := ioInternal.iPC + 4.U
+    ioInternal.oDNPC := Lookup(
+        ioInternal.iInst, ioInternal.iPC + 4.U, Array(
+            // TODO: Add decoding for dynamic next PC
+        ))
 
     // TODO: Calculate CSR (mstatus, macuse, mtvec, mepc)
 
