@@ -24,6 +24,7 @@ import npc.helper.rv64im.Inst._
 import npc.helper.opcode.OpEXU._
 import npc.helper.opcode.OpLSU._
 import npc.helper.opcode.OpWBU._
+import npc.helper.opcode.OpPriv._
 
 object iDecodeInternal extends Bundle{
     // ON-PIPELINE VALUES
@@ -82,8 +83,8 @@ class IDU extends Module{
 
     // Decode PrivReg
     Mux(iDecodeEnable.asBool, iDecPrivReg := 0.U(2.W), iDecPrivReg := Lookup(
-        ioInternal.iInst, 0.U(2.W), Array(
-            ECALL -> 1.U(2.W), MRET -> 2.U(2.W), EBREAK -> 3.U(2.W)
+        ioInternal.iInst, PR_NORM, Array(
+            ECALL -> PR_ECALL, MRET -> PR_MRET, EBREAK -> PR_EBREAK
         )
     ))
 

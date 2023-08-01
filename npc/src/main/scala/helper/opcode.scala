@@ -17,7 +17,6 @@
 package npc.helper.opcode
 
 object OpEXU{
-    // TODO: Add more operation codes, need check!
     def EX_NOP    =  0.U(7.W)
     def EX_PS1    =  1.U(7.W)
     def EX_ADD    =  2.U(7.W)
@@ -51,7 +50,6 @@ object OpEXU{
 }
 
 object OpLSULen{
-    // TODO: Add more operation codes
     def LS_B = 0.U(2.W)
     def LS_H = 1.U(2.W)
     def LS_W = 2.U(2.W)
@@ -59,7 +57,6 @@ object OpLSULen{
 }
 
 object OpLSUFunc{
-    // TODO: Add more operation codes
     def LS_NOP = 0.U(2.W)
     def LS_LD  = 1.U(2.W)
     def LS_ST  = 2.U(2.W)
@@ -67,9 +64,15 @@ object OpLSUFunc{
 }
 
 object OpWBU{
-    // TODO: Add more operation codes
     def WB_NOP  = 0.U(2.W)
     def WB_EXU  = 1.U(2.W)
     def WB_LSU  = 2.U(2.W)
     def WB_SNPC = 3.U(2.W)
+}
+
+object OpPriv{
+    def PR_NORM   = 0.U(2.W)
+    def PR_ECALL  = 1.U(2.W)
+    def PR_MRET   = 2.U(2.W)
+    def PR_EBREAK = 3.U(2.W)
 }
