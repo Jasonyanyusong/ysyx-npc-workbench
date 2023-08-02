@@ -76,3 +76,8 @@ object OpPriv{
     def PR_MRET   = 2.U(2.W)
     def PR_EBREAK = 3.U(2.W)
 }
+
+object OpState{
+    def NPC_RUNNING = 0.U(1.W)
+    def NPC_STOPPED = 1.U(1.W)
+}

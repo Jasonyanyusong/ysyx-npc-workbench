@@ -25,6 +25,7 @@ import npc.helper.opcode.OpEXU._
 import npc.helper.opcode.OpLSU._
 import npc.helper.opcode.OpWBU._
 import npc.helper.opcode.OpPriv._
+import npc.helper.opcode.OpState._
 
 object iDecodeInternal extends Bundle{
     // ON-PIPELINE VALUES
@@ -174,8 +175,8 @@ class IDU extends Module{
 
     // Decode DSReg
     Mux(iDecodeEnable.asBool, iDecDSReg := 0.U(1.W), iDecDSReg := Lookup(
-        ioInternal.iInst, 0.U(1.W), Array(
-            EBREAK -> 1.U(1.W)
+        ioInternal.iInst, NPC_RUNNING, Array(
+            EBREAK -> NPC_STOPPED
         )
     ))
 
