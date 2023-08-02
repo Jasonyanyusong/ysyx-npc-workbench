@@ -23,7 +23,8 @@ import npc.helper.defs.Base._
 import npc.helper.defs.InstType._
 
 object immGenInternal extends Bundle{
-    // TODO: define IO port for immGen
+    val iInst = Input(UInt(AddrWidth.W))
+    val oImm = Output(UInt(DataWidth.W))
 }
 
 class immGen extends Module{
