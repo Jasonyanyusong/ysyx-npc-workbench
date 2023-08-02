@@ -14,36 +14,18 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-package npc.helper.defs
+package npc.units.iDecode
 
-object Base{
-    val NR_GPR = 32
-    
-    val DataWidth = 64
+import chisel3._
+import chisel3.util._
 
-    val InstWidth = 32
-    
-    val AddrWidth = 32
+import npc.helper.defs.Base._
+import npc.helper.defs.InstType._
 
-    val RegIDWidth = 5
-    val CSRIDWidth = 12
-
-    val DecodeWidth = 16
-
-    val InstTypeWidth = 4
-
-    val immILen = 12
-    val immSLen = 12
-    val immBLen = 13
-    val immULen = 32
-    val immJLen = 21
+object immGenInternal extends Bundle{
+    // TODO: define IO port for immGen
 }
 
-object InstType{
-    val instR = 0
-    val instI = 1
-    val instS = 2
-    val instB = 3
-    val instU = 4
-    val instJ = 5
+class immGen extends Module{
+    // TODO: implement immGen
 }
