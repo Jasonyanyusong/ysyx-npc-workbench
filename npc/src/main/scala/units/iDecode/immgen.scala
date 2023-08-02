@@ -24,6 +24,7 @@ import npc.helper.defs.InstType._
 
 object immGenInternal extends Bundle{
     val iInst = Input(UInt(AddrWidth.W))
+    val iType = Input(UInt(InstTypeWidth.W))
     val oImm = Output(UInt(DataWidth.W))
 }
 
