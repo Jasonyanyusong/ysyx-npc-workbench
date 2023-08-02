@@ -29,7 +29,6 @@ object immGenInternal extends Bundle{
 }
 
 class immGen extends Module{
-    // TODO: implement immGen
     ioSubmodule = IO(new immGenInternal)
 
     val immI = ioSubmodule.iInst(31, 20).asUInt

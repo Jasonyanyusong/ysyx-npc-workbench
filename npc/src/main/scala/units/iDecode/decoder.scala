@@ -182,8 +182,6 @@ class IDU extends Module{
     // Combine these decode results together when iDecodeEnable is true
     Mux(iDecodeEnable.asBool, Cat(iDecPrivReg.asUInt, Cat(iDecEXUReg.asUInt, Cat(iDecLSlenReg.asUInt, Cat(iDecLSfuncReg.asUInt, Cat(iDecWBTypReg.asUInt, iDecDSReg.asUInt))))), 0.U(DecodeWidth.W))
 
-    // TODO: Generate Immediate Number, procedure: gen imm series -> instruction select
-
     val InstructionType = Lookup(
         ioInternal.iInst, instR.U(InstTypeWidth.W), Array(
             // TODO: Add more instruction's type decode
