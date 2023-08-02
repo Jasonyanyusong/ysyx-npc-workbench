@@ -183,8 +183,9 @@ class IDU extends Module{
     Mux(iDecodeEnable.asBool, Cat(iDecPrivReg.asUInt, Cat(iDecEXUReg.asUInt, Cat(iDecLSlenReg.asUInt, Cat(iDecLSfuncReg.asUInt, Cat(iDecWBTypReg.asUInt, iDecDSReg.asUInt))))), 0.U(DecodeWidth.W))
 
     val InstructionType = Lookup(
-        ioInternal.iInst, instR.U(InstTypeWidth.W), Array(
+        ioInternal.iInst, instR, Array(
             // TODO: Add more instruction's type decode
+            LUI -> instU, AUIPC -> instU,
         )
     )
 

@@ -40,10 +40,10 @@ object Base{
 }
 
 object InstType{
-    val instR = 0
-    val instI = 1
-    val instS = 2
-    val instB = 3
-    val instU = 4
-    val instJ = 5
+    val instR = 0.U(InstTypeWidth.W)
+    val instI = 1.U(InstTypeWidth.W)
+    val instS = 2.U(InstTypeWidth.W)
+    val instB = 3.U(InstTypeWidth.W)
+    val instU = 4.U(InstTypeWidth.W)
+    val instJ = 5.U(InstTypeWidth.W)
 }
