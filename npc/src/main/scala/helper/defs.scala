@@ -29,4 +29,10 @@ object Base{
     val CSRIDWidth = 12
 
     val DecodeWidth = 16
+
+    val immILen = 12
+    val immSLen = 12
+    val immBLen = 13
+    val immULen = 32
+    val immJLen = 21
 }

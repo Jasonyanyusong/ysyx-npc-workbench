@@ -82,7 +82,6 @@ object iDecodeInternal extends Bundle{
 class IDU extends Module{
     ioInternal = IO(new iDecodeInternal)
     // Instruction Decode Unit: First generate opreation code, then send operands to EXU and LSU (for operand send to LSU, it needs to be delivered to EXU first), last write back PC and CSR (WBU only write back GPR)
-    // TODO: Write IDU Logic
 
     val DecodeReg = RegInit(0.U(DecodeWidth.W))
     val iDecodeEnable = RegInit(true.B)
@@ -182,6 +181,73 @@ class IDU extends Module{
 
     // Combine these decode results together when iDecodeEnable is true
     Mux(iDecodeEnable.asBool, Cat(iDecPrivReg.asUInt, Cat(iDecEXUReg.asUInt, Cat(iDecLSlenReg.asUInt, Cat(iDecLSfuncReg.asUInt, Cat(iDecWBTypReg.asUInt, iDecDSReg.asUInt))))), 0.U(DecodeWidth.W))
+
+    // TODO: Generate Immediate Number, procedure: gen imm series -> instruction select
+    val immI = RegInit(0.U(immILen.W))
+    val immS = RegInit(0.U(immSLen.W))
+    val immB = RegInit(0.U(immBLen.W))
+    val immU = RegInit(0.U(immULen.W))
+    val immJ = RegInit(0.U(immJLen.W))
+
+    Mux(iDecodeEnable.asBool, 
+        immI := ioInternal.iInst(31, 20).asUInt, 
+        immI := immI
+    )
+
+    Mux(iDecodeEnable.asBool, 
+        immS := Cat(
+            Seq(
+                ioInternal.iInst(31, 25).asUInt, 
+                ioInternal.iInst(11,  7).asUInt
+            )
+        ),
+        immS := immS
+    )
+
+    Mux(iDecodeEnable.asBool, 
+        immB := Cat(
+            Seq(
+                ioInternal.iInst(31, 31).asUInt,
+                ioInternal.iInst( 7,  7).asUInt,
+                ioInternal.iInst(30, 25).asUInt,
+                ioInternal.iInst(11,  8).asUInt
+            )
+        ),
+        immB := immB
+    )
+
+    Mux(iDecodeEnable.asBool,
+        immU := Cat(
+            Seq(
+                ioInternal.iInst(31, 12).asUInt,
+                Fill(12, 0,U(1.W)).asUInt
+            )
+        ),
+        immU := immU
+    )
+
+    Mux(iDecodeEnable.asBool,
+        immJ := Cat(
+            Seq(
+                ioInternal.iInst(31, 31).asUInt,
+                ioInternal.iInst(19, 12).asUInt,
+                ioInternal.iInst(20, 20).asUInt,
+                ioInternal.iInst(30, 21).asUInt,
+                Fill(1, 0.U(1.W)).asUInt
+            )
+        ),
+        immJ := immJ
+    )
+
+    val immGenerated = RegInit(0.U(DataWidth.W))
+
+    Mux(
+        iDecodeEnable.asBool,
+        immGenerated := Lookup(
+            // TODO: Assign immediate to instructions
+        ),
+        immGenerated := immGenerated
+    )
 
     ioInternal.oSNPC := ioInternal.iPC + 4.U
     ioInternal.oDNPC := Lookup(
