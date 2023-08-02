@@ -62,4 +62,17 @@ class immGen extends Module{
             Fill(1, 0.U(1.W)).asUInt
         )
     )
+
+    val InstType = ioSubmodule.iType
+
+    ioSubmodule.oImm := MuxCase(
+        0.U(DataWidth.W),
+        Array(
+            InstType === instI -> Cat(Fill(DataWidth - immILen, immI(immILen - 1)), immI),
+            InstType === instS -> Cat(Fill(DataWidth - immSLen, immS(immSLen - 1)), immS),
+            InstType === instB -> Cat(Fill(DataWidth - immBLen, immB(immBLen - 1)), immB),
+            InstType === instU -> Cat(Fill(DataWidth - immULen, immU(immULen - 1)), immU),
+            InstType === instJ -> Cat(Fill(DataWidth - immJLen, immJ(immJLen - 1)), immJ),
+        )
+    )
 }
