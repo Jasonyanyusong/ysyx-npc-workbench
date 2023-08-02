@@ -30,4 +30,36 @@ object immGenInternal extends Bundle{
 
 class immGen extends Module{
     // TODO: implement immGen
+    ioSubmodule = IO(new immGenInternal)
+
+    val immI = ioSubmodule.iInst(31, 20).asUInt
+    val immS = Cat(
+        Seq(
+            ioSubmodule.iInst(31, 25).asUInt,
+            ioSubmodule.iInst(11,  7).asUInt
+        )
+    )
+    val immB = Cat(
+        Seq(
+            ioSubmodule.iInst(31, 31).asUInt,
+            ioSubmodule.iInst( 7,  7).asUInt,
+            ioSubmodule.iInst(30, 25).asUInt,
+            ioSubmodule.iInst(11,  8).asUInt
+        )
+    )
+    val immU = Cat(
+        Seq(
+            ioSubmodule.iInst(31, 12).asUInt,
+            Fill(12, 0,U(1.W)).asUInt
+        )
+    )
+    val immJ = Cat(
+        Seq(
+            ioSubmodule.iInst(31, 31).asUInt,
+            ioSubmodule.iInst(19, 12).asUInt,
+            ioSubmodule.iInst(20, 20).asUInt,
+            ioSubmodule.iInst(30, 21).asUInt,
+            Fill(1, 0.U(1.W)).asUInt
+        )
+    )
 }
