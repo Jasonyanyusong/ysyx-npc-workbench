@@ -242,19 +242,18 @@ class IDU extends Module{
     ioInternal.oSNPC := ioInternal.iPC + 4.U
     ioInternal.oDNPC := Lookup(
         ioInternal.iInst, ioInternal.iPC + 4.U, Array(
-            // TODO: Add decoding for dynamic next PC
-            JAL  -> ioInternal.iPC.asUInt + ImmOut.asUInt
-            JALR -> ((SRC1Val.asUInt + ImmOut.asUInt) & Cat(Fill(63, 1.U(1.W)), Fill(1, 0.U(1.W))))
+            JAL  -> ioInternal.iPC.asUInt + ImmOut.asUInt,
+            JALR -> ((SRC1Val.asUInt + ImmOut.asUInt) & Cat(Fill(63, 1.U(1.W)), Fill(1, 0.U(1.W)))),
 
-            BEQ  -> Mux(SRC1Val.asUInt === SRC2Val.asUInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U)
-            BNE  -> Mux(SRC1Val.asUInt =/= SRC2Val.asUInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U)
-            BLT  ->
-            BGE  ->
-            BLTU ->
-            BGEU ->
+            BEQ  -> Mux(SRC1Val.asUInt === SRC2Val.asUInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U),
+            BNE  -> Mux(SRC1Val.asUInt =/= SRC2Val.asUInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U),
+            BLT  -> Mux(SRC1Val.asSInt  <  SRC2Val.asSInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U),
+            BGE  -> Mux(SRC1Val.asSInt  >= SRC2Val.asSInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U),
+            BLTU -> Mux(SRC1Val.asUInt  <  SRC2Val.asUInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U),
+            BGEU -> Mux(SRC1Val.asUInt  >= SRC2Val.asUInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U),
 
-            ECALL ->
-            MRET  ->
+            ECALL -> ioInternal.iCSR_mtvec.asUInt,
+            MRET  -> ioInternal.iCSR_mepc.asUInt
         ))
 
     // TODO: Calculate CSR (mstatus, macuse, mtvec, mepc)
