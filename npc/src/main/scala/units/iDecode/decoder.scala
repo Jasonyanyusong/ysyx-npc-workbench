@@ -239,23 +239,33 @@ class IDU extends Module{
         SRC2Val := ioInternal.iSRC2
     }
 
-    ioInternal.oSNPC := ioInternal.iPC + 4.U
-    ioInternal.oDNPC := Lookup(
-        ioInternal.iInst, ioInternal.iPC + 4.U, Array(
-            JAL  -> ioInternal.iPC.asUInt + ImmOut.asUInt,
-            JALR -> ((SRC1Val.asUInt + ImmOut.asUInt) & Cat(Fill(63, 1.U(1.W)), Fill(1, 0.U(1.W)))),
+    // Decode Static-Next-PC and Dynamic-Next-PC
+    val SNPC = RegInit(0.U(AddrWidth.W))
+    val DNPC = RegInit(0.U(AddrWidth.W))
 
-            BEQ  -> Mux(SRC1Val.asUInt === SRC2Val.asUInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U),
-            BNE  -> Mux(SRC1Val.asUInt =/= SRC2Val.asUInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U),
-            BLT  -> Mux(SRC1Val.asSInt  <  SRC2Val.asSInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U),
-            BGE  -> Mux(SRC1Val.asSInt  >= SRC2Val.asSInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U),
-            BLTU -> Mux(SRC1Val.asUInt  <  SRC2Val.asUInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U),
-            BGEU -> Mux(SRC1Val.asUInt  >= SRC2Val.asUInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U),
+    when(iDecodeEnable.asBool){
+        SNPC := ioInternal.iPC + 4.U
+        DNPC := Lookup(
+            ioInternal.iInst, ioInternal.iPC + 4.U, Array(
+                JAL  -> ioInternal.iPC.asUInt + ImmOut.asUInt,
+                JALR -> ((SRC1Val.asUInt + ImmOut.asUInt) & Cat(Fill(63, 1.U(1.W)), Fill(1, 0.U(1.W)))),
 
-            ECALL -> ioInternal.iCSR_mtvec.asUInt,
-            MRET  -> ioInternal.iCSR_mepc.asUInt
-        ))
+                BEQ  -> Mux(SRC1Val.asUInt === SRC2Val.asUInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U),
+                BNE  -> Mux(SRC1Val.asUInt =/= SRC2Val.asUInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U),
+                BLT  -> Mux(SRC1Val.asSInt  <  SRC2Val.asSInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U),
+                BGE  -> Mux(SRC1Val.asSInt  >= SRC2Val.asSInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U),
+                BLTU -> Mux(SRC1Val.asUInt  <  SRC2Val.asUInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U),
+                BGEU -> Mux(SRC1Val.asUInt  >= SRC2Val.asUInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U),
 
+                ECALL -> ioInternal.iCSR_mtvec.asUInt,
+                MRET  -> ioInternal.iCSR_mepc.asUInt
+            )
+        )
+    }
+
+    ioInternal.oSNPC := SNPC
+    ioInternal.oDNPC := DNPC
+    
     // TODO: Calculate CSR (mstatus, macuse, mtvec, mepc)
 
     // Disable instruction decoding
