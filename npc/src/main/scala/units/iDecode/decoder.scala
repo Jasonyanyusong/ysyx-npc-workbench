@@ -265,8 +265,17 @@ class IDU extends Module{
 
     ioInternal.oSNPC := SNPC
     ioInternal.oDNPC := DNPC
-    
+
     // TODO: Calculate CSR (mstatus, macuse, mtvec, mepc)
+    val iDecodeCSRmstatus = RegInit(0.U(DataWidth.W))
+    val iDecodeCSRmcause = RegInit(0.U(DataWidth.W))
+    val iDecodeCSRmtvec = RegInit(0.U(DataWidth.W))
+    val iDecodeCSRmepc = RegInit(0.U(DataWidth.W))
+
+    Mux(iDecodeEnable.asBool, /*TODO: Add CSR operations*/)
+    Mux(iDecodeEnable.asBool, /*TODO: Add CSR operations*/)
+    Mux(iDecodeEnable.asBool, /*TODO: Add CSR operations*/)
+    Mux(iDecodeEnable.asBool, /*TODO: Add CSR operations*/)
 
     // Disable instruction decoding
     iDecodeEnable := false.B
