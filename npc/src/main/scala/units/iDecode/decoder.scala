@@ -213,7 +213,21 @@ class IDU extends Module{
     ImmGenerator.ioSubmodule.iType := InstructionType
     val immOut = ImmGenerator.ioSubmodule.oImm
 
-    // TODO: Get source register values
+    val RS1Addr = RegInit(0.U(RegIDWidth.W))
+    val RS2Addr = RegInit(0.U(RegIDWidth.W))
+    val SRC1Val = RegInit(0.U(DataWidth.W))
+    val SRC2Val = RegInit(0.U(DataWidth.W))
+
+    Mux(iDecodeEnable.asBool, RS1Addr := ioInternal.iInst(19, 15).asUInt, RS1Addr := RS1Addr)
+    Mux(iDecodeEnable.asBool, RS2Addr := ioInternal.iInst(24, 20).asUInt, RS2Addr := RS2Addr)
+
+    when(iDecodeEnable.asBool){
+        ioInternal.oRS1 := RS1Addr
+        SRC1Val := ioInternal.iSRC1
+
+        ioInternal.oRS2 := RS2Addr
+        SRC2Val := ioInternal.iSRC2
+    }
 
     ioInternal.oSNPC := ioInternal.iPC + 4.U
     ioInternal.oDNPC := Lookup(
