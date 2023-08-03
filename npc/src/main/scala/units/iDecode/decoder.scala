@@ -243,18 +243,18 @@ class IDU extends Module{
     ioInternal.oDNPC := Lookup(
         ioInternal.iInst, ioInternal.iPC + 4.U, Array(
             // TODO: Add decoding for dynamic next PC
-            JAL -> ioInternal.iPC + ImmOut.asUInt
+            JAL  -> ioInternal.iPC.asUInt + ImmOut.asUInt
             JALR -> ((SRC1Val.asUInt + ImmOut.asUInt) & Cat(Fill(63, 1.U(1.W)), Fill(1, 0.U(1.W))))
 
-            BEQ ->
-            BNE ->
-            BLT ->
-            BGE ->
+            BEQ  -> Mux(SRC1Val.asUInt === SRC2Val.asUInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U)
+            BNE  -> Mux(SRC1Val.asUInt =/= SRC2Val.asUInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + 4.U)
+            BLT  ->
+            BGE  ->
             BLTU ->
             BGEU ->
 
             ECALL ->
-            MRET ->
+            MRET  ->
         ))
 
     // TODO: Calculate CSR (mstatus, macuse, mtvec, mepc)
