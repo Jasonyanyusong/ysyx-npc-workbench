@@ -213,6 +213,8 @@ class IDU extends Module{
     ImmGenerator.ioSubmodule.iType := InstructionType
     val immOut = ImmGenerator.ioSubmodule.oImm
 
+    // TODO: Get source register values
+
     ioInternal.oSNPC := ioInternal.iPC + 4.U
     ioInternal.oDNPC := Lookup(
         ioInternal.iInst, ioInternal.iPC + 4.U, Array(
