@@ -182,13 +182,32 @@ class IDU extends Module{
     // Combine these decode results together when iDecodeEnable is true
     Mux(iDecodeEnable.asBool, Cat(iDecPrivReg.asUInt, Cat(iDecEXUReg.asUInt, Cat(iDecLSlenReg.asUInt, Cat(iDecLSfuncReg.asUInt, Cat(iDecWBTypReg.asUInt, iDecDSReg.asUInt))))), 0.U(DecodeWidth.W))
 
+    // Decode Instruction type
     val InstructionType = Lookup(
         ioInternal.iInst, instR, Array(
-            // TODO: Add more instruction's type decode
             LUI -> instU, AUIPC -> instU,
+
+            JAL -> instJ,
+
+            JALR -> instI,
+            LB -> instI, LH -> instI, LW -> instI, LBU -> instI, LHU -> instI, LWU -> instI, LD -> instI,
+            ADDI -> instI, SLTI -> instI, SLTIU -> instI, XORI -> instI, ORI -> instI, ANDI -> instI, SLLI -> instI, SRLI -> instI, SRAI -> instI,
+            ADDIW -> instI, SLLIW -> instI, SRLIW -> instI, SRAIW -> instI,
+
+            CSRRW -> instI, CSRRS -> instI, CSRRC -> instI, CSRRWI -> instI, CSRRSI -> instI, CSRRCI -> instI,
+
+            ADD -> instR, SUB -> instR, SLL -> instR, SLT -> instR, SLTU -> instR, XOR -> instR, SRL -> instR, SRA -> instR, OR -> instR, AND -> instR,
+            ADDW -> instR, SUBW -> instR, SLLW -> instR, SRLW -> instR, SRAW -> instR,
+            MUL -> instR, MULH -> instR, MULHSU -> instR, MULHU -> instR, DIV -> instR, DIVU -> instR, REM -> instR, REMU -> instR,
+            MULW -> instR, DIVW -> instR, DIVUW -> instR, REMW -> instR, REMUW -> instR,
+
+            SB -> instS, SH -> instS, SW -> instS, SD -> instS,
+
+            BEQ -> instB, BNE -> instB, BLT -> instB, BGE -> instB, BLTU -> instB, BGEU -> instB,
         )
     )
 
+    // Connect imm-generator
     val ImmGenerator = Module(new immGen)
     ImmGenerator.ioSubmodule.iInst := ioInternal.iInst
     ImmGenerator.ioSubmodule.iType := InstructionType
