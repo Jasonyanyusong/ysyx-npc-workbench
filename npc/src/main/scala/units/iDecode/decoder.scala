@@ -209,22 +209,32 @@ class IDU extends Module{
 
     // Connect imm-generator
     val ImmGenerator = Module(new immGen)
-    ImmGenerator.ioSubmodule.iInst := ioInternal.iInst
-    ImmGenerator.ioSubmodule.iType := InstructionType
-    val immOut = ImmGenerator.ioSubmodule.oImm
+    val ImmOut = RegInit(0.U(DataWidth.W))
+
+    when(iDecodeEnable.asBool){
+        ImmGenerator.ioSubmodule.iInst := ioInternal.iInst
+        ImmGenerator.ioSubmodule.iType := InstructionType
+        ImmOut := ImmGenerator.ioSubmodule.oImm
+    }
+
+    //ImmGenerator.ioSubmodule.iInst := ioInternal.iInst
+    //ImmGenerator.ioSubmodule.iType := InstructionType
+    //val immOut = ImmGenerator.ioSubmodule.oImm
 
     val RS1Addr = RegInit(0.U(RegIDWidth.W))
     val RS2Addr = RegInit(0.U(RegIDWidth.W))
     val SRC1Val = RegInit(0.U(DataWidth.W))
     val SRC2Val = RegInit(0.U(DataWidth.W))
 
-    Mux(iDecodeEnable.asBool, RS1Addr := ioInternal.iInst(19, 15).asUInt, RS1Addr := RS1Addr)
-    Mux(iDecodeEnable.asBool, RS2Addr := ioInternal.iInst(24, 20).asUInt, RS2Addr := RS2Addr)
+    //Mux(iDecodeEnable.asBool, RS1Addr := ioInternal.iInst(19, 15).asUInt, RS1Addr := RS1Addr)
+    //Mux(iDecodeEnable.asBool, RS2Addr := ioInternal.iInst(24, 20).asUInt, RS2Addr := RS2Addr)
 
     when(iDecodeEnable.asBool){
+        RS1Addr := ioInternal.iInst(19, 15).asUInt
         ioInternal.oRS1 := RS1Addr
         SRC1Val := ioInternal.iSRC1
 
+        RS2Addr := ioInternal.iInst(24, 20).asUInt
         ioInternal.oRS2 := RS2Addr
         SRC2Val := ioInternal.iSRC2
     }
