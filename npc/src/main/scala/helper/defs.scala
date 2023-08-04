@@ -22,13 +22,20 @@ object Base{
     val DataWidth = 64
 
     val InstWidth = 32
+    val InstSize = 4
     
     val AddrWidth = 32
 
     val RegIDWidth = 5
     val CSRIDWidth = 12
 
-    val DecodeWidth = 16
+    val iDecPrivValLen = 2
+    val iDecEXUValLen = 7
+    val iDecLSlenValLen = 2
+    val iDecLSfuncValLen = 2
+    val iDecWBTypValLen = 2
+    val iDecDSValLen = 1
+    val DecodeWidth = iDecPrivValLen + iDecEXUValLen + iDecLSlenValLen + iDecLSfuncValLen + iDecWBTypValLen + iDecDSValLen
 
     val InstTypeWidth = 4
 
@@ -37,6 +44,12 @@ object Base{
     val immBLen = 13
     val immULen = 32
     val immJLen = 21
+
+    val RS1Hi = 19
+    val RS1Lo = 15
+
+    val RS2Hi = 24
+    val RS2Lo = 20
 }
 
 object InstType{
