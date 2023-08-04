@@ -320,15 +320,16 @@ class IDU extends Module{
         )
 
         OldCSR := ioInternal.iCSR_ZicsrOldVal
+        val Zicsr_uimm := ioInternal.iInst(19, 15).asUInt
 
         ioInternal.oCSR_ZicsrNewVal := Lookup(
             ioInternal.iInst, 0.U(DataWidth.W), Array(
                 CSRRW -> SRC1Val,
                 CSRRS -> (SRC1Val | OldCSR),
                 CSRRC -> (SRC1Val & OldCSR),
-                //CSRRWI -> ,
-                //CSRRSI -> ,
-                //CSRRCI -> 
+                CSRRWI -> Zicsr_uimm,
+                CSRRSI -> (Zicsr_uimm | OldCSR),
+                CSRRCI -> (Zicsr_uimm & OldCSR)
             )
         )
     }
