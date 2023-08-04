@@ -36,8 +36,8 @@ object iDecodeInternal extends Bundle{
     val oMasterValid = Output(Bool())
 
     val iInst = Input(UInt(InstWidth.W))
-    val oDynamicNextPC = Output(UInt(AddrWidth.W))
-    val oStaticNextPC = Output(UInt(AddrWidth.W))
+    //val oDynamicNextPC = Output(UInt(AddrWidth.W))
+    //val oStaticNextPC = Output(UInt(AddrWidth.W))
     
     // Combine EXU, LSU, WBU 's decode information together
     // 1   1   1   1   1   1   0   0   0   0   0   0   0   0   0   0
@@ -52,9 +52,9 @@ object iDecodeInternal extends Bundle{
     val LS_src2 = Output(UInt(DataWidth.W))
 
     // OFF-PIPELINE VALUES
-    val CSR_FetchAddr = Output(UInt(CSRIDWidth.W)) // RV have 4096 CSRs
-    val CSR_FetchRetu = Input(UInt(DataWidth.W))
-    val CSR_ChangeVal = Output(UInt(DataWidth.W))
+    //val CSR_FetchAddr = Output(UInt(CSRIDWidth.W)) // RV have 4096 CSRs
+    //val CSR_FetchRetu = Input(UInt(DataWidth.W))
+    //val CSR_ChangeVal = Output(UInt(DataWidth.W))
 
     val oRS1 = Output(UInt(RegIDWidth.W))
     val oRS2 = Output(UInt(RegIDWidth.W))
@@ -65,7 +65,7 @@ object iDecodeInternal extends Bundle{
 
     val iPC = Input(UInt(AddrWidth.W))
     val oPC = Output(UInt(AddrWidth.W))
-    val oSNPC = Output(UInt(AddrWidth.W))
+    //val oSNPC = Output(UInt(AddrWidth.W))
     val oDNPC = Output(UInt(AddrWidth.W))
 
     val iCSR_ZicsrOldVal = Input(UInt(DataWidth.W))
@@ -252,7 +252,7 @@ class IDU extends Module{
         )
     }
 
-    ioInternal.oSNPC := SNPC
+    //ioInternal.oSNPC := SNPC
     ioInternal.oDNPC := DNPC
 
     val OldCSR = RegInit(0.U(DataWidth.W))
