@@ -68,7 +68,7 @@ object iDecodeInternal extends Bundle{
 }
 
 class IDU extends Module{
-    ioInternal = IO(new iDecodeInternal)
+    val ioInternal = IO(new iDecodeInternal)
     // Instruction Decode Unit: First generate opreation code, then send operands to EXU and LSU (for operand send to LSU, it needs to be delivered to EXU first), last write back PC and CSR (WBU only write back GPR)
 
     val DecodeVal = 0.U(DecodeWidth.W)
