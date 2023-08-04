@@ -80,7 +80,7 @@ object iDecodeInternal extends Bundle{
 
     val iCSR_ZicsrOldVal = Input(UInt(DataWidth.W))
     val oCSR_ZicsrNewVal = Output(UInt(DataWidth.W))
-    val oCSR_ZicsrWSCInx = Output(UInt(CSRIDWidth.W))
+    val oCSR_ZicsrWSCIdx = Output(UInt(CSRIDWidth.W))
 }
 
 class IDU extends Module{
