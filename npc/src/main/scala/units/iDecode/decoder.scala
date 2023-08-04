@@ -81,6 +81,8 @@ class IDU extends Module{
     val iDecWBTypVal = 0.U(iDecWBTypValLen.W)
     val iDecDSVal = 0.U(iDecDSValLen.W)
 
+    val IDU_NotBusy = RegInit(true.B)
+
     // Only can decode instruction if Master (IFU) 's output is valid
     Mux(ioInternal.iSlaveValid.asBool, iDecodeEnable := true.B, iDecodeEnable := false.B)
 
@@ -316,14 +318,16 @@ class IDU extends Module{
     // Disable instruction decoding
     iDecodeEnable := false.B
 
+    // Connect Decode Signals
     ioInternal.oDecodeBundle := DecodeVal
     ioInternal.oEXU_src1 := EXU_SRC1
     ioInternal.oEXU_src2 := EXU_SRC2
     ioInternal.oLSU_src2 := LSU_SRC2
     ioInternal.oRD := RDAddr
-    // TODO: connect more decode signals
 
+    // Connect Pipline Signals
     ioInternal.oMasterValid := true.B
+    ioInternal.oSlaveReady := (IDU_NotBusy.asBool && ioInternal.iMasterReady)
 
     when(ioInternal.iMasterReady.asBool){
         // Shake hand success, re-enable iDecode, decode next instruction if IFU have result
