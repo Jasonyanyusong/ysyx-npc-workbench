@@ -68,16 +68,6 @@ object iDecodeInternal extends Bundle{
     val oSNPC = Output(UInt(AddrWidth.W))
     val oDNPC = Output(UInt(AddrWidth.W))
 
-    /*val iCSR_mcause = Input(UInt(DataWidth.W))
-    val iCSR_mtvec = Input(UInt(DataWidth.W))
-    val iCSR_mstatus = Input(UInt(DataWidth.W))
-    val iCSR_mepc = Input(UInt(DataWidth.W))
-
-    val oCSR_mcause = Output(UInt(DataWidth.W))
-    val oCSR_mtvec = Output(UInt(DataWidth.W))
-    val oCSR_mstatus = Output(UInt(DataWidth.W))
-    val oCSR_mepc = Output(UInt(DataWidth.W))*/
-
     val iCSR_ZicsrOldVal = Input(UInt(DataWidth.W))
     val oCSR_ZicsrNewVal = Output(UInt(DataWidth.W))
     val oCSR_ZicsrWSCIdx = Output(UInt(CSRIDWidth.W))
@@ -223,17 +213,10 @@ class IDU extends Module{
         ImmOut := ImmGenerator.ioSubmodule.oImm
     }
 
-    //ImmGenerator.ioSubmodule.iInst := ioInternal.iInst
-    //ImmGenerator.ioSubmodule.iType := InstructionType
-    //val immOut = ImmGenerator.ioSubmodule.oImm
-
     val RS1Addr = RegInit(0.U(RegIDWidth.W))
     val RS2Addr = RegInit(0.U(RegIDWidth.W))
     val SRC1Val = RegInit(0.U(DataWidth.W))
     val SRC2Val = RegInit(0.U(DataWidth.W))
-
-    //Mux(iDecodeEnable.asBool, RS1Addr := ioInternal.iInst(19, 15).asUInt, RS1Addr := RS1Addr)
-    //Mux(iDecodeEnable.asBool, RS2Addr := ioInternal.iInst(24, 20).asUInt, RS2Addr := RS2Addr)
 
     when(iDecodeEnable.asBool){
         RS1Addr := ioInternal.iInst(19, 15).asUInt
@@ -272,46 +255,9 @@ class IDU extends Module{
     ioInternal.oSNPC := SNPC
     ioInternal.oDNPC := DNPC
 
-    /*
-    // TODO: Calculate CSR (mstatus, macuse, mtvec, mepc)
-    val iDecodeCSRmstatus = RegInit(0.U(DataWidth.W))
-    val iDecodeCSRmcause = RegInit(0.U(DataWidth.W))
-    val iDecodeCSRmtvec = RegInit(0.U(DataWidth.W))
-    val iDecodeCSRmepc = RegInit(0.U(DataWidth.W))
-
-    Mux(iDecodeEnable.asBool, /*TODO: Add CSR operations*/)
-    Mux(iDecodeEnable.asBool, /*TODO: Add CSR operations*/)
-    Mux(iDecodeEnable.asBool, /*TODO: Add CSR operations*/)
-    Mux(iDecodeEnable.asBool, /*TODO: Add CSR operations*/)
-
-    when(iDecodeEnable.asBool){
-        // TODO: Give old CSR val to EXU
-        iDecodeCSRmstatus := Lookup(
-            // mstatus is 0x300
-            ioInternal.iInst, ioInternal.iCSR_mstatus, Array(
-                ECALL -> "ha0001800".asUInt,
-                CSRRW -> Mux(ImmOut === "h300".asUInt, SRC1Val.asUInt, ioInternal.iCSR_mstatus.asUInt),
-                CSRRS -> Mux(ImmOut === "h300".asUInt, (ioInternal.iCSR_mstatus.asUInt | SRC1Val.asUInt), ioInternal.iCSR_mstatus.asUInt),
-                CSRRC -> Mux(ImmOut === "h300".asUInt, (ioInternal.iCSR_mstatus.asUInt & SRC1Val.asUInt), ioInternal.iCSR_mstatus.asUInt)
-            )
-        )
-
-        iDecodeCSRmcause := Lookup(
-            // mcause is 0x342
-            ioInternal.iInst, ioInternal.iCSR_mcause, Array(
-                ECALL -> 11.U(DataWidth.W),
-                CSRRW -> Mux(ImmOut === "h342".asUInt, SRC1Val.asUInt, ioInternal.iCSR_mcause.asUInt),
-                CSRRS -> Mux(ImmOut === "h342".asUInt, (ioInternal.iCSR_mcause.asUInt | SRC1Val.asUInt), ioInternal.iCSR_mcause.asUInt),
-                CSRRC -> Mux(ImmOut === "h342".asUInt, (ioInternal.iCSR_mcause.asUInt & SRC1Val.asUInt), ioInternal.iCSR_mcause.asUInt)
-            )
-        )
-    }
-    */
-
     val OldCSR = RegInit(0.U(DataWidth.W))
 
     when(iDecodeEnable.asBool){
-
         ioInternal.oCSR_ZicsrWSCIdx := Lookup(
             ioInternal.iInst, 0.U(CSRIDWidth.W), Array(
                 CSRRW -> ImmOut,  CSRRS -> ImmOut,  CSRRC -> ImmOut,
