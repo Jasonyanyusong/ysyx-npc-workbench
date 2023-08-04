@@ -323,12 +323,12 @@ class IDU extends Module{
 
         ioInternal.oCSR_ZicsrNewVal := Lookup(
             ioInternal.iInst, 0.U(DataWidth.W), Array(
-                CSRRW -> ,
-                CSRRS -> ,
-                CSRRC -> ,
-                CSRRWI -> ,
-                CSRRSI -> ,
-                CSRRCI -> 
+                CSRRW -> SRC1Val,
+                CSRRS -> (SRC1Val | OldCSR),
+                CSRRC -> (SRC1Val & OldCSR),
+                //CSRRWI -> ,
+                //CSRRSI -> ,
+                //CSRRCI -> 
             )
         )
     }
