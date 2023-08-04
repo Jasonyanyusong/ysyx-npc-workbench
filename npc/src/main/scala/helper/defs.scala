@@ -50,6 +50,9 @@ object Base{
 
     val RS2Hi = 24
     val RS2Lo = 20
+
+    val RDHi = 11
+    val RDLo = 7
 }
 
 object InstType{

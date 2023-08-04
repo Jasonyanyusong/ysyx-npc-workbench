@@ -46,10 +46,12 @@ object iDecodeInternal extends Bundle{
     // Priv               EXU              LSlen   LSfunc  WBTyp  Debug State (DS)
     val oDecodeBundle = Output(UInt(DecodeWidth.W))
 
-    val EX_src1 = Output(UInt(DataWidth.W))
-    val EX_src2 = Output(UInt(DataWidth.W))
+    val oEXU_src1 = Output(UInt(DataWidth.W))
+    val oEXU_src2 = Output(UInt(DataWidth.W))
     // Load-Store's src1 is EXU's result
-    val LS_src2 = Output(UInt(DataWidth.W))
+    val oLSU_src2 = Output(UInt(DataWidth.W))
+
+    val oRD = Output(UInt(RegIDWidth.W))
 
     // OFF-PIPELINE VALUES
     //val CSR_FetchAddr = Output(UInt(CSRIDWidth.W)) // RV have 4096 CSRs
@@ -58,13 +60,13 @@ object iDecodeInternal extends Bundle{
 
     val oRS1 = Output(UInt(RegIDWidth.W))
     val oRS2 = Output(UInt(RegIDWidth.W))
-    val oRD  = Output(UInt(RegIDWidth.W))
+    //val oRD  = Output(UInt(RegIDWidth.W))
 
     val iSRC1 = Input(UInt(DataWidth.W))
     val iSRC2 = Input(UInt(DataWidth.W))
 
     val iPC = Input(UInt(AddrWidth.W))
-    val oPC = Output(UInt(AddrWidth.W))
+    //val oPC = Output(UInt(AddrWidth.W))
     //val oSNPC = Output(UInt(AddrWidth.W))
     val oDNPC = Output(UInt(AddrWidth.W))
 
@@ -213,10 +215,13 @@ class IDU extends Module{
         ImmOut := ImmGenerator.ioSubmodule.oImm
     }
 
+    // Decode for registers
     val RS1Addr = 0.U(RegIDWidth.W)
     val RS2Addr = 0.U(RegIDWidth.W)
     val SRC1Val = 0.U(DataWidth.W)
     val SRC2Val = 0.U(DataWidth.W)
+
+    val RDAddr = 0.U(RegIDWidth.W)
 
     when(iDecodeEnable.asBool){
         RS1Addr := ioInternal.iInst(RS1Hi, RS1Lo).asUInt
@@ -226,6 +231,8 @@ class IDU extends Module{
         RS2Addr := ioInternal.iInst(RS2Hi, RS2Lo).asUInt
         ioInternal.oRS2 := RS2Addr
         SRC2Val := ioInternal.iSRC2
+
+        RDAddr := ioInternal.iInst(RDHi, RDLo).asUInt
     }
 
     // Decode Static-Next-PC and Dynamic-Next-PC
@@ -280,10 +287,48 @@ class IDU extends Module{
         )
     }
 
+    // Assign SRC to EXU and LSU
+    val EXU_SRC1 = 0.U(DataWidth.W)
+    val EXU_SRC2 = 0.U(DataWidth.W)
+    val LSU_SRC2 = 0.U(DataWidth.W)
+
+    when(iDecodeEnable.asBool){
+        EXU_SRC1 := MuxCase(0.U(DataWidth.W), Array(
+            InstructionType === InstR -> SRC1Val.asUInt,
+            InstructionType === InstI -> SRC1Val.asUInt,
+            InstructionType === InstS -> SRC1Val.asUInt,
+            InstructionType === InstB -> 0.U(DataWidth.W),
+            InstructionType === InstU -> ImmOut.asUInt,
+            InstructionType === InstJ -> 0.U(DataWidth.W)
+        ))
+
+        EXU_SRC2 := MuxCase(0.U(DataWidth.W), Array(
+            InstructionType === InstR -> SRC2Val.asUInt,
+            InstructionType === InstI -> ImmOut.asUInt,
+            InstructionType === InstS -> ImmOut.asUInt,
+            InstructionType === InstB -> 0.U(DataWidth.W),
+            InstructionType === InstU -> ioInternal.iPC.asUInt,
+            InstructionType === InstJ -> 0.U(DataWidth.W)
+        ))
+
+        LSU_SRC2 := MuxCase(0.U(DataWidth.W), Array(
+            InstructionType === InstR -> 0.U(DataWidth.W),
+            InstructionType === InstI -> 0.U(DataWidth.W),
+            InstructionType === InstS -> SRC2Val.asUInt,
+            InstructionType === InstB -> 0.U(DataWidth.W),
+            InstructionType === InstU -> 0.U(DataWidth.W),
+            InstructionType === InstJ -> 0.U(DataWidth.W)
+        ))
+    }
+
     // Disable instruction decoding
     iDecodeEnable := false.B
 
     ioInternal.oDecodeBundle := DecodeVal
+    ioInternal.oEXU_src1 := EXU_SRC1
+    ioInternal.oEXU_src2 := EXU_SRC2
+    ioInternal.oLSU_src2 := LSU_SRC2
+    ioInternal.oRD := RDAddr
     // TODO: connect more decode signals
 
     ioInternal.oMasterValid := true.B
