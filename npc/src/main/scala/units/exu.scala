@@ -49,8 +49,22 @@ class EXU extends Module{
     val EXU_NotBusy = RegInit(true.B)
 
     // TODO: Add EXU's functional
+    val ExecuteResult = 0.U(DataWidth.W)
+    val iExecuteEnable = true.B
+
+    // Only can execute arthmetic if Master (IDU) 's output is valid
+    Mux(ioInternal.iSlaveValid.asBool, iExecuteEnable := true.B, iExecuteEnable := false.B)
+
+    when(iExecuteEnable.asBool){
+        ExecuteResult := MuxCase(0.U(DataWidth.W), Array(
+            // TODO: Add more EXU operation types
+        ))
+    }
 
     // TODO: Connect Passthroughs for LSU and WBU
+    ioInternal.oDecodeBundle := ioInternal.iDecodeBundle
+    ioInternal.oLSU_SRC2 := ioInternal.iLSU_SRC2
+    ioInternal.oRD := ioInternal.iRD
 
     // TODO: Pipeline Shake-Hand-Rule implement
 }
