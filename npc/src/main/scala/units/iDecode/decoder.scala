@@ -103,7 +103,9 @@ class IDU extends Module{
     // Decode PrivReg
     Mux(iDecodeEnable.asBool, iDecPrivReg := 0.U(2.W), iDecPrivReg := Lookup(
         ioInternal.iInst, PR_NORM, Array(
-            ECALL -> PR_ECALL, MRET -> PR_MRET, EBREAK -> PR_EBREAK
+            ECALL -> PR_ECALL, MRET -> PR_MRET,
+            CSRRW -> PR_ZICSR, CSRRC -> PR_ZICSR, CSRRS -> PR_ZICSR,
+            CSRRWI -> PR_ZICSR, CSRRCI -> PR_ZICSR, CSRRSI -> PR_ZICSR
         )
     ))
 
@@ -305,6 +307,31 @@ class IDU extends Module{
         )
     }
     */
+
+    val OldCSR = RegInit(0.U(DataWidth.W))
+
+    when(iDecodeEnable.asBool){
+
+        ioInternal.oCSR_ZicsrWSCIdx := Lookup(
+            ioInternal.iInst, 0.U(CSRIDWidth.W), Array(
+                CSRRW -> ImmOut,  CSRRS -> ImmOut,  CSRRC -> ImmOut,
+                CSRRWI -> ImmOut, CSRRSI -> ImmOut, CSRRCI -> ImmOut,
+            )
+        )
+
+        OldCSR := ioInternal.iCSR_ZicsrOldVal
+
+        ioInternal.oCSR_ZicsrNewVal := Lookup(
+            ioInternal.iInst, 0.U(DataWidth.W), Array(
+                CSRRW -> ,
+                CSRRS -> ,
+                CSRRC -> ,
+                CSRRWI -> ,
+                CSRRSI -> ,
+                CSRRCI -> 
+            )
+        )
+    }
 
     // Disable instruction decoding
     iDecodeEnable := false.B

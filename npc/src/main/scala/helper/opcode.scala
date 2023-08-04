@@ -74,7 +74,7 @@ object OpPriv{
     def PR_NORM   = 0.U(2.W)
     def PR_ECALL  = 1.U(2.W)
     def PR_MRET   = 2.U(2.W)
-    def PR_EBREAK = 3.U(2.W)
+    def PR_ZICSR  = 3.U(2.W)
 }
 
 object OpState{
