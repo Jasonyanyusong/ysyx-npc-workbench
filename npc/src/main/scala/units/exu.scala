@@ -31,11 +31,26 @@ object iExecuteInternal extends Bundle{
     val oMasterValid = Output(Bool())
 
     val iDecodeBundle = Input(UInt(DecodeWidth.W))
+    val oDecodeBundle = Output(UInt(DecodeWidth.W))
 
     val iEXU_SRC1 = Input(UInt(DataWidth.W))
     val iEXU_SRC2 = Input(UInt(DataWidth.W))
     val iLSU_SRC2 = Input(UInt(DataWidth.W))
+    val oLSU_SRC2 = Output(UInt(DataWidth.W))
 
     val oEXU_RET = Output(UInt(DataWidth.W))
+    val iRD = Input(UInt(RegIDWidth.W))
     val oRD = Output(UInt(RegIDWidth.W))
+}
+
+class EXU extends Module{
+    val ioInternal = IO(new iExecuteInternal)
+
+    val EXU_NotBusy = RegInit(true.B)
+
+    // TODO: Add EXU's functional
+
+    // TODO: Connect Passthroughs for LSU and WBU
+
+    // TODO: Pipeline Shake-Hand-Rule implement
 }
