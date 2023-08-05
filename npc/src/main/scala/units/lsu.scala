@@ -55,4 +55,30 @@ class LSU extends Module{
     // TODO: implement pipelined-LSU
     val ioInternal = IO(new iLoadStoreInternal)
     val ioExternal = IO(new iLoadStoreExternal)
+
+    val LSU_NotBusy = RegInit(true.B)
+    val LoadStoreResult = 0.U(DataWidth.W)
+    val iLoadStoreEnable = true.B
+    val iLoadStoreLen = ioInternal.iDecodeBundle(6, 5)
+    val iLoadStoreFunc = ioInternal.iDecodeBundle(4, 3)
+
+    def WordSignExt(WordVal : UInt(WordWidth.W)) = Cat(Fill(DataWidth - WordWidth, WordVal(WordWidth - 1).asUInt), WordVal (WordWidth - 1, 0))
+    def HalfSignExt(HalfVal : UInt(HalfWidth.W)) = Cat(Fill(DataWidth - HalfWidth, HalfVal(HalfWidth - 1).asUInt), HalfVal (HalfWidth - 1, 0))
+    def ByteSignExt(ByteVal : UInt(ByteWidth.W)) = Cat(Fill(ByteWidth - ByteWidth, ByteVal(ByteWidth - 1).asUInt), ByteVal (ByteWidth - 1, 0))
+
+    def WordZeroExt(WordVal : UInt(WordWidth.W)) = Cat(Fill(DataWidth - WordWidth, 0.U(1.W)), WordVal (WordWidth - 1, 0))
+    def HalfZeroExt(HalfVal : UInt(HalfWidth.W)) = Cat(Fill(DataWidth - HalfWidth, 0.U(1.W)), HalfVal (HalfWidth - 1, 0))
+    def ByteZeroExt(ByteVal : UInt(ByteWidth.W)) = Cat(Fill(ByteWidth - ByteWidth, 0.U(1.W)), ByteVal (ByteWidth - 1, 0))
+
+    Mux(ioInternal.iSlaveValid.asBool, iLoadStoreEnable := true.B, iLoadStoreEnable := false.B)
+
+    when(iLoadStoreEnable.asBool){
+        LoadStoreResult := MuxCase(0.U(DataWidth.W), Array(
+            // TODO: Add more Load-Store type
+        ))
+    }
+
+    // TODO: Connect Passthrough for WBU
+
+    // TODO: Pipeline shake hand implementation
 }
