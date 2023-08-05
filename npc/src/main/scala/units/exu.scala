@@ -48,23 +48,63 @@ class EXU extends Module{
 
     val EXU_NotBusy = RegInit(true.B)
 
-    // TODO: Add EXU's functional
     val ExecuteResult = 0.U(DataWidth.W)
     val iExecuteEnable = true.B
+    val iExecuteOPcode = ioInternal.iDecodeBundle(13, 7)
+
+    val SRC1 = ioInternal.iEXU_SRC1
+    val SRC2 = ioInternal.iEXU_SRC2
+
+    def WordSignExt(WordVal : UInt(WordWidth.W)) = Cat(Fill(WordWidth, WordVal(WordWidth - 1).asUInt), WordVal (WordWidth - 1, 0))
+    def WordCut(DoubleVal : UInt(DataWidth.W)) = DoubleVal(WordWidth - 1, 0)
 
     // Only can execute arthmetic if Master (IDU) 's output is valid
     Mux(ioInternal.iSlaveValid.asBool, iExecuteEnable := true.B, iExecuteEnable := false.B)
 
     when(iExecuteEnable.asBool){
         ExecuteResult := MuxCase(0.U(DataWidth.W), Array(
-            // TODO: Add more EXU operation types
+            iExecuteOPcode === EX_NOP -> (0.U(DataWidth.W)),
+            iExecuteOPcode === EX_PS1 -> (SRC1),
+            iExecuteOPcode === EX_ADD -> (SRC1 + SRC2),
+            iExecuteOPcode === EX_SLT -> Mux(SRC1.asSInt < SRC2.asSInt, 1.U(DataWidth.W), 0.U(DataWidth.W)),
+            iExecuteOPcode === EX_SLTU -> Mux(SRC1.asUInt < SRC2.asUInt, 1.U(DataWidth.W), 0.U(DataWidth.W)),
+            iExecuteOPcode === EX_XOR -> (SRC1 ^ SRC2),
+            iExecuteOPcode === EX_OR -> (SRC1 | SRC2),
+            iExecuteOPcode === EX_AND -> (SRC1 & SRC2),
+            iExecuteOPcode === EX_SLL -> (SRC1.asUInt << SRC2(5, 0)),
+            iExecuteOPcode === EX_SRL -> (SRC1.asUInt >> SRC2(5, 0)),
+            iExecuteOPcode === EX_SRA -> (SRC1.asSInt >> SRC2(5, 0)),
+            iExecuteOPcode === EX_SUB -> (SRC1 - SRC2),
+
+            iExecuteOPcode === EX_ADDW -> (WordSignExt(WordCut(WordCut(SRC1) + WordCut(SRC2)))),
+            iExecuteOPcode === EX_SUBW -> (WordSignExt(WordCut(WordCut(SRC1) - WordCut(SRC2)))),
+            iExecuteOPcode === EX_SLLW -> (WordSignExt(WordCut(WordCut(SRC1).asUInt << SRC2(4, 0)))),
+            iExecuteOPcode === EX_SRLW -> (WordSignExt(WordCut(WordCut(SRC1).asUInt >> SRC2(4, 0)))),
+            iExecuteOPcode === EX_SRAW -> (WordSignExt(WordCut(WordCut(SRC1).asSInt >> SRC2(4, 0)))),
+
+            iExecuteOPcode === EX_MUL -> (SRC1 * SRC2)(DataWidth.W - 1, 0),
+            iExecuteOPcode === EX_MULH -> (SRC1 * SRC2)(2 * DataWidth - 1, DataWidth),
+            iExecuteOPcode === EX_MULHSU -> (SRC1.asSInt * SRC2.asUInt)(2 * DataWidth - 1, DataWidth),
+            iExecuteOPcode === EX_MULHU -> (SRC1.asUInt * SRC2.asUInt)(2 * DataWidth - 1, DataWidth),
+            iExecuteOPcode === EX_DIV -> (SRC1 / SRC2),
+            iExecuteOPcode === EX_DIVU -> (SRC1.asUInt / SRC2.asUInt),
+            iExecuteOPcode === EX_REM -> (SRC1 % SRC2),
+            iExecuteOPcode === EX_REMU -> (SRC1.asUInt % SRC2.asUInt),
+
+            iExecuteOPcode === EX_MULW -> (WordSignExt(WordCut(WordCut(SRC1) * WordCut(SRC2)))),
+            iExecuteOPcode === EX_DIVW -> (WordSignExt(WordCut(WordCut(SRC1).asSInt / WordCut(SRC2).asSInt))),
+            iExecuteOPcode === EX_DIVUW -> (WordSignExt(WordCut(WordCut(SRC1).asUInt / WordCut(SRC2).asUInt))),
+            iExecuteOPcode === EX_REMW -> (WordSignExt(WordCut(WordCut(SRC1).asSInt % WordCut(SRC2).asSInt))),
+            iExecuteOPcode === EX_REMUW -> (WordSignExt(WordCut(WordCut(SRC1).asUInt % WordCut(SRC2).asUInt)))
         ))
     }
 
-    // TODO: Connect Passthroughs for LSU and WBU
+    ioInternal.oEXU_RET := ExecuteResult
+
     ioInternal.oDecodeBundle := ioInternal.iDecodeBundle
     ioInternal.oLSU_SRC2 := ioInternal.iLSU_SRC2
     ioInternal.oRD := ioInternal.iRD
 
-    // TODO: Pipeline Shake-Hand-Rule implement
+    ioInternal.oSlaveReady := EXU_NotBusy.asBool && ioInternal.iMasterReady.asBool
+    ioInternal.oMasterValid := EXU_NotBusy.asBool && iExecuteEnable.asBool
 }

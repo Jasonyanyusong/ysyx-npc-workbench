@@ -20,6 +20,9 @@ object Base{
     val NR_GPR = 32
     
     val DataWidth = 64
+    val WordWidth = 32
+    val HalfWidth = 16
+    val ByteWidth = 8
 
     val InstWidth = 32
     val InstSize = 4
