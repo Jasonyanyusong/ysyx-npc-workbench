@@ -20,4 +20,17 @@ import chisel3._
 import chisel3.util._
 
 import npc.helper.defs.Base._
-import npc.helper.opcode.OpLSU._
+import npc.helper.opcode.OpLSULen._
+import npc.helper.opcode.OpLSUfunc._
+
+object iLoadStoreInternal extends Bundle{
+    // TODO: define pipeline-LSU's internal IO
+}
+
+object iLoadStoreExternal extends Bundle{
+    // TODO: define pipeline-LSU's external IO
+}
+
+class LSU extends Module{
+    // TODO: implement pipelined-LSU
+}
