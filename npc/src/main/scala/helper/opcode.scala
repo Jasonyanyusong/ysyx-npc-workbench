@@ -81,3 +81,10 @@ object OpState{
     def NPC_RUNNING = 0.U(1.W)
     def NPC_STOPPED = 1.U(1.W)
 }
+
+object MemOp{
+    def MEM_NOP = 0.U(2.W)
+    def MEM_READ = 1.U(2.W)
+    def MEM_WRITE = 2.U(2.W)
+    def MEM_ATOMIC = 3.U(2.W)
+}

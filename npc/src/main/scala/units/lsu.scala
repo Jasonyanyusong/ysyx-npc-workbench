@@ -22,6 +22,7 @@ import chisel3.util._
 import npc.helper.defs.Base._
 import npc.helper.opcode.OpLSULen._
 import npc.helper.opcode.OpLSUfunc._
+import npc.helper.opcode.MemOp._
 
 object iLoadStoreInternal extends Bundle{
     // ON-PIPELINE VALUES
@@ -59,8 +60,18 @@ class LSU extends Module{
     val LSU_NotBusy = RegInit(true.B)
     val LoadStoreResult = 0.U(DataWidth.W)
     val iLoadStoreEnable = true.B
-    val iLoadStoreLen = ioInternal.iDecodeBundle(6, 5)
-    val iLoadStoreFunc = ioInternal.iDecodeBundle(4, 3)
+
+    val iLoadStoreLen = LS_B // Default is LS_B since its value is 0
+    val iLoadStoreFunc = LS_NOP
+    val iLoadStoreAddr = 0.U(AddrWidth.W)
+    val iLoadStoreMemOP = MEM_NOP
+    val iLoadStoreWrite = 0.U(DataWidth.W)
+
+    val DecodeBundle = ioInternal.iDecodeBundle
+    val EXU_RET = ioInternal.iEXU_RET
+    val LSU_SRC = ioInternal.LSU_SRC2
+
+    val LD_RET = 0.U(DataWidth.W)
 
     def WordSignExt(WordVal : UInt(WordWidth.W)) = Cat(Fill(DataWidth - WordWidth, WordVal(WordWidth - 1).asUInt), WordVal (WordWidth - 1, 0))
     def HalfSignExt(HalfVal : UInt(HalfWidth.W)) = Cat(Fill(DataWidth - HalfWidth, HalfVal(HalfWidth - 1).asUInt), HalfVal (HalfWidth - 1, 0))
@@ -72,12 +83,27 @@ class LSU extends Module{
 
     Mux(ioInternal.iSlaveValid.asBool, iLoadStoreEnable := true.B, iLoadStoreEnable := false.B)
 
-    when(iLoadStoreEnable.asBool){
-        LoadStoreResult := MuxCase(0.U(DataWidth.W), Array(
-            // TODO: Add more Load-Store type
-        ))
-    }
+    Mux(iLoadStoreEnable.asBool, iLoadStoreLen := DecodeBundle(6, 5), iLoadStoreLen := iLoadStoreLen)
+    Mux(iLoadStoreEnable.asBool, iLoadStoreFunc := DecodeBundle(4, 3), iLoadStoreFunc := iLoadStoreFunc)
+    Mux(iLoadStoreEnable.asBool, iLoadStoreAddr := EXU_RET, iLoadStoreAddr := iLoadStoreAddr)
+    Mux(iLoadStoreEnable.asBool, iLoadStoreMemOP := MuxCase(MEM_NOP, Array(
+        iLoadStoreFunc === LS_LD -> MEM_READ,
+        iLoadStoreFunc === LS_LDU -> MEM_READ,
+        iLoadStoreFunc === LS_ST -> MEM_WRITE
+    )), iLoadStoreMemOP := iLoadStoreMemOP)
+    Mux(iLoadStoreEnable.asBool, iLoadStoreWrite := LSU_SRC, iLoadStoreWrite := iLoadStoreWrite)
 
+    // Connect IO External
+    ioExternal.oMemoryOP := iLoadStoreMemOP
+    ioExternal.oMemoryAddr := iLoadStoreAddr
+    ioExternal.oMemoryWrite := iLoadStoreWrite
+    LD_RET := ioExternal.iMemoryRead
+
+    // TODO: Connect IO Internal
+
+    // TODO: For different Load Instructions, generate LSU output
+
+    // Connect passtorhough for WBU
     ioInternal.oDecodeBundle := ioInternal.iDecodeBundle
     ioInternal.oEXU_RET := ioInternal.iEXU_RET
     ioInternal.oRD := ioInternal.iRD
