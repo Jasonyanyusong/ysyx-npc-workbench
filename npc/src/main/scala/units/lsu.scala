@@ -78,7 +78,9 @@ class LSU extends Module{
         ))
     }
 
-    // TODO: Connect Passthrough for WBU
+    ioInternal.oDecodeBundle := ioInternal.iDecodeBundle
+    ioInternal.oEXU_RET := ioInternal.iEXU_RET
+    ioInternal.oRD := ioInternal.iRD
 
     // TODO: Pipeline shake hand implementation
 }
