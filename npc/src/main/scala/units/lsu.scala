@@ -99,9 +99,24 @@ class LSU extends Module{
     ioExternal.oMemoryWrite := iLoadStoreWrite
     LD_RET := ioExternal.iMemoryRead
 
-    // TODO: Connect IO Internal
+    // For different Load Instructions, generate LSU output
+    Mux(iLoadStoreEnable.asBool, LoadStoreResult := MuxCase(0.U(DataWidth.W), Array(
+        iLoadStoreFunc === LS_LD -> (MuxCase(0.U(DataWidth.W), Array(
+            iLoadStoreLen === LS_B -> ByteSignExt(LD_RET),
+            iLoadStoreLen === LS_H -> HalfSignExt(LD_RET),
+            iLoadStoreLen === LS_W -> WordSignExt(LD_RET)
+            iLoadStoreLen === LS_D -> LD_RET
+        ))),
+        iLoadStoreFunc === LS_LDU -> (MuxCase(0.U(DataWidth.W), Array(
+            iLoadStoreLen === LS_B -> ByteZeroExt(LD_RET),
+            iLoadStoreLen === LS_H -> HalfZeroExt(LD_RET),
+            iLoadStoreLen === LS_W -> WordZeroExt(LD_RET)
+            iLoadStoreLen === LS_D -> LD_RET
+        )))
+    )))
 
-    // TODO: For different Load Instructions, generate LSU output
+    // Connect IO Internal
+    ioInternal.oLSU_RET := LoadStoreResult
 
     // Connect passtorhough for WBU
     ioInternal.oDecodeBundle := ioInternal.iDecodeBundle
