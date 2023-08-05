@@ -24,13 +24,35 @@ import npc.helper.opcode.OpLSULen._
 import npc.helper.opcode.OpLSUfunc._
 
 object iLoadStoreInternal extends Bundle{
-    // TODO: define pipeline-LSU's internal IO
+    // ON-PIPELINE VALUES
+    val oSlaveReady = Output(Bool())
+    val iSlaveValid = Input(Bool())
+    
+    val iMasterReady = Input(Bool())
+    val oMasterValid = Output(Bool())
+
+    val iDecodeBundle = Input(UInt(DecodeWidth.W))
+    val oDecodeBundle = Output(UInt(DecodeWidth.W))
+
+    val iEXU_RET = Input(UInt(DataWidth.W))
+    val iLSU_SRC2 = Input(UInt(DataWidth.W))
+
+    val oEXU_RET = Output(UInt(DataWidth.W))
+    val oLSU_RET = Output(UInt(DataWidth.W))
+
+    val iRD = Input(UInt(RegIDWidth.W))
+    val oRD = Output(UInt(RegIDWidth.W))
 }
 
 object iLoadStoreExternal extends Bundle{
-    // TODO: define pipeline-LSU's external IO
+    val oMemoryOP = Output(UInt(2.W))
+    val oMemoryAddr = Output(UInt(AddrWidth.W))
+    val oMemoryWrite = Output(UInt(DataWidth.W))
+    val iMemoryRead = Input(UInt(DataWidth.W))
 }
 
 class LSU extends Module{
     // TODO: implement pipelined-LSU
+    val ioInternal = IO(new iLoadStoreInternal)
+    val ioExternal = IO(new iLoadStoreExternal)
 }
