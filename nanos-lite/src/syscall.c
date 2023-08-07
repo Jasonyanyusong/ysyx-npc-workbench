@@ -42,7 +42,7 @@ void sys_open(Context *c){
   #ifdef SYSCALL_LOG
   Log("Do SYSCALL: OPEN");
   #endif
-  c->GPRx = fs_open((char *)c->GPR2, c->GPR3, c->GPR4);
+  c->GPRx = fs_open((const char *)c->GPR2, c->GPR3, c->GPR4);
 }
 
 void sys_yield(Context *c){
