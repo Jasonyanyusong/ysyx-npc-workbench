@@ -18,3 +18,24 @@ package npc.units
 
 import chisel3._
 import chisel3.util._
+
+import npc.helper.defs.Base._
+import npc.helper.opcode.OpWBU._
+
+object iWriteBackInternal extends Bundle{
+    // ON-PIPELEINE VALUES
+    val oSlaveReady = Output(Bool())
+    val iSlaveValid = Input(Bool())
+
+    val iDecodeBundle = Input(UInt(DecodeWidth.W))
+
+    val iEXU_RET = Input(UInt(DataWidth.W))
+    val iLSU_RET = Input(UInt(DataWidth.W))
+
+    val iRD = Input(UInt(RegIDWidth.W))
+
+    // OFF-PIPELINE VALUES
+    val oWriteGPREnable = Output(Bool())
+    val oWriteGPRAddr = Output(UInt(RegIDWidth.W))
+    val oWriteGPRVal = Output(UInt(DataWidth.W))
+}
