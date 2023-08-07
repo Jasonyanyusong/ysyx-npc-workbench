@@ -22,11 +22,17 @@ import chisel3.util._
 import npc.axi.master._
 
 object iFetchInternal extends Bundle{
+    // ON-PIPELINE VALUES
     val iMasterReady = Input(Bool())
     val oMasterValid = Output(Bool())
-    val iPC = Input(UInt(AddrWidth.W))
+
+    //val iPC = Input(UInt(AddrWidth.W))
     val oInst = Output(UInt(InstWidth.W))
+    val oPC = Output(UInt(AddrWidth.W))
     //val iResetInstBuffer = Input(Bool())
+
+    val iFeedBackPCChanged = Input(Bool())
+    val iFeedBackNewPCVal = Input(UInt(AddrWidth.W))
 }
 
 object iFetchExternal extends Bundle{
@@ -47,6 +53,10 @@ class IFU extends Module{
 
     val iFetchEnable = RegInit(true.B)
 
+    val IFU_NotBusy = RegInit(true.B)
+
+    val PC = RegInit("h80000000".U(AddrWidth.W))
+
     /*if(iFetchEnable.asBool){
         ioExternal.oMemEnable := true.B
         ioExternal.oPC := ioInternal.iPC
@@ -58,13 +68,24 @@ class IFU extends Module{
     }*/
 
     Mux(iFetchEnable.asBool, ioExternal.oMemEnable := true.B,  ioExternal.oMemEnable := false.B)
-    Mux(iFetchEnable.asBool, ioExternal.oPC := ioInternal.iPC, ioExternal.oPC := 0.U(AddrWidth.W))
+    //Mux(iFetchEnable.asBool, ioExternal.oPC := ioInternal.iPC, ioExternal.oPC := 0.U(AddrWidth.W))
     Mux(iFetchEnable.asBool, Inst := ioExternal.iInst,         Inst := Inst.asUInt)
+    Mux(iFetchEnable.asBool, 
+        PC := Mux(
+            ioInternal.iFeedBackPCChanged.asBool, 
+            ioInternal.iFeedBackNewPCVal, 
+            PC + 4.U
+        ), 
+        PC := PC
+    )
+
+    Mux(iFetchEnable.asBool, ioExternal.oPC := PC, ioExternal.oPC := 0.U(AddrWidth.W))
+    Mux(iFetchEnable.asBool, ioInternal.oPC := PC, ioInternal.oPC := 0.U(AddrWidth.W))
     
     iFetchEnable := false.B
 
     ioInternal.oInst := Inst
-    ioInternal.oMasterValid := true.B
+    ioInternal.oMasterValid := IFU_NotBusy.asBool
 
     when(ioInternal.iMasterReady.asBool){
         // Shake hand success, re-enable iFetch, fetch next PC's instruction

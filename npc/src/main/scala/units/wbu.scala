@@ -31,9 +31,10 @@ object iWriteBackInternal extends Bundle{
 
     val iEXU_RET = Input(UInt(DataWidth.W))
     val iLSU_RET = Input(UInt(DataWidth.W))
-    val iIDU_SPC = Input(UInt(AddrWidth.W))
+    //val iIDU_SPC = Input(UInt(AddrWidth.W))
 
     val iRD = Input(UInt(RegIDWidth.W))
+    val iPC = Input(UInt(AddrWidth.W))
 
     // OFF-PIPELINE VALUES
     val oWriteGPREnable = Output(Bool())
@@ -53,7 +54,7 @@ class WBU extends Module{
 
     val EX_RETVal = ioInternal.iEXU_RET
     val LS_RETVal = ioInternal.iLSU_RET
-    val ID_SPCVal = ioInternal.iIDU_SPC
+    val SNPC = ioInternal.iPC + 4.U
 
     val DecodeBundle = ioInternal.iDecodeBundle
     val WBDecode = DecodeBundle(2, 1)
@@ -71,7 +72,7 @@ class WBU extends Module{
         WBDecode === WB_NOP -> 0.U(DataWidth.W),
         WBDecode === WB_EXU -> EX_RETVal,
         WBDecode === WB_LSU -> LS_RETVal,
-        WBDecode === WB_SNPC -> ID_SPCVal
+        WBDecode === WB_SNPC -> SNPC
     )))
 
     // Connect IO Internal

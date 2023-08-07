@@ -41,6 +41,9 @@ object iExecuteInternal extends Bundle{
     val oEXU_RET = Output(UInt(DataWidth.W))
     val iRD = Input(UInt(RegIDWidth.W))
     val oRD = Output(UInt(RegIDWidth.W))
+
+    val iPC = Input(UInt(AddrWidth.W))
+    val oPC = Ouptut(UInt(AddrWidth.W))
 }
 
 class EXU extends Module{
@@ -104,6 +107,7 @@ class EXU extends Module{
     ioInternal.oDecodeBundle := ioInternal.iDecodeBundle
     ioInternal.oLSU_SRC2 := ioInternal.iLSU_SRC2
     ioInternal.oRD := ioInternal.iRD
+    ioInternal.oPC := ioInternal.iPC
 
     ioInternal.oSlaveReady := EXU_NotBusy.asBool && ioInternal.iMasterReady.asBool
     ioInternal.oMasterValid := EXU_NotBusy.asBool && iExecuteEnable.asBool

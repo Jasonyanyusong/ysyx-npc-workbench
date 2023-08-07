@@ -51,6 +51,12 @@ object iDecodeInternal extends Bundle{
 
     val oRD = Output(UInt(RegIDWidth.W))
 
+    val iPC = Input(UInt(AddrWidth.W))
+    val oPC = Output(UInt(AddrWidth.W))
+
+    val oFeedBackPCChanged = Output(Bool())
+    val oFeedBackNewPCVal = Output(UInt(AddrWidth.W))
+
     // OFF-PIPELINE VALUES
 
     val oRS1 = Output(UInt(RegIDWidth.W))
@@ -59,12 +65,15 @@ object iDecodeInternal extends Bundle{
     val iSRC1 = Input(UInt(DataWidth.W))
     val iSRC2 = Input(UInt(DataWidth.W))
 
-    val iPC = Input(UInt(AddrWidth.W))
-    val oDNPC = Output(UInt(AddrWidth.W))
+    //val iPC = Input(UInt(AddrWidth.W))
+    //val oDNPC = Output(UInt(AddrWidth.W))
 
     val iCSR_ZicsrOldVal = Input(UInt(DataWidth.W))
     val oCSR_ZicsrNewVal = Output(UInt(DataWidth.W))
     val oCSR_ZicsrWSCIdx = Output(UInt(CSRIDWidth.W))
+
+    val iCSR_mtvec = Input(UInt(DataWidth.W))
+    val iCSR_mepc = Input(UInt(DataWidth.W))
 }
 
 class IDU extends Module{
@@ -233,6 +242,9 @@ class IDU extends Module{
     val SNPC = 0.U(AddrWidth.W)
     val DNPC = 0.U(AddrWidth.W)
 
+    val FeedBackJumpPC = false.B
+    val FeedbackPCVal = 0.U(AddrWidth.W)
+
     when(iDecodeEnable.asBool){
         SNPC := ioInternal.iPC + InstSize.U
         DNPC := Lookup(
@@ -251,10 +263,16 @@ class IDU extends Module{
                 MRET  -> ioInternal.iCSR_mepc.asUInt
             )
         )
+        
+        // Judge SNPC is DNPC, if not, trigger value feedback
+        Mux(SNPC === DNPC, FeedBackJumpPC := false.B, FeedBackJumpPC := true.B)
+        FeedbackPCVal := DNPC
     }
 
     //ioInternal.oSNPC := SNPC
-    ioInternal.oDNPC := DNPC
+    //ioInternal.oDNPC := DNPC
+    ioInternal.oFeedBackPCChanged := FeedBackJumpPC.asBool
+    ioInternal.oFeedBackNewPCVal := FeedbackPCVal
 
     val OldCSR = 0.U(DataWidth.W)
 
@@ -324,6 +342,9 @@ class IDU extends Module{
     ioInternal.oEXU_src2 := EXU_SRC2
     ioInternal.oLSU_src2 := LSU_SRC2
     ioInternal.oRD := RDAddr
+
+    // Connect Pipeline Passthroughs
+    ioInternal.oPC := ioInternal.iPC
 
     // Connect Pipline Signals
     ioInternal.oMasterValid := true.B

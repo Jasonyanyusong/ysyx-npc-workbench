@@ -43,6 +43,9 @@ object iLoadStoreInternal extends Bundle{
 
     val iRD = Input(UInt(RegIDWidth.W))
     val oRD = Output(UInt(RegIDWidth.W))
+
+    val iPC = Input(UInt(AddrWidth.W))
+    val oPC = Output(UInt(AddrWidth.W))
 }
 
 object iLoadStoreExternal extends Bundle{
@@ -121,6 +124,7 @@ class LSU extends Module{
     ioInternal.oDecodeBundle := ioInternal.iDecodeBundle
     ioInternal.oEXU_RET := ioInternal.iEXU_RET
     ioInternal.oRD := ioInternal.iRD
+    ioInternal.oPC := ioInternal.iPC
 
     // Pipeline shake hand implementation
     ioInternal.oSlaveReady := LSU_NotBusy.asBool && ioInternal.iMasterReady.asBool
