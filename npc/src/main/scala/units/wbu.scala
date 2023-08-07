@@ -31,6 +31,7 @@ object iWriteBackInternal extends Bundle{
 
     val iEXU_RET = Input(UInt(DataWidth.W))
     val iLSU_RET = Input(UInt(DataWidth.W))
+    val iIDU_SPC = Input(UInt(AddrWidth.W))
 
     val iRD = Input(UInt(RegIDWidth.W))
 
@@ -38,4 +39,46 @@ object iWriteBackInternal extends Bundle{
     val oWriteGPREnable = Output(Bool())
     val oWriteGPRAddr = Output(UInt(RegIDWidth.W))
     val oWriteGPRVal = Output(UInt(DataWidth.W))
+}
+
+class WBU extends Module{
+    val ioInternal = IO(new iWriteBackInternal)
+
+    val WBU_NotBusy = RegInit(true.B)
+    val iWriteBackEnable = true.B
+
+    val WriteGPREnable = false.B
+    val WriteGPRAddr = 0.U(RegIDWidth.W)
+    val WriteGPRVal = 0.U(DataWidth.W)
+
+    val EX_RETVal = ioInternal.iEXU_RET
+    val LS_RETVal = ioInternal.iLSU_RET
+    val ID_SPCVal = ioInternal.iIDU_SPC
+
+    val DecodeBundle = ioInternal.iDecodeBundle
+    val WBDecode = DecodeBundle(2, 1)
+
+    Mux(ioInternal.iSlaveValid.asBool, iWriteBackEnable := true.B iWriteBackEnable := false.B)
+
+    Mux(iWriteBackEnable.asBool, WriteGPRAddr := ioInternal.iRD, WriteGPRAddr := WriteGPRAddr)
+    Mux(iWriteBackEnable.asBool, WriteGPREnable := MuxCase(false.B, Array(
+        WBDecode === WB_NOP -> false.B,
+        WBDecode === WB_EXU -> true.B,
+        WBDecode === WB_LSU -> true.B,
+        WBDecode === WB_SNPC -> true.B
+    )))
+    Mux(iWriteBackEnable.asBool, WriteGPRVal := MuxCase(0.U(DataWidth.W), Array(
+        WBDecode === WB_NOP -> 0.U(DataWidth.W),
+        WBDecode === WB_EXU -> EX_RETVal,
+        WBDecode === WB_LSU -> LS_RETVal,
+        WBDecode === WB_SNPC -> ID_SPCVal
+    )))
+
+    // Connect IO Internal
+    ioInternal.oWriteGPREnable := WriteGPREnable
+    ioInternal.oWriteGPRAddr := WriteGPRAddr
+    ioInternal.oWriteGPRVal := WriteGPRVal
+
+    // Pipeline shake hand implementation
+    ioInternal.oSlaveReady := WBU_NotBusy.asBool
 }
