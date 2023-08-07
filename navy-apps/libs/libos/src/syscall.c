@@ -41,8 +41,8 @@
 #error _syscall_ is not implemented
 #endif
 
-extern char _end;
-uintptr_t endAddr = (uintptr_t)&_end;
+extern char end;
+intptr_t endAddr = (intptr_t)&end;
 
 intptr_t _syscall_(intptr_t type, intptr_t a0, intptr_t a1, intptr_t a2) {
   register intptr_t _gpr1 asm (GPR1) = type;
@@ -62,17 +62,17 @@ void _exit(int status) {
 int _open(const char *path, int flags, mode_t mode) {
   //_exit(SYS_open);
   //return 0;
-  return _syscall_(SYS_open, (void *)path, flags, mode);
+  return _syscall_(SYS_open, (intptr_t)path, flags, mode);
 }
 
 int _write(int fd, void *buf, size_t count) {
-  return _syscall_(SYS_write, fd, (uintptr_t)buf, count);
+  return _syscall_(SYS_write, fd, (intptr_t)buf, count);
 }
 
 void *_sbrk(intptr_t increment) {
-  uintptr_t old_end = endAddr;
-  uintptr_t new_end = old_end + increment;
-  if(_syscall_(SYS_brk, new_end, 0, 0) == 0){
+  intptr_t old_end = endAddr;
+  intptr_t new_end = old_end + increment;
+  if(!_syscall_(SYS_brk, new_end, 0, 0)){
     endAddr = new_end;
     return (void *)old_end;
   }else{
@@ -83,7 +83,7 @@ void *_sbrk(intptr_t increment) {
 int _read(int fd, void *buf, size_t count) {
   //_exit(SYS_read);
   //return 0;
-  return _syscall_(SYS_read, fd, (uintptr_t)buf, count);
+  return _syscall_(SYS_read, fd, (intptr_t)buf, count);
 }
 
 int _close(int fd) {
@@ -106,6 +106,7 @@ int _gettimeofday(struct timeval *tv, struct timezone *tz) {
 }
 
 int _execve(const char *fname, char * const argv[], char *const envp[]) {
+  assert(0);
   _exit(SYS_execve);
   return 0;
 }
