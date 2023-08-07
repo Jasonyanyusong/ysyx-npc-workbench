@@ -124,4 +124,6 @@ class LSU extends Module{
     ioInternal.oRD := ioInternal.iRD
 
     // TODO: Pipeline shake hand implementation
+    ioInternal.oSlaveReady := LSU_NotBusy.asBool && ioInternal.iMasterReady.asBool
+    ioInternal.oMasterValid := LSU_NotBusy.asBool && iLoadStoreEnable.asBool
 }
