@@ -116,6 +116,9 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
   //printf("[miniSDL] x = %d, y = %d, w = %d, h = %d\n", x, y, w, h);
   //assert(0);
   //printf("[miniSDL-video] s -> format -> BitsPerPixel = %d\n", s -> format -> BitsPerPixel);
+
+  assert(s);
+
   if(x == 0 && y == 0 && w == 0 && h == 0){
     x = 0;
     y = 0;
