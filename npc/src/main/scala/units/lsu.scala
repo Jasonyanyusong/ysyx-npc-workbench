@@ -53,7 +53,6 @@ object iLoadStoreExternal extends Bundle{
 }
 
 class LSU extends Module{
-    // TODO: implement pipelined-LSU
     val ioInternal = IO(new iLoadStoreInternal)
     val ioExternal = IO(new iLoadStoreExternal)
 
@@ -123,7 +122,7 @@ class LSU extends Module{
     ioInternal.oEXU_RET := ioInternal.iEXU_RET
     ioInternal.oRD := ioInternal.iRD
 
-    // TODO: Pipeline shake hand implementation
+    // Pipeline shake hand implementation
     ioInternal.oSlaveReady := LSU_NotBusy.asBool && ioInternal.iMasterReady.asBool
     ioInternal.oMasterValid := LSU_NotBusy.asBool && iLoadStoreEnable.asBool
 }
