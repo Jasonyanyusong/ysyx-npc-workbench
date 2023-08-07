@@ -52,6 +52,7 @@ int fs_open(const char *pathname, int flags, int mode){
       #ifdef FS_LOG
       Log("Find file \"%s\" with index %d", file_table[i].name, i);
       #endif
+      //file_table->open_offset = 0;
       return i;
     }
   }
@@ -63,6 +64,7 @@ int fs_close(int fd){
   #ifdef FS_LOG
   Log("Close file \"%s\" with fd = %d", file_table[fd].name, fd);
   #endif
+  file_table[fd].open_offset = 0;
   return 0;
 }
 
@@ -70,6 +72,7 @@ size_t fs_read(int fd, void *buf, size_t len){
   assert(fd >= 0);
 
   Finfo *file = &file_table[fd];
+  assert(file);
 
   if(file->read != NULL){
     return file->read(buf, 0, len);
