@@ -26,8 +26,13 @@ object NPCIO extends Bundle{
     // TODO: Define NPC's IO
 }
 
+object NPCIODebug extends Bundle{
+    // TODO: Define NPC's debug IO
+}
+
 class NPC extends Module{
     val ioNPC = IO(new NPCIO)
+    val ioNPCDebug = IO(new NPCIODebug)
 
     // Pipeline Components
     val NPC_IFU = Module(new IFU)
