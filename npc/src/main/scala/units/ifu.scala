@@ -68,8 +68,9 @@ class IFU extends Module{
     }*/
 
     Mux(iFetchEnable.asBool, ioExternal.oMemEnable := true.B,  ioExternal.oMemEnable := false.B)
+    
     //Mux(iFetchEnable.asBool, ioExternal.oPC := ioInternal.iPC, ioExternal.oPC := 0.U(AddrWidth.W))
-    Mux(iFetchEnable.asBool, Inst := ioExternal.iInst,         Inst := Inst.asUInt)
+    
     Mux(iFetchEnable.asBool, 
         PC := Mux(
             ioInternal.iFeedBackPCChanged.asBool, 
@@ -81,6 +82,8 @@ class IFU extends Module{
 
     Mux(iFetchEnable.asBool, ioExternal.oPC := PC, ioExternal.oPC := 0.U(AddrWidth.W))
     Mux(iFetchEnable.asBool, ioInternal.oPC := PC, ioInternal.oPC := 0.U(AddrWidth.W))
+
+    Mux(iFetchEnable.asBool, Inst := ioExternal.iInst,         Inst := Inst.asUInt)
     
     iFetchEnable := false.B
 
