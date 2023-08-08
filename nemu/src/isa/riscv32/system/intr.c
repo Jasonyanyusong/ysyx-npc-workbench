@@ -26,7 +26,7 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
    */
 #ifdef CONFIG_RV_Privileged
   IFDEF(CONFIG_ShowLogForInterrupt, Log("CPU raised interupt at pc 0x%lx with interrupt NO.0x%lx, mevtc = 0x%lx, gpr[17] = 0x%lx", epc, NO, cpu.csr[CSR_MTVEC], cpu.gpr[17]));
-  cpu.csr[CSR_MSTATUS] = 0x0;
+  cpu.csr[CSR_MSTATUS] = 0x1800;
   cpu.csr[CSR_MEPC] = epc;
   cpu.csr[CSR_MCAUSE] = NO;
 

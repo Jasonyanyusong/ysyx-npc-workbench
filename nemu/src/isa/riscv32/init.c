@@ -31,6 +31,11 @@ static void restart() {
 
   /* The zero register is always 0. */
   cpu.gpr[0] = 0;
+
+  #ifdef CONFIG_RV_Privileged
+  //cpu.csr[0x300] = 0x1800;
+  //Log("csr0x300 is 0x%lx", cpu.csr[0x300]);
+  #endif
 }
 
 void init_isa() {
