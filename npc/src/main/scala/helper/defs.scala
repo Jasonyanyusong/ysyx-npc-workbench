@@ -30,6 +30,7 @@ object Base{
     val AddrWidth = 32
 
     val RegIDWidth = 5
+    val RegSum = 32
     val CSRIDWidth = 12
 
     val iDecPrivValLen = 2
@@ -56,6 +57,13 @@ object Base{
 
     val RDHi = 11
     val RDLo = 7
+}
+
+object CSR_LUT{
+    val CSR_MSTATUS = "h300".U
+    val CSR_MTVEC = "h305".U
+    val CSR_MEPC = "h341".U
+    val CSR_MCAUSE = "h342".U
 }
 
 object InstType{
