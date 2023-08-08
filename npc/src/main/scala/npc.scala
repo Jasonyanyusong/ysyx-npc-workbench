@@ -117,7 +117,15 @@ class NPC extends Module{
         }
     }
 
-    // TODO: Write NPC Logic
+    // NPC Inside Logic: IFU <-> IDU
+    NPC_IFU.ioInternal.iMasterReady := RegNext(NPC_IDU.ioInternal.oSlaveReady)
+    NPC_IDU.ioInternal.iSlaveValid  := RegNext(NPC_IDU.ioInternal.oMasterValid)
+    
+    NPC_IFU.ioInternal.iFeedBackPCChanged := RegNext(NPC_IDU.ioInternal.oFeedBackPCChanged)
+    NPC_IFU.ioInternal.iFeedBackNewPCVal  := RegNext(NPC_IDU.ioInternal.oFeedBackNewPCVal)
+
+    NPC_IDU.ioInternal.iInst := RegNext(NPC_IFU.ioInternal.oInst)
+    NPC_IDU.iPC              := RegNext(NPC_IFU.ioInternal.oPC)
 
     // Connect Debug Logic, Debug Transfer will happen at Write-Back Phase, CSR will use shift register to debug
     ioNPCDebug.GPR00 := GPR_Read(00.U)
