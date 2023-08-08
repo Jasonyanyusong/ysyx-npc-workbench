@@ -27,7 +27,40 @@ object NPCIO extends Bundle{
 }
 
 object NPCIODebug extends Bundle{
-    // TODO: Define NPC's debug IO
+    val GPR00 = Output(UInt(DataWidth.W))
+    val GPR01 = Output(UInt(DataWidth.W))
+    val GPR02 = Output(UInt(DataWidth.W))
+    val GPR03 = Output(UInt(DataWidth.W))
+    val GPR04 = Output(UInt(DataWidth.W))
+    val GPR05 = Output(UInt(DataWidth.W))
+    val GPR06 = Output(UInt(DataWidth.W))
+    val GPR07 = Output(UInt(DataWidth.W))
+    val GPR08 = Output(UInt(DataWidth.W))
+    val GPR09 = Output(UInt(DataWidth.W))
+    val GPR10 = Output(UInt(DataWidth.W))
+    val GPR11 = Output(UInt(DataWidth.W))
+    val GPR12 = Output(UInt(DataWidth.W))
+    val GPR13 = Output(UInt(DataWidth.W))
+    val GPR14 = Output(UInt(DataWidth.W))
+    val GPR15 = Output(UInt(DataWidth.W))
+    val GPR16 = Output(UInt(DataWidth.W))
+    val GPR17 = Output(UInt(DataWidth.W))
+    val GPR18 = Output(UInt(DataWidth.W))
+    val GPR19 = Output(UInt(DataWidth.W))
+    val GPR20 = Output(UInt(DataWidth.W))
+    val GPR21 = Output(UInt(DataWidth.W))
+    val GPR22 = Output(UInt(DataWidth.W))
+    val GPR23 = Output(UInt(DataWidth.W))
+    val GPR24 = Output(UInt(DataWidth.W))
+    val GPR25 = Output(UInt(DataWidth.W))
+    val GPR26 = Output(UInt(DataWidth.W))
+    val GPR27 = Output(UInt(DataWidth.W))
+    val GPR28 = Output(UInt(DataWidth.W))
+    val GPR29 = Output(UInt(DataWidth.W))
+    val GPR30 = Output(UInt(DataWidth.W))
+    val GPR31 = Output(UInt(DataWidth.W))
+
+    val PC    = Output(UInt(AddrWidth.W))
 }
 
 class NPC extends Module{
@@ -80,4 +113,6 @@ class NPC extends Module{
     }
 
     // TODO: Write NPC Logic
+
+    // TODO: Connect Debug Logic, Debug Transfer will happen at Write-Back Phase, CSR will not be debugged
 }
