@@ -38,6 +38,7 @@ static debug_module_config_t difftest_dm_config = {
 
 struct diff_context_t {
   word_t gpr[MUXDEF(CONFIG_RVE, 16, 32)];
+  word_t csr[4096];
   word_t pc;
 };
 
@@ -66,6 +67,14 @@ void sim_t::diff_set_regs(void* diff_context) {
   struct diff_context_t* ctx = (struct diff_context_t*)diff_context;
   for (int i = 0; i < NR_GPR; i++) {
     state->XPR.write(i, (sword_t)ctx->gpr[i]);
+  }
+  for (int i = 0; i < 4096; i = i + 1){
+    //printf("Get CSR No.0x%x, with val = 0x%lx\n", i, p -> get_csr(i));
+    //ctx->csr[i] = 0;
+    if (i == 0x300) { ctx -> csr[i] = p -> get_csr(i);} // 0x300 is mstatus
+    if (i == 0x305) { ctx -> csr[i] = p -> get_csr(i);} // 0x305 is mtvec
+    if (i == 0x341) { ctx -> csr[i] = p -> get_csr(i);} // 0x341 is mepc
+    if (i == 0x342) { ctx -> csr[i] = p -> get_csr(i);} // 0x342 is mcause
   }
   state->pc = ctx->pc;
 }

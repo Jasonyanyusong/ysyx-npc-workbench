@@ -18,7 +18,30 @@
 #include "../local-include/reg.h"
 
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
-  return false;
+  if(cpu.pc != ref_r -> pc)
+  {
+    printf("PC = 0x%lx, Difftest failed at PC, Difftest get 0x%lx, NEMU get 0x%lx\n", cpu.pc, ref_r -> pc, cpu.pc);
+    return false;
+  }
+
+  int check_csr_index[4] = {0x300, 0x305, 0x341, 0x342};
+  for(int i = 0; i < 4; i = i + 1){
+    if(cpu.csr[i] != ref_r -> csr[i]){
+      printf("PC = 0x%lx, Difftest failed at CSR[0x%3x], Difftest get 0x%lx, NEMU get 0x%lx\n", cpu.pc, i, ref_r -> csr[i], cpu.csr[i]);
+      return false;
+    }
+  }
+
+  for(int integer_register_index = 0; integer_register_index < 32; integer_register_index = integer_register_index + 1)
+  {
+    if(cpu.gpr[integer_register_index] != ref_r -> gpr[integer_register_index])
+    {
+      printf("PC = 0x%lx, Difftest Reg Compare failed at GPR[%d], Difftest Get 0x%lx, NEMU Get 0x%lx\n", cpu.pc, integer_register_index, ref_r -> gpr[integer_register_index], cpu.gpr[integer_register_index]);
+      return false;
+    }
+  }
+
+  return true;
 }
 
 void isa_difftest_attach() {
