@@ -65,9 +65,6 @@ object iDecodeInternal extends Bundle{
     val iSRC1 = Input(UInt(DataWidth.W))
     val iSRC2 = Input(UInt(DataWidth.W))
 
-    //val iPC = Input(UInt(AddrWidth.W))
-    //val oDNPC = Output(UInt(AddrWidth.W))
-
     val iCSR_ZicsrOldVal = Input(UInt(DataWidth.W))
     val oCSR_ZicsrNewVal = Output(UInt(DataWidth.W))
     val oCSR_ZicsrWSCIdx = Output(UInt(CSRIDWidth.W))
@@ -269,8 +266,6 @@ class IDU extends Module{
         FeedbackPCVal := DNPC
     }
 
-    //ioInternal.oSNPC := SNPC
-    //ioInternal.oDNPC := DNPC
     ioInternal.oFeedBackPCChanged := FeedBackJumpPC.asBool
     ioInternal.oFeedBackNewPCVal := FeedbackPCVal
 

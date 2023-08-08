@@ -26,17 +26,14 @@ object iFetchInternal extends Bundle{
     val iMasterReady = Input(Bool())
     val oMasterValid = Output(Bool())
 
-    //val iPC = Input(UInt(AddrWidth.W))
     val oInst = Output(UInt(InstWidth.W))
     val oPC = Output(UInt(AddrWidth.W))
-    //val iResetInstBuffer = Input(Bool())
 
     val iFeedBackPCChanged = Input(Bool())
     val iFeedBackNewPCVal = Input(UInt(AddrWidth.W))
 }
 
 object iFetchExternal extends Bundle{
-    //val iPC = Input(UInt(AddrWidth.W))
     val iInst = Input(UInt(InstWidth.W))
     val oPC = Output(UInt(AddrWidth.W))
     val oMemEnable = Output(Bool())
@@ -57,19 +54,7 @@ class IFU extends Module{
 
     val PC = RegInit("h80000000".U(AddrWidth.W))
 
-    /*if(iFetchEnable.asBool){
-        ioExternal.oMemEnable := true.B
-        ioExternal.oPC := ioInternal.iPC
-        Inst := ioExternal.iInst
-        iFetchEnable := false.B
-    }else{
-        ioExternal.oMemEnable := false.B
-        ioExternal.oPC := 0.U(AddrWidth.W)
-    }*/
-
     Mux(iFetchEnable.asBool, ioExternal.oMemEnable := true.B,  ioExternal.oMemEnable := false.B)
-    
-    //Mux(iFetchEnable.asBool, ioExternal.oPC := ioInternal.iPC, ioExternal.oPC := 0.U(AddrWidth.W))
     
     Mux(iFetchEnable.asBool, 
         PC := Mux(

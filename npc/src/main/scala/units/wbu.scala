@@ -31,7 +31,6 @@ object iWriteBackInternal extends Bundle{
 
     val iEXU_RET = Input(UInt(DataWidth.W))
     val iLSU_RET = Input(UInt(DataWidth.W))
-    //val iIDU_SPC = Input(UInt(AddrWidth.W))
 
     val iRD = Input(UInt(RegIDWidth.W))
     val iPC = Input(UInt(AddrWidth.W))
