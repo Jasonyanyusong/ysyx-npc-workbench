@@ -26,8 +26,8 @@ const char *regs[] = {
 void isa_display_gpr(){
   printf("GPR:\n");
   for(int i = 0; i < 32; i = i + 1){
-    printf("x%2d = %16lx ", i, cpu.gpr[i]);
-    if((i + 1) % 8 == 0){
+    printf("x%2d = %8lx ", i, cpu.gpr[i]);
+    if((i + 1) % 4 == 0){
       printf("\n");
     }
   }
@@ -72,7 +72,7 @@ void isa_display_csr(){
 }
 
 void isa_reg_display() {
-  printf("PC: 0x%lx\n", cpu.pc);
+  printf("PC: 0x%lx\n\n", cpu.pc);
   isa_display_gpr();
   //isa_display_fpr();
   isa_display_csr();
