@@ -131,7 +131,7 @@ class IDU extends Module{
 
             SRA -> EX_SRA, SRAI -> EX_SRA, SRAW -> EX_SRAW, SRLIW -> EX_SRAW,
 
-            MUL -> EX_MUL, MULH -> EX_MULH, MULHSU -> EX_MULHSU, MULHU -> EX_MULHU,
+            MUL -> EX_MUL, MULH -> EX_MULH, MULHSU -> EX_MULHSU, MULHU -> EX_MULHU, MULW -> EX_MULW,
 
             DIV -> EX_DIV, DIVU -> EX_DIVU, DIVW -> EX_DIVW, DIVUW -> EX_DIVUW,
 

@@ -89,6 +89,7 @@ class IFU extends Module{
 
     when(ioInternal.iMasterReady.asBool){
         // Shake hand success, re-enable iFetch, fetch next PC's instruction
+        //Inst := 0.U(InstWidth.W)
         iFetchEnable := true.B
     }
     
