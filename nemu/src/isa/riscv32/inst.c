@@ -112,7 +112,7 @@ static int decode_exec(Decode *s) {
   INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, s -> dnpc = isa_raise_intr(11, s -> pc));
   INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , N, s -> dnpc = cpu.csr[0x341]);
   INSTPAT("0000001 ????? ????? 000 ????? 01100 11", mul    , R, R(rd) = BITS(src1 * src2, 31, 0));
-  INSTPAT("0000001 ????? ????? 001 ????? 01100 11", mulh   , R, R(rd) = ((sword_t)src1 * (sword_t)src2) >> 32);
+  INSTPAT("0000001 ????? ????? 001 ????? 01100 11", mulh   , R, int64_t ans = ((int64_t)(sword_t)src1 * (int64_t)(sword_t)src2); R(rd) = (ans >> 32));
   INSTPAT("0000001 ????? ????? 010 ????? 01100 11", mulhsu , R, R(rd) = ((sword_t)src1 * (word_t)src2) >> 32);
   INSTPAT("0000001 ????? ????? 011 ????? 01100 11", mulhu  , R, R(rd) = ((word_t)src1 * (word_t)src2) >> 32);
   INSTPAT("0000001 ????? ????? 100 ????? 01100 11", div    , R, R(rd) = (sword_t)src2 != 0 ? (sword_t)src1 / (sword_t)src2 : -1);
