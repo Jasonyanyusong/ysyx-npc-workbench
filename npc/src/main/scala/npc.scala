@@ -61,6 +61,11 @@ object NPCIODebug extends Bundle{
     val GPR31 = Output(UInt(DataWidth.W))
 
     val PC    = Output(UInt(AddrWidth.W))
+
+    val MSTATUS = Output(UInt(DataWidth.W))
+    val MTVEC = Output(UInt(DataWidth.W))
+    val MEPC = Output(UInt(DataWidth.W))
+    val MCAUSE = Output(UInt(DataWidth.W))
 }
 
 class NPC extends Module{
@@ -114,5 +119,45 @@ class NPC extends Module{
 
     // TODO: Write NPC Logic
 
-    // TODO: Connect Debug Logic, Debug Transfer will happen at Write-Back Phase, CSR will not be debugged
+    // Connect Debug Logic, Debug Transfer will happen at Write-Back Phase, CSR will use shift register to debug
+    ioNPCDebug.GPR00 := GPR_Read(00.U)
+    ioNPCDebug.GPR01 := GPR_Read(01.U)
+    ioNPCDebug.GPR02 := GPR_Read(02.U)
+    ioNPCDebug.GPR03 := GPR_Read(03.U)
+    ioNPCDebug.GPR04 := GPR_Read(04.U)
+    ioNPCDebug.GPR05 := GPR_Read(05.U)
+    ioNPCDebug.GPR06 := GPR_Read(06.U)
+    ioNPCDebug.GPR07 := GPR_Read(07.U)
+    ioNPCDebug.GPR08 := GPR_Read(08.U)
+    ioNPCDebug.GPR09 := GPR_Read(09.U)
+    ioNPCDebug.GPR10 := GPR_Read(10.U)
+    ioNPCDebug.GPR11 := GPR_Read(11.U)
+    ioNPCDebug.GPR12 := GPR_Read(12.U)
+    ioNPCDebug.GPR13 := GPR_Read(13.U)
+    ioNPCDebug.GPR14 := GPR_Read(14.U)
+    ioNPCDebug.GPR15 := GPR_Read(15.U)
+    ioNPCDebug.GPR16 := GPR_Read(16.U)
+    ioNPCDebug.GPR17 := GPR_Read(17.U)
+    ioNPCDebug.GPR18 := GPR_Read(18.U)
+    ioNPCDebug.GPR19 := GPR_Read(19.U)
+    ioNPCDebug.GPR20 := GPR_Read(20.U)
+    ioNPCDebug.GPR21 := GPR_Read(21.U)
+    ioNPCDebug.GPR22 := GPR_Read(22.U)
+    ioNPCDebug.GPR23 := GPR_Read(23.U)
+    ioNPCDebug.GPR24 := GPR_Read(24.U)
+    ioNPCDebug.GPR25 := GPR_Read(25.U)
+    ioNPCDebug.GPR26 := GPR_Read(26.U)
+    ioNPCDebug.GPR27 := GPR_Read(27.U)
+    ioNPCDebug.GPR28 := GPR_Read(28.U)
+    ioNPCDebug.GPR29 := GPR_Read(29.U)
+    ioNPCDebug.GPR30 := GPR_Read(30.U)
+    ioNPCDebug.GPR31 := GPR_Read(31.U)
+
+    ioNPCDebug.PC := NPC_WBU.ioInternal.oPC
+
+    // CSR: since it was written in IDU, need to shift for EXU -> LSU -> WBU, 3 cycles
+    ioNPCDebug.MSTATUS := ShiftRegister(mstatus, 3)
+    ioNPCDebug.MTVEC := ShiftRegister(mtvec, 3)
+    ioNPCDebug.MEPC := ShiftRegister(mepc, 3)
+    ioNPCDebug.MCAUSE := ShiftRegister(mcause, 3)
 }
