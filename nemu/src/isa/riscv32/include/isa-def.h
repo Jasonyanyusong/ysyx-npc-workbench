@@ -20,6 +20,7 @@
 
 typedef struct {
   word_t gpr[32];
+  IFDEF(CONFIG_RV_Privileged, word_t csr[4096]);
   vaddr_t pc;
 } riscv32_CPU_state;
 
