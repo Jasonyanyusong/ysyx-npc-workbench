@@ -193,6 +193,10 @@ class NPC extends Module{
     NPC_LSU.ioExternal.iMemoryRead := NPCIO.iLoadStore_iMemoryRead
 
     // NPC Inside Logic: WBU <-> Top
+    Mux(NPC_WBU.ioInternal.oWriteGPREnable.asBool,
+        GPR(NPC_WBU.ioInternal.oWriteGPRAddr.asUInt) := NPC_WBU.ioInternal.oWriteGPRVal,
+        GPR(NPC_WBU.ioInternal.oWriteGPRAddr.asUInt) := GPR(NPC_WBU.ioInternal.oWriteGPRAddr.asUInt)
+    )
 
 
     // Connect Debug Logic, Debug Transfer will happen at Write-Back Phase, CSR will use shift register to debug
