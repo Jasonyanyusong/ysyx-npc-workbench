@@ -155,6 +155,14 @@ class NPC extends Module{
     NPC_EXU.ioInternal.iPC := RegNext(NPC_IDU.ioInternal.oPC)
 
     // NPC Inside Logic: IDU <-> Top
+    NPC_IDU.ioInternal.iSRC1 := GPR_Read(NPC_IDU.ioInternal.oRS1.asUInt)
+    NPC_IDU.ioInternal.iSRC2 := GPR_Read(NPC_IDU.ioInternal.oRS2.asUInt)
+
+    NPC_IDU.ioInternal.iCSR_ZicsrOldVal := CSR_Read(NPC_IDU.ioInternal.oCSR_ZicsrWSCIdx.asUInt)
+    CSR_Write(NPC_IDU.ioInternal.oCSR_ZicsrWSCIdx.asUInt, NPC_IDU.ioInternal.oCSR_ZicsrNewVal.asUInt)
+
+    NPC_IDU.ioInternal.iCSR_mtvec := mtvec
+    NPC_IDU.ioInternal.iCSR_mepc  := mepc
 
     // NPC Inside Logic: EXU <-> LSU
     NPC_EXU.ioInternal.iMasterReady := RegNext(NPC_LSU.ioInternal.oSlaveReady)
