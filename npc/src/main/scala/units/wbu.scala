@@ -60,21 +60,23 @@ class WBU extends Module{
     val DecodeBundle = ioInternal.iDecodeBundle
     val WBDecode = DecodeBundle(2, 1)
 
-    Mux(ioInternal.iSlaveValid.asBool, iWriteBackEnable := true.B iWriteBackEnable := false.B)
+    Mux(ioInternal.iSlaveValid.asBool, iWriteBackEnable := true.B, iWriteBackEnable := false.B)
 
     Mux(iWriteBackEnable.asBool, WriteGPRAddr := ioInternal.iRD, WriteGPRAddr := WriteGPRAddr)
+
     Mux(iWriteBackEnable.asBool, WriteGPREnable := MuxCase(false.B, Array(
         WBDecode === WB_NOP -> false.B,
         WBDecode === WB_EXU -> true.B,
         WBDecode === WB_LSU -> true.B,
         WBDecode === WB_SNPC -> true.B
-    )))
+    )), WriteGPREnable := WriteGPREnable)
+
     Mux(iWriteBackEnable.asBool, WriteGPRVal := MuxCase(0.U(DataWidth.W), Array(
         WBDecode === WB_NOP -> 0.U(DataWidth.W),
         WBDecode === WB_EXU -> EX_RETVal,
         WBDecode === WB_LSU -> LS_RETVal,
         WBDecode === WB_SNPC -> SNPC
-    )))
+    )), WriteGPRVal := WriteGPRVal)
 
     // Connect IO Internal
     ioInternal.oWriteGPREnable := WriteGPREnable

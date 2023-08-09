@@ -109,7 +109,7 @@ class NPC extends Module{
     val isZicsr = PrivDecode === PR_ZICSR
     val isECALL = PrivDecode === PR_ECALL
 
-    def CSR_Write(CSR_idx, CSR_val : UInt) = {
+    def CSR_Write(CSR_idx : UInt, CSR_val : UInt) = {
         switch (CSR_idx.asUInt){
             is(CSR_MSTATUS){
                 Mux(isZicsr.asBool, mstatus := CSR_val, mstatus := mstatus)

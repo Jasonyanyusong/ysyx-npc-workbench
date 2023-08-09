@@ -16,6 +16,9 @@
 
 package npc.axi
 
+import chisel3._
+import chisel3.util._
+
 class AXIArbiter extends Module{
     // Rule: LSU Read > IFU iFetch
     // This is the interface between the "module parts external" to "SoC/simulation external"

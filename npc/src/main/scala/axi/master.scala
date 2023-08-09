@@ -16,6 +16,9 @@
 
 package npc.axi
 
+import chisel3._
+import chisel3.util._
+
 object AXIMasterAW extends Bundle{
     val iMasterAWready = Input(Bool())
     val oMasterAWvalid = Output(Bool())

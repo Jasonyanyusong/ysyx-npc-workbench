@@ -16,6 +16,9 @@
 
 package npc.axi
 
+import chisel3._
+import chisel3.util._
+
 object AXISlaveAW extends Bundle{
     val oSlaveAWready = Output(Bool())
     val iSlaveAWvalid = Input(Bool())

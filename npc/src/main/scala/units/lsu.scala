@@ -75,13 +75,13 @@ class LSU extends Module{
 
     val LD_RET = 0.U(DataWidth.W)
 
-    def WordSignExt(WordVal : UInt(WordWidth.W)) = Cat(Fill(DataWidth - WordWidth, WordVal(WordWidth - 1).asUInt), WordVal (WordWidth - 1, 0))
-    def HalfSignExt(HalfVal : UInt(HalfWidth.W)) = Cat(Fill(DataWidth - HalfWidth, HalfVal(HalfWidth - 1).asUInt), HalfVal (HalfWidth - 1, 0))
-    def ByteSignExt(ByteVal : UInt(ByteWidth.W)) = Cat(Fill(ByteWidth - ByteWidth, ByteVal(ByteWidth - 1).asUInt), ByteVal (ByteWidth - 1, 0))
+    def WordSignExt(WordVal : UInt) = Cat(Fill(DataWidth - WordWidth, WordVal(WordWidth - 1).asUInt), WordVal (WordWidth - 1, 0))
+    def HalfSignExt(HalfVal : UInt) = Cat(Fill(DataWidth - HalfWidth, HalfVal(HalfWidth - 1).asUInt), HalfVal (HalfWidth - 1, 0))
+    def ByteSignExt(ByteVal : UInt) = Cat(Fill(ByteWidth - ByteWidth, ByteVal(ByteWidth - 1).asUInt), ByteVal (ByteWidth - 1, 0))
 
-    def WordZeroExt(WordVal : UInt(WordWidth.W)) = Cat(Fill(DataWidth - WordWidth, 0.U(1.W)), WordVal (WordWidth - 1, 0))
-    def HalfZeroExt(HalfVal : UInt(HalfWidth.W)) = Cat(Fill(DataWidth - HalfWidth, 0.U(1.W)), HalfVal (HalfWidth - 1, 0))
-    def ByteZeroExt(ByteVal : UInt(ByteWidth.W)) = Cat(Fill(ByteWidth - ByteWidth, 0.U(1.W)), ByteVal (ByteWidth - 1, 0))
+    def WordZeroExt(WordVal : UInt) = Cat(Fill(DataWidth - WordWidth, 0.U(1.W)), WordVal (WordWidth - 1, 0))
+    def HalfZeroExt(HalfVal : UInt) = Cat(Fill(DataWidth - HalfWidth, 0.U(1.W)), HalfVal (HalfWidth - 1, 0))
+    def ByteZeroExt(ByteVal : UInt) = Cat(Fill(ByteWidth - ByteWidth, 0.U(1.W)), ByteVal (ByteWidth - 1, 0))
 
     Mux(ioInternal.iSlaveValid.asBool, iLoadStoreEnable := true.B, iLoadStoreEnable := false.B)
 

@@ -270,9 +270,11 @@ class IDU extends Module{
     ioInternal.oFeedBackNewPCVal := FeedbackPCVal
 
     val OldCSR = 0.U(DataWidth.W)
+    val ZicsrWSCIdx = 0.U(CSRIDWidth.W)
+    val ZicsrNewVal = 0.U(DataWidth.W)
 
     when(iDecodeEnable.asBool){
-        ioInternal.oCSR_ZicsrWSCIdx := Lookup(
+        ZicsrWSCIdx := Lookup(
             ioInternal.iInst, 0.U(CSRIDWidth.W), Array(
                 CSRRW -> ImmOut,  CSRRS -> ImmOut,  CSRRC -> ImmOut,
                 CSRRWI -> ImmOut, CSRRSI -> ImmOut, CSRRCI -> ImmOut,
@@ -280,9 +282,9 @@ class IDU extends Module{
         )
 
         OldCSR := ioInternal.iCSR_ZicsrOldVal
-        val Zicsr_uimm := ioInternal.iInst(RS1Hi, RS1Lo).asUInt
+        val Zicsr_uimm = ioInternal.iInst(RS1Hi, RS1Lo)
 
-        ioInternal.oCSR_ZicsrNewVal := Lookup(
+        ZicsrNewVal := Lookup(
             ioInternal.iInst, 0.U(DataWidth.W), Array(
                 CSRRW -> SRC1Val,
                 CSRRS -> (SRC1Val | OldCSR),
@@ -293,6 +295,9 @@ class IDU extends Module{
             )
         )
     }
+
+    ioInternal.oCSR_ZicsrWSCIdx := ZicsrWSCIdx
+    ioInternal.oCSR_ZicsrNewVal := ZicsrNewVal
 
     // Assign SRC to EXU and LSU
     val EXU_SRC1 = 0.U(DataWidth.W)

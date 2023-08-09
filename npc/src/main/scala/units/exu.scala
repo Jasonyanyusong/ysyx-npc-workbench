@@ -58,8 +58,8 @@ class EXU extends Module{
     val SRC1 = ioInternal.iEXU_SRC1
     val SRC2 = ioInternal.iEXU_SRC2
 
-    def WordSignExt(WordVal : UInt(WordWidth.W)) = Cat(Fill(WordWidth, WordVal(WordWidth - 1).asUInt), WordVal (WordWidth - 1, 0))
-    def WordCut(DoubleVal : UInt(DataWidth.W)) = DoubleVal(WordWidth - 1, 0)
+    def WordSignExt(WordVal : UInt) = Cat(Fill(WordWidth, WordVal(WordWidth - 1).asUInt), WordVal (WordWidth - 1, 0))
+    def WordCut(DoubleVal : UInt) = DoubleVal(WordWidth - 1, 0)
 
     // Only can execute arthmetic if Master (IDU) 's output is valid
     Mux(ioInternal.iSlaveValid.asBool, iExecuteEnable := true.B, iExecuteEnable := false.B)
