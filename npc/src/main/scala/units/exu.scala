@@ -86,7 +86,7 @@ class EXU extends Module{
             iExecuteOPcode === EX_SRAW -> (WordSignExt(WordCut(WordCut(SRC1).asSInt >> SRC2(4, 0)))),
 
             iExecuteOPcode === EX_MUL -> (SRC1 * SRC2)(DataWidth.W - 1, 0),
-            iExecuteOPcode === EX_MULH -> (SRC1 * SRC2)(2 * DataWidth - 1, DataWidth),
+            iExecuteOPcode === EX_MULH -> (SRC1.asSInt * SRC2.asSInt)(2 * DataWidth - 1, DataWidth),
             iExecuteOPcode === EX_MULHSU -> (SRC1.asSInt * SRC2.asUInt)(2 * DataWidth - 1, DataWidth),
             iExecuteOPcode === EX_MULHU -> (SRC1.asUInt * SRC2.asUInt)(2 * DataWidth - 1, DataWidth),
             iExecuteOPcode === EX_DIV -> (SRC1 / SRC2),
