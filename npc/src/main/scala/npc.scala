@@ -127,7 +127,7 @@ class NPC extends Module{
         Mux(isECALL, mcause := "b11".asUInt, mcause := mcause)
     }
 
-    // NPC Inside Logic: IFU <-> IDU
+    // NPC Pipeline Logic: IFU <-> IDU
     NPC_IFU.ioInternal.iMasterReady := RegNext(NPC_IDU.ioInternal.oSlaveReady)
     NPC_IDU.ioInternal.iSlaveValid  := RegNext(NPC_IDU.ioInternal.oMasterValid)
     
@@ -142,7 +142,7 @@ class NPC extends Module{
     NPCIO.iFetch_oMemEnable := NPC_IFU.ioExternal.oMemEnable
     NPC_IFU.ioExternal.iInst := NPCIO.iInst
 
-    // NPC Inside Logic: IDU <-> EXU
+    // NPC Pipeline Logic: IDU <-> EXU
     NPC_IDU.ioInternal.iMasterReady := RegNext(NPC_EXU.ioInternal.oSlaveReady)
     NPC_EXU.ioInternal.iSlaveValid  := RegNext(NPC_IDU.ioInternal.oMasterValid)
 
@@ -164,7 +164,7 @@ class NPC extends Module{
     NPC_IDU.ioInternal.iCSR_mtvec := mtvec
     NPC_IDU.ioInternal.iCSR_mepc  := mepc
 
-    // NPC Inside Logic: EXU <-> LSU
+    // NPC Pipeline Logic: EXU <-> LSU
     NPC_EXU.ioInternal.iMasterReady := RegNext(NPC_LSU.ioInternal.oSlaveReady)
     NPC_LSU.ioInternal.iSlaveValid  := RegNext(NPC_EXU.ioInternal.oMasterValid)
 
@@ -175,7 +175,7 @@ class NPC extends Module{
     NPC_LSU.ioInternal.iRD := RegNext(NPC_EXU.ioInternal.oRD)
     NPC_LSU.ioInternal.iPC := RegNext(NPC_EXU.ioInternal.oPC)
 
-    // NPC Inside Logic: LSU <-> WBU
+    // NPC Pipeline Logic: LSU <-> WBU
     NPC_LSU.ioInternal.iMasterReady := RegNext(NPC_WBU.ioInternal.oSlaveReady)
     NPC_WBU.ioInternal.iSlaveValid  := RegNext(NPC_LSU.ioInternal.oMasterValid)
     
