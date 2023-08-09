@@ -104,22 +104,20 @@ class NPC extends Module{
     ))
 
     val isZicsr = false.B
-    val ZicsrIndex = 0.U(CSRIDWidth.W)
-    val ZicsrNewVal = 0.U(DataWidth.W)
 
     def CSR_Write(CSR_idx, CSR_val : UInt) = {
-        switch (ZicsrIndex.asUInt){
+        switch (CSR_idx.asUInt){
             is(CSR_MSTATUS){
-                Mux(isZicsr.asBool, mstatus := ZicsrNewVal, mstatus := mstatus)
+                Mux(isZicsr.asBool, mstatus := CSR_val, mstatus := mstatus)
             }
             is(CSR_MTVEC){
-                Mux(isZicsr.asBool, mtvec := ZicsrNewVal, mtvec := mtvec)
+                Mux(isZicsr.asBool, mtvec := CSR_val, mtvec := mtvec)
             }
             is(CSR_MEPC){
-                Mux(isZicsr.asBool, mepc := ZicsrNewVal, mepc := mepc)
+                Mux(isZicsr.asBool, mepc := CSR_val, mepc := mepc)
             }
             is(CSR_MCAUSE){
-                Mux(isZicsr.asBool, mcause := ZicsrNewVal, mcause := mcause)
+                Mux(isZicsr.asBool, mcause := CSR_val, mcause := mcause)
             }
         }
     }
