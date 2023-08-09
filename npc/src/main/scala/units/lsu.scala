@@ -71,7 +71,7 @@ class LSU extends Module{
 
     val DecodeBundle = ioInternal.iDecodeBundle
     val EXU_RET = ioInternal.iEXU_RET
-    val LSU_SRC = ioInternal.LSU_SRC2
+    val LSU_SRC = ioInternal.iLSU_SRC2
 
     val LD_RET = 0.U(DataWidth.W)
 
