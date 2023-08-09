@@ -342,7 +342,7 @@ class IDU extends Module{
     ioInternal.oPC := ioInternal.iPC
 
     // Connect Pipline Signals
-    ioInternal.oMasterValid := true.B
+    ioInternal.oMasterValid := IDU_NotBusy.asBool
     ioInternal.oSlaveReady := (IDU_NotBusy.asBool && ioInternal.iMasterReady)
 
     when(ioInternal.iMasterReady.asBool){
