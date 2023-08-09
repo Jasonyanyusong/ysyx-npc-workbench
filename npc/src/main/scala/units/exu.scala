@@ -14,7 +14,7 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-package npc.units
+package npc.units.iExecute
 
 import chisel3._
 import chisel3.util._
@@ -22,7 +22,7 @@ import chisel3.util._
 import npc.helper.defs.Base._
 import npc.helper.opcode.OpEXU._
 
-object iExecuteInternal extends Bundle{
+class iExecuteInternal extends Bundle{
     // ON-PIPELINE VALUES
     val oSlaveReady = Output(Bool())
     val iSlaveValid = Input(Bool())
@@ -43,7 +43,7 @@ object iExecuteInternal extends Bundle{
     val oRD = Output(UInt(RegIDWidth.W))
 
     val iPC = Input(UInt(AddrWidth.W))
-    val oPC = Ouptut(UInt(AddrWidth.W))
+    val oPC = Output(UInt(AddrWidth.W))
 }
 
 class EXU extends Module{
@@ -51,8 +51,8 @@ class EXU extends Module{
 
     val EXU_NotBusy = RegInit(true.B)
 
-    val ExecuteResult = 0.U(DataWidth.W)
-    val iExecuteEnable = true.B
+    val ExecuteResult = RegInit(0.U(DataWidth.W))
+    val iExecuteEnable = RegInit(true.B)
     val iExecuteOPcode = ioInternal.iDecodeBundle(13, 7)
 
     val SRC1 = ioInternal.iEXU_SRC1
@@ -62,43 +62,43 @@ class EXU extends Module{
     def WordCut(DoubleVal : UInt) = DoubleVal(WordWidth - 1, 0)
 
     // Only can execute arthmetic if Master (IDU) 's output is valid
-    Mux(ioInternal.iSlaveValid.asBool, iExecuteEnable := true.B, iExecuteEnable := false.B)
+    iExecuteEnable := Mux(ioInternal.iSlaveValid.asBool, true.B, false.B)
 
     when(iExecuteEnable.asBool){
         ExecuteResult := MuxCase(0.U(DataWidth.W), Array(
-            iExecuteOPcode === EX_NOP -> (0.U(DataWidth.W)),
-            iExecuteOPcode === EX_PS1 -> (SRC1),
-            iExecuteOPcode === EX_ADD -> (SRC1 + SRC2),
-            iExecuteOPcode === EX_SLT -> Mux(SRC1.asSInt < SRC2.asSInt, 1.U(DataWidth.W), 0.U(DataWidth.W)),
-            iExecuteOPcode === EX_SLTU -> Mux(SRC1.asUInt < SRC2.asUInt, 1.U(DataWidth.W), 0.U(DataWidth.W)),
-            iExecuteOPcode === EX_XOR -> (SRC1 ^ SRC2),
-            iExecuteOPcode === EX_OR -> (SRC1 | SRC2),
-            iExecuteOPcode === EX_AND -> (SRC1 & SRC2),
-            iExecuteOPcode === EX_SLL -> (SRC1.asUInt << SRC2(5, 0)),
-            iExecuteOPcode === EX_SRL -> (SRC1.asUInt >> SRC2(5, 0)),
-            iExecuteOPcode === EX_SRA -> (SRC1.asSInt >> SRC2(5, 0)),
-            iExecuteOPcode === EX_SUB -> (SRC1 - SRC2),
+            (iExecuteOPcode === EX_NOP) -> (0.U(DataWidth.W)).asUInt,
+            (iExecuteOPcode === EX_PS1) -> (SRC1).asUInt,
+            (iExecuteOPcode === EX_ADD) -> (SRC1 + SRC2).asUInt,
+            (iExecuteOPcode === EX_SLT) -> Mux(SRC1.asSInt < SRC2.asSInt, 1.U(DataWidth.W), 0.U(DataWidth.W)).asUInt,
+            (iExecuteOPcode === EX_SLTU) -> Mux(SRC1.asUInt < SRC2.asUInt, 1.U(DataWidth.W), 0.U(DataWidth.W)).asUInt,
+            (iExecuteOPcode === EX_XOR) -> (SRC1 ^ SRC2).asUInt,
+            (iExecuteOPcode === EX_OR) -> (SRC1 | SRC2).asUInt,
+            (iExecuteOPcode === EX_AND) -> (SRC1 & SRC2).asUInt,
+            (iExecuteOPcode === EX_SLL) -> (SRC1.asUInt << SRC2(5, 0)).asUInt,
+            (iExecuteOPcode === EX_SRL) -> (SRC1.asUInt >> SRC2(5, 0)).asUInt,
+            (iExecuteOPcode === EX_SRA) -> (SRC1.asSInt >> SRC2(5, 0)).asUInt,
+            (iExecuteOPcode === EX_SUB) -> (SRC1 - SRC2).asUInt,
 
-            iExecuteOPcode === EX_ADDW -> (WordSignExt(WordCut(WordCut(SRC1) + WordCut(SRC2)))),
-            iExecuteOPcode === EX_SUBW -> (WordSignExt(WordCut(WordCut(SRC1) - WordCut(SRC2)))),
-            iExecuteOPcode === EX_SLLW -> (WordSignExt(WordCut(WordCut(SRC1).asUInt << SRC2(4, 0)))),
-            iExecuteOPcode === EX_SRLW -> (WordSignExt(WordCut(WordCut(SRC1).asUInt >> SRC2(4, 0)))),
-            iExecuteOPcode === EX_SRAW -> (WordSignExt(WordCut(WordCut(SRC1).asSInt >> SRC2(4, 0)))),
+            (iExecuteOPcode === EX_ADDW) -> (WordSignExt(WordCut(WordCut(SRC1) + WordCut(SRC2)))).asUInt,
+            (iExecuteOPcode === EX_SUBW) -> (WordSignExt(WordCut(WordCut(SRC1) - WordCut(SRC2)))).asUInt,
+            (iExecuteOPcode === EX_SLLW) -> (WordSignExt(WordCut(WordCut(SRC1).asUInt << SRC2(4, 0)))).asUInt,
+            (iExecuteOPcode === EX_SRLW) -> (WordSignExt(WordCut(WordCut(SRC1).asUInt >> SRC2(4, 0)))).asUInt,
+            (iExecuteOPcode === EX_SRAW) -> (WordSignExt(WordCut((WordCut(SRC1).asSInt >> SRC2(4, 0)).asUInt))).asUInt,
 
-            iExecuteOPcode === EX_MUL -> (SRC1 * SRC2)(DataWidth.W - 1, 0),
-            iExecuteOPcode === EX_MULH -> (SRC1.asSInt * SRC2.asSInt)(2 * DataWidth - 1, DataWidth),
-            iExecuteOPcode === EX_MULHSU -> (SRC1.asSInt * SRC2.asUInt)(2 * DataWidth - 1, DataWidth),
-            iExecuteOPcode === EX_MULHU -> (SRC1.asUInt * SRC2.asUInt)(2 * DataWidth - 1, DataWidth),
-            iExecuteOPcode === EX_DIV -> (SRC1 / SRC2),
-            iExecuteOPcode === EX_DIVU -> (SRC1.asUInt / SRC2.asUInt),
-            iExecuteOPcode === EX_REM -> (SRC1 % SRC2),
-            iExecuteOPcode === EX_REMU -> (SRC1.asUInt % SRC2.asUInt),
+            (iExecuteOPcode === EX_MUL) -> (SRC1 * SRC2)(DataWidth - 1, 0).asUInt,
+            (iExecuteOPcode === EX_MULH) -> (SRC1.asSInt * SRC2.asSInt)(2 * DataWidth - 1, DataWidth).asUInt,
+            (iExecuteOPcode === EX_MULHSU) -> (SRC1.asSInt * SRC2.asUInt)(2 * DataWidth - 1, DataWidth).asUInt,
+            (iExecuteOPcode === EX_MULHU) -> (SRC1.asUInt * SRC2.asUInt)(2 * DataWidth - 1, DataWidth).asUInt,
+            (iExecuteOPcode === EX_DIV) -> (SRC1 / SRC2).asUInt,
+            (iExecuteOPcode === EX_DIVU) -> (SRC1.asUInt / SRC2.asUInt).asUInt,
+            (iExecuteOPcode === EX_REM) -> (SRC1 % SRC2).asUInt,
+            (iExecuteOPcode === EX_REMU) -> (SRC1.asUInt % SRC2.asUInt).asUInt,
 
-            iExecuteOPcode === EX_MULW -> (WordSignExt(WordCut(WordCut(SRC1) * WordCut(SRC2)))),
-            iExecuteOPcode === EX_DIVW -> (WordSignExt(WordCut(WordCut(SRC1).asSInt / WordCut(SRC2).asSInt))),
-            iExecuteOPcode === EX_DIVUW -> (WordSignExt(WordCut(WordCut(SRC1).asUInt / WordCut(SRC2).asUInt))),
-            iExecuteOPcode === EX_REMW -> (WordSignExt(WordCut(WordCut(SRC1).asSInt % WordCut(SRC2).asSInt))),
-            iExecuteOPcode === EX_REMUW -> (WordSignExt(WordCut(WordCut(SRC1).asUInt % WordCut(SRC2).asUInt)))
+            (iExecuteOPcode === EX_MULW) -> (WordSignExt(WordCut(WordCut(SRC1) * WordCut(SRC2)))).asUInt,
+            (iExecuteOPcode === EX_DIVW) -> (WordSignExt(WordCut((WordCut(SRC1).asSInt / WordCut(SRC2).asSInt).asUInt))).asUInt,
+            (iExecuteOPcode === EX_DIVUW) -> (WordSignExt(WordCut(WordCut(SRC1).asUInt / WordCut(SRC2).asUInt))).asUInt,
+            (iExecuteOPcode === EX_REMW) -> (WordSignExt(WordCut((WordCut(SRC1).asSInt % WordCut(SRC2).asSInt).asUInt))).asUInt,
+            (iExecuteOPcode === EX_REMUW) -> (WordSignExt(WordCut(WordCut(SRC1).asUInt % WordCut(SRC2).asUInt))).asUInt
         ))
     }
 

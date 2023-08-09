@@ -14,17 +14,17 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-package npc.units
+package npc.units.iLoadStore
 
 import chisel3._
 import chisel3.util._
 
 import npc.helper.defs.Base._
 import npc.helper.opcode.OpLSULen._
-import npc.helper.opcode.OpLSUfunc._
+import npc.helper.opcode.OpLSUFunc._
 import npc.helper.opcode.MemOp._
 
-object iLoadStoreInternal extends Bundle{
+class iLoadStoreInternal extends Bundle{
     // ON-PIPELINE VALUES
     val oSlaveReady = Output(Bool())
     val iSlaveValid = Input(Bool())
@@ -48,7 +48,7 @@ object iLoadStoreInternal extends Bundle{
     val oPC = Output(UInt(AddrWidth.W))
 }
 
-object iLoadStoreExternal extends Bundle{
+class iLoadStoreExternal extends Bundle{
     val oMemoryOP = Output(UInt(2.W))
     val oMemoryAddr = Output(UInt(AddrWidth.W))
     val oMemoryWrite = Output(UInt(DataWidth.W))
@@ -60,40 +60,40 @@ class LSU extends Module{
     val ioExternal = IO(new iLoadStoreExternal)
 
     val LSU_NotBusy = RegInit(true.B)
-    val LoadStoreResult = 0.U(DataWidth.W)
-    val iLoadStoreEnable = true.B
+    val LoadStoreResult = RegInit(0.U(DataWidth.W))
+    val iLoadStoreEnable = RegInit(true.B)
 
-    val iLoadStoreLen = LS_B // Default is LS_B since its value is 0
-    val iLoadStoreFunc = LS_NOP
-    val iLoadStoreAddr = 0.U(AddrWidth.W)
-    val iLoadStoreMemOP = MEM_NOP
-    val iLoadStoreWrite = 0.U(DataWidth.W)
+    val iLoadStoreLen = RegInit(LS_B) // Default is LS_B since its value is 0
+    val iLoadStoreFunc = RegInit(LS_NOP)
+    val iLoadStoreAddr = RegInit(0.U(AddrWidth.W))
+    val iLoadStoreMemOP = RegInit(MEM_NOP)
+    val iLoadStoreWrite = RegInit(0.U(DataWidth.W))
 
     val DecodeBundle = ioInternal.iDecodeBundle
     val EXU_RET = ioInternal.iEXU_RET
     val LSU_SRC = ioInternal.iLSU_SRC2
 
-    val LD_RET = 0.U(DataWidth.W)
+    val LD_RET = RegInit(0.U(DataWidth.W))
 
-    def WordSignExt(WordVal : UInt) = Cat(Fill(DataWidth - WordWidth, WordVal(WordWidth - 1).asUInt), WordVal (WordWidth - 1, 0))
-    def HalfSignExt(HalfVal : UInt) = Cat(Fill(DataWidth - HalfWidth, HalfVal(HalfWidth - 1).asUInt), HalfVal (HalfWidth - 1, 0))
-    def ByteSignExt(ByteVal : UInt) = Cat(Fill(ByteWidth - ByteWidth, ByteVal(ByteWidth - 1).asUInt), ByteVal (ByteWidth - 1, 0))
+    def WordSignExt(WordVal : UInt) = Cat(Fill(DataWidth - WordWidth, WordVal(WordWidth - 1).asUInt), WordVal(WordWidth - 1, 0))
+    def HalfSignExt(HalfVal : UInt) = Cat(Fill(DataWidth - HalfWidth, HalfVal(HalfWidth - 1).asUInt), HalfVal(HalfWidth - 1, 0))
+    def ByteSignExt(ByteVal : UInt) = Cat(Fill(DataWidth - ByteWidth, ByteVal(ByteWidth - 1).asUInt), ByteVal(ByteWidth - 1, 0))
 
     def WordZeroExt(WordVal : UInt) = Cat(Fill(DataWidth - WordWidth, 0.U(1.W)), WordVal (WordWidth - 1, 0))
     def HalfZeroExt(HalfVal : UInt) = Cat(Fill(DataWidth - HalfWidth, 0.U(1.W)), HalfVal (HalfWidth - 1, 0))
-    def ByteZeroExt(ByteVal : UInt) = Cat(Fill(ByteWidth - ByteWidth, 0.U(1.W)), ByteVal (ByteWidth - 1, 0))
+    def ByteZeroExt(ByteVal : UInt) = Cat(Fill(DataWidth - ByteWidth, 0.U(1.W)), ByteVal (ByteWidth - 1, 0))
 
-    Mux(ioInternal.iSlaveValid.asBool, iLoadStoreEnable := true.B, iLoadStoreEnable := false.B)
+    iLoadStoreEnable := Mux(ioInternal.iSlaveValid.asBool, true.B, false.B)
 
-    Mux(iLoadStoreEnable.asBool, iLoadStoreLen := DecodeBundle(6, 5), iLoadStoreLen := iLoadStoreLen)
-    Mux(iLoadStoreEnable.asBool, iLoadStoreFunc := DecodeBundle(4, 3), iLoadStoreFunc := iLoadStoreFunc)
-    Mux(iLoadStoreEnable.asBool, iLoadStoreAddr := EXU_RET, iLoadStoreAddr := iLoadStoreAddr)
-    Mux(iLoadStoreEnable.asBool, iLoadStoreMemOP := MuxCase(MEM_NOP, Array(
-        iLoadStoreFunc === LS_LD -> MEM_READ,
-        iLoadStoreFunc === LS_LDU -> MEM_READ,
-        iLoadStoreFunc === LS_ST -> MEM_WRITE
-    )), iLoadStoreMemOP := iLoadStoreMemOP)
-    Mux(iLoadStoreEnable.asBool, iLoadStoreWrite := LSU_SRC, iLoadStoreWrite := iLoadStoreWrite)
+    iLoadStoreLen := Mux(iLoadStoreEnable.asBool, DecodeBundle(6, 5), iLoadStoreLen)
+    iLoadStoreFunc := Mux(iLoadStoreEnable.asBool, DecodeBundle(4, 3), iLoadStoreFunc)
+    iLoadStoreAddr := Mux(iLoadStoreEnable.asBool, EXU_RET, iLoadStoreAddr)
+    iLoadStoreMemOP := Mux(iLoadStoreEnable.asBool, MuxCase(MEM_NOP, Array(
+        (iLoadStoreFunc === LS_LD) -> MEM_READ,
+        (iLoadStoreFunc === LS_LDU) -> MEM_READ,
+        (iLoadStoreFunc === LS_ST) -> MEM_WRITE
+    )), iLoadStoreMemOP)
+    iLoadStoreWrite := Mux(iLoadStoreEnable.asBool, LSU_SRC, iLoadStoreWrite)
 
     // Connect IO External
     ioExternal.oMemoryOP := iLoadStoreMemOP
@@ -102,20 +102,20 @@ class LSU extends Module{
     LD_RET := ioExternal.iMemoryRead
 
     // For different Load Instructions, generate LSU output
-    Mux(iLoadStoreEnable.asBool, LoadStoreResult := MuxCase(0.U(DataWidth.W), Array(
-        iLoadStoreFunc === LS_LD -> (MuxCase(0.U(DataWidth.W), Array(
-            iLoadStoreLen === LS_B -> ByteSignExt(LD_RET),
-            iLoadStoreLen === LS_H -> HalfSignExt(LD_RET),
-            iLoadStoreLen === LS_W -> WordSignExt(LD_RET),
-            iLoadStoreLen === LS_D -> LD_RET
+    LoadStoreResult := Mux(iLoadStoreEnable.asBool, MuxCase(0.U(DataWidth.W), Array(
+        (iLoadStoreFunc === LS_LD) -> (MuxCase(0.U(DataWidth.W), Array(
+            (iLoadStoreLen === LS_B) -> ByteSignExt(LD_RET.asUInt),
+            (iLoadStoreLen === LS_H) -> HalfSignExt(LD_RET.asUInt),
+            (iLoadStoreLen === LS_W) -> WordSignExt(LD_RET.asUInt),
+            (iLoadStoreLen === LS_D) -> LD_RET
         ))),
-        iLoadStoreFunc === LS_LDU -> (MuxCase(0.U(DataWidth.W), Array(
-            iLoadStoreLen === LS_B -> ByteZeroExt(LD_RET),
-            iLoadStoreLen === LS_H -> HalfZeroExt(LD_RET),
-            iLoadStoreLen === LS_W -> WordZeroExt(LD_RET),
-            iLoadStoreLen === LS_D -> LD_RET
+        (iLoadStoreFunc === LS_LDU) -> (MuxCase(0.U(DataWidth.W), Array(
+            (iLoadStoreLen === LS_B) -> ByteZeroExt(LD_RET.asUInt),
+            (iLoadStoreLen === LS_H) -> HalfZeroExt(LD_RET.asUInt),
+            (iLoadStoreLen === LS_W) -> WordZeroExt(LD_RET.asUInt),
+            (iLoadStoreLen === LS_D) -> LD_RET
         )))
-    )))
+    )), LoadStoreResult)
 
     // Connect IO Internal
     ioInternal.oLSU_RET := LoadStoreResult

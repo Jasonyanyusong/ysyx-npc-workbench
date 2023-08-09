@@ -21,9 +21,15 @@ import chisel3.util._
 
 import npc.helper.defs.Base._
 import npc.helper.defs.CSR_LUT._
-import npc.helper.defs.PR_ZICSR._
+import npc.helper.opcode.OpPriv._
 
-object NPCIO extends Bundle{
+import npc.units.iFetch._
+import npc.units.iDecode._
+import npc.units.iExecute._
+import npc.units.iLoadStore._
+import npc.units.iWriteBack._
+
+class NPCIO extends Bundle{
     val iFetch_iInst = Input(UInt(InstWidth.W))
     val iFetch_oPC = Output(UInt(AddrWidth.W))
     val iFetch_oMemEnable = Output(Bool())
@@ -34,7 +40,7 @@ object NPCIO extends Bundle{
     val iLoadStore_iMemoryRead = Input(UInt(DataWidth.W))
 }
 
-object NPCIODebug extends Bundle{
+class NPCIODebug extends Bundle{
     val GPR00 = Output(UInt(DataWidth.W))
     val GPR01 = Output(UInt(DataWidth.W))
     val GPR02 = Output(UInt(DataWidth.W))
@@ -88,7 +94,7 @@ class NPC extends Module{
     val NPC_WBU = Module(new WBU)
 
     // GPR Maintain and Manipulation
-    val GPR = Mem(RegSum, 0.U(DataWidth.W))
+    val GPR = Mem(RegSum, UInt(DataWidth.W))
     def GPR_Read(index : UInt) = Mux(index === 0.U, 0.U(DataWidth.W), GPR(index))
 
     // CSR Maintain and Manipulation
@@ -104,12 +110,7 @@ class NPC extends Module{
         (index === CSR_MCAUSE) -> (mcause.asUInt )  // mcause
     ))
 
-    val PrivDecode = NPC_IDU.oDecodeBundle(15, 14)
-
-    val isZicsr = PrivDecode === PR_ZICSR
-    val isECALL = PrivDecode === PR_ECALL
-
-    def CSR_Write(CSR_idx : UInt, CSR_val : UInt) = {
+    /*def CSR_Write(CSR_idx : UInt, CSR_val : UInt) = {
         switch (CSR_idx.asUInt){
             is(CSR_MSTATUS){
                 Mux(isZicsr.asBool, mstatus := CSR_val, mstatus := mstatus)
@@ -125,7 +126,7 @@ class NPC extends Module{
             }
         }
         Mux(isECALL, mcause := "b11".asUInt, mcause := mcause)
-    }
+    }*/
 
     // NPC Pipeline Logic: IFU <-> IDU
     NPC_IFU.ioInternal.iMasterReady := RegNext(NPC_IDU.ioInternal.oSlaveReady)
@@ -135,12 +136,12 @@ class NPC extends Module{
     NPC_IFU.ioInternal.iFeedBackNewPCVal  := RegNext(NPC_IDU.ioInternal.oFeedBackNewPCVal)
 
     NPC_IDU.ioInternal.iInst := RegNext(NPC_IFU.ioInternal.oInst)
-    NPC_IDU.iPC              := RegNext(NPC_IFU.ioInternal.oPC)
+    NPC_IDU.ioInternal.iPC   := RegNext(NPC_IFU.ioInternal.oPC)
 
     // NPC Outside Logic: IFU <-> IO
-    NPCIO.iFetch_oPC := NPC_IFU.ioExternal.oPC
-    NPCIO.iFetch_oMemEnable := NPC_IFU.ioExternal.oMemEnable
-    NPC_IFU.ioExternal.iInst := NPCIO.iInst
+    ioNPC.iFetch_oPC := NPC_IFU.ioExternal.oPC
+    ioNPC.iFetch_oMemEnable := NPC_IFU.ioExternal.oMemEnable
+    NPC_IFU.ioExternal.iInst := ioNPC.iFetch_iInst
 
     // NPC Pipeline Logic: IDU <-> EXU
     NPC_IDU.ioInternal.iMasterReady := RegNext(NPC_EXU.ioInternal.oSlaveReady)
@@ -149,7 +150,7 @@ class NPC extends Module{
     NPC_EXU.ioInternal.iDecodeBundle := RegNext(NPC_IDU.ioInternal.oDecodeBundle)
     NPC_EXU.ioInternal.iEXU_SRC1     := RegNext(NPC_IDU.ioInternal.oEXU_src1)
     NPC_EXU.ioInternal.iEXU_SRC2     := RegNext(NPC_IDU.ioInternal.oEXU_src2)
-    NPC_EXU.ioInternal.iLSU_SRC2     := RegNext(NPC_IDU.ioInternal.oLSU_SRC2)
+    NPC_EXU.ioInternal.iLSU_SRC2     := RegNext(NPC_IDU.ioInternal.oLSU_src2)
 
     NPC_EXU.ioInternal.iRD := RegNext(NPC_IDU.ioInternal.oRD)
     NPC_EXU.ioInternal.iPC := RegNext(NPC_IDU.ioInternal.oPC)
@@ -159,7 +160,30 @@ class NPC extends Module{
     NPC_IDU.ioInternal.iSRC2 := GPR_Read(NPC_IDU.ioInternal.oRS2.asUInt)
 
     NPC_IDU.ioInternal.iCSR_ZicsrOldVal := CSR_Read(NPC_IDU.ioInternal.oCSR_ZicsrWSCIdx.asUInt)
-    CSR_Write(NPC_IDU.ioInternal.oCSR_ZicsrWSCIdx.asUInt, NPC_IDU.ioInternal.oCSR_ZicsrNewVal.asUInt)
+    //CSR_Write(NPC_IDU.ioInternal.oCSR_ZicsrWSCIdx.asUInt, NPC_IDU.ioInternal.oCSR_ZicsrNewVal.asUInt)
+
+    val PrivDecode = NPC_IDU.ioInternal.oDecodeBundle(15, 14)
+    val isZicsr = PrivDecode === PR_ZICSR
+    val isECALL = PrivDecode === PR_ECALL
+
+    mstatus := MuxCase(mstatus, Array(
+        isZicsr -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
+        isECALL -> "ha00001800".asUInt
+    ))
+
+    mtvec := MuxCase(mtvec, Array(
+        isZicsr -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
+    ))
+
+    mepc := MuxCase(mepc, Array(
+        isZicsr -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
+        isECALL -> NPC_IDU.ioInternal.oPC
+    ))
+
+    mcause := MuxCase(mcause, Array(
+        isZicsr -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
+        isECALL -> 11.U(DataWidth.W)
+    ))
 
     NPC_IDU.ioInternal.iCSR_mtvec := mtvec
     NPC_IDU.ioInternal.iCSR_mepc  := mepc
@@ -187,17 +211,19 @@ class NPC extends Module{
     NPC_WBU.ioInternal.iPC := RegNext(NPC_LSU.ioInternal.oPC)
 
     // NPC Outside Logic: LSU <-> IO
-    NPCIO.iLoadStore_oMemoryOP     := NPC_LSU.ioExternal.oMemoryOP
-    NPCIO.iLoadStore_oMemoryAddr   := NPC_LSU.ioExternal.oMemoryAddr
-    NPCIO.iLoadStore_oMemoryWrite  := NPC_LSU.ioExternal.oMemoryWrite
-    NPC_LSU.ioExternal.iMemoryRead := NPCIO.iLoadStore_iMemoryRead
+    ioNPC.iLoadStore_oMemoryOP     := NPC_LSU.ioExternal.oMemoryOP
+    ioNPC.iLoadStore_oMemoryAddr   := NPC_LSU.ioExternal.oMemoryAddr
+    ioNPC.iLoadStore_oMemoryWrite  := NPC_LSU.ioExternal.oMemoryWrite
+    NPC_LSU.ioExternal.iMemoryRead := ioNPC.iLoadStore_iMemoryRead
 
     // NPC Inside Logic: WBU <-> Top
-    Mux(NPC_WBU.ioInternal.oWriteGPREnable.asBool,
-        GPR(NPC_WBU.ioInternal.oWriteGPRAddr.asUInt) := NPC_WBU.ioInternal.oWriteGPRVal,
-        GPR(NPC_WBU.ioInternal.oWriteGPRAddr.asUInt) := GPR(NPC_WBU.ioInternal.oWriteGPRAddr.asUInt)
+    GPR(NPC_WBU.ioInternal.oWriteGPRAddr.asUInt) := 
+        Mux(
+            NPC_WBU.ioInternal.oWriteGPREnable.asBool, 
+            NPC_WBU.ioInternal.oWriteGPRVal, 
+            GPR(NPC_WBU.ioInternal.oWriteGPRAddr.asUInt
+        )
     )
-
 
     // Connect Debug Logic, Debug Transfer will happen at Write-Back Phase, CSR will use shift register to debug
     ioNPCDebug.GPR00 := GPR_Read(00.U)

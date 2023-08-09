@@ -16,6 +16,9 @@
 
 package npc.helper.opcode
 
+import chisel3._
+import chisel3.util._
+
 object OpEXU{
     def EX_NOP    =  0.U(7.W)
     def EX_PS1    =  1.U(7.W)

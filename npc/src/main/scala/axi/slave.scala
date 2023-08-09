@@ -14,12 +14,12 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-package npc.axi
+package npc.axi.slave
 
 import chisel3._
 import chisel3.util._
 
-object AXISlaveAW extends Bundle{
+class AXISlaveAW extends Bundle{
     val oSlaveAWready = Output(Bool())
     val iSlaveAWvalid = Input(Bool())
     val iSlaveAWaddr = Input(UInt(32.W))
@@ -29,7 +29,7 @@ object AXISlaveAW extends Bundle{
     val iSlaveAWburst = Input(UInt(2.W))
 }
 
-object AXISlaveW extends Bundle{
+class AXISlaveW extends Bundle{
     val oSlaveWready = Output(Bool())
     val iSlaveWvalid = Input(Bool())
     val iSlaveWdata = Input(UInt(64.W))
@@ -37,14 +37,14 @@ object AXISlaveW extends Bundle{
     val iSlaveWlast = Input(Bool())
 }
 
-object AXISlaveB extends Bundle{
+class AXISlaveB extends Bundle{
     val iSlaveBready = Input(Bool())
     val oSlaveBvalid = Output(Bool())
     val oSlaveBresp = Output(UInt(2.W))
     val oSlaveBid = Output(UInt(4.W))
 }
 
-object AXISlaveAR extends Bundle{
+class AXISlaveAR extends Bundle{
     val oSlaveARready = Output(Bool())
     val iSlaveARvalid = Input(Bool())
     val iSlaveARaddr = Input(UInt(32.W))
@@ -54,7 +54,7 @@ object AXISlaveAR extends Bundle{
     val iSlaveARburst = Input(UInt(2.W))
 }
 
-object AXISlaveR extends Bundle{
+class AXISlaveR extends Bundle{
     val iSlaveRready = Input(Bool())
     val oSlaveRvalid = Output(Bool())
     val oSlaveRresp = Output(UInt(2.W))

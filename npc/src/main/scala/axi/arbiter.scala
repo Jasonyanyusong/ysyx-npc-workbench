@@ -19,27 +19,29 @@ package npc.axi
 import chisel3._
 import chisel3.util._
 
+import npc.axi.master._
+
 class AXIArbiter extends Module{
     // Rule: LSU Read > IFU iFetch
     // This is the interface between the "module parts external" to "SoC/simulation external"
 
-    val IFU_AR = IO(new Flipped(AXIMasterAR))
-    val IFU_R  = IO(new Flipped(AXIMasterR))
-    val LSU_AR = IO(new Flipped(AXIMasterAR))
-    val LSU_R  = IO(new Flipped(AXIMasterR))
+    val IFU_AR = IO(Flipped(new AXIMasterAR))
+    val IFU_R  = IO(Flipped(new AXIMasterR))
+    val LSU_AR = IO(Flipped(new AXIMasterAR))
+    val LSU_R  = IO(Flipped(new AXIMasterR))
 
     val ArbitAR = IO(new AXIMasterAR)
     val ArbitR  = IO(new AXIMasterR)
 
-    if(IFU_AR.oMasterARvalid.asBool && LSU_AR.oMasterARvalid.asBool){
+    if(IFU_AR.oMasterARvalid.litToBoolean && LSU_AR.oMasterARvalid.litToBoolean){
         // Both LSU and IFU send read request, satisfy LSU first
         LSU_AR <> ArbitAR
         LSU_R  <> ArbitR
-    }else if(IFU_AR.oMasterARvalid.asBool && (!LSU_AR.oMasterARvalid.asBool)){
+    }else if(IFU_AR.oMasterARvalid.litToBoolean && (!LSU_AR.oMasterARvalid.litToBoolean)){
         // Only IFU
         IFU_AR <> ArbitAR
         IFU_R  <> ArbitR
-    }else if((!IFU_AR.oMasterARvalid.asBool) && LSU_AR.oMasterARvalid.asBool){
+    }else if((!IFU_AR.oMasterARvalid.litToBoolean) && LSU_AR.oMasterARvalid.litToBoolean){
         // Only LSU
         LSU_AR <> ArbitAR
         LSU_R  <> ArbitR

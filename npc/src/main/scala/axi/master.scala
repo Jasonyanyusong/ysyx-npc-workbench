@@ -14,12 +14,12 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-package npc.axi
+package npc.axi.master
 
 import chisel3._
 import chisel3.util._
 
-object AXIMasterAW extends Bundle{
+class AXIMasterAW extends Bundle{
     val iMasterAWready = Input(Bool())
     val oMasterAWvalid = Output(Bool())
     val oMasterAWaddr = Output(UInt(32.W))
@@ -29,7 +29,7 @@ object AXIMasterAW extends Bundle{
     val oMasterAWburst = Output(UInt(2.W))
 }
 
-object AXIMasterW extends Bundle{
+class AXIMasterW extends Bundle{
     val iMasterWready = Input(Bool())
     val oMasterWvalid = Output(Bool())
     val oMasterWdata = Output(UInt(64.W))
@@ -37,14 +37,14 @@ object AXIMasterW extends Bundle{
     val oMasterWlast = Output(Bool())
 }
 
-object AXIMasterB extends Bundle{
+class AXIMasterB extends Bundle{
     val oMasterBready = Output(Bool())
     val iMasterBvalid = Input(Bool())
     val iMasterBresp = Input(UInt(2.W))
     val iMasterBid = Input(UInt(4.W))
 }
 
-object AXIMasterAR extends Bundle{
+class AXIMasterAR extends Bundle{
     val iMasterARready = Input(Bool())
     val oMasterARvalid = Output(Bool())
     val oMasterARaddr = Output(UInt(32.W))
@@ -54,7 +54,7 @@ object AXIMasterAR extends Bundle{
     val oMasterARburst = Output(UInt(2.W))
 }
 
-object AXIMasterR extends Bundle{
+class AXIMasterR extends Bundle{
     val oMasterRready = Output(Bool())
     val iMasterRvalid = Input(Bool())
     val iMasterRresp = Input(UInt(2.W))

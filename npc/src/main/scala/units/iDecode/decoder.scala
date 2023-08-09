@@ -20,14 +20,16 @@ import chisel3._
 import chisel3.util._
 
 import npc.helper.defs.Base._
+import npc.helper.defs.InstType._
 import npc.helper.rv64im.Inst._
 import npc.helper.opcode.OpEXU._
-import npc.helper.opcode.OpLSU._
+import npc.helper.opcode.OpLSULen._
+import npc.helper.opcode.OpLSUFunc._
 import npc.helper.opcode.OpWBU._
 import npc.helper.opcode.OpPriv._
 import npc.helper.opcode.OpState._
 
-object iDecodeInternal extends Bundle{
+class iDecodeInternal extends Bundle{
     // ON-PIPELINE VALUES
     val oSlaveReady = Output(Bool())
     val iSlaveValid = Input(Bool())
@@ -77,23 +79,23 @@ class IDU extends Module{
     val ioInternal = IO(new iDecodeInternal)
     // Instruction Decode Unit: First generate opreation code, then send operands to EXU and LSU (for operand send to LSU, it needs to be delivered to EXU first), last write back PC and CSR (WBU only write back GPR)
 
-    val DecodeVal = 0.U(DecodeWidth.W)
-    val iDecodeEnable = true.B
+    val DecodeVal = RegInit(0.U(DecodeWidth.W))
+    val iDecodeEnable = RegInit(true.B)
 
-    val iDecPrivVal = 0.U(iDecPrivValLen.W)
-    val iDecEXUVal = 0.U(iDecEXUValLen.W)
-    val iDecLSlenVal = 0.U(iDecLSlenValLen.W)
-    val iDecLSfuncVal = 0.U(iDecLSfuncValLen.W)
-    val iDecWBTypVal = 0.U(iDecWBTypValLen.W)
-    val iDecDSVal = 0.U(iDecDSValLen.W)
+    val iDecPrivVal = RegInit(0.U(iDecPrivValLen.W))
+    val iDecEXUVal = RegInit(0.U(iDecEXUValLen.W))
+    val iDecLSlenVal = RegInit(0.U(iDecLSlenValLen.W))
+    val iDecLSfuncVal = RegInit(0.U(iDecLSfuncValLen.W))
+    val iDecWBTypVal = RegInit(0.U(iDecWBTypValLen.W))
+    val iDecDSVal = RegInit(0.U(iDecDSValLen.W))
 
     val IDU_NotBusy = RegInit(true.B)
 
     // Only can decode instruction if Master (IFU) 's output is valid
-    Mux(ioInternal.iSlaveValid.asBool, iDecodeEnable := true.B, iDecodeEnable := false.B)
+    iDecodeEnable := Mux(ioInternal.iSlaveValid.asBool, true.B,false.B) 
 
     // Decode PrivReg
-    Mux(iDecodeEnable.asBool, iDecPrivVal := 0.U(iDecPrivValLen.W), iDecPrivVal := Lookup(
+    iDecPrivVal := Mux(iDecodeEnable.asBool, 0.U(iDecPrivValLen.W), Lookup(
         ioInternal.iInst, PR_NORM, Array(
             ECALL -> PR_ECALL, MRET -> PR_MRET,
             CSRRW -> PR_ZICSR, CSRRC -> PR_ZICSR, CSRRS -> PR_ZICSR,
@@ -102,7 +104,7 @@ class IDU extends Module{
     ))
 
     // Decode EXUReg
-    Mux(iDecodeEnable.asBool, iDecEXUVal := 0.U(iDecEXUValLen.W), iDecEXUVal := Lookup(
+    iDecEXUVal := Mux(iDecodeEnable.asBool, 0.U(iDecEXUValLen.W), Lookup(
         ioInternal.iInst, EX_NOP, Array(
             LUI -> EX_PS1, //CSRRW -> EX_PS1, CSRRS -> EX_PS1, CSRRC -> EX_PS1,
 
@@ -139,7 +141,7 @@ class IDU extends Module{
     ))
 
     // Decode LSlenReg
-    Mux(iDecodeEnable.asBool, iDecLSlenVal := 0.U(iDecLSlenValLen.W), iDecLSlenVal := Lookup(
+    iDecLSlenVal := Mux(iDecodeEnable.asBool, 0.U(iDecLSlenValLen.W), Lookup(
         ioInternal.iInst, 0.U(2.W), Array(
             LB -> LS_B, LBU -> LS_B, SB -> LS_B,
             LH -> LS_H, LHU -> LS_H, SH -> LS_H,
@@ -149,7 +151,7 @@ class IDU extends Module{
     ))
 
     // Decode LSfuncReg
-    Mux(iDecodeEnable.asBool, iDecLSfuncVal := LS_NOP, iDecLSfuncVal := Lookup(
+    iDecLSfuncVal := Mux(iDecodeEnable.asBool, LS_NOP, Lookup(
         ioInternal.iInst, LS_NOP, Array(
             LB  -> LS_LD ,  LH -> LS_LD ,  LW -> LS_LD ,  LD -> LS_LD ,
             SB  -> LS_ST ,  SH -> LS_ST ,  SW -> LS_ST ,  SD -> LS_ST ,
@@ -158,7 +160,7 @@ class IDU extends Module{
     ))
 
     // Decode WBTypReg
-    Mux(iDecodeEnable.asBool, iDecWBTypVal := WB_NOP, iDecWBTypVal := Lookup(
+    iDecWBTypVal := Mux(iDecodeEnable.asBool, WB_NOP, Lookup(
         ioInternal.iInst, WB_EXU, Array(
             SB -> WB_NOP, SH -> WB_NOP, SW -> WB_NOP, SD -> WB_NOP,
             ECALL -> WB_NOP, EBREAK -> WB_NOP, MRET -> WB_NOP,
@@ -171,14 +173,14 @@ class IDU extends Module{
     ))
 
     // Decode DSReg
-    Mux(iDecodeEnable.asBool, iDecDSVal := 0.U(iDecDSValLen.W), iDecDSVal := Lookup(
+    iDecDSVal := Mux(iDecodeEnable.asBool, 0.U(iDecDSValLen.W), Lookup(
         ioInternal.iInst, NPC_RUNNING, Array(
             EBREAK -> NPC_STOPPED
         )
     ))
 
     // Combine these decode results together when iDecodeEnable is true
-    Mux(iDecodeEnable.asBool, DecodeVal := Cat(iDecPrivVal.asUInt, Cat(iDecEXUVal.asUInt, Cat(iDecLSlenVal.asUInt, Cat(iDecLSfuncVal.asUInt, Cat(iDecWBTypVal.asUInt, iDecDSVal.asUInt))))), 0.U(DecodeWidth.W))
+    DecodeVal := Mux(iDecodeEnable.asBool, Cat(iDecPrivVal.asUInt, Cat(iDecEXUVal.asUInt, Cat(iDecLSlenVal.asUInt, Cat(iDecLSfuncVal.asUInt, Cat(iDecWBTypVal.asUInt, iDecDSVal.asUInt))))), 0.U(DecodeWidth.W))
 
     // Decode Instruction type
     val InstructionType = Lookup(
@@ -207,46 +209,45 @@ class IDU extends Module{
 
     // Connect imm-generator
     val ImmGenerator = Module(new immGen)
-    val ImmOut = 0.U(DataWidth.W)
+    val ImmOut = RegInit(0.U(DataWidth.W))
 
-    when(iDecodeEnable.asBool){
-        ImmGenerator.ioSubmodule.iInst := ioInternal.iInst
-        ImmGenerator.ioSubmodule.iType := InstructionType
-        ImmOut := ImmGenerator.ioSubmodule.oImm
-    }
+    ImmGenerator.ioSubmodule.iInst := Mux(iDecodeEnable.asBool, ioInternal.iInst, 0.U(InstWidth.W))
+    ImmGenerator.ioSubmodule.iType := Mux(iDecodeEnable.asBool, InstructionType, instR)
+    ImmOut := Mux(iDecodeEnable.asBool, ImmGenerator.ioSubmodule.oImm, ImmOut)
 
     // Decode for registers
-    val RS1Addr = 0.U(RegIDWidth.W)
-    val RS2Addr = 0.U(RegIDWidth.W)
-    val SRC1Val = 0.U(DataWidth.W)
-    val SRC2Val = 0.U(DataWidth.W)
+    val RS1Addr = RegInit(0.U(RegIDWidth.W))
+    val RS2Addr = RegInit(0.U(RegIDWidth.W))
+    val SRC1Val = RegInit(0.U(DataWidth.W))
+    val SRC2Val = RegInit(0.U(DataWidth.W))
 
-    val RDAddr = 0.U(RegIDWidth.W)
+    val RDAddr = RegInit(0.U(RegIDWidth.W))
 
     when(iDecodeEnable.asBool){
         RS1Addr := ioInternal.iInst(RS1Hi, RS1Lo).asUInt
-        ioInternal.oRS1 := RS1Addr
         SRC1Val := ioInternal.iSRC1
 
         RS2Addr := ioInternal.iInst(RS2Hi, RS2Lo).asUInt
-        ioInternal.oRS2 := RS2Addr
         SRC2Val := ioInternal.iSRC2
 
         RDAddr := ioInternal.iInst(RDHi, RDLo).asUInt
     }
 
-    // Decode Static-Next-PC and Dynamic-Next-PC
-    val SNPC = 0.U(AddrWidth.W)
-    val DNPC = 0.U(AddrWidth.W)
+    ioInternal.oRS1 := RS1Addr
+    ioInternal.oRS2 := RS2Addr
 
-    val FeedBackJumpPC = false.B
-    val FeedbackPCVal = 0.U(AddrWidth.W)
+    // Decode Static-Next-PC and Dynamic-Next-PC
+    val SNPC = RegInit(0.U(AddrWidth.W))
+    val DNPC = RegInit(0.U(AddrWidth.W))
+
+    val FeedBackJumpPC = RegInit(false.B)
+    val FeedbackPCVal = RegInit(0.U(AddrWidth.W))
 
     when(iDecodeEnable.asBool){
         SNPC := ioInternal.iPC + InstSize.U
         DNPC := Lookup(
             ioInternal.iInst, ioInternal.iPC + InstSize.U, Array(
-                JAL  -> ioInternal.iPC.asUInt + ImmOut.asUInt,
+                JAL  -> (ioInternal.iPC.asUInt + ImmOut.asUInt),
                 JALR -> ((SRC1Val.asUInt + ImmOut.asUInt) & Cat(Fill(63, 1.U(1.W)), Fill(1, 0.U(1.W)))),
 
                 BEQ  -> Mux(SRC1Val.asUInt === SRC2Val.asUInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + InstSize.U),
@@ -262,16 +263,16 @@ class IDU extends Module{
         )
         
         // Judge SNPC is DNPC, if not, trigger value feedback
-        Mux(SNPC === DNPC, FeedBackJumpPC := false.B, FeedBackJumpPC := true.B)
+        FeedBackJumpPC := Mux(SNPC === DNPC, false.B, true.B)
         FeedbackPCVal := DNPC
     }
 
     ioInternal.oFeedBackPCChanged := FeedBackJumpPC.asBool
     ioInternal.oFeedBackNewPCVal := FeedbackPCVal
 
-    val OldCSR = 0.U(DataWidth.W)
-    val ZicsrWSCIdx = 0.U(CSRIDWidth.W)
-    val ZicsrNewVal = 0.U(DataWidth.W)
+    val OldCSR = RegInit(0.U(DataWidth.W))
+    val ZicsrWSCIdx = RegInit(0.U(CSRIDWidth.W))
+    val ZicsrNewVal = RegInit(0.U(DataWidth.W))
 
     when(iDecodeEnable.asBool){
         ZicsrWSCIdx := Lookup(
@@ -300,36 +301,36 @@ class IDU extends Module{
     ioInternal.oCSR_ZicsrNewVal := ZicsrNewVal
 
     // Assign SRC to EXU and LSU
-    val EXU_SRC1 = 0.U(DataWidth.W)
-    val EXU_SRC2 = 0.U(DataWidth.W)
-    val LSU_SRC2 = 0.U(DataWidth.W)
+    val EXU_SRC1 = RegInit(0.U(DataWidth.W))
+    val EXU_SRC2 = RegInit(0.U(DataWidth.W))
+    val LSU_SRC2 = RegInit(0.U(DataWidth.W))
 
     when(iDecodeEnable.asBool){
         EXU_SRC1 := MuxCase(0.U(DataWidth.W), Array(
-            InstructionType === InstR -> SRC1Val.asUInt,
-            InstructionType === InstI -> SRC1Val.asUInt,
-            InstructionType === InstS -> SRC1Val.asUInt,
-            InstructionType === InstB -> 0.U(DataWidth.W),
-            InstructionType === InstU -> ImmOut.asUInt,
-            InstructionType === InstJ -> 0.U(DataWidth.W)
+            (InstructionType === instR) -> SRC1Val.asUInt,
+            (InstructionType === instI) -> SRC1Val.asUInt,
+            (InstructionType === instS) -> SRC1Val.asUInt,
+            (InstructionType === instB) -> 0.U(DataWidth.W),
+            (InstructionType === instU) -> ImmOut.asUInt,
+            (InstructionType === instJ) -> 0.U(DataWidth.W)
         ))
 
         EXU_SRC2 := MuxCase(0.U(DataWidth.W), Array(
-            InstructionType === InstR -> SRC2Val.asUInt,
-            InstructionType === InstI -> ImmOut.asUInt,
-            InstructionType === InstS -> ImmOut.asUInt,
-            InstructionType === InstB -> 0.U(DataWidth.W),
-            InstructionType === InstU -> ioInternal.iPC.asUInt,
-            InstructionType === InstJ -> 0.U(DataWidth.W)
+            (InstructionType === instR) -> SRC2Val.asUInt,
+            (InstructionType === instI) -> ImmOut.asUInt,
+            (InstructionType === instS) -> ImmOut.asUInt,
+            (InstructionType === instB) -> 0.U(DataWidth.W),
+            (InstructionType === instU) -> ioInternal.iPC.asUInt,
+            (InstructionType === instJ) -> 0.U(DataWidth.W)
         ))
 
         LSU_SRC2 := MuxCase(0.U(DataWidth.W), Array(
-            InstructionType === InstR -> 0.U(DataWidth.W),
-            InstructionType === InstI -> 0.U(DataWidth.W),
-            InstructionType === InstS -> SRC2Val.asUInt,
-            InstructionType === InstB -> 0.U(DataWidth.W),
-            InstructionType === InstU -> 0.U(DataWidth.W),
-            InstructionType === InstJ -> 0.U(DataWidth.W)
+            (InstructionType === instR) -> 0.U(DataWidth.W),
+            (InstructionType === instI) -> 0.U(DataWidth.W),
+            (InstructionType === instS) -> SRC2Val.asUInt,
+            (InstructionType === instB) -> 0.U(DataWidth.W),
+            (InstructionType === instU) -> 0.U(DataWidth.W),
+            (InstructionType === instJ) -> 0.U(DataWidth.W)
         ))
     }
 

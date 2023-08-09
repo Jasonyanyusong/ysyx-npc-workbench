@@ -22,7 +22,7 @@ import chisel3.util._
 import npc.helper.defs.Base._
 import npc.helper.defs.InstType._
 
-object immGenInternal extends Bundle{
+class immGenInternal extends Bundle{
     val iInst = Input(UInt(AddrWidth.W))
     val iType = Input(UInt(InstTypeWidth.W))
     val oImm = Output(UInt(DataWidth.W))
@@ -43,13 +43,14 @@ class immGen extends Module{
             ioSubmodule.iInst(31, 31).asUInt,
             ioSubmodule.iInst( 7,  7).asUInt,
             ioSubmodule.iInst(30, 25).asUInt,
-            ioSubmodule.iInst(11,  8).asUInt
+            ioSubmodule.iInst(11,  8).asUInt,
+            Fill(1, 0.U(1.W)).asUInt
         )
     )
     val immU = Cat(
         Seq(
             ioSubmodule.iInst(31, 12).asUInt,
-            Fill(12, 0,U(1.W)).asUInt
+            Fill(12, 0.U(1.W)).asUInt
         )
     )
     val immJ = Cat(
@@ -67,11 +68,11 @@ class immGen extends Module{
     ioSubmodule.oImm := MuxCase(
         0.U(DataWidth.W),
         Array(
-            InstType === instI -> Cat(Fill(DataWidth - immILen, immI(immILen - 1)), immI),
-            InstType === instS -> Cat(Fill(DataWidth - immSLen, immS(immSLen - 1)), immS),
-            InstType === instB -> Cat(Fill(DataWidth - immBLen, immB(immBLen - 1)), immB),
-            InstType === instU -> Cat(Fill(DataWidth - immULen, immU(immULen - 1)), immU),
-            InstType === instJ -> Cat(Fill(DataWidth - immJLen, immJ(immJLen - 1)), immJ),
+            (InstType === instI) -> Cat(Fill(DataWidth - immILen, immI(immILen - 1)), immI),
+            (InstType === instS) -> Cat(Fill(DataWidth - immSLen, immS(immSLen - 1)), immS),
+            (InstType === instB) -> Cat(Fill(DataWidth - immBLen, immB(immBLen - 1)), immB),
+            (InstType === instU) -> Cat(Fill(DataWidth - immULen, immU(immULen - 1)), immU),
+            (InstType === instJ) -> Cat(Fill(DataWidth - immJLen, immJ(immJLen - 1)), immJ),
         )
     )
 }

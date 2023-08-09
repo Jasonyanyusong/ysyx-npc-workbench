@@ -14,7 +14,7 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-package npc.units
+package npc.units.iWriteBack
 
 import chisel3._
 import chisel3.util._
@@ -22,7 +22,7 @@ import chisel3.util._
 import npc.helper.defs.Base._
 import npc.helper.opcode.OpWBU._
 
-object iWriteBackInternal extends Bundle{
+class iWriteBackInternal extends Bundle{
     // ON-PIPELEINE VALUES
     val oSlaveReady = Output(Bool())
     val iSlaveValid = Input(Bool())
@@ -35,7 +35,7 @@ object iWriteBackInternal extends Bundle{
     val iRD = Input(UInt(RegIDWidth.W))
     val iPC = Input(UInt(AddrWidth.W))
 
-    val oPC = Input(UInt(AddrWidth.W))
+    val oPC = Output(UInt(AddrWidth.W))
 
     // OFF-PIPELINE VALUES
     val oWriteGPREnable = Output(Bool())
@@ -47,11 +47,11 @@ class WBU extends Module{
     val ioInternal = IO(new iWriteBackInternal)
 
     val WBU_NotBusy = RegInit(true.B)
-    val iWriteBackEnable = true.B
+    val iWriteBackEnable = RegInit(true.B)
 
-    val WriteGPREnable = false.B
-    val WriteGPRAddr = 0.U(RegIDWidth.W)
-    val WriteGPRVal = 0.U(DataWidth.W)
+    val WriteGPREnable = RegInit(false.B)
+    val WriteGPRAddr = RegInit(0.U(RegIDWidth.W))
+    val WriteGPRVal = RegInit(0.U(DataWidth.W))
 
     val EX_RETVal = ioInternal.iEXU_RET
     val LS_RETVal = ioInternal.iLSU_RET
@@ -60,23 +60,23 @@ class WBU extends Module{
     val DecodeBundle = ioInternal.iDecodeBundle
     val WBDecode = DecodeBundle(2, 1)
 
-    Mux(ioInternal.iSlaveValid.asBool, iWriteBackEnable := true.B, iWriteBackEnable := false.B)
+    iWriteBackEnable := Mux(ioInternal.iSlaveValid.asBool, true.B, false.B)
 
-    Mux(iWriteBackEnable.asBool, WriteGPRAddr := ioInternal.iRD, WriteGPRAddr := WriteGPRAddr)
+    WriteGPRAddr := Mux(iWriteBackEnable.asBool, ioInternal.iRD, WriteGPRAddr)
 
-    Mux(iWriteBackEnable.asBool, WriteGPREnable := MuxCase(false.B, Array(
-        WBDecode === WB_NOP -> false.B,
-        WBDecode === WB_EXU -> true.B,
-        WBDecode === WB_LSU -> true.B,
-        WBDecode === WB_SNPC -> true.B
-    )), WriteGPREnable := WriteGPREnable)
+    WriteGPREnable := Mux(iWriteBackEnable.asBool, MuxCase(false.B, Array(
+        (WBDecode === WB_NOP) -> false.B,
+        (WBDecode === WB_EXU) -> true.B,
+        (WBDecode === WB_LSU) -> true.B,
+        (WBDecode === WB_SNPC) -> true.B
+    )), WriteGPREnable)
 
-    Mux(iWriteBackEnable.asBool, WriteGPRVal := MuxCase(0.U(DataWidth.W), Array(
-        WBDecode === WB_NOP -> 0.U(DataWidth.W),
-        WBDecode === WB_EXU -> EX_RETVal,
-        WBDecode === WB_LSU -> LS_RETVal,
-        WBDecode === WB_SNPC -> SNPC
-    )), WriteGPRVal := WriteGPRVal)
+    WriteGPRVal := Mux(iWriteBackEnable.asBool, MuxCase(0.U(DataWidth.W), Array(
+        (WBDecode === WB_NOP) -> 0.U(DataWidth.W),
+        (WBDecode === WB_EXU) -> EX_RETVal,
+        (WBDecode === WB_LSU) -> LS_RETVal,
+        (WBDecode === WB_SNPC) -> SNPC
+    )), WriteGPRVal)
 
     // Connect IO Internal
     ioInternal.oWriteGPREnable := WriteGPREnable

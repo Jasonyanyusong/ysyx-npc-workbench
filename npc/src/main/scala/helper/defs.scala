@@ -70,10 +70,10 @@ object CSR_LUT{
 }
 
 object InstType{
-    val instR = 0.U(InstTypeWidth.W)
-    val instI = 1.U(InstTypeWidth.W)
-    val instS = 2.U(InstTypeWidth.W)
-    val instB = 3.U(InstTypeWidth.W)
-    val instU = 4.U(InstTypeWidth.W)
-    val instJ = 5.U(InstTypeWidth.W)
+    val instR = 0.U(Base.InstTypeWidth.W)
+    val instI = 1.U(Base.InstTypeWidth.W)
+    val instS = 2.U(Base.InstTypeWidth.W)
+    val instB = 3.U(Base.InstTypeWidth.W)
+    val instU = 4.U(Base.InstTypeWidth.W)
+    val instJ = 5.U(Base.InstTypeWidth.W)
 }

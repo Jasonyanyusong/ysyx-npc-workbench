@@ -14,14 +14,15 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-package npc.units
+package npc.units.iFetch
 
 import chisel3._
 import chisel3.util._
 
+import npc.helper.defs.Base._
 import npc.axi.master._
 
-object iFetchInternal extends Bundle{
+class iFetchInternal extends Bundle{
     // ON-PIPELINE VALUES
     val iMasterReady = Input(Bool())
     val oMasterValid = Output(Bool())
@@ -33,7 +34,7 @@ object iFetchInternal extends Bundle{
     val iFeedBackNewPCVal = Input(UInt(AddrWidth.W))
 }
 
-object iFetchExternal extends Bundle{
+class iFetchExternal extends Bundle{
     val iInst = Input(UInt(InstWidth.W))
     val oPC = Output(UInt(AddrWidth.W))
     val oMemEnable = Output(Bool())
@@ -54,21 +55,21 @@ class IFU extends Module{
 
     val PC = RegInit("h80000000".U(AddrWidth.W))
 
-    Mux(iFetchEnable.asBool, ioExternal.oMemEnable := true.B,  ioExternal.oMemEnable := false.B)
+    ioExternal.oMemEnable := Mux(iFetchEnable.asBool, true.B, false.B)
     
-    Mux(iFetchEnable.asBool, 
-        PC := Mux(
+    PC := Mux(iFetchEnable.asBool, 
+        Mux(
             ioInternal.iFeedBackPCChanged.asBool, 
             ioInternal.iFeedBackNewPCVal, 
             PC + 4.U
         ), 
-        PC := PC
+        PC
     )
 
-    Mux(iFetchEnable.asBool, ioExternal.oPC := PC, ioExternal.oPC := 0.U(AddrWidth.W))
-    Mux(iFetchEnable.asBool, ioInternal.oPC := PC, ioInternal.oPC := 0.U(AddrWidth.W))
+    ioExternal.oPC := Mux(iFetchEnable.asBool, PC, 0.U(AddrWidth.W))
+    ioInternal.oPC := Mux(iFetchEnable.asBool, PC, 0.U(AddrWidth.W))
 
-    Mux(iFetchEnable.asBool, Inst := ioExternal.iInst,         Inst := Inst.asUInt)
+    Inst := Mux(iFetchEnable.asBool, ioExternal.iInst, Inst.asUInt)
     
     iFetchEnable := false.B
 
