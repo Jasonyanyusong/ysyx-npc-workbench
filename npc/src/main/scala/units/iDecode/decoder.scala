@@ -104,7 +104,7 @@ class IDU extends Module{
     // Decode EXUReg
     Mux(iDecodeEnable.asBool, iDecEXUVal := 0.U(iDecEXUValLen.W), iDecEXUVal := Lookup(
         ioInternal.iInst, EX_NOP, Array(
-            LUI -> EX_PS1, CSRRW -> EX_PS1, CSRRS -> EX_PS1, CSRRC -> EX_PS1,
+            LUI -> EX_PS1, //CSRRW -> EX_PS1, CSRRS -> EX_PS1, CSRRC -> EX_PS1,
 
             AUIPC -> EX_ADD, SB -> EX_ADD, SH -> EX_ADD, SW -> EX_ADD, SD -> EX_ADD, ADD -> EX_ADD, ADDI -> EX_ADD,
             LB -> EX_ADD, LBU -> EX_ADD, LH -> EX_ADD, LHU -> EX_ADD, LW -> EX_ADD, LWU -> EX_ADD, LD -> EX_ADD,

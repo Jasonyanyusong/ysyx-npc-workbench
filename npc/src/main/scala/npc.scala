@@ -21,6 +21,7 @@ import chisel3.util._
 
 import npc.helper.defs.Base._
 import npc.helper.defs.CSR_LUT._
+import npc.helper.defs.PR_ZICSR._
 
 object NPCIO extends Bundle{
     val iFetch_iInst = Input(UInt(InstWidth.W))
@@ -103,7 +104,10 @@ class NPC extends Module{
         (index === CSR_MCAUSE) -> (mcause.asUInt )  // mcause
     ))
 
-    val isZicsr = false.B
+    val PrivDecode = NPC_IDU.oDecodeBundle(15, 14)
+
+    val isZicsr = PrivDecode === PR_ZICSR
+    val isECALL = PrivDecode === PR_ECALL
 
     def CSR_Write(CSR_idx, CSR_val : UInt) = {
         switch (CSR_idx.asUInt){
@@ -120,6 +124,7 @@ class NPC extends Module{
                 Mux(isZicsr.asBool, mcause := CSR_val, mcause := mcause)
             }
         }
+        Mux(isECALL, mcause := "b11".asUInt, mcause := mcause)
     }
 
     // NPC Inside Logic: IFU <-> IDU
