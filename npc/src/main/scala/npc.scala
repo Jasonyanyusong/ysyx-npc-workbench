@@ -23,10 +23,14 @@ import npc.helper.defs.Base._
 import npc.helper.defs.CSR_LUT._
 
 object NPCIO extends Bundle{
-    // TODO: Define NPC's IO
     val iFetch_iInst = Input(UInt(InstWidth.W))
     val iFetch_oPC = Output(UInt(AddrWidth.W))
     val iFetch_oMemEnable = Output(Bool())
+
+    val iLoadStore_oMemoryOP = Output(UInt(2.W))
+    val iLoadStore_oMemoryAddr = Output(UInt(AddrWidth.W))
+    val iLoadStore_oMemoryWrite = Output(UInt(DataWidth.W))
+    val iLoadStore_iMemoryRead = Input(UInt(DataWidth.W))
 }
 
 object NPCIODebug extends Bundle{
@@ -172,6 +176,10 @@ class NPC extends Module{
     NPC_WBU.ioInternal.iPC := RegNext(NPC_LSU.ioInternal.oPC)
 
     // NPC Outside Logic: LSU <-> IO
+    NPCIO.iLoadStore_oMemoryOP     := NPC_LSU.ioExternal.oMemoryOP
+    NPCIO.iLoadStore_oMemoryAddr   := NPC_LSU.ioExternal.oMemoryAddr
+    NPCIO.iLoadStore_oMemoryWrite  := NPC_LSU.ioExternal.oMemoryWrite
+    NPC_LSU.ioExternal.iMemoryRead := NPCIO.iLoadStore_iMemoryRead
 
     // NPC Inside Logic: WBU <-> Top
 
