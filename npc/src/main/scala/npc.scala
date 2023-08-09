@@ -24,6 +24,9 @@ import npc.helper.defs.CSR_LUT._
 
 object NPCIO extends Bundle{
     // TODO: Define NPC's IO
+    val iFetch_iInst = Input(UInt(InstWidth.W))
+    val iFetch_oPC = Output(UInt(AddrWidth.W))
+    val iFetch_oMemEnable = Output(Bool())
 }
 
 object NPCIODebug extends Bundle{
@@ -128,6 +131,9 @@ class NPC extends Module{
     NPC_IDU.iPC              := RegNext(NPC_IFU.ioInternal.oPC)
 
     // NPC Outside Logic: IFU <-> IO
+    NPCIO.iFetch_oPC := NPC_IFU.ioExternal.oPC
+    NPCIO.iFetch_oMemEnable := NPC_IFU.ioExternal.oMemEnable
+    NPC_IFU.ioExternal.iInst := NPCIO.iInst
 
     // NPC Inside Logic: IDU <-> EXU
 
