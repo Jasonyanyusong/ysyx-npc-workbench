@@ -150,6 +150,15 @@ class NPC extends Module{
     // NPC Inside Logic: IDU <-> Top
 
     // NPC Inside Logic: EXU <-> LSU
+    NPC_EXU.ioInternal.iMasterReady := RegNext(NPC_LSU.ioInternal.oSlaveReady)
+    NPC_LSU.ioInternal.iSlaveValid  := RegNext(NPC_EXU.ioInternal.oMasterValid)
+
+    NPC_LSU.ioInternal.iDecodeBundle := RegNext(NPC_EXU.ioInternal.oDecodeBundle)
+    NPC_LSU.ioInternal.iEXU_RET      := RegNext(NPC_EXU.ioInternal.oEXU_RET)
+    NPC_LSU.ioInternal.iLSU_SRC2     := RegNext(NPC_EXU.ioInternal.oLSU_SRC2)
+
+    NPC_LSU.ioInternal.iRD := RegNext(NPC_EXU.ioInternal.oRD)
+    NPC_LSU.ioInternal.iPC := RegNext(NPC_EXU.ioInternal.oPC)
 
     // NPC Inside Logic: LSU <-> WBU
 
