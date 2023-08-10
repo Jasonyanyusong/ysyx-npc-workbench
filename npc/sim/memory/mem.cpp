@@ -14,7 +14,37 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
+#include <common.h>
+#include <mem.h>
+
+static uint8_t *pmem = NULL;
+
 void init_mem(){
     // TODO add some code here
+    printf("Initializing Memory\n");  
+    pmem = malloc(MEM_END - MEM_START + 1);
+    assert(pmem);
+    printf("Memory [0x%x, 0x%x]\n", MEM_START, MEM_END);
     return;
+}
+
+bool in_pmem(word_t addr){
+    return (addr >= MEM_START) && (addr <= MEM_END);
+}
+
+uint8_t* guest_to_host(word_t paddr) { return pmem + paddr - MEM_START; }
+word_t host_to_guest(uint8_t *haddr) { return haddr - pmem + MEM_START; }
+
+static void out_of_bound(word_t addr){
+    printf("[memory] address = 0x%x is out of bound of pmem@[0x%x,0x%x]\n", addr, MEM_START, MEM_END);
+    assert(0);
+}
+
+static word_t pmem_read(paddr_t addr, int len) {
+  word_t ret = host_read(guest_to_host(addr), len);
+  return ret;
+}
+
+static void pmem_write(paddr_t addr, int len, word_t data) {
+  host_write(guest_to_host(addr), len, data);
 }

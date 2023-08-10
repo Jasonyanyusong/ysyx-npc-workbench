@@ -14,36 +14,20 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include<common.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <inttypes.h>
+#include <assert.h>
+#include <stdlib.h>
 
-#define MEM_START 0x80000000
-#define MEM_END   0x8fffffff
+typedef int64_t sword_t;
+typedef uint64_t word_t;
 
-void init_mem();
+#define BITMASK(bits) ((1ull << (bits)) - 1)
+#define BITS(x, hi, lo) (((x) >> (lo)) & BITMASK((hi) - (lo) + 1)) // similar to x[hi:lo] in verilog
 
-bool in_pmem();
+#define STRLEN(CONST_STR) (sizeof(CONST_STR) - 1)
+#define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
 
-static word_t pmem_read(word_t addr);
-static void pmem_write(word_t addr, word_t data);
-
-static void out_of_bound();
-
-static inline word_t host_read(void *addr, int len) {
-  switch (len) {
-    case 1: return *(uint8_t  *)addr;
-    case 2: return *(uint16_t *)addr;
-    case 4: return *(uint32_t *)addr;
-    case 8: return *(uint64_t *)addr;
-    default: assert(0);
-  }
-}
-
-static inline void host_write(void *addr, int len, word_t data) {
-  switch (len) {
-    case 1: *(uint8_t  *)addr = data; return;
-    case 2: *(uint16_t *)addr = data; return;
-    case 4: *(uint32_t *)addr = data; return;
-    case 8: *(uint64_t *)addr = data; return;
-    default: assert(0);
-  }
-}
+enum { NPC_RUNNING, NPC_STOP, NPC_END, NPC_ABORT, NPC_QUIT };
