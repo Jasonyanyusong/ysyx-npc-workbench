@@ -47,7 +47,7 @@ class WBU extends Module{
     val ioInternal = IO(new iWriteBackInternal)
 
     val WBU_NotBusy = RegInit(true.B)
-    val iWriteBackEnable = RegInit(true.B)
+    //val iWriteBackEnable = RegInit(true.B)
 
     val WriteGPREnable = RegInit(false.B)
     val WriteGPRAddr = RegInit(0.U(RegIDWidth.W))
@@ -60,23 +60,42 @@ class WBU extends Module{
     val DecodeBundle = ioInternal.iDecodeBundle
     val WBDecode = DecodeBundle(2, 1)
 
-    iWriteBackEnable := Mux(ioInternal.iSlaveValid.asBool, true.B, false.B)
+    //iWriteBackEnable := Mux(ioInternal.iSlaveValid.asBool, true.B, false.B)
 
-    WriteGPRAddr := Mux(iWriteBackEnable.asBool, ioInternal.iRD, WriteGPRAddr)
+    when(ioInternal.iSlaveValid.asBool){
+        // TODO: put all logic here
+        WriteGPRAddr := ioInternal.iRD
 
-    WriteGPREnable := Mux(iWriteBackEnable.asBool, MuxCase(false.B, Array(
+        WriteGPREnable := MuxCase(false.B, Array(
+            (WBDecode === WB_NOP) -> false.B,
+            (WBDecode === WB_EXU) -> true.B,
+            (WBDecode === WB_LSU) -> true.B,
+            (WBDecode === WB_SNPC) -> true.B
+        ))
+
+        WriteGPRVal := MuxCase(0.U(DataWidth.W), Array(
+            (WBDecode === WB_NOP) -> 0.U(DataWidth.W),
+            (WBDecode === WB_EXU) -> EX_RETVal,
+            (WBDecode === WB_LSU) -> LS_RETVal,
+            (WBDecode === WB_SNPC) -> SNPC
+        ))
+    }
+
+    //WriteGPRAddr := Mux(iWriteBackEnable.asBool, ioInternal.iRD, WriteGPRAddr)
+
+    /*WriteGPREnable := Mux(iWriteBackEnable.asBool, MuxCase(false.B, Array(
         (WBDecode === WB_NOP) -> false.B,
         (WBDecode === WB_EXU) -> true.B,
         (WBDecode === WB_LSU) -> true.B,
         (WBDecode === WB_SNPC) -> true.B
-    )), WriteGPREnable)
+    )), WriteGPREnable)*/
 
-    WriteGPRVal := Mux(iWriteBackEnable.asBool, MuxCase(0.U(DataWidth.W), Array(
+    /*WriteGPRVal := Mux(iWriteBackEnable.asBool, MuxCase(0.U(DataWidth.W), Array(
         (WBDecode === WB_NOP) -> 0.U(DataWidth.W),
         (WBDecode === WB_EXU) -> EX_RETVal,
         (WBDecode === WB_LSU) -> LS_RETVal,
         (WBDecode === WB_SNPC) -> SNPC
-    )), WriteGPRVal)
+    )), WriteGPRVal)*/
 
     // Connect IO Internal
     ioInternal.oWriteGPREnable := WriteGPREnable
