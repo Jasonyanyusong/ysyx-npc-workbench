@@ -109,6 +109,13 @@ class EXU extends Module{
     ioInternal.oRD := ioInternal.iRD
     ioInternal.oPC := ioInternal.iPC
 
+    iExecuteEnable := false.B
+
     ioInternal.oSlaveReady := EXU_NotBusy.asBool && ioInternal.iMasterReady.asBool
     ioInternal.oMasterValid := EXU_NotBusy.asBool && iExecuteEnable.asBool
+
+    when(ioInternal.iMasterReady.asBool){
+        // Shake hand success, re-enable iDecode, decode next instruction if IFU have result
+        iExecuteEnable := true.B
+    }
 }
