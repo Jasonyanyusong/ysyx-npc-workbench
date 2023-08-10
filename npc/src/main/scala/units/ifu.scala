@@ -49,38 +49,57 @@ class IFU extends Module{
 
     val Inst = RegInit(0.U(InstWidth.W))
 
-    val iFetchEnable = RegInit(true.B)
+    //val iFetchEnable = RegInit(true.B)
 
     val IFU_NotBusy = RegInit(true.B)
 
     val PC = RegInit("h80000000".U(AddrWidth.W))
 
-    ioExternal.oMemEnable := Mux(iFetchEnable.asBool, true.B, false.B)
+    //ioExternal.oMemEnable := Mux(iFetchEnable.asBool, true.B, false.B)
+
+    val iFetchMemEnable = RegInit(false.B)
     
-    PC := Mux(iFetchEnable.asBool, 
+    /*PC := Mux(iFetchEnable.asBool, 
         Mux(
             ioInternal.iFeedBackPCChanged.asBool, 
             ioInternal.iFeedBackNewPCVal, 
             PC + 4.U
         ), 
         PC
-    )
+    )*/
 
-    ioExternal.oPC := Mux(iFetchEnable.asBool, PC, 0.U(AddrWidth.W))
-    ioInternal.oPC := Mux(iFetchEnable.asBool, PC, 0.U(AddrWidth.W))
+    //ioExternal.oPC := Mux(iFetchEnable.asBool, PC, 0.U(AddrWidth.W))
+    //ioInternal.oPC := Mux(iFetchEnable.asBool, PC, 0.U(AddrWidth.W))
 
-    Inst := Mux(iFetchEnable.asBool, ioExternal.iInst, Inst.asUInt)
+    //Inst := Mux(iFetchEnable.asBool, ioExternal.iInst, Inst.asUInt)
     
-    iFetchEnable := false.B
+    //iFetchEnable := false.B
 
-    ioInternal.oInst := Inst
-    ioInternal.oMasterValid := IFU_NotBusy.asBool
-
-    when(ioInternal.iMasterReady.asBool){
+    /*when(){
         // Shake hand success, re-enable iFetch, fetch next PC's instruction
         //Inst := 0.U(InstWidth.W)
         iFetchEnable := true.B
+    }*/
+
+    //iFetchEnable := Mux(ioInternal.iMasterReady.asBool, true.B, false.B)
+
+    when(ioInternal.iMasterReady.asBool){
+        PC := Mux(
+            ioInternal.iFeedBackPCChanged.asBool, 
+            ioInternal.iFeedBackNewPCVal, 
+            PC + 4.U
+        )
+
+        iFetchMemEnable := true.B
+
+        Inst := ioExternal.iInst
     }
+
+    ioExternal.oMemEnable := iFetchMemEnable
+    ioExternal.oPC := PC
+    ioInternal.oPC := PC
+    ioInternal.oInst := Inst
+    ioInternal.oMasterValid := IFU_NotBusy.asBool
     
     /*
 
