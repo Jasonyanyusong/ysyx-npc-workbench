@@ -80,7 +80,6 @@ class IDU extends Module{
     // Instruction Decode Unit: First generate opreation code, then send operands to EXU and LSU (for operand send to LSU, it needs to be delivered to EXU first), last write back PC and CSR (WBU only write back GPR)
 
     val DecodeVal = RegInit(0.U(DecodeWidth.W))
-    //val iDecodeEnable = RegInit(true.B)
 
     val iDecPrivVal = RegInit(0.U(iDecPrivValLen.W))
     val iDecEXUVal = RegInit(0.U(iDecEXUValLen.W))
@@ -245,7 +244,6 @@ class IDU extends Module{
         RDAddr := ioInternal.iInst(RDHi, RDLo).asUInt
 
         // Decode Static-Next-PC and Dynamic-Next-PC
-
         SNPC := ioInternal.iPC + InstSize.U
         DNPC := Lookup(
             ioInternal.iInst, ioInternal.iPC + InstSize.U, Array(
