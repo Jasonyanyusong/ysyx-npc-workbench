@@ -59,6 +59,9 @@ class iDecodeInternal extends Bundle{
     val oFeedBackPCChanged = Output(Bool())
     val oFeedBackNewPCVal = Output(UInt(AddrWidth.W))
 
+    val iHaveWriteBack = Input(Bool())
+    val iWriteBackAddr = Input(UInt(RegIDWidth.W))
+
     // OFF-PIPELINE VALUES
 
     val oRS1 = Output(UInt(RegIDWidth.W))
@@ -111,11 +114,14 @@ class IDU extends Module{
     val LSU_SRC2 = RegInit(0.U(DataWidth.W))
 
     val IDU_NotBusy = RegInit(true.B)
+    val RegStateTable = Mem(RegSum, Bool())
 
     // Connect imm-generator
     val ImmGenerator = Module(new immGen)
     ImmGenerator.ioSubmodule.iInst := ioInternal.iInst
     ImmGenerator.ioSubmodule.iType := InstructionType
+
+    RegStateTable(ioInternal.iWriteBackAddr.asUInt) := Mux(ioInternal.iHaveWriteBack.asBool, false.B, RegStateTable(ioInternal.iWriteBackAddr.asUInt))
 
     when(ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool){
         // Decode PrivReg
@@ -242,6 +248,10 @@ class IDU extends Module{
         SRC2Val := ioInternal.iSRC2
 
         RDAddr := ioInternal.iInst(RDHi, RDLo).asUInt
+
+        // Register State control
+        RegStateTable(RDAddr.asUInt) := 1.U(1.W)
+        IDU_NotBusy := (RegStateTable(RS1Addr.asUInt).asBool && RegStateTable(RS2Addr.asUInt).asBool)
 
         // Decode Static-Next-PC and Dynamic-Next-PC
         SNPC := ioInternal.iPC + InstSize.U
