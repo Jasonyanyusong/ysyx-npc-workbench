@@ -52,7 +52,6 @@ class EXU extends Module{
     val EXU_NotBusy = RegInit(true.B)
 
     val ExecuteResult = RegInit(0.U(DataWidth.W))
-    //val iExecuteEnable = RegInit(true.B)
     val iExecuteOPcode = ioInternal.iDecodeBundle(13, 7)
 
     val SRC1 = ioInternal.iEXU_SRC1
@@ -60,9 +59,6 @@ class EXU extends Module{
 
     def WordSignExt(WordVal : UInt) = Cat(Fill(WordWidth, WordVal(WordWidth - 1).asUInt), WordVal (WordWidth - 1, 0))
     def WordCut(DoubleVal : UInt) = DoubleVal(WordWidth - 1, 0)
-
-    // Only can execute arthmetic if Master (IDU) 's output is valid
-    //iExecuteEnable := Mux(ioInternal.iSlaveValid.asBool, true.B, false.B)
 
     when(ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool){
         ExecuteResult := MuxCase(0.U(DataWidth.W), Array(
@@ -109,13 +105,6 @@ class EXU extends Module{
     ioInternal.oRD := ioInternal.iRD
     ioInternal.oPC := ioInternal.iPC
 
-    //iExecuteEnable := false.B
-
     ioInternal.oSlaveReady := (EXU_NotBusy.asBool && ioInternal.iMasterReady.asBool)
     ioInternal.oMasterValid := (EXU_NotBusy.asBool && ioInternal.iSlaveValid.asBool)
-
-    /*when(ioInternal.iMasterReady.asBool){
-        // Shake hand success, re-enable iDecode, decode next instruction if IFU have result
-        iExecuteEnable := true.B
-    }*/
 }
