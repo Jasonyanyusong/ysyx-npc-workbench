@@ -317,14 +317,6 @@ class IDU extends Module{
         ))
     }
 
-    /*iDecPrivVal := iDecPrivVal
-    iDecEXUVal := iDecEXUVal
-    iDecLSlenVal := iDecLSlenVal
-    iDecLSfuncVal := iDecLSfuncVal
-    iDecWBTypVal := iDecWBTypVal
-    iDecDSVal := iDecDSVal
-    DecodeVal := DecodeVal*/
-
     ioInternal.oRS1 := RS1Addr
     ioInternal.oRS2 := RS2Addr
 
