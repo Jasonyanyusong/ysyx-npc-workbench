@@ -80,6 +80,8 @@ class NPCIODebug extends Bundle{
     val MTVEC = Output(UInt(DataWidth.W))
     val MEPC = Output(UInt(DataWidth.W))
     val MCAUSE = Output(UInt(DataWidth.W))
+
+    val DecodeBundleDebug = Output(UInt(DecodeWidth.W))
 }
 
 class NPC extends Module{
@@ -266,4 +268,6 @@ class NPC extends Module{
     ioNPCDebug.MTVEC := ShiftRegister(mtvec, 3)
     ioNPCDebug.MEPC := ShiftRegister(mepc, 3)
     ioNPCDebug.MCAUSE := ShiftRegister(mcause, 3)
+
+    ioNPCDebug.DecodeBundleDebug := ShiftRegister(NPC_IDU.ioInternal.oDecodeBundle, 3)
 }
