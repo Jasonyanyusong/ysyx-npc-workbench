@@ -131,7 +131,7 @@ class IDU extends Module{
         // Decode EXUReg
         iDecEXUVal := Lookup(
             ioInternal.iInst, EX_NOP, Array(
-                LUI -> EX_PS1, //CSRRW -> EX_PS1, CSRRS -> EX_PS1, CSRRC -> EX_PS1,
+                LUI -> EX_PS1, CSRRW -> EX_PS1, CSRRS -> EX_PS1, CSRRC -> EX_PS1, CSRRWI -> EX_PS1, CSRRCI -> EX_PS1, CSRRSI -> EX_PS1,
 
                 AUIPC -> EX_ADD, SB -> EX_ADD, SH -> EX_ADD, SW -> EX_ADD, SD -> EX_ADD, ADD -> EX_ADD, ADDI -> EX_ADD,
                 LB -> EX_ADD, LBU -> EX_ADD, LH -> EX_ADD, LHU -> EX_ADD, LW -> EX_ADD, LWU -> EX_ADD, LD -> EX_ADD,
@@ -291,7 +291,10 @@ class IDU extends Module{
 
         EXU_SRC1 := MuxCase(0.U(DataWidth.W), Array(
             (InstructionType === instR) -> SRC1Val.asUInt,
-            (InstructionType === instI) -> SRC1Val.asUInt,
+            (InstructionType === instI) -> Lookup(ioInternal.iInst, SRC1Val.asUInt, Array(
+                CSRRW -> OldCSR, CSRRS -> OldCSR, CSRRC -> OldCSR,
+                CSRRWI -> OldCSR, CSRRSI -> OldCSR, CSRRCI -> OldCSR
+            )),
             (InstructionType === instS) -> SRC1Val.asUInt,
             (InstructionType === instB) -> 0.U(DataWidth.W),
             (InstructionType === instU) -> ImmOut.asUInt,
