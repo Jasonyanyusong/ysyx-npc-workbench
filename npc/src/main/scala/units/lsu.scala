@@ -61,7 +61,7 @@ class LSU extends Module{
 
     val LSU_NotBusy = RegInit(true.B)
     val LoadStoreResult = RegInit(0.U(DataWidth.W))
-    val iLoadStoreEnable = RegInit(true.B)
+    //val iLoadStoreEnable = RegInit(true.B)
 
     val iLoadStoreLen = RegInit(LS_B) // Default is LS_B since its value is 0
     val iLoadStoreFunc = RegInit(LS_NOP)
@@ -83,17 +83,30 @@ class LSU extends Module{
     def HalfZeroExt(HalfVal : UInt) = Cat(Fill(DataWidth - HalfWidth, 0.U(1.W)), HalfVal (HalfWidth - 1, 0))
     def ByteZeroExt(ByteVal : UInt) = Cat(Fill(DataWidth - ByteWidth, 0.U(1.W)), ByteVal (ByteWidth - 1, 0))
 
-    iLoadStoreEnable := Mux(ioInternal.iSlaveValid.asBool, true.B, false.B)
+    //iLoadStoreEnable := Mux(ioInternal.iSlaveValid.asBool, true.B, false.B)
 
-    iLoadStoreLen := Mux(iLoadStoreEnable.asBool, DecodeBundle(6, 5), iLoadStoreLen)
-    iLoadStoreFunc := Mux(iLoadStoreEnable.asBool, DecodeBundle(4, 3), iLoadStoreFunc)
-    iLoadStoreAddr := Mux(iLoadStoreEnable.asBool, EXU_RET, iLoadStoreAddr)
-    iLoadStoreMemOP := Mux(iLoadStoreEnable.asBool, MuxCase(MEM_NOP, Array(
+    when(ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool){
+        // TODO: move all LSU logic here
+        iLoadStoreLen := DecodeBundle(6, 5)
+        iLoadStoreFunc := DecodeBundle(4, 3)
+        iLoadStoreAddr := EXU_RET
+        iLoadStoreMemOP := MuxCase(MEM_NOP, Array(
+            (iLoadStoreFunc === LS_LD) -> MEM_READ,
+            (iLoadStoreFunc === LS_LDU) -> MEM_READ,
+            (iLoadStoreFunc === LS_ST) -> MEM_WRITE
+        ))
+        iLoadStoreWrite := LSU_SRC
+    }
+
+    //iLoadStoreLen := Mux(iLoadStoreEnable.asBool, DecodeBundle(6, 5), iLoadStoreLen)
+    //iLoadStoreFunc := Mux(iLoadStoreEnable.asBool, DecodeBundle(4, 3), iLoadStoreFunc)
+    //iLoadStoreAddr := Mux(iLoadStoreEnable.asBool, EXU_RET, iLoadStoreAddr)
+    /*iLoadStoreMemOP := Mux(iLoadStoreEnable.asBool, MuxCase(MEM_NOP, Array(
         (iLoadStoreFunc === LS_LD) -> MEM_READ,
         (iLoadStoreFunc === LS_LDU) -> MEM_READ,
         (iLoadStoreFunc === LS_ST) -> MEM_WRITE
-    )), iLoadStoreMemOP)
-    iLoadStoreWrite := Mux(iLoadStoreEnable.asBool, LSU_SRC, iLoadStoreWrite)
+    )), iLoadStoreMemOP)*/
+    //iLoadStoreWrite := Mux(iLoadStoreEnable.asBool, LSU_SRC, iLoadStoreWrite)
 
     // Connect IO External
     ioExternal.oMemoryOP := iLoadStoreMemOP
@@ -101,8 +114,24 @@ class LSU extends Module{
     ioExternal.oMemoryWrite := iLoadStoreWrite
     LD_RET := ioExternal.iMemoryRead
 
+    when(ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool){
+        LoadStoreResult :=MuxCase(0.U(DataWidth.W), Array(
+            (iLoadStoreFunc === LS_LD) -> (MuxCase(0.U(DataWidth.W), Array(
+                (iLoadStoreLen === LS_B) -> ByteSignExt(LD_RET.asUInt),
+                (iLoadStoreLen === LS_H) -> HalfSignExt(LD_RET.asUInt),
+                (iLoadStoreLen === LS_W) -> WordSignExt(LD_RET.asUInt),
+                (iLoadStoreLen === LS_D) -> LD_RET
+            ))),
+            (iLoadStoreFunc === LS_LDU) -> (MuxCase(0.U(DataWidth.W), Array(
+                (iLoadStoreLen === LS_B) -> ByteZeroExt(LD_RET.asUInt),
+                (iLoadStoreLen === LS_H) -> HalfZeroExt(LD_RET.asUInt),
+                (iLoadStoreLen === LS_W) -> WordZeroExt(LD_RET.asUInt)
+            )))
+        ))
+    }
+
     // For different Load Instructions, generate LSU output
-    LoadStoreResult := Mux(iLoadStoreEnable.asBool, MuxCase(0.U(DataWidth.W), Array(
+    /*LoadStoreResult := Mux(iLoadStoreEnable.asBool, MuxCase(0.U(DataWidth.W), Array(
         (iLoadStoreFunc === LS_LD) -> (MuxCase(0.U(DataWidth.W), Array(
             (iLoadStoreLen === LS_B) -> ByteSignExt(LD_RET.asUInt),
             (iLoadStoreLen === LS_H) -> HalfSignExt(LD_RET.asUInt),
@@ -115,7 +144,7 @@ class LSU extends Module{
             (iLoadStoreLen === LS_W) -> WordZeroExt(LD_RET.asUInt),
             (iLoadStoreLen === LS_D) -> LD_RET
         )))
-    )), LoadStoreResult)
+    )), LoadStoreResult)*/
 
     // Connect IO Internal
     ioInternal.oLSU_RET := LoadStoreResult
@@ -127,6 +156,6 @@ class LSU extends Module{
     ioInternal.oPC := ioInternal.iPC
 
     // Pipeline shake hand implementation
-    ioInternal.oSlaveReady := LSU_NotBusy.asBool && ioInternal.iMasterReady.asBool
-    ioInternal.oMasterValid := LSU_NotBusy.asBool && iLoadStoreEnable.asBool
+    ioInternal.oSlaveReady := (LSU_NotBusy.asBool && ioInternal.iMasterReady.asBool)
+    ioInternal.oMasterValid := (LSU_NotBusy.asBool && ioInternal.iSlaveValid.asBool)
 }
