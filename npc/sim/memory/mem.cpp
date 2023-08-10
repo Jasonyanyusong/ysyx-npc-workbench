@@ -14,11 +14,7 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include<stdio.h>
-
-#include<mem.h>
-
-int main(int argc, char* argv[]){
-    printf("Welcome to NPC-SIM!\n");
-    init_mem();
+void init_mem(){
+    // TODO add some code here
+    return;
 }
