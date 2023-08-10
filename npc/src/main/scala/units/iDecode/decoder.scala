@@ -92,7 +92,7 @@ class IDU extends Module{
     val IDU_NotBusy = RegInit(true.B)
 
     // Only can decode instruction if Master (IFU) 's output is valid
-    iDecodeEnable := Mux(ioInternal.iSlaveValid.asBool, true.B,false.B) 
+    iDecodeEnable := Mux(ioInternal.iSlaveValid.asBool, true.B, false.B) 
 
     // Decode PrivReg
     iDecPrivVal := Mux(iDecodeEnable.asBool, 0.U(iDecPrivValLen.W), Lookup(
@@ -180,7 +180,10 @@ class IDU extends Module{
     ))
 
     // Combine these decode results together when iDecodeEnable is true
-    DecodeVal := Mux(iDecodeEnable.asBool, Cat(iDecPrivVal.asUInt, Cat(iDecEXUVal.asUInt, Cat(iDecLSlenVal.asUInt, Cat(iDecLSfuncVal.asUInt, Cat(iDecWBTypVal.asUInt, iDecDSVal.asUInt))))), 0.U(DecodeWidth.W))
+    //DecodeVal := Cat(iDecPrivVal.asUInt, Cat(iDecEXUVal.asUInt, Cat(iDecLSlenVal.asUInt, Cat(iDecLSfuncVal.asUInt, Cat(iDecWBTypVal.asUInt, iDecDSVal.asUInt)))))
+    DecodeVal := Cat(Seq(
+        iDecPrivVal, iDecEXUVal, iDecLSlenVal, iDecLSfuncVal, iDecWBTypVal, iDecDSVal
+    ))
 
     // Decode Instruction type
     val InstructionType = Lookup(
