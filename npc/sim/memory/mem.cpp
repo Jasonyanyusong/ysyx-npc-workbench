@@ -20,7 +20,6 @@
 static uint8_t *pmem = NULL;
 
 void init_mem(){
-    // TODO add some code here
     printf("Initializing Memory\n");  
     pmem = malloc(MEM_END - MEM_START + 1);
     assert(pmem);
