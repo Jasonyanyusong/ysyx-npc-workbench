@@ -14,28 +14,24 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include <common.h>
+#include <verilator-sim.h>
 
-#include "verilated.h"
-#include "verilated_vcd_c.h"
-#include "../../obj_dir/VNPC.h"
+VerilatedContext* contextp = NULL;
+VerilatedVcdC* tfp = NULL;
+static VNPC* top;
 
-#define NR_GPRs 32
-#define NR_CSRs 4
+void sim_sim_init(){
+    // TODO: implement this function
+}
 
-typedef struct {
-  word_t gpr[NR_GPRs];
-  word_t csr[NR_CSRs];
-  word_t pc;
-} rtl_CPU_State;
+void sim_sim_exit(){
+    // TODO: implement this function
+}
 
-extern rtl_CPU_State cpu;
+void sim_one_exec(){
+    // TODO: implement this function
+}
 
-#define CONFIG_VCD_OUTPUT
-
-void sim_sim_init();
-void sim_sim_exit();
-void sim_one_exec();
-void sim_step_and_dump_wave();
-
-void get_regs();
+void sim_step_and_dump_wave(){
+    // TODO: implement his function
+}
