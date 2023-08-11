@@ -28,6 +28,9 @@ static void pmem_write(word_t addr, word_t data);
 
 static void out_of_bound();
 
+uint8_t* guest_to_host(word_t paddr);
+word_t host_to_guest(uint8_t *haddr);
+
 static inline word_t host_read(void *addr, int len) {
   switch (len) {
     case 1: return *(uint8_t  *)addr;
