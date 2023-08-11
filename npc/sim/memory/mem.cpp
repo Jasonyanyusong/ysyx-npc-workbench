@@ -40,11 +40,11 @@ static void out_of_bound(word_t addr){
     assert(0);
 }
 
-static word_t pmem_read(paddr_t addr, int len) {
+static word_t pmem_read(word_t addr, int len) {
   word_t ret = host_read(guest_to_host(addr), len);
   return ret;
 }
 
-static void pmem_write(paddr_t addr, int len, word_t data) {
+static void pmem_write(word_t addr, int len, word_t data) {
   host_write(guest_to_host(addr), len, data);
 }
