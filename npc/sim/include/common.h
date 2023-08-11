@@ -39,3 +39,5 @@ typedef struct {
 } NPCState;
 
 extern NPCState npc_state;
+
+uint64_t get_time();
