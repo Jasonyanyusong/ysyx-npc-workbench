@@ -31,3 +31,11 @@ typedef uint64_t word_t;
 #define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
 
 enum { NPC_RUNNING, NPC_STOP, NPC_END, NPC_ABORT, NPC_QUIT };
+
+typedef struct {
+  int state;
+  word_t halt_pc;
+  uint32_t halt_ret;
+} NPCState;
+
+extern NPCState npc_state;
