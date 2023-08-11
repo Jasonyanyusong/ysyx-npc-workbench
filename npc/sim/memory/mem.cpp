@@ -21,7 +21,7 @@ static uint8_t *pmem = NULL;
 
 void init_mem(){
     printf("Initializing Memory\n");  
-    pmem = malloc(MEM_END - MEM_START + 1);
+    pmem = (uint8_t *)malloc(MEM_END - MEM_START + 1);
     assert(pmem);
     printf("Memory [0x%x, 0x%x]\n", MEM_START, MEM_END);
     return;
