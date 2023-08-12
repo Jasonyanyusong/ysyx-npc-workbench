@@ -87,6 +87,12 @@ void step_and_dump_wave(){
     return;
 }
 
-word_t compute_ipc(){
-    return -1;
+double compute_ipc(){
+    assert(cycle > 0);
+    assert(instruction > 0);
+
+    double ans = (double)instruction / (double)cycyle;
+    printf("[simulation] IPC is %lf\n", ans);
+    
+    return ans;
 }
