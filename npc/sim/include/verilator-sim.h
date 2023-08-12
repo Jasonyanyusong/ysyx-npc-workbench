@@ -43,3 +43,9 @@ void get_regs();
 extern VerilatedContext* contextp;
 extern VerilatedVcdC* tfp;
 extern static VNPC* top;
+
+extern word_t cycle;
+extern word_t instruction;
+extern word_t time;
+
+word_t compute_ipc();

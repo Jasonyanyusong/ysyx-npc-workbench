@@ -77,3 +77,7 @@ void step_and_dump_wave(){
 
     return;
 }
+
+word_t compute_ipc(){
+    return -1;
+}
