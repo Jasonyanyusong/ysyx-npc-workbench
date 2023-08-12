@@ -35,7 +35,7 @@ extern rtl_CPU_State cpu;
 
 void sim_init();
 void sim_exit();
-void sim_one_exec();
+void sim_one_cycle();
 void step_and_dump_wave();
 
 void get_regs();

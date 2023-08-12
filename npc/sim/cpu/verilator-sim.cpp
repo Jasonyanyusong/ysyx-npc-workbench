@@ -64,7 +64,7 @@ void sim_exit(){
     return;
 }
 
-void sim_one_exec(){
+void sim_one_cycle(){
     assert(top);
     
     assert(0);
