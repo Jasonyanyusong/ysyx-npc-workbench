@@ -52,8 +52,14 @@ void sim_init(){
 }
 
 void sim_exit(){
-    assert(0);
-    // TODO: implement this function
+    printf("[simulation] simulation exitted\n");
+    step_and_dump_wave();
+
+    #ifdef CONFIG_VCD_OUTPUT
+    tfp -> close();
+    #endif
+
+    return;
 }
 
 void sim_one_exec(){
