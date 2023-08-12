@@ -52,6 +52,8 @@ void sim_init(){
 }
 
 void sim_exit(){
+    assert(top);
+
     printf("[simulation] simulation exitted\n");
     step_and_dump_wave();
 
@@ -63,11 +65,18 @@ void sim_exit(){
 }
 
 void sim_one_exec(){
+    assert(top);
+    
     assert(0);
     // TODO: implement this function
 }
 
 void step_and_dump_wave(){
+    #ifdef CONFIG_VCD_OUTPUT
+    assert(contextp);
+    assert(tfp);
+    #endif
+
     top -> eval();
 
     #ifdef CONFIG_VCD_OUTPUT
