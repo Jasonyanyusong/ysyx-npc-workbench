@@ -68,6 +68,12 @@ void sim_one_exec(){
 }
 
 void step_and_dump_wave(){
-    assert(0);
-    // TODO: implement his function
+    top -> eval();
+
+    #ifdef CONFIG_VCD_OUTPUT
+    contextp -> timeInc(1);
+    tfp -> dump(contextp -> time());
+    #endif
+
+    return;
 }
