@@ -31,11 +31,15 @@ typedef struct {
 
 extern rtl_CPU_State cpu;
 
-#define CONFIG_VCD_OUTPUT
+//#define CONFIG_VCD_OUTPUT
 
-void sim_sim_init();
-void sim_sim_exit();
+void sim_init();
+void sim_exit();
 void sim_one_exec();
-void sim_step_and_dump_wave();
+void step_and_dump_wave();
 
 void get_regs();
+
+extern VerilatedContext* contextp;
+extern VerilatedVcdC* tfp;
+extern static VNPC* top;

@@ -16,22 +16,52 @@
 
 #include <verilator-sim.h>
 
-VerilatedContext* contextp = NULL;
-VerilatedVcdC* tfp = NULL;
-static VNPC* top;
+//VerilatedContext* contextp = NULL;
+//VerilatedVcdC* tfp = NULL;
+//static VNPC* top;
 
-void sim_sim_init(){
-    // TODO: implement this function
+void sim_init(){
+    printf("[simulation] initializing simulation\n");
+
+    #ifdef CONFIG_VCD_OUTPUT
+    contextp = new VerilatedContext;
+    tfp = new VerilatedVcdC;
+    #endif
+
+    top = new VNPC;
+
+    #ifdef CONFIG_VCD_OUTPUT
+    contextp -> traceEverOn(true);
+    top -> trace(tfp, 0);
+    tfp -> open("dump.vcd");
+    #endif
+
+    printf("[simulation] simulation initialized, now reset NPC\n");
+
+    top -> clock = 0;
+    top -> reset = 1;
+    step_and_dump_wave();
+    
+    top -> clock = 1;
+    step_and_dump_wave();
+    top -> reset = 0;
+    top -> eval();
+
+    printf("[simulation] NPC has been resetted\n");
+    return;
 }
 
-void sim_sim_exit(){
+void sim_exit(){
+    assert(0);
     // TODO: implement this function
 }
 
 void sim_one_exec(){
+    assert(0);
     // TODO: implement this function
 }
 
-void sim_step_and_dump_wave(){
+void step_and_dump_wave(){
+    assert(0);
     // TODO: implement his function
 }

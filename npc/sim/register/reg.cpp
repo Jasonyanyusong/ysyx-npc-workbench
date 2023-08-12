@@ -17,5 +17,6 @@
 #include <verilator-sim.h>
 
 void get_regs(){
+    assert(0);
     // TODO: implement this function
 }
