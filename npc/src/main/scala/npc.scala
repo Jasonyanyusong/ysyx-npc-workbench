@@ -36,6 +36,7 @@ class NPCIO extends Bundle{
 
     val iLoadStore_oMemoryOP = Output(UInt(2.W))
     val iLoadStore_oMemoryAddr = Output(UInt(AddrWidth.W))
+    val iLoadStore_oMemoryLen = Output(UInt(2.W))
     val iLoadStore_oMemoryWrite = Output(UInt(DataWidth.W))
     val iLoadStore_iMemoryRead = Input(UInt(DataWidth.W))
 }
@@ -215,6 +216,7 @@ class NPC extends Module{
     // NPC Outside Logic: LSU <-> IO
     ioNPC.iLoadStore_oMemoryOP     := NPC_LSU.ioExternal.oMemoryOP
     ioNPC.iLoadStore_oMemoryAddr   := NPC_LSU.ioExternal.oMemoryAddr
+    ioNPC.iLoadStore_oMemoryLen    := NPC_LSU.ioExternal.oMemoryLen
     ioNPC.iLoadStore_oMemoryWrite  := NPC_LSU.ioExternal.oMemoryWrite
     NPC_LSU.ioExternal.iMemoryRead := ioNPC.iLoadStore_iMemoryRead
 

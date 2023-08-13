@@ -50,6 +50,7 @@ class iLoadStoreInternal extends Bundle{
 
 class iLoadStoreExternal extends Bundle{
     val oMemoryOP = Output(UInt(2.W))
+    val oMemoryLen = Output(UInt(2.W))
     val oMemoryAddr = Output(UInt(AddrWidth.W))
     val oMemoryWrite = Output(UInt(DataWidth.W))
     val iMemoryRead = Input(UInt(DataWidth.W))
@@ -99,6 +100,7 @@ class LSU extends Module{
     ioExternal.oMemoryAddr := iLoadStoreAddr
     ioExternal.oMemoryWrite := iLoadStoreWrite
     LD_RET := ioExternal.iMemoryRead
+    ioExternal.oMemoryLen := iLoadStoreLen
 
     when(ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool){
         LoadStoreResult :=MuxCase(0.U(DataWidth.W), Array(
