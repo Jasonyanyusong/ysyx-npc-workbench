@@ -15,3 +15,53 @@
 ***************************************************************************************/
 
 #include <monitor.h>
+#include <reg.h>
+#include <mem.h>
+
+int cmd_c(){
+    assert(0);
+    // TODO: implement this function
+    return 0;
+}
+
+int cmd_q(){
+    assert(0);
+    // TODO: implement this function
+    return 0;
+}
+
+int cmd_m(){
+    assert(0);
+    // TODO: implement this function
+    return 0;
+}
+
+int cmd_r(){
+    assert(0);
+    // TODO: implement this function
+    return 0;
+}
+
+int cmd_s(){
+    assert(0);
+    // TODO: implement this function
+    return 0;
+}
+
+int cmd_h(){
+    assert(0);
+    // TODO: implement this function
+    return 0;
+}
+
+void sdb_main_loop(){
+    assert(0);
+    // TODO: implement this function
+    return;
+}
+
+void sdb_init_sdb(){
+    assert(0);
+    // TODO: implement this function
+    return;
+}

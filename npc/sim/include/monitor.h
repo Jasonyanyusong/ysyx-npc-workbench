@@ -15,3 +15,20 @@
 ***************************************************************************************/
 
 #include <common.h>
+
+#include <readline/readline.h>
+#include <readline/history.h>
+
+void init_monitor(int argc, char* argv[]);
+void parse_args(int argc, char* argv[]);
+void load_image();
+
+int cmd_c();
+int cmd_q();
+int cmd_m();
+int cmd_r();
+int cmd_s();
+int cmd_h();
+
+void sdb_main_loop();
+void sdb_init_sdb();

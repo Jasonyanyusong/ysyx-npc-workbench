@@ -15,3 +15,22 @@
 ***************************************************************************************/
 
 #include <monitor.h>
+#include <mem.h>
+
+void init_monitor(int argc, char* argv[]){
+    assert(0);
+    // TODO: implement this function
+    return;
+}
+
+void parse_args(int argc, char* argv[]){
+    assert(0);
+    // TODO: implement this function
+    return;
+}
+
+void load_image(){
+    assert(0);
+    // TODO: implememt this function
+    return;
+}
