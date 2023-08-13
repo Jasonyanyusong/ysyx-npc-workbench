@@ -16,11 +16,30 @@
 
 #include <verilator-sim.h>
 
+// CSR list: mstatus. mtvec mepc macuse
+
 void get_regs(){
     assert(top);
 
-    assert(0);
-    // TODO: implement this function
+    cpu.pc = top -> ioNPCDebug_PC;
+
+    cpu.csr[0] = top -> ioNPCDebug_MSTATUS;
+    cpu.csr[1] = top -> ioNPCDebug_MTVEC;
+    cpu.csr[2] = top -> ioNPCDebug_MEPC;
+    cpu.csr[3] = top -> ioNPCDebug_MCAUSE;
+
+    if(NR_GPRs == 16 || NR_GPRs == 32){
+        // TODO: get first 16 registers from top
+    }else{
+        printf("[register] wrong GPR number");
+        assert(0);
+    }
+
+    if(NR_GPRs == 32){
+        // TODO: get last 16 regsiters from top
+    }
+
+    return;
 }
 
 void display_regs(){
