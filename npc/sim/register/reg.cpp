@@ -26,7 +26,22 @@ void get_regs(){
 void display_regs(){
     assert(top);
     assert(&cpu);
-    
-    assert(0);
-    // TODO: implement this function
+
+    printf("PC = 0x%lx\n", cpu.pc);
+
+    for(int i = 0; i < NR_GPRs; i = i + 1){
+        printf("GPR[%d] = 0x%lx\t", cpu.gpr[i]);
+        if((i + 1) % 8 == 0){
+            printf("\n")
+        }
+    }
+
+    for(int i = 0; i < NR_CSRs; i = i + 1){
+        printf("CSR[%d] = 0x%lx\t", cpu.csr[i]);
+        if((i + 1) % 8 == 0){
+            printf("\n")
+        }
+    }
+
+    return;
 }
