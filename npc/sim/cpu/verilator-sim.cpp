@@ -115,5 +115,5 @@ double compute_ipc(){
 void sim_mem(int delay_cycle){
     assert(0);
     // TODO: implement this function
-    return 0;
+    return;
 }
