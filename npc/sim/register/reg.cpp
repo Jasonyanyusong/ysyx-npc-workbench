@@ -69,6 +69,8 @@ void get_regs(){
         cpu.gpr[31] = top -> ioNPCDebug_GPR31;
     }
 
+    instruction = instruction + 1;
+
     return;
 }
 

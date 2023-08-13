@@ -38,6 +38,10 @@ void sim_init(){
     tfp -> open("dump.vcd");
     #endif
 
+    cycle = 0;
+    instruction = 0;
+    time = 0;
+
     printf("[simulation] simulation initialized, now reset NPC\n");
 
     top -> clock = 0;
@@ -68,9 +72,18 @@ void sim_exit(){
 
 void sim_one_cycle(){
     assert(top);
+
+    top -> clock = 0;
+    step_and_dump_wave();
+
+    sim_mem();
+
+    top -> clock = 1;
+    step_and_dump_wave();
+
+    cycle = cycle + 1;
     
-    assert(0);
-    // TODO: implement this function
+    return;
 }
 
 void step_and_dump_wave(){
