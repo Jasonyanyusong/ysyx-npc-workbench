@@ -15,6 +15,8 @@
 ***************************************************************************************/
 
 #include <verilator-sim.h>
+#include <mem.h>
+#include <math.h>
 
 //VerilatedContext* contextp = NULL;
 //VerilatedVcdC* tfp = NULL;
@@ -112,8 +114,46 @@ double compute_ipc(){
     return ans;
 }
 
+#define MEM_NOP 0b00
+#define MEM_READ 0b01
+#define MEM_WRITE 0b10
+
 void sim_mem(int delay_cycle){
-    assert(0);
-    // TODO: implement this function
+    assert(top);
+
+    word_t LS_MemAddr = top -> ioNPC_iLoadStore_oMemoryAddr;
+    int LS_MemLen = (int)pow(2, ); // TODO: Compute MemLen
+
+    assert(LS_MemLen >= 1 && LS_MemLen <= 8);
+    
+    switch(top -> ioNPC_iLoadStore_oMemoryOP){
+        case(MEM_NOP){
+            top -> ioNPC_iLoadStore_iMemoryRead = 0;
+            break;
+        }
+        case(MEM_READ){
+            top -> ioNPC_iLoadStore_iMemoryRead = pmem_read(LS_MemAddr, LS_MemLen);
+            break;
+        }
+        case(MEM_WRITE){
+            top -> ioNPC_iLoadStore_iMemoryRead = 0;
+            pmem_write(LS_MemAddr, LS_MemLen, top -> ioNPC_iLoadStore_oMemoryWrite);
+            break;
+        }
+        default: {printf("[simulation] unknown LSU operation\n"); assert(0); break;}
+    }
+
+    top -> eval();
+
+    word_t IF_MemAddr = top -> ioNPC_iFetch_oPC;
+
+    if(top -> ioNPC_iFetch_oMemEnable){
+        top -> ioNPC_iFetch_iInst = pmem_read(IF_MemAddr, 4);
+    }else{
+        top -> ioNPC_iFetch_iInst = 0;
+    }
+
+    top -> eval();
+
     return;
 }
