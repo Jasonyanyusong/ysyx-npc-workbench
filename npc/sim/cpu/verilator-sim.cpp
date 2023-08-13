@@ -122,7 +122,7 @@ void sim_mem(int delay_cycle){
     assert(top);
 
     word_t LS_MemAddr = top -> ioNPC_iLoadStore_oMemoryAddr;
-    int LS_MemLen = (int)pow(2, ); // TODO: Compute MemLen
+    int LS_MemLen = (int)pow(2, top -> ioNPC_iLoadStore_oMemoryLen);
 
     assert(LS_MemLen >= 1 && LS_MemLen <= 8);
     
