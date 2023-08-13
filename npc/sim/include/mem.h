@@ -23,8 +23,8 @@ void init_mem();
 
 bool in_pmem(word_t addr);
 
-static word_t pmem_read(word_t addr);
-static void pmem_write(word_t addr, word_t data);
+static word_t pmem_read(word_t addr, int len);
+static void pmem_write(word_t addr, int len, word_t data);
 
 static void out_of_bound();
 
