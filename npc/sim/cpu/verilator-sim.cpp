@@ -20,6 +20,8 @@
 //VerilatedVcdC* tfp = NULL;
 //static VNPC* top;
 
+int memory_delay = 0;
+
 void sim_init(){
     printf("[simulation] initializing simulation\n");
 
@@ -95,4 +97,10 @@ double compute_ipc(){
     printf("[simulation] IPC is %lf\n", ans);
     
     return ans;
+}
+
+void sim_mem(int delay_cycle){
+    assert(0);
+    // TODO: implement this function
+    return 0;
 }
