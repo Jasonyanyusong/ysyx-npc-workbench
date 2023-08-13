@@ -29,14 +29,44 @@ void get_regs(){
     cpu.csr[3] = top -> ioNPCDebug_MCAUSE;
 
     if(NR_GPRs == 16 || NR_GPRs == 32){
-        // TODO: get first 16 registers from top
+        cpu.gpr[0]  = top -> ioNPCDebug_GPR00;
+        cpu.gpr[1]  = top -> ioNPCDebug_GPR01;
+        cpu.gpr[2]  = top -> ioNPCDebug_GPR02;
+        cpu.gpr[3]  = top -> ioNPCDebug_GPR03;
+        cpu.gpr[4]  = top -> ioNPCDebug_GPR04;
+        cpu.gpr[5]  = top -> ioNPCDebug_GPR05;
+        cpu.gpr[6]  = top -> ioNPCDebug_GPR06;
+        cpu.gpr[7]  = top -> ioNPCDebug_GPR07;
+        cpu.gpr[8]  = top -> ioNPCDebug_GPR08;
+        cpu.gpr[9]  = top -> ioNPCDebug_GPR09;
+        cpu.gpr[10] = top -> ioNPCDebug_GPR10;
+        cpu.gpr[11] = top -> ioNPCDebug_GPR11;
+        cpu.gpr[12] = top -> ioNPCDebug_GPR12;
+        cpu.gpr[13] = top -> ioNPCDebug_GPR13;
+        cpu.gpr[14] = top -> ioNPCDebug_GPR14;
+        cpu.gpr[15] = top -> ioNPCDebug_GPR15;
     }else{
-        printf("[register] wrong GPR number");
+        printf("[register] wrong GPR number\n");
         assert(0);
     }
 
     if(NR_GPRs == 32){
-        // TODO: get last 16 regsiters from top
+        cpu.gpr[16] = top -> ioNPCDebug_GPR16;
+        cpu.gpr[17] = top -> ioNPCDebug_GPR17;
+        cpu.gpr[18] = top -> ioNPCDebug_GPR18;
+        cpu.gpr[19] = top -> ioNPCDebug_GPR19;
+        cpu.gpr[20] = top -> ioNPCDebug_GPR20;
+        cpu.gpr[21] = top -> ioNPCDebug_GPR21;
+        cpu.gpr[22] = top -> ioNPCDebug_GPR22;
+        cpu.gpr[23] = top -> ioNPCDebug_GPR23;
+        cpu.gpr[24] = top -> ioNPCDebug_GPR24;
+        cpu.gpr[25] = top -> ioNPCDebug_GPR25;
+        cpu.gpr[26] = top -> ioNPCDebug_GPR26;
+        cpu.gpr[27] = top -> ioNPCDebug_GPR27;
+        cpu.gpr[28] = top -> ioNPCDebug_GPR28;
+        cpu.gpr[29] = top -> ioNPCDebug_GPR29;
+        cpu.gpr[30] = top -> ioNPCDebug_GPR30;
+        cpu.gpr[31] = top -> ioNPCDebug_GPR31;
     }
 
     return;
