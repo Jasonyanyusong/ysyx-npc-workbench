@@ -51,3 +51,5 @@ extern word_t time;
 double compute_ipc();
 
 void sim_mem(int delay_cycle);
+
+void display_regs();

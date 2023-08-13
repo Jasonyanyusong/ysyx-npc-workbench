@@ -22,3 +22,11 @@ void get_regs(){
     assert(0);
     // TODO: implement this function
 }
+
+void display_regs(){
+    assert(top);
+    assert(&cpu);
+    
+    assert(0);
+    // TODO: implement this function
+}
