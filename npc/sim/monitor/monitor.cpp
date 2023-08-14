@@ -47,8 +47,11 @@ void init_monitor(int argc, char* argv[]){
 }
 
 void parse_args(int argc, char* argv[]){
+    const struct option table[] = {
+        // TODO: add more commands
+    };
+    // TODO: implement functionality of parse_args here
     assert(0);
-    // TODO: implement this function
     return;
 }
 

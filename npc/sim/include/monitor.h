@@ -19,6 +19,8 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+#include <getopt.h>
+
 void init_monitor(int argc, char* argv[]);
 void parse_args(int argc, char* argv[]);
 void load_image();
