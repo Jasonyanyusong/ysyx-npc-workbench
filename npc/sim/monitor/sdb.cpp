@@ -85,10 +85,12 @@ int cmd_r(char* args){
 
 int cmd_s(char* args){
     if(args == NULL){
-        printf("[sdb] this function need arguments, plese try again\n");
+        printf("[sdb] you can use \"s N\" to execute N steps\n");
+        if(npc_state.state == NPC_RUNNING || npc_state.state == NPC_STOP){
+            sim_one_cycle();
+        }
         return 0;
     }
-    assert(0);
     // TODO: implement this function
     return 0;
 }
