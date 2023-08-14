@@ -22,9 +22,6 @@
 #define SCREEN_W 400
 #define SCREEN_H 300
 
-#define CONFIG_VGA_CTL_MMIO 0xa0000100
-#define CONFIG_FB_ADDR 0xa1000000
-
 static uint32_t screen_width() {
   return SCREEN_W;
 }

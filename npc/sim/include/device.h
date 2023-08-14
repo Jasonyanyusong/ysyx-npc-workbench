@@ -17,6 +17,15 @@
 //#include <common.h>
 #include<difftest.h>
 
+#define CONFIG_I8042_DATA_MMIO 0xa0000060
+
+#define CONFIG_SERIAL_MMIO 0xa00003f8
+
+#define CONFIG_RTC_MMIO 0xa0000048
+
+#define CONFIG_VGA_CTL_MMIO 0xa0000100
+#define CONFIG_FB_ADDR 0xa1000000
+
 typedef void(*io_callback_t)(uint32_t, int, bool);
 uint8_t* new_space(int size);
 

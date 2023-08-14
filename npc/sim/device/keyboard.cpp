@@ -20,8 +20,6 @@
 #define KEYDOWN_MASK 0x8000
 #include <SDL2/SDL.h>
 
-#define CONFIG_I8042_DATA_MMIO 0xa0000060
-
 #define concat_temp(x, y) x ## y
 #define concat(x, y) concat_temp(x, y)
 
