@@ -81,12 +81,17 @@ void load_image(){
         return;
     }
 
+    assert(image_path != NULL);
+
     FILE *fp = fopen(image_path, "rb");
     assert(fp);
 
     fseek(fp, 0, SEEK_END);
     word_t image_size = ftell(fp);
     assert(image_size > 0);
+
+    img_size = image_size;
+    assert(img_size == image_size);
 
     printf("[monitor] image %s with size %d\n", image_path, image_size);
 
