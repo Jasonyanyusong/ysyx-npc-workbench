@@ -28,8 +28,6 @@ void sdl_clear_event_queue(){
     return;
 }
 
-// TODO: move macro "device_have_vga" and "device_have_keyboard" to "device.h"
-
 void device_update(){
     word_t device_now = get_time();
     if(device_now - device_last < (1000000 / 60)){
@@ -60,7 +58,7 @@ void device_update(){
                 #else
                 break;
                 #endif
-                
+
             }
             default: break;
         }
