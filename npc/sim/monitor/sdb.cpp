@@ -72,8 +72,17 @@ int cmd_m(char* args){
         printf("[sdb] this function need arguments, plese try again\n");
         return 0;
     }
-    assert(0);
-    // TODO: implement this function
+    
+    word_t print_length;
+    word_t start_memory_address;
+    char *last_part_of_args;
+    char *string_token_first = strtok_r(args, " ", &last_part_of_args);
+    print_length = atoi(string_token_first);
+    sscanf(last_part_of_args, "%lx", &start_memory_address);
+    for(word_t addr = start_memory_address; addr < start_memory_address + print_length; i = i + 4){
+        printf("pmem @ 0x%lx -> 0x%lx\n", addr, pmem_read(addr));
+    }
+
     return 0;
 }
 
