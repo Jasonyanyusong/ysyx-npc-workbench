@@ -25,7 +25,7 @@ static struct {
     const char *name;
     const char *description;
     int (*handler) (char *);
-} sdb_cmd_table [] = {
+} md_table [] = {
     { "h", "help",                                     cmd_h},
     { "c", "continue execution",                       cmd_c},
     { "q", "quit NSIM",                                cmd_q},
@@ -96,8 +96,9 @@ int cmd_s(char* args){
 }
 
 int cmd_h(char* args){
-    assert(0);
-    // TODO: implement this function
+    for(int i = 0; i < NR_CMD; i = i + 1){
+        printf("%s - %s\n", cmd_table[i].name, cmd_table[i].description);
+    }
     return 0;
 }
 
@@ -120,15 +121,15 @@ void sdb_main_loop(){
 
         int i;
         for(i = 0; i < NR_CMD; i = i + 1){
-            if(strcmp(cmd, sdb_cmd_table[i].name) == 0){
-                if(sdb_cmd_table[i].handler(args) < 0) {return;}
+            if(strcmp(cmd, cmd_table[i].name) == 0){
+                if(cmd_table[i].handler(args) < 0) {return;}
                 break;
             }
         }
 
         if(i == NR_CMD) {printf("[sdb] unknown command '%s'\n", cmd);}
     }
-    
+
     return;
 }
 
