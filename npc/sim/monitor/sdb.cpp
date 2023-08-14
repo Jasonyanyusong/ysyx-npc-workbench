@@ -78,8 +78,7 @@ int cmd_m(char* args){
 }
 
 int cmd_r(char* args){
-    assert(0);
-    // TODO: implement this function
+    display_regs();
     return 0;
 }
 
