@@ -17,6 +17,11 @@
 #include <device.h>
 #include <SDL2/SDL.h>
 
+void init_i8042();
+void init_serial();
+void init_timer();
+void init_vga();
+
 void send_key(uint8_t scancode, bool is_keydown);
 void vga_update_screen();
 
@@ -67,7 +72,25 @@ void device_update(){
 }
 
 void init_device(){
-    // TODO: implement this function
-    assert(0);
+    printf("[device] initializing devices\n");
+
+    #ifdef CONFIG_I8042_DATA_MMIO
+    init_i8042();
+    #endif
+
+    #ifdef CONFIG_SERIAL_MMIO
+    init_serial();
+    #endif
+
+    #ifdef CONFIG_RTC_MMIO
+    init_timer();
+    #endif
+
+    #ifdef CONFIG_VGA_CTL_MMIO
+    init_vga();
+    #endif
+
+    printf("[device] device initialize finished\n");
+    
     return;
 }
