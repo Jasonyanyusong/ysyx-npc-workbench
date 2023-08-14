@@ -17,6 +17,18 @@
 #include <monitor.h>
 #include <mem.h>
 
+char* image_path = NULL;
+char* diff_so_file = NULL;
+
+uint32_t default_img[] = {
+    // TODO: write binary of default image
+    // need to support both RV32 and RV64
+    0x800002b7, // lui t0, 0x80000
+    0x0002a023, // sw zero ,0(t0)
+    0x0002a503, // lw a0, 0(t0)
+    0x00100073, // ebreak
+};
+
 void init_monitor(int argc, char* argv[]){
     assert(0);
     // TODO: implement this function
