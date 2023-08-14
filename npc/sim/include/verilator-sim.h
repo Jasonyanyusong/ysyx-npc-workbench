@@ -39,7 +39,7 @@ typedef struct {
 
 extern NPCState npc_state;
 
-//#define CONFIG_VCD_OUTPUT
+#define CONFIG_VCD_OUTPUT
 
 void sim_init();
 void sim_exit();
