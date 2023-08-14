@@ -20,6 +20,21 @@
 
 bool is_batch_mode = false;
 
+static struct {
+    const char *name;
+    const char *description;
+    int (*handler) (char *);
+} sdb_cmd_table [] = {
+    { "h", "help",                                     cmd_h},
+    { "c", "continue execution",                       cmd_c},
+    { "q", "quit NSIM",                                cmd_q},
+    { "s", "single-step execution",                    cmd_s},
+    { "r", "informations about register ",             cmd_r},
+    { "m", "scan and print memory",                    cmd_m},
+};
+
+#define NR_CMD 6
+
 static char* rl_gets(){
     static char* line_read = NULL;
 
