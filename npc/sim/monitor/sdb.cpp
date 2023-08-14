@@ -17,6 +17,7 @@
 #include <monitor.h>
 #include <reg.h>
 #include <mem.h>
+#include <verilator-sim.h>
 
 bool is_batch_mode = false;
 
@@ -53,8 +54,10 @@ static char* rl_gets(){
 }
 
 int cmd_c(char* args){
-    assert(0);
-    // TODO: implement this function
+    while(npc_state.state == NPC_RUNNING || npc_state.state == NPC_STOP){
+        sim_one_cycle();
+    }
+    printf("[sdb] NPC's state is not NPC_RUNNING or NPC_STOP, can not continue\n");
     return 0;
 }
 
