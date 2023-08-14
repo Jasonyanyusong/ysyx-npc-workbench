@@ -63,8 +63,7 @@ void sdb_main_loop(){
 }
 
 void sdb_init_sdb(){
-    assert(0);
-    // TODO: implement this function
+    printf("[sdb] nothing to do, initialized\n");
     return;
 }
 
