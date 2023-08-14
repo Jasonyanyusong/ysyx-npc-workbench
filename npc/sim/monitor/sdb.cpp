@@ -37,45 +37,47 @@ static char* rl_gets(){
     return line_read;
 }
 
-int cmd_c(){
+int cmd_c(char* args){
     assert(0);
     // TODO: implement this function
     return 0;
 }
 
-int cmd_q(){
+int cmd_q(char* args){
     assert(0);
     // TODO: implement this function
     return 0;
 }
 
-int cmd_m(){
+int cmd_m(char* args){
     assert(0);
     // TODO: implement this function
     return 0;
 }
 
-int cmd_r(){
+int cmd_r(char* args){
     assert(0);
     // TODO: implement this function
     return 0;
 }
 
-int cmd_s(){
+int cmd_s(char* args){
     assert(0);
     // TODO: implement this function
     return 0;
 }
 
-int cmd_h(){
+int cmd_h(char* args){
     assert(0);
     // TODO: implement this function
     return 0;
 }
 
 void sdb_main_loop(){
-    assert(0);
-    // TODO: implement this function
+    if(is_batch_mode){
+        cmd_c(NULL);
+        return;
+    }
     return;
 }
 
