@@ -54,3 +54,6 @@ void map_write(word_t addr, int len, word_t data, IOMap *map);
 
 word_t mmio_read(word_t addr, int len);
 void mmio_write(word_t addr, int len, word_t data);
+
+void sdl_clear_event_queue();
+void device_update();
