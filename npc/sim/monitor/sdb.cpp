@@ -50,6 +50,10 @@ int cmd_q(char* args){
 }
 
 int cmd_m(char* args){
+    if(args == NULL){
+        printf("[sdb] this function need arguments, plese try again\n");
+        return 0;
+    }
     assert(0);
     // TODO: implement this function
     return 0;
@@ -62,6 +66,10 @@ int cmd_r(char* args){
 }
 
 int cmd_s(char* args){
+    if(args == NULL){
+        printf("[sdb] this function need arguments, plese try again\n");
+        return 0;
+    }
     assert(0);
     // TODO: implement this function
     return 0;
