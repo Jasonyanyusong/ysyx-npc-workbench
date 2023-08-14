@@ -28,7 +28,10 @@ static uint8_t *io_space = NULL;
 static uint8_t *p_space = NULL;
 
 uint8_t* new_space(int size) {
+  //printf("[device-map] adding new space with size %d\n", size);
+  assert(p_space);
   uint8_t *p = p_space;
+  assert(p);
   // page aligned;
   size = (size + (PAGE_SIZE - 1)) & ~PAGE_MASK;
   p_space += size;
@@ -44,6 +47,7 @@ void init_map() {
   io_space = (uint8_t *)malloc(IO_SPACE_MAX);
   assert(io_space);
   p_space = io_space;
+  assert(p_space);
 }
 
 static void check_bound(IOMap *map, word_t addr) {

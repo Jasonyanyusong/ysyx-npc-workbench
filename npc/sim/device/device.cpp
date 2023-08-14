@@ -23,6 +23,8 @@ void init_serial();
 void init_timer();
 void init_vga();
 
+void init_map();
+
 void send_key(uint8_t scancode, bool is_keydown);
 void vga_update_screen();
 
@@ -74,6 +76,8 @@ void device_update(){
 
 void init_device(){
     printf("[device] initializing devices\n");
+    
+    init_map();
 
     #ifdef CONFIG_I8042_DATA_MMIO
     init_i8042();
