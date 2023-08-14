@@ -56,9 +56,27 @@ void parse_args(int argc, char* argv[]){
 void load_image(){
     if(image_path == NULL){
         printf("[monitor] no image file is given, using built-in RISC-V image, support both RV32 and RV64\n");
+        assert(default_img);
+        assert(sizeof(default_img) > 0);
         memcpy(guest_to_host(MEM_START), default_img, sizeof(default_img));
         img_size = sizeof(default_img);
         return;
     }
+
+    FILE *fp = fopen(image_path, "rb");
+    assert(fp);
+
+    fseek(fp, 0, SEEK_END);
+    word_t image_size = ftell(fp);
+    assert(image_size > 0);
+
+    printf("[monitor] image %s with size %d\n", image_path, image_size);
+
+    fseek(fp, 0, SEEK_SET);
+    int fread_ret = fread(guest_to_host(MEM_START), image_size, 1, fp);
+    assert(fread_ret == 1);
+
+    fclose(fp);
+
     return;
 }
