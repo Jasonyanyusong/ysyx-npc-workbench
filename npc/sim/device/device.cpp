@@ -15,12 +15,13 @@
 ***************************************************************************************/
 
 #include <device.h>
+#include <SDL2/SDL.h>
 
 void send_key(uint8_t scancode, bool is_keydown);
 
 void sdl_clear_event_queue(){
-    // TODO: implement this function
-    assert(0);
+    SDL_Event event;
+    while (SDL_PollEvent(&event));
     return;
 }
 
