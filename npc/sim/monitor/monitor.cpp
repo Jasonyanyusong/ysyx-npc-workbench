@@ -99,7 +99,8 @@ void load_image(){
     int fread_ret = fread(guest_to_host(MEM_START), image_size, 1, fp);
     assert(fread_ret == 1);
 
-    fclose(fp);
+    int fclose_ret = fclose(fp);
+    assert(fclose_ret == 0);
 
     return;
 }
