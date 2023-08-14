@@ -34,11 +34,16 @@ bool is_exit_status_bad(){
 
 int main(int argc, char* argv[]){
     printf("Welcome to NPC-SIM!\n");
+    printf("[npc-sim] initializing memory & devices\n");
     init_mem();
     init_device();
+    printf("[npc-sim] initializing monitor\n");
     init_monitor(argc, argv);
+    printf("[npc-sim] initializing verilator-sim\n");
     sim_init();
+    printf("[npc-sim] entering sdb main loop\n");
     sdb_main_loop();
+    printf("[npc-sim] leving sdb main loop\n");
     sim_exit();
     printf("Goodbye\n");
 

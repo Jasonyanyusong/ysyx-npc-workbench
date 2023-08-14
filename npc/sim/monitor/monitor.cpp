@@ -32,7 +32,9 @@ uint32_t default_img[] = {
 word_t img_size = -1;
 
 void init_monitor(int argc, char* argv[]){
+    printf("[monitor] parse args\n");
     parse_args(argc, argv);
+    printf("[monitor] loading images\n");
     load_image();
 
     #ifdef CONFIG_DIFFTEST
