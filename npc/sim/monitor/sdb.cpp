@@ -72,7 +72,7 @@ int cmd_m(char* args){
         printf("[sdb] this function need arguments, plese try again\n");
         return 0;
     }
-    
+
     word_t print_length;
     word_t start_memory_address;
     char *last_part_of_args;
@@ -135,8 +135,7 @@ void sdb_main_loop(){
         char* args = cmd + strlen(cmd) + 1;
         if(args >= str_end) {args = NULL;}
 
-        //device_sdl_clear_event_queue();
-        // TODO: the code above need to be implemented later
+        sdl_clear_event_queue();
 
         int i;
         for(i = 0; i < NR_CMD; i = i + 1){
