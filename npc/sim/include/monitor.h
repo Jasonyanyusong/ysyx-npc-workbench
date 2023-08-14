@@ -34,3 +34,4 @@ int cmd_h();
 
 void sdb_main_loop();
 void sdb_init_sdb();
+void sdb_set_batch_mode();

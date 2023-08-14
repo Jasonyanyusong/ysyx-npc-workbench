@@ -18,6 +18,8 @@
 #include <reg.h>
 #include <mem.h>
 
+bool is_batch_mode = false;
+
 int cmd_c(){
     assert(0);
     // TODO: implement this function
@@ -61,6 +63,12 @@ void sdb_main_loop(){
 }
 
 void sdb_init_sdb(){
+    assert(0);
+    // TODO: implement this function
+    return;
+}
+
+void sdb_set_batch_mode(){
     assert(0);
     // TODO: implement this function
     return;
