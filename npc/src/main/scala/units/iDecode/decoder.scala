@@ -268,6 +268,7 @@ class IDU extends Module{
                 BGEU -> Mux(SRC1Val.asUInt  >= SRC2Val.asUInt, ioInternal.iPC.asUInt + ImmOut.asUInt, ioInternal.iPC.asUInt + InstSize.U),
 
                 ECALL -> ioInternal.iCSR_mtvec.asUInt,
+                EBREAK -> ioInternal.iPC,
                 MRET  -> ioInternal.iCSR_mepc.asUInt
             )
         )
