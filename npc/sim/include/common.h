@@ -30,14 +30,12 @@ typedef uint64_t word_t;
 #define STRLEN(CONST_STR) (sizeof(CONST_STR) - 1)
 #define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
 
-enum { NPC_RUNNING, NPC_STOP, NPC_END, NPC_ABORT, NPC_QUIT };
+//static enum { NPC_RUNNING, NPC_STOP, NPC_END, NPC_ABORT, NPC_QUIT };
 
-typedef struct {
-  int state;
-  word_t halt_pc;
-  uint32_t halt_ret;
-} NPCState;
-
-extern NPCState npc_state;
+#define NPC_RUNNING 0
+#define NPC_STOP    1
+#define NPC_END     2
+#define NPC_ABORT   3
+#define NPC_QUIT    4
 
 uint64_t get_time();

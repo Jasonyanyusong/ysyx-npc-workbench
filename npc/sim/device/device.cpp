@@ -16,6 +16,7 @@
 
 #include <device.h>
 #include <SDL2/SDL.h>
+#include <verilator-sim.h>
 
 void init_i8042();
 void init_serial();

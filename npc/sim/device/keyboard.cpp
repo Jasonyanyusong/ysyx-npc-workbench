@@ -16,6 +16,7 @@
 
 #include <common.h>
 #include <device.h>
+#include <verilator-sim.h>
 
 #define KEYDOWN_MASK 0x8000
 #include <SDL2/SDL.h>

@@ -16,6 +16,7 @@
 
 #include <verilator-sim.h>
 #include <mem.h>
+#include <common.h>
 #include <math.h>
 
 //VerilatedContext* contextp = NULL;
@@ -23,6 +24,17 @@
 //static VNPC* top;
 
 int memory_delay = 0;
+
+void pmem_write(word_t, int, word_t);
+word_t pmem_read(word_t, int);
+
+VerilatedContext* contextp;
+VerilatedVcdC* tfp;
+VNPC* top;
+
+word_t cycle;
+word_t instruction;
+word_t time_of_exec;
 
 void sim_init(){
     printf("[simulation] initializing simulation\n");
@@ -42,7 +54,7 @@ void sim_init(){
 
     cycle = 0;
     instruction = 0;
-    time = 0;
+    time_of_exec = 0;
 
     printf("[simulation] simulation initialized, now reset NPC\n");
 
@@ -78,7 +90,7 @@ void sim_one_cycle(){
     top -> clock = 0;
     step_and_dump_wave();
 
-    sim_mem();
+    sim_mem(0);
 
     top -> clock = 1;
     step_and_dump_wave();
@@ -108,7 +120,7 @@ double compute_ipc(){
     assert(cycle > 0);
     assert(instruction > 0);
 
-    double ans = (double)instruction / (double)cycyle;
+    double ans = (double)instruction / (double)cycle;
     printf("[simulation] IPC is %lf\n", ans);
     
     return ans;
@@ -127,15 +139,15 @@ void sim_mem(int delay_cycle){
     assert(LS_MemLen >= 1 && LS_MemLen <= 8);
     
     switch(top -> ioNPC_iLoadStore_oMemoryOP){
-        case(MEM_NOP){
+        case(MEM_NOP):{
             top -> ioNPC_iLoadStore_iMemoryRead = 0;
             break;
         }
-        case(MEM_READ){
+        case(MEM_READ):{
             top -> ioNPC_iLoadStore_iMemoryRead = pmem_read(LS_MemAddr, LS_MemLen);
             break;
         }
-        case(MEM_WRITE){
+        case(MEM_WRITE):{
             top -> ioNPC_iLoadStore_iMemoryRead = 0;
             pmem_write(LS_MemAddr, LS_MemLen, top -> ioNPC_iLoadStore_oMemoryWrite);
             break;

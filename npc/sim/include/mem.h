@@ -19,14 +19,17 @@
 #define MEM_START 0x80000000
 #define MEM_END   0x8fffffff
 
+typedef int64_t sword_t;
+typedef uint64_t word_t;
+
 void init_mem();
 
 bool in_pmem(word_t addr);
 
-static word_t pmem_read(word_t addr, int len);
-static void pmem_write(word_t addr, int len, word_t data);
+word_t pmem_read(word_t addr, int len);
+void pmem_write(word_t addr, int len, word_t data);
 
-static void out_of_bound();
+void out_of_bound();
 
 uint8_t* guest_to_host(word_t paddr);
 word_t host_to_guest(uint8_t *haddr);

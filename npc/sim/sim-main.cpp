@@ -17,12 +17,15 @@
 #define CONFIG_PLATFORM_VERILATOR
 //#define CONFIG_PLATFORM_IVERILOG
 
-#include<stdio.h>
-#include<monitor.h>
-#include<device.h>
-#include<verilator-sim.h>
+#include <stdio.h>
+#include <monitor.h>
+#include <device.h>
+#include <common.h>
+#include <verilator-sim.h>
 
 #include<mem.h>
+
+NPCState npc_state;
 
 bool is_exit_status_bad(){
     bool good = npc_state.state != NPC_ABORT;

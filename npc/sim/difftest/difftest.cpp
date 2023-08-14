@@ -21,6 +21,8 @@
 #include <mem.h>
 #include <verilator-sim.h>
 
+rtl_CPU_State cpu;
+
 void (*ref_difftest_memcpy)(word_t addr, void *buf, word_t n, bool direction) = NULL;
 void (*ref_difftest_regcpy)(void *dut, bool direction) = NULL;
 void (*ref_difftest_exec)(word_t n) = NULL;

@@ -15,8 +15,8 @@
 ***************************************************************************************/
 
 #include <monitor.h>
-#include <reg.h>
 #include <mem.h>
+#include <device.h>
 #include <verilator-sim.h>
 
 bool is_batch_mode = false;
@@ -25,7 +25,7 @@ static struct {
     const char *name;
     const char *description;
     int (*handler) (char *);
-} md_table [] = {
+} cmd_table [] = {
     { "h", "help",                                     cmd_h},
     { "c", "continue execution",                       cmd_c},
     { "q", "quit NSIM",                                cmd_q},
@@ -79,8 +79,8 @@ int cmd_m(char* args){
     char *string_token_first = strtok_r(args, " ", &last_part_of_args);
     print_length = atoi(string_token_first);
     sscanf(last_part_of_args, "%lx", &start_memory_address);
-    for(word_t addr = start_memory_address; addr < start_memory_address + print_length; i = i + 4){
-        printf("pmem @ 0x%lx -> 0x%lx\n", addr, pmem_read(addr));
+    for(word_t addr = start_memory_address; addr < start_memory_address + print_length; addr = addr + 4){
+        printf("pmem @ 0x%lx -> 0x%lx\n", addr, pmem_read(addr, 4));
     }
 
     return 0;
@@ -102,7 +102,7 @@ int cmd_s(char* args){
         return 0;
     }else{
         int steps = atoi(args);
-        assert(args > 0);
+        assert(steps > 0);
         for(int i = 0; i < steps; i = i + 1){
             if(npc_state.state == NPC_RUNNING || npc_state.state == NPC_STOP){
                 sim_one_cycle();

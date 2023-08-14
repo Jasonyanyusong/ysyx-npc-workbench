@@ -14,7 +14,7 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include <common.h>
+//#include <common.h>
 
 #include <readline/readline.h>
 #include <readline/history.h>

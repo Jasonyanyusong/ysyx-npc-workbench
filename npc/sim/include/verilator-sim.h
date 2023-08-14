@@ -31,6 +31,14 @@ typedef struct {
 
 extern rtl_CPU_State cpu;
 
+typedef struct {
+  int state;
+  word_t halt_pc;
+  uint32_t halt_ret;
+} NPCState;
+
+extern NPCState npc_state;
+
 //#define CONFIG_VCD_OUTPUT
 
 void sim_init();
@@ -42,11 +50,11 @@ void get_regs();
 
 extern VerilatedContext* contextp;
 extern VerilatedVcdC* tfp;
-extern static VNPC* top;
+extern VNPC* top;
 
 extern word_t cycle;
 extern word_t instruction;
-extern word_t time;
+extern word_t time_of_exec;
 
 double compute_ipc();
 

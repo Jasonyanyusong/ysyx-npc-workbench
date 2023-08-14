@@ -29,7 +29,7 @@ static IOMap* fetch_mmio_map(word_t addr) {
   return (mapid == -1 ? NULL : &maps[mapid]);
 }
 
-static void report_mmio_overlap(const char *name1, paddr_t l1, paddr_t r1, const char *name2, paddr_t l2, paddr_t r2) {
+static void report_mmio_overlap(const char *name1, word_t l1, word_t r1, const char *name2, word_t l2, word_t r2) {
     printf("[device-mmio], MMIO region %s@[0x%x, 0x%x] is overlapped with %s@[0x%x, 0x%x]\n", name1, l1, r1, name2, l2, r2);
     assert(0);
 }
