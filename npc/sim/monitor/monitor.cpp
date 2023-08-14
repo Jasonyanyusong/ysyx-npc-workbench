@@ -53,8 +53,21 @@ void parse_args(int argc, char* argv[]){
         {"help"     , no_argument      , NULL, 'h'},
         {"img"      , required_argument, NULL, 'i'},
     };
-    // TODO: implement functionality of parse_args here
-    assert(0);
+    int o;
+    while ( (o = getopt_long(argc, argv, "-bhd:i:", table, NULL)) != -1) {
+        switch (o) {
+            case 'b': sdb_set_batch_mode(); break;
+            case 'd': assert(optarg != NULL); diff_so_file = optarg; printf("diff_so_file = \"%s\"\n", diff_so_file); break;
+            case 'i': assert(optarg != NULL); image_path = optarg; printf("image_path = \"%s\"\n", image_path); break;
+            default:
+                printf("Usage: %s [OPTION...] IMAGE [args]\n\n", argv[0]);
+                printf("\t-b,--batch              run with batch mode\n");
+                printf("\t-d,--diff=REF_SO        run DiffTest with reference REF_SO\n");
+                printf("\t-i,--image=IMAGE_PATH   run NPC with image at IMAGE_PATH\n");
+                printf("\n");
+                exit(0);
+        }
+    }
     return;
 }
 
