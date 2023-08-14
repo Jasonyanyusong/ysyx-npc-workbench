@@ -16,6 +16,7 @@
 
 #include <monitor.h>
 #include <mem.h>
+#include <difftest.h>
 
 char* image_path = NULL;
 char* diff_so_file = NULL;
@@ -29,9 +30,20 @@ uint32_t default_img[] = {
     0x00100073, // ebreak
 };
 
+word_t img_size = -1;
+
 void init_monitor(int argc, char* argv[]){
-    assert(0);
-    // TODO: implement this function
+    parse_args(argc, argv);
+    load_image();
+
+    #ifdef CONFIG_DIFFTEST
+    assert(diff_so_file != NULL);
+    assert(img_size > 0);
+    difftest_init(diff_so_file, img_size);
+    #endif
+
+    printf("[monitor] monitor initialized\n");
+
     return;
 }
 
