@@ -48,7 +48,10 @@ void init_monitor(int argc, char* argv[]){
 
 void parse_args(int argc, char* argv[]){
     const struct option table[] = {
-        // TODO: add more commands
+        {"batch"    , no_argument      , NULL, 'b'},
+        {"diff"     , required_argument, NULL, 'd'},
+        {"help"     , no_argument      , NULL, 'h'},
+        {"img"      , required_argument, NULL, 'i'},
     };
     // TODO: implement functionality of parse_args here
     assert(0);
