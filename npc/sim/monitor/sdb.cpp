@@ -87,11 +87,22 @@ int cmd_s(char* args){
         printf("[sdb] you can use \"s N\" to execute N steps\n");
         if(npc_state.state == NPC_RUNNING || npc_state.state == NPC_STOP){
             sim_one_cycle();
+        }else{
+            printf("[sdb] NPC's state is not NPC_RUNNING or NPC_STOP, can not continue\n");
+        }
+        return 0;
+    }else{
+        int steps = atoi(args);
+        assert(args > 0);
+        for(int i = 0; i < steps; i = i + 1){
+            if(npc_state.state == NPC_RUNNING || npc_state.state == NPC_STOP){
+                sim_one_cycle();
+            }else{
+                printf("[sdb] NPC's state is not NPC_RUNNING or NPC_STOP, can not continue\n");
+            }
         }
         return 0;
     }
-    // TODO: implement this function
-    return 0;
 }
 
 int cmd_h(char* args){
