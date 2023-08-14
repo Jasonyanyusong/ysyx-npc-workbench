@@ -69,7 +69,7 @@ void sdb_init_sdb(){
 }
 
 void sdb_set_batch_mode(){
-    assert(0);
-    // TODO: implement this function
+    is_batch_mode = true;
+    assert(is_batch_mode);
     return;
 }
