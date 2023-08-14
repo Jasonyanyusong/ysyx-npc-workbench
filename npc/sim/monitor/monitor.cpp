@@ -54,7 +54,11 @@ void parse_args(int argc, char* argv[]){
 }
 
 void load_image(){
-    assert(0);
-    // TODO: implememt this function
+    if(image_path == NULL){
+        printf("[monitor] no image file is given, using built-in RISC-V image, support both RV32 and RV64\n");
+        memcpy(guest_to_host(MEM_START), default_img, sizeof(default_img));
+        img_size = sizeof(default_img);
+        return;
+    }
     return;
 }
