@@ -106,6 +106,29 @@ void sdb_main_loop(){
         cmd_c(NULL);
         return;
     }
+
+    for(char* str; (str = rl_gets()) != NULL; ){
+        char* str_end = str + strlen(str);
+        char* cmd = strtok(str, " ");
+        if (cmd == NULL) {continue;}
+        
+        char* args = cmd + strlen(cmd) + 1;
+        if(args >= str_end) {args = NULL;}
+
+        //device_sdl_clear_event_queue();
+        // TODO: the code above need to be implemented later
+
+        int i;
+        for(i = 0; i < NR_CMD; i = i + 1){
+            if(strcmp(cmd, sdb_cmd_table[i].name) == 0){
+                if(sdb_cmd_table[i].handler(args) < 0) {return;}
+                break;
+            }
+        }
+
+        if(i == NR_CMD) {printf("[sdb] unknown command '%s'\n", cmd);}
+    }
+    
     return;
 }
 
