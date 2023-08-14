@@ -57,3 +57,5 @@ void mmio_write(word_t addr, int len, word_t data);
 
 void sdl_clear_event_queue();
 void device_update();
+
+void init_device();
