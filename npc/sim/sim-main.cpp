@@ -27,9 +27,12 @@
 int main(int argc, char* argv[]){
     printf("Welcome to NPC-SIM!\n");
     init_mem();
+    init_device();
     init_monitor(argc, argv);
     sim_init();
     sdb_main_loop();
     sim_exit();
     printf("Goodbye\n");
+    //return 0;
+    // TODO: judge exit status is good
 }
