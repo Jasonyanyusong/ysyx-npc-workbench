@@ -24,6 +24,11 @@
 
 #include<mem.h>
 
+bool is_exit_status_bad(){
+    bool good = npc_state.state != NPC_ABORT;
+    return !good;
+}
+
 int main(int argc, char* argv[]){
     printf("Welcome to NPC-SIM!\n");
     init_mem();
@@ -33,6 +38,6 @@ int main(int argc, char* argv[]){
     sdb_main_loop();
     sim_exit();
     printf("Goodbye\n");
-    //return 0;
-    // TODO: judge exit status is good
+
+    return is_exit_status_bad();
 }
