@@ -20,6 +20,23 @@
 
 bool is_batch_mode = false;
 
+static char* rl_gets(){
+    static char* line_read = NULL;
+
+    if(line_read){
+        free(line_read);
+        line_read = NULL;
+    }
+
+    line_read = readline("(npc-sim) ");
+
+    if (line_read && *line_read){
+        add_history(line_read);
+    }
+
+    return line_read;
+}
+
 int cmd_c(){
     assert(0);
     // TODO: implement this function
