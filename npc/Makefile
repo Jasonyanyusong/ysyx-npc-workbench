@@ -41,7 +41,7 @@ BIN				:= $(OBJ_DIR)/V$(TOP_NAME)
 IMG				?= ../am-kernels/tests/cpu-tests/build/dummy-riscv64-npc.bin
 ELF				?= ../am-kernels/tests/cpu-tests/build/dummy-riscv64-npc.elf
 
-RUN_FLAGS		:= --readbin=${IMG} --readelf=${ELF} --diff=${DIFFTEST} -s
+RUN_FLAGS		:= --img=${IMG} --diff=${DIFFTEST}
 NPC_EXEC		:= ${BIN} ${RUN_FLAGS}
 
 .PHONY:run gdb wave clean
