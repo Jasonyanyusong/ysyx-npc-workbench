@@ -14,7 +14,8 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include <common.h>
+//#include <common.h>
+#include<difftest.h>
 
 typedef void(*io_callback_t)(uint32_t, int, bool);
 uint8_t* new_space(int size);
@@ -45,8 +46,6 @@ static inline int find_mapid_by_addr(IOMap *maps, int size, word_t addr) {
   return -1;
 }
 
-void add_pio_map(const char *name, ioaddr_t addr,
-        void *space, uint32_t len, io_callback_t callback);
 void add_mmio_map(const char *name, word_t addr,
         void *space, uint32_t len, io_callback_t callback);
 
