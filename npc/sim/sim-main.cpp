@@ -14,11 +14,22 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
+#define CONFIG_PLATFORM_VERILATOR
+//#define CONFIG_PLATFORM_IVERILOG
+
 #include<stdio.h>
+#include<monitor.h>
+#include<device.h>
+#include<verilator-sim.h>
 
 #include<mem.h>
 
 int main(int argc, char* argv[]){
     printf("Welcome to NPC-SIM!\n");
     init_mem();
+    init_monitor(argc, argv);
+    sim_init();
+    sdb_main_loop();
+    sim_exit();
+    printf("Goodbye\n");
 }
