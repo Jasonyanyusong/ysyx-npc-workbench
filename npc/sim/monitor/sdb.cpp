@@ -62,9 +62,9 @@ int cmd_c(char* args){
 }
 
 int cmd_q(char* args){
-    assert(0);
-    // TODO: implement this function
-    return 0;
+    npc_state.state = NPC_QUIT;
+    printf("[sdb] exit NPC\n");
+    return -1;
 }
 
 int cmd_m(char* args){
