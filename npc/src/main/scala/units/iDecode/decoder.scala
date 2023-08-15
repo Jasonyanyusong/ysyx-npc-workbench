@@ -250,7 +250,8 @@ class IDU extends Module{
         RDAddr := ioInternal.iInst(RDHi, RDLo).asUInt
 
         // Register State control
-        RegStateTable(RDAddr.asUInt) := 1.U(1.W)
+        //RegStateTable(RDAddr.asUInt) := 1.U(1.W)
+        RegStateTable(RDAddr.asUInt) := Mux(RDAddr.asUInt === 0.U, 0.U(1.W), 1.U(1.W))
         IDU_NotBusy := (RegStateTable(RS1Addr.asUInt).asBool && RegStateTable(RS2Addr.asUInt).asBool)
 
         // Decode Static-Next-PC and Dynamic-Next-PC
