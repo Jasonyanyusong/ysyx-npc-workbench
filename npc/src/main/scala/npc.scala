@@ -147,7 +147,7 @@ class NPC extends Module{
     NPC_IDU.ioInternal.iSlaveValid  := RegNext(NPC_IFU.ioInternal.oMasterValid)
     
     NPC_IFU.ioInternal.iFeedBackPCChanged := (NPC_IDU.ioInternal.oFeedBackPCChanged)
-    NPC_IFU.ioInternal.iFeedBackNewPCVal  := (NPC_IDU.ioInternal.oFeedBackNewPCVal)
+    //NPC_IFU.ioInternal.iFeedBackNewPCVal  := (NPC_IDU.ioInternal.oFeedBackNewPCVal)
 
     NPC_IDU.ioInternal.iInst := RegNext(NPC_IFU.ioInternal.oInst)
     NPC_IDU.ioInternal.iPC   := RegNext(NPC_IFU.ioInternal.oPC)

@@ -32,7 +32,7 @@ class iFetchInternal extends Bundle{
     val oPC = Output(UInt(AddrWidth.W))
 
     val iFeedBackPCChanged = Input(Bool())
-    val iFeedBackNewPCVal = Input(UInt(AddrWidth.W))
+    //val iFeedBackNewPCVal = Input(UInt(AddrWidth.W))
 }
 
 class iFetchExternal extends Bundle{
@@ -53,7 +53,7 @@ class IFU extends Module{
     ioExternal.oPC := ioInternal.iPC
     ioInternal.oPC := ioInternal.iPC
     ioInternal.oInst := Mux(ioInternal.iMasterReady.asBool || ioInternal.iPC === "h80000000".U, ioExternal.iInst, 0.U(InstWidth.W))
-    ioInternal.oMasterValid := IFU_NotBusy.asBool
+    ioInternal.oMasterValid := (IFU_NotBusy.asBool && (!ioInternal.iFeedBackPCChanged))
     
     /*
 
