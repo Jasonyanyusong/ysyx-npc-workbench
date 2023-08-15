@@ -73,8 +73,6 @@ class LSU extends Module{
     val EXU_RET = ioInternal.iEXU_RET
     val LSU_SRC = ioInternal.iLSU_SRC2
 
-    //val LD_RET = RegInit(0.U(DataWidth.W))
-
     def WordSignExt(WordVal : UInt) = Cat(Fill(DataWidth - WordWidth, WordVal(WordWidth - 1).asUInt), WordVal(WordWidth - 1, 0))
     def HalfSignExt(HalfVal : UInt) = Cat(Fill(DataWidth - HalfWidth, HalfVal(HalfWidth - 1).asUInt), HalfVal(HalfWidth - 1, 0))
     def ByteSignExt(ByteVal : UInt) = Cat(Fill(DataWidth - ByteWidth, ByteVal(ByteWidth - 1).asUInt), ByteVal(ByteWidth - 1, 0))
@@ -96,23 +94,10 @@ class LSU extends Module{
     )
     val LSU_WRITE_SRC = Mux(LSU_StateOK, LSU_SRC, 0.U(DataWidth.W))
 
-    //when(ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool){
-        //iLoadStoreLen := DecodeBundle(6, 5)
-        //iLoadStoreFunc := DecodeBundle(4, 3)
-        //iLoadStoreAddr := EXU_RET
-        /*iLoadStoreMemOP := MuxCase(MEM_NOP, Array(
-            (iLoadStoreFunc === LS_LD) -> MEM_READ,
-            (iLoadStoreFunc === LS_LDU) -> MEM_READ,
-            (iLoadStoreFunc === LS_ST) -> MEM_WRITE
-        ))*/
-        //iLoadStoreWrite := LSU_SRC
-    //}
-
     // Connect IO External
     ioExternal.oMemoryOP := LSU_MEMOP
     ioExternal.oMemoryAddr := LSU_ADDR
     ioExternal.oMemoryWrite := LSU_WRITE_SRC
-    //LD_RET := ioExternal.iMemoryRead
     ioExternal.oMemoryLen := LSU_LEN
 
     val MEM_READ_RET = Mux(LSU_StateOK, ioExternal.iMemoryRead, 0.U(DataWidth.W))
@@ -130,22 +115,6 @@ class LSU extends Module{
                 (LSU_LEN === LS_W) -> WordZeroExt(MEM_READ_RET.asUInt)
             )))
         )), 0.U(DataWidth.W))
-
-    /*when(ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool){
-        LoadStoreResult :=MuxCase(0.U(DataWidth.W), Array(
-            (iLoadStoreFunc === LS_LD) -> (MuxCase(0.U(DataWidth.W), Array(
-                (iLoadStoreLen === LS_B) -> ByteSignExt(LD_RET.asUInt),
-                (iLoadStoreLen === LS_H) -> HalfSignExt(LD_RET.asUInt),
-                (iLoadStoreLen === LS_W) -> WordSignExt(LD_RET.asUInt),
-                (iLoadStoreLen === LS_D) -> LD_RET
-            ))),
-            (iLoadStoreFunc === LS_LDU) -> (MuxCase(0.U(DataWidth.W), Array(
-                (iLoadStoreLen === LS_B) -> ByteZeroExt(LD_RET.asUInt),
-                (iLoadStoreLen === LS_H) -> HalfZeroExt(LD_RET.asUInt),
-                (iLoadStoreLen === LS_W) -> WordZeroExt(LD_RET.asUInt)
-            )))
-        ))
-    }*/
 
     // Connect IO Internal
     ioInternal.oLSU_RET := LSU_Compute_Result
