@@ -73,7 +73,7 @@ class LSU extends Module{
     val EXU_RET = ioInternal.iEXU_RET
     val LSU_SRC = ioInternal.iLSU_SRC2
 
-    val LD_RET = RegInit(0.U(DataWidth.W))
+    //val LD_RET = RegInit(0.U(DataWidth.W))
 
     def WordSignExt(WordVal : UInt) = Cat(Fill(DataWidth - WordWidth, WordVal(WordWidth - 1).asUInt), WordVal(WordWidth - 1, 0))
     def HalfSignExt(HalfVal : UInt) = Cat(Fill(DataWidth - HalfWidth, HalfVal(HalfWidth - 1).asUInt), HalfVal(HalfWidth - 1, 0))
@@ -83,26 +83,55 @@ class LSU extends Module{
     def HalfZeroExt(HalfVal : UInt) = Cat(Fill(DataWidth - HalfWidth, 0.U(1.W)), HalfVal (HalfWidth - 1, 0))
     def ByteZeroExt(ByteVal : UInt) = Cat(Fill(DataWidth - ByteWidth, 0.U(1.W)), ByteVal (ByteWidth - 1, 0))
 
-    when(ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool){
-        iLoadStoreLen := DecodeBundle(6, 5)
-        iLoadStoreFunc := DecodeBundle(4, 3)
-        iLoadStoreAddr := EXU_RET
-        iLoadStoreMemOP := MuxCase(MEM_NOP, Array(
+    val LSU_StateOK = (ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool)
+
+    val LSU_LEN = Mux(LSU_StateOK, DecodeBundle(6, 5), LS_B)
+    val LSU_FUNC = Mux(LSU_StateOK, DecodeBundle(4, 3), LS_NOP)
+    val LSU_ADDR = Mux(LSU_StateOK, EXU_RET, 0.U(DataWidth.W))
+    val LSU_MEMOP = Mux(LSU_StateOK, MuxCase(MEM_NOP, Array(
+            (LSU_FUNC === LS_LD) -> MEM_READ,
+            (LSU_FUNC === LS_LDU) -> MEM_READ,
+            (LSU_FUNC === LS_ST) -> MEM_WRITE
+        )), MEM_NOP
+    )
+    val LSU_WRITE_SRC = Mux(LSU_StateOK, LSU_SRC, 0.U(DataWidth.W))
+
+    //when(ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool){
+        //iLoadStoreLen := DecodeBundle(6, 5)
+        //iLoadStoreFunc := DecodeBundle(4, 3)
+        //iLoadStoreAddr := EXU_RET
+        /*iLoadStoreMemOP := MuxCase(MEM_NOP, Array(
             (iLoadStoreFunc === LS_LD) -> MEM_READ,
             (iLoadStoreFunc === LS_LDU) -> MEM_READ,
             (iLoadStoreFunc === LS_ST) -> MEM_WRITE
-        ))
-        iLoadStoreWrite := LSU_SRC
-    }
+        ))*/
+        //iLoadStoreWrite := LSU_SRC
+    //}
 
     // Connect IO External
-    ioExternal.oMemoryOP := iLoadStoreMemOP
-    ioExternal.oMemoryAddr := iLoadStoreAddr
-    ioExternal.oMemoryWrite := iLoadStoreWrite
-    LD_RET := ioExternal.iMemoryRead
-    ioExternal.oMemoryLen := iLoadStoreLen
+    ioExternal.oMemoryOP := LSU_MEMOP
+    ioExternal.oMemoryAddr := LSU_ADDR
+    ioExternal.oMemoryWrite := LSU_WRITE_SRC
+    //LD_RET := ioExternal.iMemoryRead
+    ioExternal.oMemoryLen := LSU_LEN
 
-    when(ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool){
+    val MEM_READ_RET = Mux(LSU_StateOK, ioExternal.iMemoryRead, 0.U(DataWidth.W))
+
+    val LSU_Compute_Result = Mux(LSU_StateOK, MuxCase(0.U(DataWidth.W), Array(
+            (LSU_FUNC === LS_LD) -> (MuxCase(0.U(DataWidth.W), Array(
+                (LSU_LEN === LS_B) -> ByteSignExt(MEM_READ_RET.asUInt),
+                (LSU_LEN === LS_H) -> HalfSignExt(MEM_READ_RET.asUInt),
+                (LSU_LEN === LS_W) -> WordSignExt(MEM_READ_RET.asUInt),
+                (LSU_LEN === LS_D) -> MEM_READ_RET
+            ))),
+            (LSU_FUNC === LS_LDU) -> (MuxCase(0.U(DataWidth.W), Array(
+                (LSU_LEN === LS_B) -> ByteZeroExt(MEM_READ_RET.asUInt),
+                (LSU_LEN === LS_H) -> HalfZeroExt(MEM_READ_RET.asUInt),
+                (LSU_LEN === LS_W) -> WordZeroExt(MEM_READ_RET.asUInt)
+            )))
+        )), 0.U(DataWidth.W))
+
+    /*when(ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool){
         LoadStoreResult :=MuxCase(0.U(DataWidth.W), Array(
             (iLoadStoreFunc === LS_LD) -> (MuxCase(0.U(DataWidth.W), Array(
                 (iLoadStoreLen === LS_B) -> ByteSignExt(LD_RET.asUInt),
@@ -116,10 +145,10 @@ class LSU extends Module{
                 (iLoadStoreLen === LS_W) -> WordZeroExt(LD_RET.asUInt)
             )))
         ))
-    }
+    }*/
 
     // Connect IO Internal
-    ioInternal.oLSU_RET := LoadStoreResult
+    ioInternal.oLSU_RET := LSU_Compute_Result
 
     // Connect passtorhough for WBU
     ioInternal.oDecodeBundle := ioInternal.iDecodeBundle
