@@ -48,10 +48,6 @@ class WBU extends Module{
 
     val WBU_NotBusy = RegInit(true.B)
 
-    //val WriteGPREnable = RegInit(false.B)
-    //val WriteGPRAddr = RegInit(0.U(RegIDWidth.W))
-    //val WriteGPRVal = RegInit(0.U(DataWidth.W))
-
     val EX_RETVal = ioInternal.iEXU_RET
     val LS_RETVal = ioInternal.iLSU_RET
     val SNPC = ioInternal.iPC + 4.U
@@ -76,24 +72,6 @@ class WBU extends Module{
             (WBDecode === WB_SNPC) -> SNPC
         )), 0.U(DataWidth.W)
     )
-
-    //when(ioInternal.iSlaveValid.asBool){
-        //WriteGPRAddr := ioInternal.iRD
-
-        /*WriteGPREnable := MuxCase(false.B, Array(
-            (WBDecode === WB_NOP) -> false.B,
-            (WBDecode === WB_EXU) -> true.B,
-            (WBDecode === WB_LSU) -> true.B,
-            (WBDecode === WB_SNPC) -> true.B
-        ))*/
-
-        /*WriteGPRVal := MuxCase(0.U(DataWidth.W), Array(
-            (WBDecode === WB_NOP) -> 0.U(DataWidth.W),
-            (WBDecode === WB_EXU) -> EX_RETVal,
-            (WBDecode === WB_LSU) -> LS_RETVal,
-            (WBDecode === WB_SNPC) -> SNPC
-        ))*/
-    //}
 
     // Connect IO Internal
     ioInternal.oWriteGPREnable := WBU_GPR_WRITE_ENABLE
