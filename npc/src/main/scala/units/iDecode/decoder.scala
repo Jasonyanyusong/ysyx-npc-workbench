@@ -82,7 +82,7 @@ class IDU extends Module{
     val ioInternal = IO(new iDecodeInternal)
     // Instruction Decode Unit: First generate opreation code, then send operands to EXU and LSU (for operand send to LSU, it needs to be delivered to EXU first), last write back PC and CSR (WBU only write back GPR)
 
-    val DecodeVal = RegInit(0.U(DecodeWidth.W))
+    /*val DecodeVal = RegInit(0.U(DecodeWidth.W))
 
     val iDecPrivVal = RegInit(0.U(iDecPrivValLen.W))
     val iDecEXUVal = RegInit(0.U(iDecEXUValLen.W))
@@ -111,30 +111,23 @@ class IDU extends Module{
 
     val EXU_SRC1 = RegInit(0.U(DataWidth.W))
     val EXU_SRC2 = RegInit(0.U(DataWidth.W))
-    val LSU_SRC2 = RegInit(0.U(DataWidth.W))
+    val LSU_SRC2 = RegInit(0.U(DataWidth.W))*/
 
     val IDU_NotBusy = RegInit(true.B)
     val RegStateTable = Mem(RegSum, Bool())
 
-    // Connect imm-generator
-    val ImmGenerator = Module(new immGen)
-    ImmGenerator.ioSubmodule.iInst := ioInternal.iInst
-    ImmGenerator.ioSubmodule.iType := InstructionType
+    val IDU_StateOK = (ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool)
 
-    RegStateTable(ioInternal.iWriteBackAddr.asUInt) := Mux(ioInternal.iHaveWriteBack.asBool, false.B, RegStateTable(ioInternal.iWriteBackAddr.asUInt))
-
-    when(ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool){
-        // Decode PrivReg
-        iDecPrivVal := Lookup(
+    val Priv = Mux(IDU_StateOK, Lookup(
             ioInternal.iInst, PR_NORM, Array(
                 ECALL -> PR_ECALL, MRET -> PR_MRET,
                 CSRRW -> PR_ZICSR, CSRRC -> PR_ZICSR, CSRRS -> PR_ZICSR,
                 CSRRWI -> PR_ZICSR, CSRRCI -> PR_ZICSR, CSRRSI -> PR_ZICSR
             )
-        )
+        ), 0.U(iDecPrivValLen.W)
+    )
 
-        // Decode EXUReg
-        iDecEXUVal := Lookup(
+    val EXU_OP = Mux(IDU_StateOK, Lookup(
             ioInternal.iInst, EX_NOP, Array(
                 LUI -> EX_PS1, CSRRW -> EX_PS1, CSRRS -> EX_PS1, CSRRC -> EX_PS1, CSRRWI -> EX_PS1, CSRRCI -> EX_PS1, CSRRSI -> EX_PS1,
 
@@ -168,29 +161,29 @@ class IDU extends Module{
 
                 //JAL -> EX_NOP, JALR -> EX_NOP, BEQ -> EX_NOP, BNE -> EX_NOP, BLT -> EX_NOP, BLTU -> EX_NOP, BGE -> EX_NOP, BGEU -> EX_NOP,
             )
-        )
+        ), 0.U(iDecEXUValLen.W)
+    )
 
-        // Decode LSlenReg
-        iDecLSlenVal := Lookup(
+    val LSU_OP_LEN = Mux(IDU_StateOK, Lookup(
             ioInternal.iInst, 0.U(2.W), Array(
                 LB -> LS_B, LBU -> LS_B, SB -> LS_B,
                 LH -> LS_H, LHU -> LS_H, SH -> LS_H,
                 LW -> LS_W, LWU -> LS_W, SW -> LS_W,
                 LD -> LS_D,              SD -> LS_D
             )
-        )
+        ), 0.U(iDecLSlenValLen.W)
+    )
 
-        // Decode LSfuncReg
-        iDecLSfuncVal := Lookup(
+    val LSU_OP_FUNC = Mux(IDU_StateOK, Lookup(
             ioInternal.iInst, LS_NOP, Array(
                 LB  -> LS_LD ,  LH -> LS_LD ,  LW -> LS_LD ,  LD -> LS_LD ,
                 SB  -> LS_ST ,  SH -> LS_ST ,  SW -> LS_ST ,  SD -> LS_ST ,
                 LBU -> LS_LDU, LHU -> LS_LDU, LWU -> LS_LDU
             )
-        )
+        ), 0.U(iDecLSfuncValLen.W)
+    )
 
-        // Decode WBTypReg
-        iDecWBTypVal := Lookup(
+    val WBU_OP = Mux(IDU_StateOK, Lookup(
             ioInternal.iInst, WB_EXU, Array(
                 SB -> WB_NOP, SH -> WB_NOP, SW -> WB_NOP, SD -> WB_NOP,
                 ECALL -> WB_NOP, EBREAK -> WB_NOP, MRET -> WB_NOP,
@@ -200,21 +193,22 @@ class IDU extends Module{
 
                 JAL -> WB_SNPC, JALR -> WB_SNPC
             )
-        )
+        ), 0.U(iDecWBTypValLen.W)
+    )
 
-        // Decode DSReg
-        iDecDSVal := Lookup(
+    val DEBUG_STATE = Mux(IDU_StateOK, Lookup(
             ioInternal.iInst, NPC_RUNNING, Array(
                 EBREAK -> NPC_STOPPED
             )
-        )
+        ), 0.U(iDecDSValLen.W)
+    )
 
-        DecodeVal := Cat(Seq(
-            iDecPrivVal, iDecEXUVal, iDecLSlenVal, iDecLSfuncVal, iDecWBTypVal, iDecDSVal
-        ))
+    val IDU_DecodeBundle = Mux(IDU_StateOK, Cat(Seq(
+            Priv, EXU_OP, LSU_OP_LEN, LSU_OP_FUNC, WBU_OP, DEBUG_STATE
+        )), 0.U(DecodeWidth.W)
+    )
 
-        // Decode Instruction type
-        InstructionType := Lookup(
+    val IDU_InstructionType = Mux(IDU_StateOK, Lookup(
             ioInternal.iInst, instR, Array(
                 LUI -> instU, AUIPC -> instU,
 
@@ -236,27 +230,260 @@ class IDU extends Module{
 
                 BEQ -> instB, BNE -> instB, BLT -> instB, BGE -> instB, BLTU -> instB, BGEU -> instB,
             )
-        )
+        ), instR
+    )
 
-        ImmOut := ImmGenerator.ioSubmodule.oImm
+    // Connect imm-generator
+    val ImmGenerator = Module(new immGen)
+    ImmGenerator.ioSubmodule.iInst := ioInternal.iInst
+    //ImmGenerator.ioSubmodule.iType := InstructionType
+    ImmGenerator.ioSubmodule.iType := IDU_InstructionType
+    val IDU_Imm = Mux(IDU_StateOK, ImmGenerator.ioSubmodule.oImm, 0.U(DataWidth.W))
+
+    val IDU_RS1 = Mux(IDU_StateOK, ioInternal.iInst(RS1Hi, RS1Lo).asUInt, 0.U(RegIDWidth.W))
+    val IDU_RS2 = Mux(IDU_StateOK, ioInternal.iInst(RS2Hi, RS2Lo).asUInt, 0.U(RegIDWidth.W))
+    val IDU_RD  = Mux(IDU_StateOK, ioInternal.iInst(RDHi, RDLo).asUInt, 0.U(RegIDWidth.W))
+
+    val IDU_SRC1 = Mux(IDU_StateOK, ioInternal.iSRC1, 0.U(DataWidth.W))
+    val IDU_SRC2 = Mux(IDU_StateOK, ioInternal.iSRC2, 0.U(DataWidth.W))
+
+    RegStateTable(IDU_RD.asUInt) := Mux(IDU_RD.asUInt === 0.U, 0.U(1.W), 1.U(1.W))
+    RegStateTable(ioInternal.iWriteBackAddr.asUInt) := Mux(ioInternal.iHaveWriteBack.asBool, false.B, RegStateTable(ioInternal.iWriteBackAddr.asUInt))
+    IDU_NotBusy := ((!RegStateTable(IDU_RS1.asUInt).asBool) && (!RegStateTable(IDU_RS2.asUInt).asBool))
+
+    val IDU_SNPC = Mux(IDU_StateOK, ioInternal.iPC + InstSize.U, 0.U(AddrWidth.W))
+    val IDU_DNPC = Mux(IDU_StateOK, Lookup(
+            ioInternal.iInst, ioInternal.iPC + InstSize.U, Array(
+                JAL  -> (ioInternal.iPC.asUInt + IDU_Imm.asUInt),
+                JALR -> ((IDU_SRC1.asUInt + IDU_Imm.asUInt) & Cat(Fill(63, 1.U(1.W)), Fill(1, 0.U(1.W)))),
+
+                BEQ  -> Mux(IDU_SRC1.asUInt === IDU_SRC2.asUInt, ioInternal.iPC.asUInt + IDU_Imm.asUInt, ioInternal.iPC.asUInt + InstSize.U),
+                BNE  -> Mux(IDU_SRC1.asUInt =/= IDU_SRC2.asUInt, ioInternal.iPC.asUInt + IDU_Imm.asUInt, ioInternal.iPC.asUInt + InstSize.U),
+                BLT  -> Mux(IDU_SRC1.asSInt  <  IDU_SRC2.asSInt, ioInternal.iPC.asUInt + IDU_Imm.asUInt, ioInternal.iPC.asUInt + InstSize.U),
+                BGE  -> Mux(IDU_SRC1.asSInt  >= IDU_SRC2.asSInt, ioInternal.iPC.asUInt + IDU_Imm.asUInt, ioInternal.iPC.asUInt + InstSize.U),
+                BLTU -> Mux(IDU_SRC1.asUInt  <  IDU_SRC2.asUInt, ioInternal.iPC.asUInt + IDU_Imm.asUInt, ioInternal.iPC.asUInt + InstSize.U),
+                BGEU -> Mux(IDU_SRC1.asUInt  >= IDU_SRC2.asUInt, ioInternal.iPC.asUInt + IDU_Imm.asUInt, ioInternal.iPC.asUInt + InstSize.U),
+
+                ECALL -> ioInternal.iCSR_mtvec.asUInt,
+                EBREAK -> ioInternal.iPC,
+                MRET  -> ioInternal.iCSR_mepc.asUInt
+            )
+        ), 0.U(AddrWidth.W)
+    )
+
+    val IDU_JudgePCJump = Mux(IDU_StateOK, Mux(IDU_SNPC === IDU_DNPC, false.B, true.B), false.B)
+    val IDU_JumpPCAddr  = Mux(IDU_StateOK, IDU_DNPC, 0.U(AddrWidth.W))
+
+    val IDU_ZicsrWSCIdx = Mux(IDU_StateOK, Lookup(
+            ioInternal.iInst, 0.U(CSRIDWidth.W), Array(
+                CSRRW -> IDU_Imm,  CSRRS -> IDU_Imm,  CSRRC -> IDU_Imm,
+                CSRRWI -> IDU_Imm, CSRRSI -> IDU_Imm, CSRRCI -> IDU_Imm,
+            )
+        ), 0.U(CSRIDWidth.W)
+    )
+
+    val IDU_OldCSR = Mux(IDU_StateOK, ioInternal.iCSR_ZicsrOldVal, 0.U(DataWidth.W))
+    val IDU_Zicsr_uimm = Mux(IDU_StateOK, ioInternal.iInst(RS1Hi, RS1Lo), 0.U(5.W))
+
+    val IDU_ZicsrNewVal = Mux(IDU_StateOK, Lookup(
+            ioInternal.iInst, 0.U(DataWidth.W), Array(
+                CSRRW -> IDU_SRC1,
+                CSRRS -> (IDU_SRC1 | IDU_OldCSR),
+                CSRRC -> (IDU_SRC1 & IDU_OldCSR),
+                CSRRWI -> IDU_Zicsr_uimm,
+                CSRRSI -> (IDU_Zicsr_uimm | IDU_OldCSR),
+                CSRRCI -> (IDU_Zicsr_uimm & IDU_OldCSR)
+            )
+        ), 0.U(DataWidth.W)
+    )
+
+    val IDU_EXU_SRC1 = Mux(IDU_StateOK, MuxCase(0.U(DataWidth.W), Array(
+        (IDU_InstructionType === instR) -> IDU_SRC1.asUInt,
+        (IDU_InstructionType === instI) -> Lookup(ioInternal.iInst, IDU_SRC1.asUInt, Array(
+            CSRRW -> IDU_OldCSR, CSRRS -> IDU_OldCSR, CSRRC -> IDU_OldCSR,
+            CSRRWI -> IDU_OldCSR, CSRRSI -> IDU_OldCSR, CSRRCI -> IDU_OldCSR
+        )),
+        (IDU_InstructionType === instS) -> IDU_SRC1.asUInt,
+        (IDU_InstructionType === instB) -> 0.U(DataWidth.W),
+        (IDU_InstructionType === instU) -> IDU_Imm.asUInt,
+        (IDU_InstructionType === instJ) -> 0.U(DataWidth.W)
+    )), 0.U(DataWidth.W))
+
+    val IDU_EXU_SRC2 = Mux(IDU_StateOK, MuxCase(0.U(DataWidth.W), Array(
+        (IDU_InstructionType === instR) -> IDU_SRC2.asUInt,
+        (IDU_InstructionType === instI) -> IDU_Imm.asUInt,
+        (IDU_InstructionType === instS) -> IDU_Imm.asUInt,
+        (IDU_InstructionType === instB) -> 0.U(DataWidth.W),
+        (IDU_InstructionType === instU) -> ioInternal.iPC.asUInt,
+        (IDU_InstructionType === instJ) -> 0.U(DataWidth.W)
+    )), 0.U(DataWidth.W))
+
+    val IDU_LSU_SRC2 = Mux(IDU_StateOK, MuxCase(0.U(DataWidth.W), Array(
+        (IDU_InstructionType === instR) -> 0.U(DataWidth.W),
+        (IDU_InstructionType === instI) -> 0.U(DataWidth.W),
+        (IDU_InstructionType === instS) -> IDU_SRC2.asUInt,
+        (IDU_InstructionType === instB) -> 0.U(DataWidth.W),
+        (IDU_InstructionType === instU) -> 0.U(DataWidth.W),
+        (IDU_InstructionType === instJ) -> 0.U(DataWidth.W)
+    )), 0.U(DataWidth.W))
+
+    ioInternal.oRS1 := IDU_RS1
+    ioInternal.oRS2 := IDU_RS2
+
+    ioInternal.oFeedBackPCChanged := IDU_JudgePCJump
+    ioInternal.oFeedBackNewPCVal := IDU_JumpPCAddr
+
+    ioInternal.oCSR_ZicsrWSCIdx := IDU_ZicsrWSCIdx
+    ioInternal.oCSR_ZicsrNewVal := IDU_ZicsrNewVal
+
+    // Connect Decode Signals
+    ioInternal.oDecodeBundle := IDU_DecodeBundle
+    ioInternal.oEXU_src1 := IDU_EXU_SRC1
+    ioInternal.oEXU_src2 := IDU_EXU_SRC2
+    ioInternal.oLSU_src2 := IDU_LSU_SRC2
+    ioInternal.oRD := IDU_RD
+
+    // Connect Pipeline Passthroughs
+    ioInternal.oPC := ioInternal.iPC
+
+    // Connect Pipline Signals
+    ioInternal.oMasterValid := (IDU_NotBusy.asBool && ioInternal.iSlaveValid)
+    ioInternal.oSlaveReady := (IDU_NotBusy.asBool && ioInternal.iMasterReady)
+
+    //when(ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool){
+        // Decode PrivReg
+        /*iDecPrivVal := Lookup(
+            ioInternal.iInst, PR_NORM, Array(
+                ECALL -> PR_ECALL, MRET -> PR_MRET,
+                CSRRW -> PR_ZICSR, CSRRC -> PR_ZICSR, CSRRS -> PR_ZICSR,
+                CSRRWI -> PR_ZICSR, CSRRCI -> PR_ZICSR, CSRRSI -> PR_ZICSR
+            )
+        )*/
+
+        // Decode EXUReg
+        /*iDecEXUVal := Lookup(
+            ioInternal.iInst, EX_NOP, Array(
+                LUI -> EX_PS1, CSRRW -> EX_PS1, CSRRS -> EX_PS1, CSRRC -> EX_PS1, CSRRWI -> EX_PS1, CSRRCI -> EX_PS1, CSRRSI -> EX_PS1,
+
+                AUIPC -> EX_ADD, SB -> EX_ADD, SH -> EX_ADD, SW -> EX_ADD, SD -> EX_ADD, ADD -> EX_ADD, ADDI -> EX_ADD,
+                LB -> EX_ADD, LBU -> EX_ADD, LH -> EX_ADD, LHU -> EX_ADD, LW -> EX_ADD, LWU -> EX_ADD, LD -> EX_ADD,
+                ADDW -> EX_ADDW, ADDIW -> EX_ADDW,
+
+                SUB -> EX_SUB, SUBW -> EX_SUBW,
+
+                AND -> EX_AND, ANDI -> EX_AND,
+
+                OR -> EX_OR, ORI -> EX_OR,
+
+                XOR -> EX_XOR, XORI -> EX_XOR,
+
+                SLT -> EX_SLT, SLTI -> EX_SLT,
+
+                SLTU -> EX_SLTU, SLTIU -> EX_SLTU,
+
+                SLL -> EX_SLL, SLLI -> EX_SLL, SLLW -> EX_SLLW, SLLIW -> EX_SLLW,
+
+                SRL -> EX_SRL, SRLI -> EX_SRL, SRLW -> EX_SRLW, SRLIW -> EX_SRLW,
+
+                SRA -> EX_SRA, SRAI -> EX_SRA, SRAW -> EX_SRAW, SRLIW -> EX_SRAW,
+
+                MUL -> EX_MUL, MULH -> EX_MULH, MULHSU -> EX_MULHSU, MULHU -> EX_MULHU, MULW -> EX_MULW,
+
+                DIV -> EX_DIV, DIVU -> EX_DIVU, DIVW -> EX_DIVW, DIVUW -> EX_DIVUW,
+
+                REM -> EX_REM, REMU -> EX_REMU, REMW -> EX_REMW, REMUW -> EX_REMUW,
+
+                //JAL -> EX_NOP, JALR -> EX_NOP, BEQ -> EX_NOP, BNE -> EX_NOP, BLT -> EX_NOP, BLTU -> EX_NOP, BGE -> EX_NOP, BGEU -> EX_NOP,
+            )
+        )*/
+
+        // Decode LSlenReg
+        /*iDecLSlenVal := Lookup(
+            ioInternal.iInst, 0.U(2.W), Array(
+                LB -> LS_B, LBU -> LS_B, SB -> LS_B,
+                LH -> LS_H, LHU -> LS_H, SH -> LS_H,
+                LW -> LS_W, LWU -> LS_W, SW -> LS_W,
+                LD -> LS_D,              SD -> LS_D
+            )
+        )*/
+
+        // Decode LSfuncReg
+        /*iDecLSfuncVal := Lookup(
+            ioInternal.iInst, LS_NOP, Array(
+                LB  -> LS_LD ,  LH -> LS_LD ,  LW -> LS_LD ,  LD -> LS_LD ,
+                SB  -> LS_ST ,  SH -> LS_ST ,  SW -> LS_ST ,  SD -> LS_ST ,
+                LBU -> LS_LDU, LHU -> LS_LDU, LWU -> LS_LDU
+            )
+        )*/
+
+        // Decode WBTypReg
+        /*iDecWBTypVal := Lookup(
+            ioInternal.iInst, WB_EXU, Array(
+                SB -> WB_NOP, SH -> WB_NOP, SW -> WB_NOP, SD -> WB_NOP,
+                ECALL -> WB_NOP, EBREAK -> WB_NOP, MRET -> WB_NOP,
+                BEQ -> WB_NOP, BNE -> WB_NOP, BGE -> WB_NOP, BGEU -> WB_NOP, BLT -> WB_NOP, BLTU -> WB_NOP,
+
+                LB -> WB_LSU, LBU -> WB_LSU, LH -> WB_LSU, LHU -> WB_LSU, LW -> WB_LSU, LWU -> WB_LSU, LD -> WB_LSU,
+
+                JAL -> WB_SNPC, JALR -> WB_SNPC
+            )
+        )*/
+
+        // Decode DSReg
+        /*iDecDSVal := Lookup(
+            ioInternal.iInst, NPC_RUNNING, Array(
+                EBREAK -> NPC_STOPPED
+            )
+        )*/
+
+        /*DecodeVal := Cat(Seq(
+            iDecPrivVal, iDecEXUVal, iDecLSlenVal, iDecLSfuncVal, iDecWBTypVal, iDecDSVal
+        ))*/
+
+        // Decode Instruction type
+        /*InstructionType := Lookup(
+            ioInternal.iInst, instR, Array(
+                LUI -> instU, AUIPC -> instU,
+
+                JAL -> instJ,
+
+                JALR -> instI,
+                LB -> instI, LH -> instI, LW -> instI, LBU -> instI, LHU -> instI, LWU -> instI, LD -> instI,
+                ADDI -> instI, SLTI -> instI, SLTIU -> instI, XORI -> instI, ORI -> instI, ANDI -> instI, SLLI -> instI, SRLI -> instI, SRAI -> instI,
+                ADDIW -> instI, SLLIW -> instI, SRLIW -> instI, SRAIW -> instI,
+
+                CSRRW -> instI, CSRRS -> instI, CSRRC -> instI, CSRRWI -> instI, CSRRSI -> instI, CSRRCI -> instI,
+
+                ADD -> instR, SUB -> instR, SLL -> instR, SLT -> instR, SLTU -> instR, XOR -> instR, SRL -> instR, SRA -> instR, OR -> instR, AND -> instR,
+                ADDW -> instR, SUBW -> instR, SLLW -> instR, SRLW -> instR, SRAW -> instR,
+                MUL -> instR, MULH -> instR, MULHSU -> instR, MULHU -> instR, DIV -> instR, DIVU -> instR, REM -> instR, REMU -> instR,
+                MULW -> instR, DIVW -> instR, DIVUW -> instR, REMW -> instR, REMUW -> instR,
+
+                SB -> instS, SH -> instS, SW -> instS, SD -> instS,
+
+                BEQ -> instB, BNE -> instB, BLT -> instB, BGE -> instB, BLTU -> instB, BGEU -> instB,
+            )
+        )*/
+
+        //ImmOut := ImmGenerator.ioSubmodule.oImm
 
         // Decode for registers
-        RS1Addr := ioInternal.iInst(RS1Hi, RS1Lo).asUInt
-        SRC1Val := ioInternal.iSRC1
+        //RS1Addr := ioInternal.iInst(RS1Hi, RS1Lo).asUInt
+        //SRC1Val := ioInternal.iSRC1
 
-        RS2Addr := ioInternal.iInst(RS2Hi, RS2Lo).asUInt
-        SRC2Val := ioInternal.iSRC2
+        //RS2Addr := ioInternal.iInst(RS2Hi, RS2Lo).asUInt
+        //SRC2Val := ioInternal.iSRC2
 
-        RDAddr := ioInternal.iInst(RDHi, RDLo).asUInt
+        //RDAddr := ioInternal.iInst(RDHi, RDLo).asUInt
 
         // Register State control
         //RegStateTable(RDAddr.asUInt) := 1.U(1.W)
-        RegStateTable(RDAddr.asUInt) := Mux(RDAddr.asUInt === 0.U, 0.U(1.W), 1.U(1.W))
-        IDU_NotBusy := (RegStateTable(RS1Addr.asUInt).asBool && RegStateTable(RS2Addr.asUInt).asBool)
+        //RegStateTable(RDAddr.asUInt) := Mux(RDAddr.asUInt === 0.U, 0.U(1.W), 1.U(1.W))
+        //IDU_NotBusy := (RegStateTable(RS1Addr.asUInt).asBool && RegStateTable(RS2Addr.asUInt).asBool)
 
         // Decode Static-Next-PC and Dynamic-Next-PC
-        SNPC := ioInternal.iPC + InstSize.U
-        DNPC := Lookup(
+        //SNPC := ioInternal.iPC + InstSize.U
+        /*DNPC := Lookup(
             ioInternal.iInst, ioInternal.iPC + InstSize.U, Array(
                 JAL  -> (ioInternal.iPC.asUInt + ImmOut.asUInt),
                 JALR -> ((SRC1Val.asUInt + ImmOut.asUInt) & Cat(Fill(63, 1.U(1.W)), Fill(1, 0.U(1.W)))),
@@ -272,23 +499,23 @@ class IDU extends Module{
                 EBREAK -> ioInternal.iPC,
                 MRET  -> ioInternal.iCSR_mepc.asUInt
             )
-        )
+        )*/
         
         // Judge SNPC is DNPC, if not, trigger value feedback
-        FeedBackJumpPC := Mux(SNPC === DNPC, false.B, true.B)
-        FeedbackPCVal := DNPC
+        //FeedBackJumpPC := Mux(SNPC === DNPC, false.B, true.B)
+        //FeedbackPCVal := DNPC
 
-        ZicsrWSCIdx := Lookup(
+        /*ZicsrWSCIdx := Lookup(
             ioInternal.iInst, 0.U(CSRIDWidth.W), Array(
                 CSRRW -> ImmOut,  CSRRS -> ImmOut,  CSRRC -> ImmOut,
                 CSRRWI -> ImmOut, CSRRSI -> ImmOut, CSRRCI -> ImmOut,
             )
-        )
+        )*/
 
-        OldCSR := ioInternal.iCSR_ZicsrOldVal
-        val Zicsr_uimm = ioInternal.iInst(RS1Hi, RS1Lo)
+        //OldCSR := ioInternal.iCSR_ZicsrOldVal
+        //val Zicsr_uimm = ioInternal.iInst(RS1Hi, RS1Lo)
 
-        ZicsrNewVal := Lookup(
+        /*ZicsrNewVal := Lookup(
             ioInternal.iInst, 0.U(DataWidth.W), Array(
                 CSRRW -> SRC1Val,
                 CSRRS -> (SRC1Val | OldCSR),
@@ -297,9 +524,9 @@ class IDU extends Module{
                 CSRRSI -> (Zicsr_uimm | OldCSR),
                 CSRRCI -> (Zicsr_uimm & OldCSR)
             )
-        )
+        )*/
 
-        EXU_SRC1 := MuxCase(0.U(DataWidth.W), Array(
+        /*EXU_SRC1 := MuxCase(0.U(DataWidth.W), Array(
             (InstructionType === instR) -> SRC1Val.asUInt,
             (InstructionType === instI) -> Lookup(ioInternal.iInst, SRC1Val.asUInt, Array(
                 CSRRW -> OldCSR, CSRRS -> OldCSR, CSRRC -> OldCSR,
@@ -327,10 +554,10 @@ class IDU extends Module{
             (InstructionType === instB) -> 0.U(DataWidth.W),
             (InstructionType === instU) -> 0.U(DataWidth.W),
             (InstructionType === instJ) -> 0.U(DataWidth.W)
-        ))
-    }
+        ))*/
+    //}
 
-    ioInternal.oRS1 := RS1Addr
+    /*ioInternal.oRS1 := RS1Addr
     ioInternal.oRS2 := RS2Addr
 
     ioInternal.oFeedBackPCChanged := FeedBackJumpPC.asBool
@@ -351,5 +578,5 @@ class IDU extends Module{
 
     // Connect Pipline Signals
     ioInternal.oMasterValid := (IDU_NotBusy.asBool && ioInternal.iSlaveValid)
-    ioInternal.oSlaveReady := (IDU_NotBusy.asBool && ioInternal.iMasterReady)
+    ioInternal.oSlaveReady := (IDU_NotBusy.asBool && ioInternal.iMasterReady)*/
 }
