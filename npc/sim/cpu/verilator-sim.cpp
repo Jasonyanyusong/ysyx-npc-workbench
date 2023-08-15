@@ -63,9 +63,11 @@ void sim_init(){
     step_and_dump_wave();
     
     top -> clock = 1;
-    step_and_dump_wave();
-    top -> reset = 0;
     top -> eval();
+    top -> reset = 0;
+    step_and_dump_wave();
+
+    cycle = cycle + 1;
 
     printf("[simulation] NPC has been resetted\n");
     return;
@@ -87,12 +89,15 @@ void sim_exit(){
 void sim_one_cycle(){
     assert(top);
 
+    sim_mem(0); // iFetch
+
     top -> clock = 0;
+    sim_mem(0);
     step_and_dump_wave();
 
-    sim_mem(0);
-
     top -> clock = 1;
+    //top -> eval();
+    //sim_mem(0);
     step_and_dump_wave();
 
     cycle = cycle + 1;
@@ -160,8 +165,10 @@ void sim_mem(int delay_cycle){
     word_t IF_MemAddr = top -> ioNPC_iFetch_oPC;
 
     if(top -> ioNPC_iFetch_oMemEnable){
+        printf("[verilator-sim] at cycle %d, get iFetch Memory request, addr 0x%x\n", cycle, IF_MemAddr);
         top -> ioNPC_iFetch_iInst = pmem_read(IF_MemAddr, 4);
     }else{
+        printf("[verilator-sim] at cycle %d, no iFetch Memory request\n", cycle);
         top -> ioNPC_iFetch_iInst = 0;
     }
 
