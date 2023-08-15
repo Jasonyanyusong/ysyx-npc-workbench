@@ -39,7 +39,6 @@ class iFetchExternal extends Bundle{
     val iInst = Input(UInt(InstWidth.W))
     val oPC = Output(UInt(AddrWidth.W))
     val oMemEnable = Output(Bool())
-    //val oInst = Input(UInt(InstWidth.W))
 }
 
 class IFU extends Module{
@@ -48,38 +47,13 @@ class IFU extends Module{
 
     // Non-AXI, pipelined Version IFU
 
-    //val Inst = RegInit(0.U(InstWidth.W))
     val IFU_NotBusy = RegInit(true.B)
-    //val PC = RegInit("h80000000".U(AddrWidth.W))
-    //val iFetchMemEnable = RegInit(false.B)
-
-    /*when(ioInternal.iMasterReady.asBool){
-        PC := Mux(
-            ioInternal.iFeedBackPCChanged.asBool, 
-            ioInternal.iFeedBackNewPCVal, 
-            PC + 4.U
-        )
-
-        //iFetchMemEnable := true.B
-
-        //Inst := ioExternal.iInst
-    }*/
-
-    //ioExternal.oMemEnable := iFetchMemEnable
-
 
     ioExternal.oMemEnable := ioInternal.iMasterReady.asBool || ioInternal.iPC === "h80000000".U
-    //Inst := Mux(ioInternal.iMasterReady.asBool, ioExternal.iInst, Inst)
     ioExternal.oPC := ioInternal.iPC
     ioInternal.oPC := ioInternal.iPC
     ioInternal.oInst := Mux(ioInternal.iMasterReady.asBool || ioInternal.iPC === "h80000000".U, ioExternal.iInst, 0.U(InstWidth.W))
     ioInternal.oMasterValid := IFU_NotBusy.asBool
-
-    /*PC := Mux(ioInternal.iMasterReady.asBool, Mux(
-        ioInternal.iFeedBackPCChanged.asBool, 
-        ioInternal.iFeedBackNewPCVal, 
-        PC + 4.U
-    ), PC)*/
     
     /*
 
