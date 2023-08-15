@@ -48,9 +48,9 @@ class WBU extends Module{
 
     val WBU_NotBusy = RegInit(true.B)
 
-    val WriteGPREnable = RegInit(false.B)
-    val WriteGPRAddr = RegInit(0.U(RegIDWidth.W))
-    val WriteGPRVal = RegInit(0.U(DataWidth.W))
+    //val WriteGPREnable = RegInit(false.B)
+    //val WriteGPRAddr = RegInit(0.U(RegIDWidth.W))
+    //val WriteGPRVal = RegInit(0.U(DataWidth.W))
 
     val EX_RETVal = ioInternal.iEXU_RET
     val LS_RETVal = ioInternal.iLSU_RET
@@ -59,28 +59,46 @@ class WBU extends Module{
     val DecodeBundle = ioInternal.iDecodeBundle
     val WBDecode = DecodeBundle(2, 1)
 
-    when(ioInternal.iSlaveValid.asBool){
-        WriteGPRAddr := ioInternal.iRD
+    val WBU_StateOK = (ioInternal.iSlaveValid.asBool)
 
-        WriteGPREnable := MuxCase(false.B, Array(
+    val WBU_GPR_ADDR = Mux(WBU_StateOK, ioInternal.iRD, 0.U(RegIDWidth.W))
+    val WBU_GPR_WRITE_ENABLE = Mux(WBU_StateOK, MuxCase(false.B, Array(
             (WBDecode === WB_NOP) -> false.B,
             (WBDecode === WB_EXU) -> true.B,
             (WBDecode === WB_LSU) -> true.B,
             (WBDecode === WB_SNPC) -> true.B
-        ))
-
-        WriteGPRVal := MuxCase(0.U(DataWidth.W), Array(
+        )), false.B
+    )
+    val WBU_GPR_WRITE_DATA = Mux(WBU_StateOK, MuxCase(0.U(DataWidth.W), Array(
             (WBDecode === WB_NOP) -> 0.U(DataWidth.W),
             (WBDecode === WB_EXU) -> EX_RETVal,
             (WBDecode === WB_LSU) -> LS_RETVal,
             (WBDecode === WB_SNPC) -> SNPC
-        ))
-    }
+        )), 0.U(DataWidth.W)
+    )
+
+    //when(ioInternal.iSlaveValid.asBool){
+        //WriteGPRAddr := ioInternal.iRD
+
+        /*WriteGPREnable := MuxCase(false.B, Array(
+            (WBDecode === WB_NOP) -> false.B,
+            (WBDecode === WB_EXU) -> true.B,
+            (WBDecode === WB_LSU) -> true.B,
+            (WBDecode === WB_SNPC) -> true.B
+        ))*/
+
+        /*WriteGPRVal := MuxCase(0.U(DataWidth.W), Array(
+            (WBDecode === WB_NOP) -> 0.U(DataWidth.W),
+            (WBDecode === WB_EXU) -> EX_RETVal,
+            (WBDecode === WB_LSU) -> LS_RETVal,
+            (WBDecode === WB_SNPC) -> SNPC
+        ))*/
+    //}
 
     // Connect IO Internal
-    ioInternal.oWriteGPREnable := WriteGPREnable
-    ioInternal.oWriteGPRAddr := WriteGPRAddr
-    ioInternal.oWriteGPRVal := WriteGPRVal
+    ioInternal.oWriteGPREnable := WBU_GPR_WRITE_ENABLE
+    ioInternal.oWriteGPRAddr := WBU_GPR_ADDR
+    ioInternal.oWriteGPRVal := WBU_GPR_WRITE_DATA
     ioInternal.oPC := ioInternal.iPC
 
     // Pipeline shake hand implementation
