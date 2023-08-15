@@ -28,6 +28,7 @@ class iFetchInternal extends Bundle{
     val oMasterValid = Output(Bool())
 
     val oInst = Output(UInt(InstWidth.W))
+    val iPC = Input(UInt(AddrWidth.W))
     val oPC = Output(UInt(AddrWidth.W))
 
     val iFeedBackPCChanged = Input(Bool())
@@ -47,59 +48,38 @@ class IFU extends Module{
 
     // Non-AXI, pipelined Version IFU
 
-    val Inst = RegInit(0.U(InstWidth.W))
-
-    //val iFetchEnable = RegInit(true.B)
-
+    //val Inst = RegInit(0.U(InstWidth.W))
     val IFU_NotBusy = RegInit(true.B)
+    //val PC = RegInit("h80000000".U(AddrWidth.W))
+    //val iFetchMemEnable = RegInit(false.B)
 
-    val PC = RegInit("h80000000".U(AddrWidth.W))
-
-    //ioExternal.oMemEnable := Mux(iFetchEnable.asBool, true.B, false.B)
-
-    val iFetchMemEnable = RegInit(false.B)
-    
-    /*PC := Mux(iFetchEnable.asBool, 
-        Mux(
-            ioInternal.iFeedBackPCChanged.asBool, 
-            ioInternal.iFeedBackNewPCVal, 
-            PC + 4.U
-        ), 
-        PC
-    )*/
-
-    //ioExternal.oPC := Mux(iFetchEnable.asBool, PC, 0.U(AddrWidth.W))
-    //ioInternal.oPC := Mux(iFetchEnable.asBool, PC, 0.U(AddrWidth.W))
-
-    //Inst := Mux(iFetchEnable.asBool, ioExternal.iInst, Inst.asUInt)
-    
-    //iFetchEnable := false.B
-
-    /*when(){
-        // Shake hand success, re-enable iFetch, fetch next PC's instruction
-        //Inst := 0.U(InstWidth.W)
-        iFetchEnable := true.B
-    }*/
-
-    //iFetchEnable := Mux(ioInternal.iMasterReady.asBool, true.B, false.B)
-
-    when(ioInternal.iMasterReady.asBool){
+    /*when(ioInternal.iMasterReady.asBool){
         PC := Mux(
             ioInternal.iFeedBackPCChanged.asBool, 
             ioInternal.iFeedBackNewPCVal, 
             PC + 4.U
         )
 
-        iFetchMemEnable := true.B
+        //iFetchMemEnable := true.B
 
-        Inst := ioExternal.iInst
-    }
+        //Inst := ioExternal.iInst
+    }*/
 
-    ioExternal.oMemEnable := iFetchMemEnable
-    ioExternal.oPC := PC
-    ioInternal.oPC := PC
-    ioInternal.oInst := Inst
+    //ioExternal.oMemEnable := iFetchMemEnable
+
+
+    ioExternal.oMemEnable := ioInternal.iMasterReady.asBool || ioInternal.iPC === "h80000000".U
+    //Inst := Mux(ioInternal.iMasterReady.asBool, ioExternal.iInst, Inst)
+    ioExternal.oPC := ioInternal.iPC
+    ioInternal.oPC := ioInternal.iPC
+    ioInternal.oInst := Mux(ioInternal.iMasterReady.asBool || ioInternal.iPC === "h80000000".U, ioExternal.iInst, 0.U(InstWidth.W))
     ioInternal.oMasterValid := IFU_NotBusy.asBool
+
+    /*PC := Mux(ioInternal.iMasterReady.asBool, Mux(
+        ioInternal.iFeedBackPCChanged.asBool, 
+        ioInternal.iFeedBackNewPCVal, 
+        PC + 4.U
+    ), PC)*/
     
     /*
 

@@ -96,6 +96,14 @@ class NPC extends Module{
     val NPC_LSU = Module(new LSU)
     val NPC_WBU = Module(new WBU)
 
+    // PC Maintain and Manipulation
+    val PC = RegInit("h80000000".U(AddrWidth.W))
+
+    PC := Mux(NPC_IDU.ioInternal.oFeedBackPCChanged.asBool,
+        NPC_IDU.ioInternal.oFeedBackNewPCVal,
+        PC + 4.U
+    )
+
     // GPR Maintain and Manipulation
     val GPR = Mem(RegSum, UInt(DataWidth.W))
     def GPR_Read(index : UInt) = Mux(index === 0.U, 0.U(DataWidth.W), GPR(index))
@@ -131,12 +139,15 @@ class NPC extends Module{
         Mux(isECALL, mcause := "b11".asUInt, mcause := mcause)
     }*/
 
+    // NPC Inside Logic: Top -> IFU
+    NPC_IFU.ioInternal.iPC := PC
+
     // NPC Pipeline Logic: IFU <-> IDU
     NPC_IFU.ioInternal.iMasterReady := RegNext(NPC_IDU.ioInternal.oSlaveReady)
-    NPC_IDU.ioInternal.iSlaveValid  := RegNext(NPC_IDU.ioInternal.oMasterValid)
+    NPC_IDU.ioInternal.iSlaveValid  := RegNext(NPC_IFU.ioInternal.oMasterValid)
     
-    NPC_IFU.ioInternal.iFeedBackPCChanged := RegNext(NPC_IDU.ioInternal.oFeedBackPCChanged)
-    NPC_IFU.ioInternal.iFeedBackNewPCVal  := RegNext(NPC_IDU.ioInternal.oFeedBackNewPCVal)
+    NPC_IFU.ioInternal.iFeedBackPCChanged := (NPC_IDU.ioInternal.oFeedBackPCChanged)
+    NPC_IFU.ioInternal.iFeedBackNewPCVal  := (NPC_IDU.ioInternal.oFeedBackNewPCVal)
 
     NPC_IDU.ioInternal.iInst := RegNext(NPC_IFU.ioInternal.oInst)
     NPC_IDU.ioInternal.iPC   := RegNext(NPC_IFU.ioInternal.oPC)
