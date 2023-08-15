@@ -23,6 +23,9 @@
 //VerilatedVcdC* tfp = NULL;
 //static VNPC* top;
 
+#define NPC_RUNNING 0
+#define NPC_STOPPED 1
+
 int memory_delay = 0;
 
 void pmem_write(word_t, int, word_t);
@@ -101,6 +104,16 @@ void sim_one_cycle(){
     step_and_dump_wave();
 
     cycle = cycle + 1;
+
+    if((top -> ioNPCDebug_DecodeBundleDebug & 0b1) == NPC_STOPPED){
+        printf("NPC simulation finished, a0 = %d, ", top -> ioNPCDebug_GPR10);
+        if(top -> ioNPCDebug_GPR10 == 0){
+            printf("HIT GOOD TRAP\n");
+        }else{
+            printf("HIT BAD  TRAP\n");
+        }
+        npc_state.state = NPC_END;
+    }
     
     return;
 }
