@@ -41,9 +41,11 @@ void out_of_bound(word_t addr){
 
 word_t pmem_read(word_t addr, int len) {
   word_t ret = host_read(guest_to_host(addr), len);
+  //printf("[mem : pmem_read] read mem @ 0x%lx with len %d get data 0x%lx\n", addr, len, ret);
   return ret;
 }
 
 void pmem_write(word_t addr, int len, word_t data) {
+  //printf("[mem : pmem_write] write mem @ 0x%lx with len %d and data 0x%lx\n", addr, len, data);
   host_write(guest_to_host(addr), len, data);
 }

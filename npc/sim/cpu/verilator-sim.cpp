@@ -92,9 +92,10 @@ void sim_exit(){
 void sim_one_cycle(){
     assert(top);
 
-    sim_mem(0); // iFetch
+    //sim_mem(0); // iFetch
 
     top -> clock = 0;
+    top -> eval();
     sim_mem(0);
     step_and_dump_wave();
 
@@ -149,23 +150,29 @@ double compute_ipc(){
 #define MEM_WRITE 0b10
 
 void sim_mem(int delay_cycle){
+    //printf("[verilator-sim : sim-mem] at cycle %d\n", cycle);
+
     assert(top);
 
-    word_t LS_MemAddr = top -> ioNPC_iLoadStore_oMemoryAddr;
+    word_t LS_MemAddr = (uint32_t)top -> ioNPC_iLoadStore_oMemoryAddr;
+    //printf("[verilator-sim : sim_mem] LS_MemAddr is 0x%x\n", LS_MemAddr);
     int LS_MemLen = (int)pow(2, top -> ioNPC_iLoadStore_oMemoryLen);
 
     assert(LS_MemLen >= 1 && LS_MemLen <= 8);
     
     switch(top -> ioNPC_iLoadStore_oMemoryOP){
         case(MEM_NOP):{
+            //printf("[verilator-sim : sim_mem] LS do not access mem here\n");
             top -> ioNPC_iLoadStore_iMemoryRead = 0;
             break;
         }
         case(MEM_READ):{
+            //printf("[verilator-sim : sim_mem] LS do read mem here\n");
             top -> ioNPC_iLoadStore_iMemoryRead = pmem_read(LS_MemAddr, LS_MemLen);
             break;
         }
         case(MEM_WRITE):{
+            //printf("[verilator-sim : sim_mem] LS do write mem here, data is 0x%lx\n", top -> ioNPC_iLoadStore_oMemoryWrite);
             top -> ioNPC_iLoadStore_iMemoryRead = 0;
             pmem_write(LS_MemAddr, LS_MemLen, top -> ioNPC_iLoadStore_oMemoryWrite);
             break;
@@ -175,7 +182,8 @@ void sim_mem(int delay_cycle){
 
     top -> eval();
 
-    word_t IF_MemAddr = top -> ioNPC_iFetch_oPC;
+    word_t IF_MemAddr = (uint32_t)top -> ioNPC_iFetch_oPC;
+    //printf("[verilator-sim : sim_mem] IF_MemAddr is 0x%x\n", IF_MemAddr);
 
     if(top -> ioNPC_iFetch_oMemEnable){
         printf("[verilator-sim] at cycle %d, get iFetch Memory request, addr 0x%x\n", cycle, IF_MemAddr);
