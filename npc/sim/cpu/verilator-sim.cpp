@@ -157,7 +157,7 @@ void sim_mem(int delay_cycle){
     assert(top);
 
     word_t LS_MemAddr = (uint32_t)top -> ioNPC_iLoadStore_oMemoryAddr;
-    //printf("[verilator-sim : sim_mem] LS_MemAddr is 0x%x\n", LS_MemAddr);
+    printf("[verilator-sim : sim_mem] LS_MemAddr is 0x%x\n", LS_MemAddr);
     int LS_MemLen = (int)pow(2, top -> ioNPC_iLoadStore_oMemoryLen);
 
     assert(LS_MemLen >= 1 && LS_MemLen <= 8);
@@ -185,7 +185,7 @@ void sim_mem(int delay_cycle){
     top -> eval();
 
     word_t IF_MemAddr = (uint32_t)top -> ioNPC_iFetch_oPC;
-    //printf("[verilator-sim : sim_mem] IF_MemAddr is 0x%x\n", IF_MemAddr);
+    printf("[verilator-sim : sim_mem] IF_MemAddr is 0x%x\n", IF_MemAddr);
 
     if(top -> ioNPC_iFetch_oMemEnable){
         printf("[verilator-sim] at cycle %d, get iFetch Memory request, addr 0x%x\n", cycle, IF_MemAddr);
