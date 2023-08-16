@@ -20,6 +20,8 @@ import chisel3._
 import chisel3.util._
 
 import npc.helper.defs.Base._
+import npc.helper.defs.PipeLineDefs._
+
 import npc.helper.opcode.OpWBU._
 
 class iWriteBackInternal extends Bundle{
@@ -27,17 +29,20 @@ class iWriteBackInternal extends Bundle{
     val oSlaveReady = Output(Bool())
     val iSlaveValid = Input(Bool())
 
-    val iDecodeBundle = Input(UInt(DecodeWidth.W))
+    val PipeLine_LS2WB_MsgBundle = Input(UInt(PipeLine_LS2WB_Width.W))
 
-    val iEXU_RET = Input(UInt(DataWidth.W))
-    val iLSU_RET = Input(UInt(DataWidth.W))
+    //val iDecodeBundle = Input(UInt(DecodeWidth.W))
 
-    val iRD = Input(UInt(RegIDWidth.W))
-    val iPC = Input(UInt(AddrWidth.W))
+    //val iEXU_RET = Input(UInt(DataWidth.W))
+    //val iLSU_RET = Input(UInt(DataWidth.W))
+
+    //val iRD = Input(UInt(RegIDWidth.W))
+    //val iPC = Input(UInt(AddrWidth.W))
 
     val oPC = Output(UInt(AddrWidth.W))
 
     val oWorked = Output(Bool()) // Debug signal, used for difftest
+    val oDecodeBundleDebug = Output(UInt(DecodeWidth.W))
 
     // OFF-PIPELINE VALUES
     val oWriteGPREnable = Output(Bool())
@@ -50,16 +55,27 @@ class WBU extends Module{
 
     val WBU_NotBusy = RegInit(true.B)
 
-    val EX_RETVal = ioInternal.iEXU_RET
-    val LS_RETVal = ioInternal.iLSU_RET
-    val SNPC = ioInternal.iPC + 4.U
+    val PipeLine_LS2WB_Bundle = new Bundle{
+        val Instr = UInt(InstWidth.W)
+        val PC = UInt(AddrWidth.W)
+        val DecodeVal = UInt(DecodeWidth.W)
+        val RD = UInt(RegIDWidth.W)
+        val EX_RET = UInt(DataWidth.W)
+        val LS_RET = UInt(DataWidth.W)
+    }
 
-    val DecodeBundle = ioInternal.iDecodeBundle
+    val LS2WB_Msg = ioInternal.PipeLine_LS2WB_MsgBundle.asTypeOf(PipeLine_LS2WB_Bundle)
+
+    val EX_RETVal = LS2WB_Msg.EX_RET
+    val LS_RETVal = LS2WB_Msg.LS_RET
+    val SNPC = LS2WB_Msg.PC + 4.U
+
+    val DecodeBundle = LS2WB_Msg.DecodeVal
     val WBDecode = DecodeBundle(2, 1)
 
     val WBU_StateOK = (ioInternal.iSlaveValid.asBool)
 
-    val WBU_GPR_ADDR = Mux(WBU_StateOK, ioInternal.iRD, 0.U(RegIDWidth.W))
+    val WBU_GPR_ADDR = Mux(WBU_StateOK, LS2WB_Msg.RD, 0.U(RegIDWidth.W))
     val WBU_GPR_WRITE_ENABLE = Mux(WBU_StateOK, MuxCase(false.B, Array(
             (WBDecode === WB_NOP) -> false.B,
             (WBDecode === WB_EXU) -> true.B,
@@ -79,10 +95,11 @@ class WBU extends Module{
     ioInternal.oWriteGPREnable := WBU_GPR_WRITE_ENABLE
     ioInternal.oWriteGPRAddr := WBU_GPR_ADDR
     ioInternal.oWriteGPRVal := WBU_GPR_WRITE_DATA
-    ioInternal.oPC := ioInternal.iPC
+    ioInternal.oPC := LS2WB_Msg.PC
 
     // Connect IO for debug
     ioInternal.oWorked := WBU_StateOK
+    ioInternal.oDecodeBundleDebug := LS2WB_Msg.DecodeVal
 
     // Pipeline shake hand implementation
     ioInternal.oSlaveReady := WBU_NotBusy.asBool

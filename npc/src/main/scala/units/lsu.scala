@@ -20,6 +20,8 @@ import chisel3._
 import chisel3.util._
 
 import npc.helper.defs.Base._
+import npc.helper.defs.PipeLineDefs._
+
 import npc.helper.opcode.OpLSULen._
 import npc.helper.opcode.OpLSUFunc._
 import npc.helper.opcode.MemOp._
@@ -32,20 +34,25 @@ class iLoadStoreInternal extends Bundle{
     val iMasterReady = Input(Bool())
     val oMasterValid = Output(Bool())
 
-    val iDecodeBundle = Input(UInt(DecodeWidth.W))
-    val oDecodeBundle = Output(UInt(DecodeWidth.W))
+    // TODO: change singal type
+    val PipeLine_EX2LS_MsgBundle = Input(UInt(PipeLine_EX2LS_Width.W))
+    val PipeLine_LS2WB_MsgBundle = Output(UInt(PipeLine_LS2WB_Width.W))
+    val PipeLine_LS2WB_ChangeReg = Output(Bool())
 
-    val iEXU_RET = Input(UInt(DataWidth.W))
-    val iLSU_SRC2 = Input(UInt(DataWidth.W))
+    //val iDecodeBundle = Input(UInt(DecodeWidth.W))
+    //val oDecodeBundle = Output(UInt(DecodeWidth.W))
 
-    val oEXU_RET = Output(UInt(DataWidth.W))
-    val oLSU_RET = Output(UInt(DataWidth.W))
+    //val iEXU_RET = Input(UInt(DataWidth.W))
+    //val iLSU_SRC2 = Input(UInt(DataWidth.W))
 
-    val iRD = Input(UInt(RegIDWidth.W))
-    val oRD = Output(UInt(RegIDWidth.W))
+    //val oEXU_RET = Output(UInt(DataWidth.W))
+    //val oLSU_RET = Output(UInt(DataWidth.W))
 
-    val iPC = Input(UInt(AddrWidth.W))
-    val oPC = Output(UInt(AddrWidth.W))
+    //val iRD = Input(UInt(RegIDWidth.W))
+    //val oRD = Output(UInt(RegIDWidth.W))
+
+    //val iPC = Input(UInt(AddrWidth.W))
+    //val oPC = Output(UInt(AddrWidth.W))
 }
 
 class iLoadStoreExternal extends Bundle{
@@ -61,17 +68,29 @@ class LSU extends Module{
     val ioExternal = IO(new iLoadStoreExternal)
 
     val LSU_NotBusy = RegInit(true.B)
-    val LoadStoreResult = RegInit(0.U(DataWidth.W))
 
-    val iLoadStoreLen = RegInit(LS_B) // Default is LS_B since its value is 0
-    val iLoadStoreFunc = RegInit(LS_NOP)
-    val iLoadStoreAddr = RegInit(0.U(AddrWidth.W))
-    val iLoadStoreMemOP = RegInit(MEM_NOP)
-    val iLoadStoreWrite = RegInit(0.U(DataWidth.W))
+    val PipeLine_EX2LS_Bundle = new Bundle{
+        val Instr = UInt(InstWidth.W)
+        val PC = UInt(AddrWidth.W)
+        val DecodeVal = UInt(DecodeWidth.W)
+        val RD = UInt(RegIDWidth.W)
+        val EX_RET = UInt(DataWidth.W)
+        val LS_SRC2 = UInt(DataWidth.W)
+    }
 
-    val DecodeBundle = ioInternal.iDecodeBundle
-    val EXU_RET = ioInternal.iEXU_RET
-    val LSU_SRC = ioInternal.iLSU_SRC2
+    val EX2LS_Msg = ioInternal.PipeLine_EX2LS_MsgBundle.asTypeOf(PipeLine_EX2LS_Bundle)
+
+    //val LoadStoreResult = RegInit(0.U(DataWidth.W))
+
+    //val iLoadStoreLen = RegInit(LS_B) // Default is LS_B since its value is 0
+    //val iLoadStoreFunc = RegInit(LS_NOP)
+    //val iLoadStoreAddr = RegInit(0.U(AddrWidth.W))
+    //val iLoadStoreMemOP = RegInit(MEM_NOP)
+    //val iLoadStoreWrite = RegInit(0.U(DataWidth.W))
+
+    val DecodeBundle = EX2LS_Msg.DecodeVal
+    val EXU_RET = EX2LS_Msg.EX_RET
+    val LSU_SRC = EX2LS_Msg.LS_SRC2
 
     def WordSignExt(WordVal : UInt) = Cat(Fill(DataWidth - WordWidth, WordVal(WordWidth - 1).asUInt), WordVal(WordWidth - 1, 0))
     def HalfSignExt(HalfVal : UInt) = Cat(Fill(DataWidth - HalfWidth, HalfVal(HalfWidth - 1).asUInt), HalfVal(HalfWidth - 1, 0))
@@ -116,14 +135,21 @@ class LSU extends Module{
             )))
         )), 0.U(DataWidth.W))
 
+    val PrePare_PipeLine_LS2WB_Bundle = Mux(LSU_StateOK, Cat(Seq(
+        EX2LS_Msg.Instr, EX2LS_Msg.PC, EX2LS_Msg.DecodeVal, EX2LS_Msg.RD, EX2LS_Msg.EX_RET, LSU_Compute_Result
+    )), 0.U(PipeLine_LS2WB_Width.W))
+
+    ioInternal.PipeLine_LS2WB_MsgBundle := PrePare_PipeLine_LS2WB_Bundle
+    ioInternal.PipeLine_LS2WB_ChangeReg := LSU_StateOK && LSU_NotBusy
+
     // Connect IO Internal
-    ioInternal.oLSU_RET := LSU_Compute_Result
+    //ioInternal.oLSU_RET := LSU_Compute_Result
 
     // Connect passtorhough for WBU
-    ioInternal.oDecodeBundle := ioInternal.iDecodeBundle
-    ioInternal.oEXU_RET := ioInternal.iEXU_RET
-    ioInternal.oRD := ioInternal.iRD
-    ioInternal.oPC := ioInternal.iPC
+    //ioInternal.oDecodeBundle := ioInternal.iDecodeBundle
+    //ioInternal.oEXU_RET := ioInternal.iEXU_RET
+    //ioInternal.oRD := ioInternal.iRD
+    //ioInternal.oPC := ioInternal.iPC
 
     // Pipeline shake hand implementation
     ioInternal.oSlaveReady := (LSU_NotBusy.asBool && ioInternal.iMasterReady.asBool)

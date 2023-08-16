@@ -21,6 +21,8 @@ import chisel3.util._
 
 import npc.helper.defs.Base._
 import npc.helper.defs.InstType._
+import npc.helper.defs.PipeLineDefs._
+
 import npc.helper.rv64im.Inst._
 import npc.helper.opcode.OpEXU._
 import npc.helper.opcode.OpLSULen._
@@ -37,29 +39,33 @@ class iDecodeInternal extends Bundle{
     val iMasterReady = Input(Bool())
     val oMasterValid = Output(Bool())
 
-    val iInst = Input(UInt(InstWidth.W))
+    //val iInst = Input(UInt(InstWidth.W))
     
     // Combine EXU, LSU, WBU 's decode information together
     // 1   1   1   1   1   1   0   0   0   0   0   0   0   0   0   0
     // 5   4   3   2   1   0   9   8   7   6   5   4   3   2   1   0
     // |---|   |-----------------------|   |---|   |---|   |---|   |
     // Priv               EXU              LSlen   LSfunc  WBTyp  Debug State (DS)
-    val oDecodeBundle = Output(UInt(DecodeWidth.W))
+    //val oDecodeBundle = Output(UInt(DecodeWidth.W))
 
-    val oEXU_src1 = Output(UInt(DataWidth.W))
-    val oEXU_src2 = Output(UInt(DataWidth.W))
-    val oLSU_src2 = Output(UInt(DataWidth.W))
+    //val oEXU_src1 = Output(UInt(DataWidth.W))
+    //val oEXU_src2 = Output(UInt(DataWidth.W))
+    //val oLSU_src2 = Output(UInt(DataWidth.W))
 
-    val oRD = Output(UInt(RegIDWidth.W))
+    //val oRD = Output(UInt(RegIDWidth.W))
 
-    val iPC = Input(UInt(AddrWidth.W))
-    val oPC = Output(UInt(AddrWidth.W))
+    //val iPC = Input(UInt(AddrWidth.W))
+    //val oPC = Output(UInt(AddrWidth.W))
 
     val oFeedBackPCChanged = Output(Bool())
     val oFeedBackNewPCVal = Output(UInt(AddrWidth.W))
 
     val iHaveWriteBack = Input(Bool())
     val iWriteBackAddr = Input(UInt(RegIDWidth.W))
+
+    val PipeLine_IF2ID_MsgBundle = Input(UInt(PipeLine_IF2ID_Width.W))
+    val PipeLine_ID2EX_MsgBundle = Output(UInt(PipeLine_ID2EX_Width.W))
+    val PipeLine_ID2EX_ChangeReg = Output(Bool())
 
     // OFF-PIPELINE VALUES
 
@@ -80,13 +86,16 @@ class iDecodeInternal extends Bundle{
 class IDU extends Module{
     val ioInternal = IO(new iDecodeInternal)
 
+    val PipeLine_Instr = ioInternal.PipeLine_IF2ID_MsgBundle(95, 64)
+    val PipeLine_PC = ioInternal.PipeLine_IF2ID_MsgBundle(63, 0)
+
     val IDU_NotBusy = RegInit(true.B)
     val RegStateTable = Mem(RegSum, Bool())
 
     val IDU_StateOK = (ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool)
 
     val Priv = Mux(IDU_StateOK, Lookup(
-            ioInternal.iInst, PR_NORM, Array(
+            PipeLine_Instr, PR_NORM, Array(
                 ECALL -> PR_ECALL, MRET -> PR_MRET,
                 CSRRW -> PR_ZICSR, CSRRC -> PR_ZICSR, CSRRS -> PR_ZICSR,
                 CSRRWI -> PR_ZICSR, CSRRCI -> PR_ZICSR, CSRRSI -> PR_ZICSR
@@ -95,7 +104,7 @@ class IDU extends Module{
     )
 
     val EXU_OP = Mux(IDU_StateOK, Lookup(
-            ioInternal.iInst, EX_NOP, Array(
+            PipeLine_Instr, EX_NOP, Array(
                 LUI -> EX_PS1, CSRRW -> EX_PS1, CSRRS -> EX_PS1, CSRRC -> EX_PS1, CSRRWI -> EX_PS1, CSRRCI -> EX_PS1, CSRRSI -> EX_PS1,
 
                 AUIPC -> EX_ADD, SB -> EX_ADD, SH -> EX_ADD, SW -> EX_ADD, SD -> EX_ADD, ADD -> EX_ADD, ADDI -> EX_ADD,
@@ -132,7 +141,7 @@ class IDU extends Module{
     )
 
     val LSU_OP_LEN = Mux(IDU_StateOK, Lookup(
-            ioInternal.iInst, 0.U(2.W), Array(
+            PipeLine_Instr, 0.U(2.W), Array(
                 LB -> LS_B, LBU -> LS_B, SB -> LS_B,
                 LH -> LS_H, LHU -> LS_H, SH -> LS_H,
                 LW -> LS_W, LWU -> LS_W, SW -> LS_W,
@@ -142,7 +151,7 @@ class IDU extends Module{
     )
 
     val LSU_OP_FUNC = Mux(IDU_StateOK, Lookup(
-            ioInternal.iInst, LS_NOP, Array(
+            PipeLine_Instr, LS_NOP, Array(
                 LB  -> LS_LD ,  LH -> LS_LD ,  LW -> LS_LD ,  LD -> LS_LD ,
                 SB  -> LS_ST ,  SH -> LS_ST ,  SW -> LS_ST ,  SD -> LS_ST ,
                 LBU -> LS_LDU, LHU -> LS_LDU, LWU -> LS_LDU
@@ -151,7 +160,7 @@ class IDU extends Module{
     )
 
     val WBU_OP = Mux(IDU_StateOK, Lookup(
-            ioInternal.iInst, WB_EXU, Array(
+            PipeLine_Instr, WB_EXU, Array(
                 SB -> WB_NOP, SH -> WB_NOP, SW -> WB_NOP, SD -> WB_NOP,
                 ECALL -> WB_NOP, EBREAK -> WB_NOP, MRET -> WB_NOP,
                 BEQ -> WB_NOP, BNE -> WB_NOP, BGE -> WB_NOP, BGEU -> WB_NOP, BLT -> WB_NOP, BLTU -> WB_NOP,
@@ -164,7 +173,7 @@ class IDU extends Module{
     )
 
     val DEBUG_STATE = Mux(IDU_StateOK, Lookup(
-            ioInternal.iInst, NPC_RUNNING, Array(
+            PipeLine_Instr, NPC_RUNNING, Array(
                 EBREAK -> NPC_STOPPED
             )
         ), 0.U(iDecDSValLen.W)
@@ -176,7 +185,7 @@ class IDU extends Module{
     )
 
     val IDU_InstructionType = Mux(IDU_StateOK, Lookup(
-            ioInternal.iInst, instR, Array(
+            PipeLine_Instr, instR, Array(
                 LUI -> instU, AUIPC -> instU,
 
                 JAL -> instJ,
@@ -202,13 +211,13 @@ class IDU extends Module{
 
     // Connect imm-generator
     val ImmGenerator = Module(new immGen)
-    ImmGenerator.ioSubmodule.iInst := ioInternal.iInst
+    ImmGenerator.ioSubmodule.iInst := PipeLine_Instr
     ImmGenerator.ioSubmodule.iType := IDU_InstructionType
     val IDU_Imm = Mux(IDU_StateOK, ImmGenerator.ioSubmodule.oImm, 0.U(DataWidth.W))
 
-    val IDU_RS1 = Mux(IDU_StateOK, ioInternal.iInst(RS1Hi, RS1Lo).asUInt, 0.U(RegIDWidth.W))
-    val IDU_RS2 = Mux(IDU_StateOK, ioInternal.iInst(RS2Hi, RS2Lo).asUInt, 0.U(RegIDWidth.W))
-    val IDU_RD  = Mux(IDU_StateOK, ioInternal.iInst(RDHi, RDLo).asUInt, 0.U(RegIDWidth.W))
+    val IDU_RS1 = Mux(IDU_StateOK, PipeLine_Instr(RS1Hi, RS1Lo).asUInt, 0.U(RegIDWidth.W))
+    val IDU_RS2 = Mux(IDU_StateOK, PipeLine_Instr(RS2Hi, RS2Lo).asUInt, 0.U(RegIDWidth.W))
+    val IDU_RD  = Mux(IDU_StateOK, PipeLine_Instr(RDHi, RDLo).asUInt, 0.U(RegIDWidth.W))
 
     val IDU_SRC1 = Mux(IDU_StateOK, ioInternal.iSRC1, 0.U(DataWidth.W))
     val IDU_SRC2 = Mux(IDU_StateOK, ioInternal.iSRC2, 0.U(DataWidth.W))
@@ -217,30 +226,30 @@ class IDU extends Module{
     RegStateTable(ioInternal.iWriteBackAddr.asUInt) := Mux(ioInternal.iHaveWriteBack.asBool, false.B, RegStateTable(ioInternal.iWriteBackAddr.asUInt))
     IDU_NotBusy := ((!RegStateTable(IDU_RS1.asUInt).asBool) && (!RegStateTable(IDU_RS2.asUInt).asBool))
 
-    printf("[RTL] Get WBU's Did RD = %d, RD ADDR = %d\n", ioInternal.iHaveWriteBack, ioInternal.iWriteBackAddr)
+    /*printf("[RTL] Get WBU's Did RD = %d, RD ADDR = %d\n", ioInternal.iHaveWriteBack, ioInternal.iWriteBackAddr)
     printf("[RTL] New RD is %d, Check Register State: RS1 = %d, RS2 = %d, RS1 state: %d, RS2 state: %d\n",IDU_RD, IDU_RS1, IDU_RS2, RegStateTable(IDU_RS1.asUInt), RegStateTable(IDU_RS2.asUInt))
     printf("[RTL] Register state, 1 is for not ready (dirty) ")
     for(i <- 0 to 31){
         printf("%d", RegStateTable(i))
     }
     printf("\n")
-    printf("[RTL] IDU_NotBusy = %d\n", IDU_NotBusy)
+    printf("[RTL] IDU_NotBusy = %d\n", IDU_NotBusy)*/
 
-    val IDU_SNPC = Mux(IDU_StateOK, ioInternal.iPC + InstSize.U, 0.U(AddrWidth.W))
+    val IDU_SNPC = Mux(IDU_StateOK, PipeLine_PC + InstSize.U, 0.U(AddrWidth.W))
     val IDU_DNPC = Mux(IDU_StateOK, Lookup(
-            ioInternal.iInst, ioInternal.iPC + InstSize.U, Array(
-                JAL  -> (ioInternal.iPC.asUInt + IDU_Imm.asUInt),
+            PipeLine_Instr, PipeLine_PC + InstSize.U, Array(
+                JAL  -> (PipeLine_PC.asUInt + IDU_Imm.asUInt),
                 JALR -> ((IDU_SRC1.asUInt + IDU_Imm.asUInt) & Cat(Fill(63, 1.U(1.W)), Fill(1, 0.U(1.W)))),
 
-                BEQ  -> Mux(IDU_SRC1.asUInt === IDU_SRC2.asUInt, ioInternal.iPC.asUInt + IDU_Imm.asUInt, ioInternal.iPC.asUInt + InstSize.U),
-                BNE  -> Mux(IDU_SRC1.asUInt =/= IDU_SRC2.asUInt, ioInternal.iPC.asUInt + IDU_Imm.asUInt, ioInternal.iPC.asUInt + InstSize.U),
-                BLT  -> Mux(IDU_SRC1.asSInt  <  IDU_SRC2.asSInt, ioInternal.iPC.asUInt + IDU_Imm.asUInt, ioInternal.iPC.asUInt + InstSize.U),
-                BGE  -> Mux(IDU_SRC1.asSInt  >= IDU_SRC2.asSInt, ioInternal.iPC.asUInt + IDU_Imm.asUInt, ioInternal.iPC.asUInt + InstSize.U),
-                BLTU -> Mux(IDU_SRC1.asUInt  <  IDU_SRC2.asUInt, ioInternal.iPC.asUInt + IDU_Imm.asUInt, ioInternal.iPC.asUInt + InstSize.U),
-                BGEU -> Mux(IDU_SRC1.asUInt  >= IDU_SRC2.asUInt, ioInternal.iPC.asUInt + IDU_Imm.asUInt, ioInternal.iPC.asUInt + InstSize.U),
+                BEQ  -> Mux(IDU_SRC1.asUInt === IDU_SRC2.asUInt, PipeLine_PC.asUInt + IDU_Imm.asUInt, PipeLine_PC.asUInt + InstSize.U),
+                BNE  -> Mux(IDU_SRC1.asUInt =/= IDU_SRC2.asUInt, PipeLine_PC.asUInt + IDU_Imm.asUInt, PipeLine_PC.asUInt + InstSize.U),
+                BLT  -> Mux(IDU_SRC1.asSInt  <  IDU_SRC2.asSInt, PipeLine_PC.asUInt + IDU_Imm.asUInt, PipeLine_PC.asUInt + InstSize.U),
+                BGE  -> Mux(IDU_SRC1.asSInt  >= IDU_SRC2.asSInt, PipeLine_PC.asUInt + IDU_Imm.asUInt, PipeLine_PC.asUInt + InstSize.U),
+                BLTU -> Mux(IDU_SRC1.asUInt  <  IDU_SRC2.asUInt, PipeLine_PC.asUInt + IDU_Imm.asUInt, PipeLine_PC.asUInt + InstSize.U),
+                BGEU -> Mux(IDU_SRC1.asUInt  >= IDU_SRC2.asUInt, PipeLine_PC.asUInt + IDU_Imm.asUInt, PipeLine_PC.asUInt + InstSize.U),
 
                 ECALL -> ioInternal.iCSR_mtvec.asUInt,
-                EBREAK -> ioInternal.iPC,
+                EBREAK -> PipeLine_PC,
                 MRET  -> ioInternal.iCSR_mepc.asUInt
             )
         ), 0.U(AddrWidth.W)
@@ -250,7 +259,7 @@ class IDU extends Module{
     val IDU_JumpPCAddr  = Mux(IDU_StateOK, IDU_DNPC, 0.U(AddrWidth.W))
 
     val IDU_ZicsrWSCIdx = Mux(IDU_StateOK, Lookup(
-            ioInternal.iInst, 0.U(CSRIDWidth.W), Array(
+            PipeLine_Instr, 0.U(CSRIDWidth.W), Array(
                 CSRRW -> IDU_Imm,  CSRRS -> IDU_Imm,  CSRRC -> IDU_Imm,
                 CSRRWI -> IDU_Imm, CSRRSI -> IDU_Imm, CSRRCI -> IDU_Imm,
             )
@@ -258,10 +267,10 @@ class IDU extends Module{
     )
 
     val IDU_OldCSR = Mux(IDU_StateOK, ioInternal.iCSR_ZicsrOldVal, 0.U(DataWidth.W))
-    val IDU_Zicsr_uimm = Mux(IDU_StateOK, ioInternal.iInst(RS1Hi, RS1Lo), 0.U(5.W))
+    val IDU_Zicsr_uimm = Mux(IDU_StateOK, PipeLine_Instr(RS1Hi, RS1Lo), 0.U(5.W))
 
     val IDU_ZicsrNewVal = Mux(IDU_StateOK, Lookup(
-            ioInternal.iInst, 0.U(DataWidth.W), Array(
+            PipeLine_Instr, 0.U(DataWidth.W), Array(
                 CSRRW -> IDU_SRC1,
                 CSRRS -> (IDU_SRC1 | IDU_OldCSR),
                 CSRRC -> (IDU_SRC1 & IDU_OldCSR),
@@ -274,7 +283,7 @@ class IDU extends Module{
 
     val IDU_EXU_SRC1 = Mux(IDU_StateOK, MuxCase(0.U(DataWidth.W), Array(
         (IDU_InstructionType === instR) -> IDU_SRC1.asUInt,
-        (IDU_InstructionType === instI) -> Lookup(ioInternal.iInst, IDU_SRC1.asUInt, Array(
+        (IDU_InstructionType === instI) -> Lookup(PipeLine_Instr, IDU_SRC1.asUInt, Array(
             CSRRW -> IDU_OldCSR, CSRRS -> IDU_OldCSR, CSRRC -> IDU_OldCSR,
             CSRRWI -> IDU_OldCSR, CSRRSI -> IDU_OldCSR, CSRRCI -> IDU_OldCSR
         )),
@@ -289,7 +298,7 @@ class IDU extends Module{
         (IDU_InstructionType === instI) -> IDU_Imm.asUInt,
         (IDU_InstructionType === instS) -> IDU_Imm.asUInt,
         (IDU_InstructionType === instB) -> 0.U(DataWidth.W),
-        (IDU_InstructionType === instU) -> ioInternal.iPC.asUInt,
+        (IDU_InstructionType === instU) -> PipeLine_PC.asUInt,
         (IDU_InstructionType === instJ) -> 0.U(DataWidth.W)
     )), 0.U(DataWidth.W))
 
@@ -302,6 +311,13 @@ class IDU extends Module{
         (IDU_InstructionType === instJ) -> 0.U(DataWidth.W)
     )), 0.U(DataWidth.W))
 
+
+
+    val PrePare_PipeLine_ID2EX_Bundle = Mux(IDU_StateOK, Cat(Seq(PipeLine_Instr, PipeLine_PC, IDU_DecodeBundle, IDU_RD, IDU_EXU_SRC1, IDU_EXU_SRC2, IDU_LSU_SRC2)), 0.U(PipeLine_ID2EX_Width.W))
+    ioInternal.PipeLine_ID2EX_MsgBundle := PrePare_PipeLine_ID2EX_Bundle
+    ioInternal.PipeLine_ID2EX_ChangeReg := (IDU_StateOK && IDU_NotBusy)
+     
+
     ioInternal.oRS1 := IDU_RS1
     ioInternal.oRS2 := IDU_RS2
 
@@ -312,14 +328,14 @@ class IDU extends Module{
     ioInternal.oCSR_ZicsrNewVal := IDU_ZicsrNewVal
 
     // Connect Decode Signals
-    ioInternal.oDecodeBundle := IDU_DecodeBundle
-    ioInternal.oEXU_src1 := IDU_EXU_SRC1
-    ioInternal.oEXU_src2 := IDU_EXU_SRC2
-    ioInternal.oLSU_src2 := IDU_LSU_SRC2
-    ioInternal.oRD := IDU_RD
+    //ioInternal.oDecodeBundle := IDU_DecodeBundle
+    //ioInternal.oEXU_src1 := IDU_EXU_SRC1
+    //ioInternal.oEXU_src2 := IDU_EXU_SRC2
+    //ioInternal.oLSU_src2 := IDU_LSU_SRC2
+    //ioInternal.oRD := IDU_RD
 
     // Connect Pipeline Passthroughs
-    ioInternal.oPC := ioInternal.iPC
+    //ioInternal.oPC := PipeLine_PC
 
     // Connect Pipline Signals
     ioInternal.oMasterValid := (IDU_NotBusy.asBool && ioInternal.iSlaveValid)

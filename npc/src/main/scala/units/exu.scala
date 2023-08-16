@@ -20,6 +20,8 @@ import chisel3._
 import chisel3.util._
 
 import npc.helper.defs.Base._
+import npc.helper.defs.PipeLineDefs._
+
 import npc.helper.opcode.OpEXU._
 
 class iExecuteInternal extends Bundle{
@@ -30,20 +32,24 @@ class iExecuteInternal extends Bundle{
     val iMasterReady = Input(Bool())
     val oMasterValid = Output(Bool())
 
-    val iDecodeBundle = Input(UInt(DecodeWidth.W))
-    val oDecodeBundle = Output(UInt(DecodeWidth.W))
+    val PipeLine_ID2EX_MsgBundle = Input(UInt(PipeLine_ID2EX_Width.W))
+    val PipeLine_EX2LS_MsgBundle = Output(UInt(PipeLine_EX2LS_Width.W))
+    val PipeLine_EX2LS_ChangeReg = Output(Bool())
 
-    val iEXU_SRC1 = Input(UInt(DataWidth.W))
-    val iEXU_SRC2 = Input(UInt(DataWidth.W))
-    val iLSU_SRC2 = Input(UInt(DataWidth.W))
-    val oLSU_SRC2 = Output(UInt(DataWidth.W))
+    //val iDecodeBundle = Input(UInt(DecodeWidth.W))
+    //val oDecodeBundle = Output(UInt(DecodeWidth.W))
 
-    val oEXU_RET = Output(UInt(DataWidth.W))
-    val iRD = Input(UInt(RegIDWidth.W))
-    val oRD = Output(UInt(RegIDWidth.W))
+    //val iEXU_SRC1 = Input(UInt(DataWidth.W))
+    //val iEXU_SRC2 = Input(UInt(DataWidth.W))
+    //val iLSU_SRC2 = Input(UInt(DataWidth.W))
+    //val oLSU_SRC2 = Output(UInt(DataWidth.W))
 
-    val iPC = Input(UInt(AddrWidth.W))
-    val oPC = Output(UInt(AddrWidth.W))
+    //val oEXU_RET = Output(UInt(DataWidth.W))
+    //val iRD = Input(UInt(RegIDWidth.W))
+    //val oRD = Output(UInt(RegIDWidth.W))
+
+    //val iPC = Input(UInt(AddrWidth.W))
+    //val oPC = Output(UInt(AddrWidth.W))
 }
 
 class EXU extends Module{
@@ -51,11 +57,23 @@ class EXU extends Module{
 
     val EXU_NotBusy = RegInit(true.B)
 
-    val ExecuteResult = RegInit(0.U(DataWidth.W))
-    val iExecuteOPcode = ioInternal.iDecodeBundle(13, 7)
+    val PipeLine_ID2EX_Bundle = new Bundle{
+        val Instr = UInt(InstWidth.W)
+        val PC = UInt(AddrWidth.W)
+        val DecodeVal = UInt(DecodeWidth.W)
+        val RD = UInt(RegIDWidth.W)
+        val EXU_SRC1 = UInt(DataWidth.W)
+        val EXU_SRC2 = UInt(DataWidth.W)
+        val LSU_SRC2 = UInt(DataWidth.W)
+    }
 
-    val SRC1 = ioInternal.iEXU_SRC1
-    val SRC2 = ioInternal.iEXU_SRC2
+    val ID2EX_Msg = ioInternal.PipeLine_ID2EX_MsgBundle.asTypeOf(PipeLine_ID2EX_Bundle)
+
+    //val ExecuteResult = RegInit(0.U(DataWidth.W))
+    val iExecuteOPcode = ID2EX_Msg.DecodeVal(13, 7)
+
+    val SRC1 = ID2EX_Msg.EXU_SRC1
+    val SRC2 = ID2EX_Msg.EXU_SRC2
 
     def WordSignExt(WordVal : UInt) = Cat(Fill(WordWidth, WordVal(WordWidth - 1).asUInt), WordVal (WordWidth - 1, 0))
     def WordCut(DoubleVal : UInt) = DoubleVal(WordWidth - 1, 0)
@@ -98,12 +116,19 @@ class EXU extends Module{
             (iExecuteOPcode === EX_REMUW) -> (WordSignExt(WordCut(WordCut(SRC1).asUInt % WordCut(SRC2).asUInt))).asUInt
         )), 0.U(DataWidth.W))
 
-    ioInternal.oEXU_RET := EXU_Compute_Result
+    //ioInternal.oEXU_RET := EXU_Compute_Result
 
-    ioInternal.oDecodeBundle := ioInternal.iDecodeBundle
-    ioInternal.oLSU_SRC2 := ioInternal.iLSU_SRC2
-    ioInternal.oRD := ioInternal.iRD
-    ioInternal.oPC := ioInternal.iPC
+    //ioInternal.oDecodeBundle := ioInternal.iDecodeBundle
+    //ioInternal.oLSU_SRC2 := ioInternal.iLSU_SRC2
+    //ioInternal.oRD := ioInternal.iRD
+    //ioInternal.oPC := ioInternal.iPC
+
+    val PrePare_PipeLine_EX2LS_Bundle = Mux(EXU_StateOK, Cat(Seq(
+        ID2EX_Msg.Instr.asUInt, ID2EX_Msg.PC.asUInt, ID2EX_Msg.DecodeVal.asUInt, ID2EX_Msg.RD.asUInt, EXU_Compute_Result(DataWidth - 1, 0).asUInt, ID2EX_Msg.LSU_SRC2.asUInt
+    )), 0.U(PipeLine_EX2LS_Width.W))
+
+    ioInternal.PipeLine_EX2LS_MsgBundle := PrePare_PipeLine_EX2LS_Bundle
+    ioInternal.PipeLine_EX2LS_ChangeReg := EXU_StateOK && EXU_NotBusy
 
     ioInternal.oSlaveReady := (EXU_NotBusy.asBool && ioInternal.iMasterReady.asBool)
     ioInternal.oMasterValid := (EXU_NotBusy.asBool && ioInternal.iSlaveValid.asBool)
