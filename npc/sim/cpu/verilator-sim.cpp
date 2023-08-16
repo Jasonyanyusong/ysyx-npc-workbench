@@ -119,7 +119,7 @@ void sim_one_cycle(){
     }
     #endif
 
-    if((top -> ioNPCDebug_DecodeBundleDebug & 0b1) == NPC_STOPPED){
+    if(top -> ioNPCDebug_Halt){
         printf("NPC simulation finished, a0 = %d, ", top -> ioNPCDebug_GPR10);
         if(top -> ioNPCDebug_GPR10 == 0){
             printf("HIT GOOD TRAP\n");
@@ -127,7 +127,10 @@ void sim_one_cycle(){
             printf("HIT BAD  TRAP\n");
         }
         npc_state.state = NPC_END;
+
+        #ifdef CONFIG_DIFFTEST
         difftest_one_exec();
+        #endif
     }
 
     printf("\n\n");
