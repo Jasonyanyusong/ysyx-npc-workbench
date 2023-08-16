@@ -225,6 +225,7 @@ class IDU extends Module{
     }
     printf("\n")
     printf("[RTL] IDU_NotBusy = %d\n", IDU_NotBusy)
+    printf("\n\n");
 
     val IDU_SNPC = Mux(IDU_StateOK, ioInternal.iPC + InstSize.U, 0.U(AddrWidth.W))
     val IDU_DNPC = Mux(IDU_StateOK, Lookup(
