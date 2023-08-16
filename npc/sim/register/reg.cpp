@@ -16,7 +16,7 @@
 
 #include <verilator-sim.h>
 
-// CSR list: mstatus. mtvec mepc macuse
+// CSR list: mstatus mtvec mepc macuse
 
 void get_regs(){
     assert(top);
@@ -84,6 +84,8 @@ void display_regs(){
             printf("\n");
         }
     }
+
+    printf("CSR: mstatus mtvec mepc macuse\n");
 
     for(int i = 0; i < NR_CSRs; i = i + 1){
         printf("CSR[%d] = 0x%lx\t", i, cpu.csr[i]);
