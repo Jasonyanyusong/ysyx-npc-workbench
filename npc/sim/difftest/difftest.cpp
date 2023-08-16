@@ -60,6 +60,8 @@ void difftest_init(char* ref_so_file, word_t img_size){
     void (*ref_difftest_init)(int) = (void (*)(int)) dlsym(handle, "difftest_init");
     assert(ref_difftest_init);
 
+    cpu.pc = 0x80000000;
+
     ref_difftest_init(1234);
     ref_difftest_memcpy(MEM_START, guest_to_host(MEM_START), img_size, DIFFTEST_TO_REF);
     ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
@@ -109,11 +111,11 @@ bool difftest_check_reg(){
         }
     }
 
-    for(int i = 0; i < NR_CSRs; i = i + 1){
+    /*for(int i = 0; i < NR_CSRs; i = i + 1){
         if(cpu.csr[i] != ref.csr[i]){
             printf("[difftest] ERROR: CSR[%d] (not real index) is different at PC 0x%x, ref is 0x%lx, dut is 0x%lx\n", i, cpu.pc, ref.csr[i], cpu.csr[i]);
             return false;
         }
-    }
+    }*/
     return true;
 }

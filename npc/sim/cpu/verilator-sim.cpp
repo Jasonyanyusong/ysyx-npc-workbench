@@ -18,6 +18,7 @@
 #include <mem.h>
 #include <common.h>
 #include <math.h>
+#include <difftest.h>
 
 //VerilatedContext* contextp = NULL;
 //VerilatedVcdC* tfp = NULL;
@@ -108,6 +109,16 @@ void sim_one_cycle(){
 
     get_regs(); // used as print registers or difftest
 
+    #ifdef CONFIG_DIFFTEST
+    if(top -> ioNPCDebug_Worked){
+        printf("[verilator-sim] WBU indicated it worked, so do a difftest\n");
+        difftest_one_exec();
+        if(difftest_check_reg()){
+            npc_state.state = NPC_ABORT;
+        }
+    }
+    #endif
+
     if((top -> ioNPCDebug_DecodeBundleDebug & 0b1) == NPC_STOPPED){
         printf("NPC simulation finished, a0 = %d, ", top -> ioNPCDebug_GPR10);
         if(top -> ioNPCDebug_GPR10 == 0){
@@ -117,6 +128,8 @@ void sim_one_cycle(){
         }
         npc_state.state = NPC_END;
     }
+
+    printf("\n\n");
     
     return;
 }
@@ -188,7 +201,7 @@ void sim_mem(int delay_cycle){
     printf("[verilator-sim : sim_mem] IF_MemAddr is 0x%x\n", IF_MemAddr);
 
     if(top -> ioNPC_iFetch_oMemEnable){
-        printf("[verilator-sim] at cycle %d, get iFetch Memory request, addr 0x%x\n", cycle, IF_MemAddr);
+        printf("[verilator-sim] at cycle %d, get iFetch Memory request, addr 0x%x, inst 0x%x\n", cycle, IF_MemAddr, pmem_read(IF_MemAddr, 4));
         top -> ioNPC_iFetch_iInst = pmem_read(IF_MemAddr, 4);
     }else{
         printf("[verilator-sim] at cycle %d, no iFetch Memory request\n", cycle);
