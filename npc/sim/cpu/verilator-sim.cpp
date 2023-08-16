@@ -113,7 +113,7 @@ void sim_one_cycle(){
     if(top -> ioNPCDebug_Worked){
         printf("[verilator-sim] WBU indicated it worked, so do a difftest\n");
         difftest_one_exec();
-        if(difftest_check_reg()){
+        if(!difftest_check_reg()){
             npc_state.state = NPC_ABORT;
         }
     }
