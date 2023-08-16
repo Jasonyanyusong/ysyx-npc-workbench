@@ -31,14 +31,6 @@ class iWriteBackInternal extends Bundle{
 
     val PipeLine_LS2WB_MsgBundle = Input(UInt(PipeLine_LS2WB_Width.W))
 
-    //val iDecodeBundle = Input(UInt(DecodeWidth.W))
-
-    //val iEXU_RET = Input(UInt(DataWidth.W))
-    //val iLSU_RET = Input(UInt(DataWidth.W))
-
-    //val iRD = Input(UInt(RegIDWidth.W))
-    //val iPC = Input(UInt(AddrWidth.W))
-
     val oPC = Output(UInt(AddrWidth.W))
 
     val oWorked = Output(Bool()) // Debug signal, used for difftest

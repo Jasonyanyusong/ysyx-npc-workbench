@@ -130,25 +130,6 @@ class NPC extends Module{
         (index === CSR_MCAUSE) -> (mcause.asUInt )  // mcause
     ))
 
-    /*def CSR_Write(CSR_idx : UInt, CSR_val : UInt) = {
-        switch (CSR_idx.asUInt){
-            is(CSR_MSTATUS){
-                Mux(isZicsr.asBool, mstatus := CSR_val, mstatus := mstatus)
-            }
-            is(CSR_MTVEC){
-                Mux(isZicsr.asBool, mtvec := CSR_val, mtvec := mtvec)
-            }
-            is(CSR_MEPC){
-                Mux(isZicsr.asBool, mepc := CSR_val, mepc := mepc)
-            }
-            is(CSR_MCAUSE){
-                Mux(isZicsr.asBool, mcause := CSR_val, mcause := mcause)
-            }
-        }
-        Mux(isECALL, mcause := "b11".asUInt, mcause := mcause)
-    }*/
-
-
     // NPC Inside Logic: Top -> IFU
     NPC_IFU.ioInternal.iPC := PC
 
@@ -166,10 +147,6 @@ class NPC extends Module{
     
     // The PC change feedback need to do at the same time, not using RegNext
     NPC_IFU.ioInternal.iFeedBackPCChanged := (NPC_IDU.ioInternal.oFeedBackPCChanged)
-    //NPC_IFU.ioInternal.iFeedBackNewPCVal  := (NPC_IDU.ioInternal.oFeedBackNewPCVal)
-
-    //NPC_IDU.ioInternal.iInst := RegNext(NPC_IFU.ioInternal.oInst)
-    //NPC_IDU.ioInternal.iPC   := RegNext(NPC_IFU.ioInternal.oPC)
 
     // NPC Outside Logic: IFU <-> IO
     ioNPC.iFetch_oPC := NPC_IFU.ioExternal.oPC
@@ -177,7 +154,6 @@ class NPC extends Module{
     NPC_IFU.ioExternal.iInst := ioNPC.iFetch_iInst
 
     // NPC Pipeline Logic: IDU <-> EXU
-
     PipeLine_ID2EX := Mux(
         NPC_IDU.ioInternal.PipeLine_ID2EX_ChangeReg,
         NPC_IDU.ioInternal.PipeLine_ID2EX_MsgBundle,
@@ -189,20 +165,11 @@ class NPC extends Module{
 
     NPC_EXU.ioInternal.PipeLine_ID2EX_MsgBundle := PipeLine_ID2EX
 
-    //NPC_EXU.ioInternal.iDecodeBundle := RegNext(NPC_IDU.ioInternal.oDecodeBundle)
-    //NPC_EXU.ioInternal.iEXU_SRC1     := RegNext(NPC_IDU.ioInternal.oEXU_src1)
-    //NPC_EXU.ioInternal.iEXU_SRC2     := RegNext(NPC_IDU.ioInternal.oEXU_src2)
-    //NPC_EXU.ioInternal.iLSU_SRC2     := RegNext(NPC_IDU.ioInternal.oLSU_src2)
-
-    //NPC_EXU.ioInternal.iRD := RegNext(NPC_IDU.ioInternal.oRD)
-    //NPC_EXU.ioInternal.iPC := RegNext(NPC_IDU.ioInternal.oPC)
-
     // NPC Inside Logic: IDU <-> Top
     NPC_IDU.ioInternal.iSRC1 := GPR_Read(NPC_IDU.ioInternal.oRS1.asUInt)
     NPC_IDU.ioInternal.iSRC2 := GPR_Read(NPC_IDU.ioInternal.oRS2.asUInt)
 
     NPC_IDU.ioInternal.iCSR_ZicsrOldVal := CSR_Read(NPC_IDU.ioInternal.oCSR_ZicsrWSCIdx.asUInt)
-    //CSR_Write(NPC_IDU.ioInternal.oCSR_ZicsrWSCIdx.asUInt, NPC_IDU.ioInternal.oCSR_ZicsrNewVal.asUInt)
 
     val NPC_PipeLine_ID2EX_Bundle = new Bundle{
         val Instr = UInt(InstWidth.W)
@@ -255,13 +222,6 @@ class NPC extends Module{
 
     NPC_LSU.ioInternal.PipeLine_EX2LS_MsgBundle := PipeLine_EX2LS
 
-    //NPC_LSU.ioInternal.iDecodeBundle := RegNext(NPC_EXU.ioInternal.oDecodeBundle)
-    //NPC_LSU.ioInternal.iEXU_RET      := RegNext(NPC_EXU.ioInternal.oEXU_RET)
-    //NPC_LSU.ioInternal.iLSU_SRC2     := RegNext(NPC_EXU.ioInternal.oLSU_SRC2)
-
-    //NPC_LSU.ioInternal.iRD := RegNext(NPC_EXU.ioInternal.oRD)
-    //NPC_LSU.ioInternal.iPC := RegNext(NPC_EXU.ioInternal.oPC)
-
     // NPC Pipeline Logic: LSU <-> WBU
 
     PipeLine_LS2WB := Mux(
@@ -272,13 +232,6 @@ class NPC extends Module{
 
     NPC_LSU.ioInternal.iMasterReady := RegNext(NPC_WBU.ioInternal.oSlaveReady)
     NPC_WBU.ioInternal.iSlaveValid  := RegNext(NPC_LSU.ioInternal.oMasterValid)
-    
-    //NPC_WBU.ioInternal.iDecodeBundle := RegNext(NPC_LSU.ioInternal.oDecodeBundle)
-    //NPC_WBU.ioInternal.iEXU_RET      := RegNext(NPC_LSU.ioInternal.oEXU_RET)
-    //NPC_WBU.ioInternal.iLSU_RET      := RegNext(NPC_LSU.ioInternal.oLSU_RET)
-
-    //NPC_WBU.ioInternal.iRD := RegNext(NPC_LSU.ioInternal.oRD)
-    //NPC_WBU.ioInternal.iPC := RegNext(NPC_LSU.ioInternal.oPC)
 
     NPC_WBU.ioInternal.PipeLine_LS2WB_MsgBundle := PipeLine_LS2WB
 

@@ -38,24 +38,14 @@ class iDecodeInternal extends Bundle{
 
     val iMasterReady = Input(Bool())
     val oMasterValid = Output(Bool())
-
-    //val iInst = Input(UInt(InstWidth.W))
     
+    // Structure of Decode Bundle, although not use directly, this is also important
+
     // Combine EXU, LSU, WBU 's decode information together
     // 1   1   1   1   1   1   0   0   0   0   0   0   0   0   0   0
     // 5   4   3   2   1   0   9   8   7   6   5   4   3   2   1   0
     // |---|   |-----------------------|   |---|   |---|   |---|   |
     // Priv               EXU              LSlen   LSfunc  WBTyp  Debug State (DS)
-    //val oDecodeBundle = Output(UInt(DecodeWidth.W))
-
-    //val oEXU_src1 = Output(UInt(DataWidth.W))
-    //val oEXU_src2 = Output(UInt(DataWidth.W))
-    //val oLSU_src2 = Output(UInt(DataWidth.W))
-
-    //val oRD = Output(UInt(RegIDWidth.W))
-
-    //val iPC = Input(UInt(AddrWidth.W))
-    //val oPC = Output(UInt(AddrWidth.W))
 
     val oFeedBackPCChanged = Output(Bool())
     val oFeedBackNewPCVal = Output(UInt(AddrWidth.W))
@@ -317,7 +307,6 @@ class IDU extends Module{
     ioInternal.PipeLine_ID2EX_MsgBundle := PrePare_PipeLine_ID2EX_Bundle
     ioInternal.PipeLine_ID2EX_ChangeReg := (IDU_StateOK && IDU_NotBusy)
      
-
     ioInternal.oRS1 := IDU_RS1
     ioInternal.oRS2 := IDU_RS2
 
@@ -326,16 +315,6 @@ class IDU extends Module{
 
     ioInternal.oCSR_ZicsrWSCIdx := IDU_ZicsrWSCIdx
     ioInternal.oCSR_ZicsrNewVal := IDU_ZicsrNewVal
-
-    // Connect Decode Signals
-    //ioInternal.oDecodeBundle := IDU_DecodeBundle
-    //ioInternal.oEXU_src1 := IDU_EXU_SRC1
-    //ioInternal.oEXU_src2 := IDU_EXU_SRC2
-    //ioInternal.oLSU_src2 := IDU_LSU_SRC2
-    //ioInternal.oRD := IDU_RD
-
-    // Connect Pipeline Passthroughs
-    //ioInternal.oPC := PipeLine_PC
 
     // Connect Pipline Signals
     ioInternal.oMasterValid := (IDU_NotBusy.asBool && ioInternal.iSlaveValid)

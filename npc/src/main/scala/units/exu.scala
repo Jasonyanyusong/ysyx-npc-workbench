@@ -35,21 +35,6 @@ class iExecuteInternal extends Bundle{
     val PipeLine_ID2EX_MsgBundle = Input(UInt(PipeLine_ID2EX_Width.W))
     val PipeLine_EX2LS_MsgBundle = Output(UInt(PipeLine_EX2LS_Width.W))
     val PipeLine_EX2LS_ChangeReg = Output(Bool())
-
-    //val iDecodeBundle = Input(UInt(DecodeWidth.W))
-    //val oDecodeBundle = Output(UInt(DecodeWidth.W))
-
-    //val iEXU_SRC1 = Input(UInt(DataWidth.W))
-    //val iEXU_SRC2 = Input(UInt(DataWidth.W))
-    //val iLSU_SRC2 = Input(UInt(DataWidth.W))
-    //val oLSU_SRC2 = Output(UInt(DataWidth.W))
-
-    //val oEXU_RET = Output(UInt(DataWidth.W))
-    //val iRD = Input(UInt(RegIDWidth.W))
-    //val oRD = Output(UInt(RegIDWidth.W))
-
-    //val iPC = Input(UInt(AddrWidth.W))
-    //val oPC = Output(UInt(AddrWidth.W))
 }
 
 class EXU extends Module{
@@ -69,7 +54,6 @@ class EXU extends Module{
 
     val ID2EX_Msg = ioInternal.PipeLine_ID2EX_MsgBundle.asTypeOf(PipeLine_ID2EX_Bundle)
 
-    //val ExecuteResult = RegInit(0.U(DataWidth.W))
     val iExecuteOPcode = ID2EX_Msg.DecodeVal(13, 7)
 
     val SRC1 = ID2EX_Msg.EXU_SRC1
@@ -115,13 +99,6 @@ class EXU extends Module{
             (iExecuteOPcode === EX_REMW) -> (WordSignExt(WordCut((WordCut(SRC1).asSInt % WordCut(SRC2).asSInt).asUInt))).asUInt,
             (iExecuteOPcode === EX_REMUW) -> (WordSignExt(WordCut(WordCut(SRC1).asUInt % WordCut(SRC2).asUInt))).asUInt
         )), 0.U(DataWidth.W))
-
-    //ioInternal.oEXU_RET := EXU_Compute_Result
-
-    //ioInternal.oDecodeBundle := ioInternal.iDecodeBundle
-    //ioInternal.oLSU_SRC2 := ioInternal.iLSU_SRC2
-    //ioInternal.oRD := ioInternal.iRD
-    //ioInternal.oPC := ioInternal.iPC
 
     val PrePare_PipeLine_EX2LS_Bundle = Mux(EXU_StateOK, Cat(Seq(
         ID2EX_Msg.Instr.asUInt, ID2EX_Msg.PC.asUInt, ID2EX_Msg.DecodeVal.asUInt, ID2EX_Msg.RD.asUInt, EXU_Compute_Result(DataWidth - 1, 0).asUInt, ID2EX_Msg.LSU_SRC2.asUInt

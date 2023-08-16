@@ -29,12 +29,9 @@ class iFetchInternal extends Bundle{
     val iMasterReady = Input(Bool())
     val oMasterValid = Output(Bool())
 
-    //val oInst = Output(UInt(InstWidth.W))
     val iPC = Input(UInt(AddrWidth.W))
-    //val oPC = Output(UInt(AddrWidth.W))
 
     val iFeedBackPCChanged = Input(Bool())
-    //val iFeedBackNewPCVal = Input(UInt(AddrWidth.W))
 
     val PipeLine_IF2ID_MsgBundle = Output(UInt(PipeLine_IF2ID_Width.W))
     val PipeLine_IF2ID_ChangeReg = Output(Bool())
@@ -58,8 +55,6 @@ class IFU extends Module{
 
     ioExternal.oMemEnable := (IFU_StateOK || ioInternal.iPC === "h80000000".U) && (!ioInternal.iFeedBackPCChanged)
     ioExternal.oPC := ioInternal.iPC
-    //ioInternal.oPC := ioInternal.iPC
-    //ioInternal.oInst := Mux(ioInternal.iMasterReady.asBool || ioInternal.iPC === "h80000000".U, ioExternal.iInst, 0.U(InstWidth.W))
     ioInternal.oMasterValid := (IFU_NotBusy.asBool && (!ioInternal.iFeedBackPCChanged) && ioInternal.iPC =/= 0.U)
 
     val Inst = Mux(IFU_StateOK || ioInternal.iPC === "h80000000".U, ioExternal.iInst, 0.U(InstWidth.W))
