@@ -98,6 +98,12 @@ class NPC extends Module{
     val NPC_LSU = Module(new LSU)
     val NPC_WBU = Module(new WBU)
 
+    // PipeLine Registers
+    val PipeLine_IF2ID = RegInit(0.U(PipeLine_IF2ID_Width.W))
+    val PipeLine_ID2EX = RegInit(0.U(PipeLine_ID2EX_Width.W))
+    val PipeLine_EX2LS = RegInit(0.U(PipeLine_EX2LS_Width.W))
+    val PipeLine_LS2WB = RegInit(0.U(PipeLine_LS2WB_Width.W))
+
     // PC Maintain and Manipulation
     val PC = RegInit("h80000000".U(AddrWidth.W))
 
