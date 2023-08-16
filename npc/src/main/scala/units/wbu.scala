@@ -34,6 +34,7 @@ class iWriteBackInternal extends Bundle{
     val oPC = Output(UInt(AddrWidth.W))
 
     val oWorked = Output(Bool()) // Debug signal, used for difftest
+    val oStopped = Output(Bool())
     val oDecodeBundleDebug = Output(UInt(DecodeWidth.W))
 
     // OFF-PIPELINE VALUES
@@ -92,6 +93,7 @@ class WBU extends Module{
     // Connect IO for debug
     ioInternal.oWorked := WBU_StateOK
     ioInternal.oDecodeBundleDebug := LS2WB_Msg.DecodeVal
+    ioInternal.oStopped := (LS2WB_Msg.Instr === "h100073".U)
 
     // Pipeline shake hand implementation
     ioInternal.oSlaveReady := WBU_NotBusy.asBool

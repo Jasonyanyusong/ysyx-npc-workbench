@@ -50,8 +50,8 @@ class iDecodeInternal extends Bundle{
     val oFeedBackPCChanged = Output(Bool())
     val oFeedBackNewPCVal = Output(UInt(AddrWidth.W))
 
-    val iHaveWriteBack = Input(Bool())
-    val iWriteBackAddr = Input(UInt(RegIDWidth.W))
+    //val iHaveWriteBack = Input(Bool())
+    //val iWriteBackAddr = Input(UInt(RegIDWidth.W))
 
     val PipeLine_IF2ID_MsgBundle = Input(UInt(PipeLine_IF2ID_Width.W))
     val PipeLine_ID2EX_MsgBundle = Output(UInt(PipeLine_ID2EX_Width.W))
@@ -61,9 +61,13 @@ class iDecodeInternal extends Bundle{
 
     val oRS1 = Output(UInt(RegIDWidth.W))
     val oRS2 = Output(UInt(RegIDWidth.W))
+    val oRD  = Output(UInt(RegIDWidth.W))
 
     val iSRC1 = Input(UInt(DataWidth.W))
     val iSRC2 = Input(UInt(DataWidth.W))
+
+    val iSRC1Dirty = Input(Bool())
+    val iSRC2Dirty = Input(Bool())
 
     val iCSR_ZicsrOldVal = Input(UInt(DataWidth.W))
     val oCSR_ZicsrNewVal = Output(UInt(DataWidth.W))
@@ -80,7 +84,7 @@ class IDU extends Module{
     val PipeLine_PC = ioInternal.PipeLine_IF2ID_MsgBundle(63, 0)
 
     val IDU_NotBusy = RegInit(true.B)
-    val RegStateTable = Mem(RegSum, Bool())
+    //val RegStateTable = Mem(RegSum, Bool())
 
     val IDU_StateOK = (ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool)
 
@@ -212,9 +216,14 @@ class IDU extends Module{
     val IDU_SRC1 = Mux(IDU_StateOK, ioInternal.iSRC1, 0.U(DataWidth.W))
     val IDU_SRC2 = Mux(IDU_StateOK, ioInternal.iSRC2, 0.U(DataWidth.W))
 
-    RegStateTable(IDU_RD.asUInt) := Mux(IDU_RD.asUInt === 0.U, 0.U(1.W), 1.U(1.W))
+    val IDU_SRC1_Dirty = Mux(IDU_StateOK, ioInternal.iSRC1Dirty, false.B)
+    val IDU_SRC2_Dirty = Mux(IDU_StateOK, ioInternal.iSRC2Dirty, false.B)
+
+    /*RegStateTable(IDU_RD.asUInt) := Mux(IDU_RD.asUInt === 0.U, 0.U(1.W), 1.U(1.W))
     RegStateTable(ioInternal.iWriteBackAddr.asUInt) := Mux(ioInternal.iHaveWriteBack.asBool, false.B, RegStateTable(ioInternal.iWriteBackAddr.asUInt))
-    IDU_NotBusy := ((!RegStateTable(IDU_RS1.asUInt).asBool) && (!RegStateTable(IDU_RS2.asUInt).asBool))
+    IDU_NotBusy := ((!RegStateTable(IDU_RS1.asUInt).asBool) && (!RegStateTable(IDU_RS2.asUInt).asBool))*/
+
+    //IDU_NotBusy := ((!IDU_SRC1_Dirty) && (!IDU_SRC2_Dirty))
 
     /*printf("[RTL] Get WBU's Did RD = %d, RD ADDR = %d\n", ioInternal.iHaveWriteBack, ioInternal.iWriteBackAddr)
     printf("[RTL] New RD is %d, Check Register State: RS1 = %d, RS2 = %d, RS1 state: %d, RS2 state: %d\n",IDU_RD, IDU_RS1, IDU_RS2, RegStateTable(IDU_RS1.asUInt), RegStateTable(IDU_RS2.asUInt))
@@ -309,6 +318,7 @@ class IDU extends Module{
      
     ioInternal.oRS1 := IDU_RS1
     ioInternal.oRS2 := IDU_RS2
+    ioInternal.oRD := IDU_RD
 
     ioInternal.oFeedBackPCChanged := IDU_JudgePCJump
     ioInternal.oFeedBackNewPCVal := IDU_JumpPCAddr
@@ -317,6 +327,6 @@ class IDU extends Module{
     ioInternal.oCSR_ZicsrNewVal := IDU_ZicsrNewVal
 
     // Connect Pipline Signals
-    ioInternal.oMasterValid := (IDU_NotBusy.asBool && ioInternal.iSlaveValid)
-    ioInternal.oSlaveReady := (IDU_NotBusy.asBool && ioInternal.iMasterReady)
+    ioInternal.oMasterValid := (IDU_NotBusy.asBool && ioInternal.iSlaveValid) && ((!IDU_SRC1_Dirty) && (!IDU_SRC2_Dirty))
+    ioInternal.oSlaveReady := (IDU_NotBusy.asBool && ioInternal.iMasterReady) && ((!IDU_SRC1_Dirty) && (!IDU_SRC2_Dirty))
 }

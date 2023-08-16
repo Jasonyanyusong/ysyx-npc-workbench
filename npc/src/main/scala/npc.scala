@@ -83,9 +83,10 @@ class NPCIODebug extends Bundle{
     val MEPC = Output(UInt(DataWidth.W))
     val MCAUSE = Output(UInt(DataWidth.W))
 
-    val DecodeBundleDebug = Output(UInt(DecodeWidth.W))
+    //val DecodeBundleDebug = Output(UInt(DecodeWidth.W))
 
     val Worked = Output(Bool())
+    val Halt = Output(Bool())
 }
 
 class NPC extends Module{
@@ -115,7 +116,13 @@ class NPC extends Module{
 
     // GPR Maintain and Manipulation
     val GPR = Mem(RegSum, UInt(DataWidth.W))
+    val GPR_Status = Mem(RegSum, Bool())
+
+    GPR_Status(NPC_IDU.ioInternal.oRD) := Mux(NPC_IDU.ioInternal.oMasterValid, true.B, GPR_Status(NPC_IDU.ioInternal.oRD))
+    GPR_Status(NPC_WBU.ioInternal.oWriteGPRAddr) := Mux(NPC_WBU.ioInternal.oWorked, false.B, GPR_Status(NPC_WBU.ioInternal.oWriteGPRAddr))
+
     def GPR_Read(index : UInt) = Mux(index === 0.U, 0.U(DataWidth.W), GPR(index))
+    def GPR_getStatus(index : UInt) = Mux(index === 0.U, false.B, GPR_Status(index))
 
     // CSR Maintain and Manipulation
     val mstatus = RegInit(0.U(DataWidth.W))
@@ -163,6 +170,8 @@ class NPC extends Module{
     // NPC Inside Logic: IDU <-> Top
     NPC_IDU.ioInternal.iSRC1 := GPR_Read(NPC_IDU.ioInternal.oRS1.asUInt)
     NPC_IDU.ioInternal.iSRC2 := GPR_Read(NPC_IDU.ioInternal.oRS2.asUInt)
+    NPC_IDU.ioInternal.iSRC1Dirty := GPR_getStatus(NPC_IDU.ioInternal.oRS1.asUInt)
+    NPC_IDU.ioInternal.iSRC2Dirty := GPR_getStatus(NPC_IDU.ioInternal.oRS2.asUInt)
     NPC_IDU.ioInternal.iCSR_ZicsrOldVal := CSR_Read(NPC_IDU.ioInternal.oCSR_ZicsrWSCIdx.asUInt)
     val NPC_PipeLine_ID2EX_Bundle = new Bundle{
         val Instr = UInt(InstWidth.W)
@@ -223,8 +232,8 @@ class NPC extends Module{
     NPC_LSU.ioExternal.iMemoryRead := ioNPC.iLoadStore_iMemoryRead
 
     // NPC Inside Logic: WBU -> IDU
-    NPC_IDU.ioInternal.iHaveWriteBack := NPC_WBU.ioInternal.oWriteGPREnable
-    NPC_IDU.ioInternal.iWriteBackAddr := NPC_WBU.ioInternal.oWriteGPRAddr
+    //NPC_IDU.ioInternal.iHaveWriteBack := NPC_WBU.ioInternal.oWriteGPREnable
+    //NPC_IDU.ioInternal.iWriteBackAddr := NPC_WBU.ioInternal.oWriteGPRAddr
 
     // NPC Inside Logic: WBU <-> Top
     GPR(NPC_WBU.ioInternal.oWriteGPRAddr.asUInt) := 
@@ -271,6 +280,7 @@ class NPC extends Module{
 
     ioNPCDebug.PC := NPC_WBU.ioInternal.oPC
     ioNPCDebug.Worked := RegNext(NPC_WBU.ioInternal.oWorked)
+    ioNPCDebug.Halt := (NPC_WBU.ioInternal.oStopped)
 
     // CSR: since it was written in IDU, need to shift for EXU -> LSU -> WBU, 3 cycles
     ioNPCDebug.MSTATUS := ShiftRegister(mstatus, 3)
@@ -278,5 +288,5 @@ class NPC extends Module{
     ioNPCDebug.MEPC := ShiftRegister(mepc, 3)
     ioNPCDebug.MCAUSE := ShiftRegister(mcause, 3)
 
-    ioNPCDebug.DecodeBundleDebug := NPC_WBU.ioInternal.oDecodeBundleDebug
+    //ioNPCDebug.DecodeBundleDebug := NPC_WBU.ioInternal.oDecodeBundleDebug
 }
