@@ -217,6 +217,15 @@ class IDU extends Module{
     RegStateTable(ioInternal.iWriteBackAddr.asUInt) := Mux(ioInternal.iHaveWriteBack.asBool, false.B, RegStateTable(ioInternal.iWriteBackAddr.asUInt))
     IDU_NotBusy := ((!RegStateTable(IDU_RS1.asUInt).asBool) && (!RegStateTable(IDU_RS2.asUInt).asBool))
 
+    printf("[RTL] Get WBU's Did RD = %d, RD ADDR = %d\n", ioInternal.iHaveWriteBack, ioInternal.iWriteBackAddr)
+    printf("[RTL] New RD is %d, Check Register State: RS1 = %d, RS2 = %d, RS1 state: %d, RS2 state: %d\n",IDU_RD, IDU_RS1, IDU_RS2, RegStateTable(IDU_RS1.asUInt), RegStateTable(IDU_RS2.asUInt))
+    printf("[RTL] Register state, 1 is for not ready (dirty) ")
+    for(i <- 0 to 31){
+        printf("%d", RegStateTable(i))
+    }
+    printf("\n")
+    printf("[RTL] IDU_NotBusy = %d\n", IDU_NotBusy)
+
     val IDU_SNPC = Mux(IDU_StateOK, ioInternal.iPC + InstSize.U, 0.U(AddrWidth.W))
     val IDU_DNPC = Mux(IDU_StateOK, Lookup(
             ioInternal.iInst, ioInternal.iPC + InstSize.U, Array(
