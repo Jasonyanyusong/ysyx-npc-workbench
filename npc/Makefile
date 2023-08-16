@@ -39,8 +39,8 @@ OBJ_DIR			:= ./obj_dir
 BIN				:= $(OBJ_DIR)/V$(TOP_NAME)
 
 IMG				?= ../am-kernels/tests/cpu-tests/build/dummy-riscv64-npc.bin
-ELF				?= ../am-kernels/tests/cpu-tests/build/dummy-riscv64-npc.elf
 
+#RUN_FLAGS		:= --diff=${DIFFTEST}
 RUN_FLAGS		:= --img=${IMG} --diff=${DIFFTEST}
 NPC_EXEC		:= ${BIN} ${RUN_FLAGS}
 
