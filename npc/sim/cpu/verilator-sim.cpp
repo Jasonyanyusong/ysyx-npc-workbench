@@ -127,6 +127,7 @@ void sim_one_cycle(){
             printf("HIT BAD  TRAP\n");
         }
         npc_state.state = NPC_END;
+        difftest_one_exec();
     }
 
     printf("\n\n");
