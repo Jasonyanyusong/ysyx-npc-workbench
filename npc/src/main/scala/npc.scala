@@ -21,6 +21,7 @@ import chisel3.util._
 
 import npc.helper.defs.Base._
 import npc.helper.defs.CSR_LUT._
+import npc.helper.defs.PipeLineDefs._
 import npc.helper.opcode.OpPriv._
 
 import npc.units.iFetch._
