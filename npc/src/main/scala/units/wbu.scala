@@ -37,6 +37,8 @@ class iWriteBackInternal extends Bundle{
 
     val oPC = Output(UInt(AddrWidth.W))
 
+    val oWorked = Output(Bool()) // Debug signal, used for difftest
+
     // OFF-PIPELINE VALUES
     val oWriteGPREnable = Output(Bool())
     val oWriteGPRAddr = Output(UInt(RegIDWidth.W))
@@ -78,6 +80,9 @@ class WBU extends Module{
     ioInternal.oWriteGPRAddr := WBU_GPR_ADDR
     ioInternal.oWriteGPRVal := WBU_GPR_WRITE_DATA
     ioInternal.oPC := ioInternal.iPC
+
+    // Connect IO for debug
+    ioInternal.oWorked := WBU_StateOK
 
     // Pipeline shake hand implementation
     ioInternal.oSlaveReady := WBU_NotBusy.asBool
