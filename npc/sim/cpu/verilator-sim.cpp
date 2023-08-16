@@ -106,6 +106,8 @@ void sim_one_cycle(){
 
     cycle = cycle + 1;
 
+    get_regs(); // used as print registers or difftest
+
     if((top -> ioNPCDebug_DecodeBundleDebug & 0b1) == NPC_STOPPED){
         printf("NPC simulation finished, a0 = %d, ", top -> ioNPCDebug_GPR10);
         if(top -> ioNPCDebug_GPR10 == 0){
