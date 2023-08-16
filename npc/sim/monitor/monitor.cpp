@@ -18,6 +18,8 @@
 #include <mem.h>
 #include <difftest.h>
 
+#define INSERT_NOP_INSTR
+
 char* image_path = NULL;
 char* diff_so_file = NULL;
 
@@ -25,25 +27,31 @@ uint32_t default_img[] = {
     // need to support both RV32 and RV64
     // this image add some nop instruction so it will not cause structural hazard
     0x00000297, // auipc t0,0
+    #ifdef INSERT_NOP_INSTR
     0x00000033, // addi, zero, 0(zero)
     0x00000033, // addi, zero, 0(zero)
     0x00000033, // addi, zero, 0(zero)
     0x00000033, // addi, zero, 0(zero)
     0x00000033, // addi, zero, 0(zero)
+    #endif
 
     0x0002a023, // sw zero ,0(t0)
+    #ifdef INSERT_NOP_INSTR
     0x00000033, // addi, zero, 0(zero)
     0x00000033, // addi, zero, 0(zero)
     0x00000033, // addi, zero, 0(zero)
     0x00000033, // addi, zero, 0(zero)
     0x00000033, // addi, zero, 0(zero)
+    #endif
 
     0x0002a503, // lw a0, 0(t0)
+    #ifdef INSERT_NOP_INSTR
     0x00000033, // addi, zero, 0(zero)
     0x00000033, // addi, zero, 0(zero)
     0x00000033, // addi, zero, 0(zero)
     0x00000033, // addi, zero, 0(zero)
     0x00000033, // addi, zero, 0(zero)
+    #endif
     
     0x00100073, // ebreak
 };
