@@ -139,12 +139,9 @@ class NPC extends Module{
         NPC_IFU.ioInternal.PipeLine_IF2ID_MsgBundle, 
         PipeLine_IF2ID
     )
-
     NPC_IFU.ioInternal.iMasterReady := RegNext(NPC_IDU.ioInternal.oSlaveReady)
     NPC_IDU.ioInternal.iSlaveValid  := RegNext(NPC_IFU.ioInternal.oMasterValid)
-
     NPC_IDU.ioInternal.PipeLine_IF2ID_MsgBundle := PipeLine_IF2ID
-    
     // The PC change feedback need to do at the same time, not using RegNext
     NPC_IFU.ioInternal.iFeedBackPCChanged := (NPC_IDU.ioInternal.oFeedBackPCChanged)
 
@@ -159,18 +156,14 @@ class NPC extends Module{
         NPC_IDU.ioInternal.PipeLine_ID2EX_MsgBundle,
         PipeLine_ID2EX
     )
-
     NPC_IDU.ioInternal.iMasterReady := RegNext(NPC_EXU.ioInternal.oSlaveReady)
     NPC_EXU.ioInternal.iSlaveValid  := RegNext(NPC_IDU.ioInternal.oMasterValid)
-
     NPC_EXU.ioInternal.PipeLine_ID2EX_MsgBundle := PipeLine_ID2EX
 
     // NPC Inside Logic: IDU <-> Top
     NPC_IDU.ioInternal.iSRC1 := GPR_Read(NPC_IDU.ioInternal.oRS1.asUInt)
     NPC_IDU.ioInternal.iSRC2 := GPR_Read(NPC_IDU.ioInternal.oRS2.asUInt)
-
     NPC_IDU.ioInternal.iCSR_ZicsrOldVal := CSR_Read(NPC_IDU.ioInternal.oCSR_ZicsrWSCIdx.asUInt)
-
     val NPC_PipeLine_ID2EX_Bundle = new Bundle{
         val Instr = UInt(InstWidth.W)
         val PC = UInt(AddrWidth.W)
@@ -180,59 +173,46 @@ class NPC extends Module{
         val EXU_SRC2 = UInt(DataWidth.W)
         val LSU_SRC2 = UInt(DataWidth.W)
     }
-
     val NPC_ID2EX_Msg = PipeLine_ID2EX.asTypeOf(NPC_PipeLine_ID2EX_Bundle)
-
     val PrivDecode = NPC_ID2EX_Msg.DecodeVal(15, 14)
     val isZicsr = PrivDecode === PR_ZICSR
     val isECALL = PrivDecode === PR_ECALL
-
     mstatus := MuxCase(mstatus, Array(
         isZicsr -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
         isECALL -> "ha00001800".asUInt
     ))
-
     mtvec := MuxCase(mtvec, Array(
         isZicsr -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
     ))
-
     mepc := MuxCase(mepc, Array(
         isZicsr -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
         isECALL -> NPC_ID2EX_Msg.PC
     ))
-
     mcause := MuxCase(mcause, Array(
         isZicsr -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
         isECALL -> 11.U(DataWidth.W)
     ))
-
     NPC_IDU.ioInternal.iCSR_mtvec := mtvec
     NPC_IDU.ioInternal.iCSR_mepc  := mepc
 
     // NPC Pipeline Logic: EXU <-> LSU
-
     PipeLine_EX2LS := Mux(
         NPC_EXU.ioInternal.PipeLine_EX2LS_ChangeReg,
         NPC_EXU.ioInternal.PipeLine_EX2LS_MsgBundle,
         PipeLine_EX2LS
     )
-
     NPC_EXU.ioInternal.iMasterReady := RegNext(NPC_LSU.ioInternal.oSlaveReady)
     NPC_LSU.ioInternal.iSlaveValid  := RegNext(NPC_EXU.ioInternal.oMasterValid)
-
     NPC_LSU.ioInternal.PipeLine_EX2LS_MsgBundle := PipeLine_EX2LS
 
     // NPC Pipeline Logic: LSU <-> WBU
-
     PipeLine_LS2WB := Mux(
         NPC_LSU.ioInternal.PipeLine_LS2WB_ChangeReg,
         NPC_LSU.ioInternal.PipeLine_LS2WB_MsgBundle,
         PipeLine_LS2WB
     )
-
     NPC_LSU.ioInternal.iMasterReady := RegNext(NPC_WBU.ioInternal.oSlaveReady)
     NPC_WBU.ioInternal.iSlaveValid  := RegNext(NPC_LSU.ioInternal.oMasterValid)
-
     NPC_WBU.ioInternal.PipeLine_LS2WB_MsgBundle := PipeLine_LS2WB
 
     // NPC Outside Logic: LSU <-> IO
