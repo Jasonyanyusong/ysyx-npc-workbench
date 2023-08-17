@@ -109,10 +109,10 @@ class NPC extends Module{
     // PC Maintain and Manipulation
     val PC = RegInit("h80000000".U(AddrWidth.W))
 
-    PC := Mux(NPC_IDU.ioInternal.oFeedBackPCChanged.asBool,
+    PC := Mux(NPC_IDU.ioInternal.oMasterValid, Mux(NPC_IDU.ioInternal.oFeedBackPCChanged.asBool,
         NPC_IDU.ioInternal.oFeedBackNewPCVal,
         PC + 4.U
-    )
+    ), PC)
 
     // GPR Maintain and Manipulation
     val GPR = Mem(RegSum, UInt(DataWidth.W))

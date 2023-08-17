@@ -80,8 +80,20 @@ class iDecodeInternal extends Bundle{
 class IDU extends Module{
     val ioInternal = IO(new iDecodeInternal)
 
-    val PipeLine_Instr = ioInternal.PipeLine_IF2ID_MsgBundle(95, 64)
-    val PipeLine_PC = ioInternal.PipeLine_IF2ID_MsgBundle(63, 0)
+    //val PipeLine_Instr = ioInternal.PipeLine_IF2ID_MsgBundle(95, 64)
+    //val PipeLine_PC = ioInternal.PipeLine_IF2ID_MsgBundle(63, 0)
+
+    // TODO: solve the bug of decoding the next inst when IDU hazard blocked
+
+    val PipeLine_ID2ID_Bundle = new Bundle{
+        val Instr = UInt(InstWidth.W)
+        val PC = UInt(AddrWidth.W)
+    }
+
+    val IF2ID_Msg = ioInternal.PipeLine_IF2ID_MsgBundle.asTypeOf(PipeLine_ID2ID_Bundle)
+
+    val PipeLine_Instr = IF2ID_Msg.Instr
+    val PipeLine_PC = IF2ID_Msg.PC
 
     val IDU_NotBusy = RegInit(true.B)
     //val RegStateTable = Mem(RegSum, Bool())
@@ -223,7 +235,7 @@ class IDU extends Module{
     RegStateTable(ioInternal.iWriteBackAddr.asUInt) := Mux(ioInternal.iHaveWriteBack.asBool, false.B, RegStateTable(ioInternal.iWriteBackAddr.asUInt))
     IDU_NotBusy := ((!RegStateTable(IDU_RS1.asUInt).asBool) && (!RegStateTable(IDU_RS2.asUInt).asBool))*/
 
-    //IDU_NotBusy := ((!IDU_SRC1_Dirty) && (!IDU_SRC2_Dirty))
+    IDU_NotBusy := ((!IDU_SRC1_Dirty) && (!IDU_SRC2_Dirty))
 
     /*printf("[RTL] Get WBU's Did RD = %d, RD ADDR = %d\n", ioInternal.iHaveWriteBack, ioInternal.iWriteBackAddr)
     printf("[RTL] New RD is %d, Check Register State: RS1 = %d, RS2 = %d, RS1 state: %d, RS2 state: %d\n",IDU_RD, IDU_RS1, IDU_RS2, RegStateTable(IDU_RS1.asUInt), RegStateTable(IDU_RS2.asUInt))
@@ -320,7 +332,7 @@ class IDU extends Module{
     ioInternal.oRS2 := IDU_RS2
     ioInternal.oRD := IDU_RD
 
-    ioInternal.oFeedBackPCChanged := IDU_JudgePCJump
+    ioInternal.oFeedBackPCChanged := IDU_JudgePCJump && ((!IDU_SRC1_Dirty) && (!IDU_SRC2_Dirty))
     ioInternal.oFeedBackNewPCVal := IDU_JumpPCAddr
 
     ioInternal.oCSR_ZicsrWSCIdx := IDU_ZicsrWSCIdx

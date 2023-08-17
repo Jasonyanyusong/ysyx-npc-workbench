@@ -53,11 +53,11 @@ class IFU extends Module{
 
     val IFU_StateOK = ioInternal.iMasterReady.asBool
 
-    ioExternal.oMemEnable := (IFU_StateOK || ioInternal.iPC === "h80000000".U) && (!ioInternal.iFeedBackPCChanged)
+    ioExternal.oMemEnable := (IFU_StateOK) && (!ioInternal.iFeedBackPCChanged)
     ioExternal.oPC := ioInternal.iPC
     ioInternal.oMasterValid := (IFU_NotBusy.asBool && (!ioInternal.iFeedBackPCChanged) && ioInternal.iPC =/= 0.U)
 
-    val Inst = Mux(IFU_StateOK || ioInternal.iPC === "h80000000".U, ioExternal.iInst, 0.U(InstWidth.W))
+    val Inst = Mux(IFU_StateOK, ioExternal.iInst, 0.U(InstWidth.W))
     val PC = ioInternal.iPC
 
     val PrePare_PipeLine_IF2ID_Bundle = Cat(Seq(Inst, PC))
