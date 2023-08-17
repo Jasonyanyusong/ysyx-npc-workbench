@@ -63,13 +63,16 @@ void sim_init(){
     printf("[simulation] simulation initialized, now reset NPC\n");
 
     top -> clock = 0;
+    top -> eval();
     top -> reset = 1;
-    step_and_dump_wave();
+    top -> eval();
+    //step_and_dump_wave();
     
     top -> clock = 1;
     top -> eval();
     top -> reset = 0;
-    step_and_dump_wave();
+    top -> eval();
+    //step_and_dump_wave();
 
     cycle = cycle + 1;
 
@@ -81,7 +84,7 @@ void sim_exit(){
     assert(top);
 
     printf("[simulation] simulation exitted\n");
-    step_and_dump_wave();
+    //step_and_dump_wave();
 
     #ifdef CONFIG_VCD_OUTPUT
     tfp -> close();
@@ -174,24 +177,26 @@ void sim_mem(int delay_cycle){
     assert(top);
 
     word_t LS_MemAddr = (uint32_t)top -> ioNPC_iLoadStore_oMemoryAddr;
-    printf("[verilator-sim : sim_mem] LS_MemAddr is 0x%x\n", LS_MemAddr);
     int LS_MemLen = (int)pow(2, top -> ioNPC_iLoadStore_oMemoryLen);
+    printf("[verilator-sim : sim_mem] LS_MemAddr is 0x%x, len = %d\n", LS_MemAddr, LS_MemLen);
 
     assert(LS_MemLen >= 1 && LS_MemLen <= 8);
     
     switch(top -> ioNPC_iLoadStore_oMemoryOP){
         case(MEM_NOP):{
-            //printf("[verilator-sim : sim_mem] LS do not access mem here\n");
+            printf("[verilator-sim : sim_mem] LS do not access mem here\n");
             top -> ioNPC_iLoadStore_iMemoryRead = 0;
             break;
         }
         case(MEM_READ):{
-            //printf("[verilator-sim : sim_mem] LS do read mem here\n");
-            top -> ioNPC_iLoadStore_iMemoryRead = pmem_read(LS_MemAddr, LS_MemLen);
+            printf("[verilator-sim : sim_mem] LS do read mem here");
+            word_t ret = pmem_read(LS_MemAddr, LS_MemLen);
+            top -> ioNPC_iLoadStore_iMemoryRead = ret;
+            printf(", data is 0x%lx\n", ret);
             break;
         }
         case(MEM_WRITE):{
-            //printf("[verilator-sim : sim_mem] LS do write mem here, data is 0x%lx\n", top -> ioNPC_iLoadStore_oMemoryWrite);
+            printf("[verilator-sim : sim_mem] LS do write mem here, data is 0x%lx\n", top -> ioNPC_iLoadStore_oMemoryWrite);
             top -> ioNPC_iLoadStore_iMemoryRead = 0;
             pmem_write(LS_MemAddr, LS_MemLen, top -> ioNPC_iLoadStore_oMemoryWrite);
             break;

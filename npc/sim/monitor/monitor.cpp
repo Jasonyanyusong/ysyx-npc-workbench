@@ -18,7 +18,7 @@
 #include <mem.h>
 #include <difftest.h>
 
-#define INSERT_NOP_INSTR
+//#define INSERT_NOP_INSTR
 
 char* image_path = NULL;
 char* diff_so_file = NULL;
