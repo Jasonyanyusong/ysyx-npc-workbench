@@ -85,14 +85,14 @@ void display_regs(){
         }
     }
 
-    printf("CSR: mstatus mtvec mepc macuse\n");
+    //printf("CSR: mstatus mtvec mepc macuse\n");
 
-    for(int i = 0; i < NR_CSRs; i = i + 1){
+    /*for(int i = 0; i < NR_CSRs; i = i + 1){
         printf("CSR[%d] = 0x%lx\t", i, cpu.csr[i]);
         if((i + 1) % 8 == 0){
             printf("\n");
         }
-    }
+    }*/
 
     printf("\n");
 
