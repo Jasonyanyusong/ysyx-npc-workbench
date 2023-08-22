@@ -80,39 +80,58 @@ class iDecodeInternal extends Bundle{
 class IDU extends Module{
     val ioInternal = IO(new iDecodeInternal)
 
-    val IDU_StateOK = (ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool)
-    val IDU_NotBusy = RegInit(true.B)
-
-    val IDU_SRC1 = Mux(IDU_StateOK, ioInternal.iSRC1, 0.U(DataWidth.W))
-    val IDU_SRC2 = Mux(IDU_StateOK, ioInternal.iSRC2, 0.U(DataWidth.W))
-
-    val IDU_SRC1_Dirty = Mux(IDU_StateOK, ioInternal.iSRC1Dirty, false.B)
-    val IDU_SRC2_Dirty = Mux(IDU_StateOK, ioInternal.iSRC2Dirty, false.B)
-
-    IDU_NotBusy := (!(IDU_SRC1_Dirty) && !(IDU_SRC2_Dirty))
-
+    val IDU_Busy = RegInit(false.B)
     val PipeLine_IF2ID_MsgBuffer = RegInit(0.U(PipeLine_IF2ID_Width.W))
-    PipeLine_IF2ID_MsgBuffer := Mux(IDU_NotBusy, ioInternal.PipeLine_IF2ID_MsgBundle, PipeLine_IF2ID_MsgBuffer)
 
-    val IDU_Message2Process = Mux(IDU_NotBusy, ioInternal.PipeLine_IF2ID_MsgBundle, PipeLine_IF2ID_MsgBuffer)
+    val IDU_StateOK = (ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool)
 
+    PipeLine_IF2ID_MsgBuffer := Mux(IDU_Busy, PipeLine_IF2ID_MsgBuffer, ioInternal.PipeLine_IF2ID_MsgBundle)
     val PipeLine_IF2ID_Bundle = new Bundle{
         val Instr = UInt(InstWidth.W)
         val PC = UInt(AddrWidth.W)
     }
+    val IDU_ProcessMsg = Mux(IDU_Busy, PipeLine_IF2ID_MsgBuffer, ioInternal.PipeLine_IF2ID_MsgBundle).asTypeOf(PipeLine_IF2ID_Bundle)
 
-    val IF2ID_Msg = IDU_Message2Process.asTypeOf(PipeLine_IF2ID_Bundle)
+    // Get RS1, RS2 and RD
+    val RS1 = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RS1Hi, RS1Lo), 0.U(RegIDWidth.W))
+    val RS2 = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RS2Hi, RS2Lo), 0.U(RegIDWidth.W))
+    val RD  = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RDHi , RDLo ), 0.U(RegIDWidth.W))
 
-    val PipeLine_Instr = IF2ID_Msg.Instr
-    val PipeLine_PC = IF2ID_Msg.PC
+    ioInternal.oRS1 := RS1
+    ioInternal.oRS2 := RS2
+    ioInternal.oRD := RD
 
-    val IDU_RS1 = Mux(IDU_StateOK, PipeLine_Instr(RS1Hi, RS1Lo).asUInt, 0.U(RegIDWidth.W))
-    val IDU_RS2 = Mux(IDU_StateOK, PipeLine_Instr(RS2Hi, RS2Lo).asUInt, 0.U(RegIDWidth.W))
-    val IDU_RD  = Mux(IDU_StateOK, PipeLine_Instr(RDHi, RDLo).asUInt, 0.U(RegIDWidth.W))
+    val RSRegistersDirty = (ioInternal.iSRC1Dirty || ioInternal.iSRC2Dirty)
+
+    // judge IDU's Busy state
+    IDU_Busy := RSRegistersDirty
+
+    //val IDU_NotBusy = RegInit(true.B)
+
+    val IDU_SRC1 = Mux(IDU_StateOK, ioInternal.iSRC1, 0.U(DataWidth.W))
+    val IDU_SRC2 = Mux(IDU_StateOK, ioInternal.iSRC2, 0.U(DataWidth.W))
+
+    //val IDU_SRC1_Dirty = Mux(IDU_StateOK, ioInternal.iSRC1Dirty, false.B)
+    //val IDU_SRC2_Dirty = Mux(IDU_StateOK, ioInternal.iSRC2Dirty, false.B)
+
+    //IDU_NotBusy := (!(IDU_SRC1_Dirty) && !(IDU_SRC2_Dirty))
+
+    //PipeLine_IF2ID_MsgBuffer := Mux(IDU_NotBusy, ioInternal.PipeLine_IF2ID_MsgBundle, PipeLine_IF2ID_MsgBuffer)
+
+    //val IDU_Message2Process = Mux(IDU_NotBusy, ioInternal.PipeLine_IF2ID_MsgBundle, PipeLine_IF2ID_MsgBuffer)
+
+    //val IF2ID_Msg = IDU_Message2Process.asTypeOf(PipeLine_IF2ID_Bundle)
+
+    val PipeLine_Instr = IDU_ProcessMsg.Instr
+    val PipeLine_PC = IDU_ProcessMsg.PC
+
+    //val IDU_RS1 = Mux(IDU_StateOK, PipeLine_Instr(RS1Hi, RS1Lo).asUInt, 0.U(RegIDWidth.W))
+    //val IDU_RS2 = Mux(IDU_StateOK, PipeLine_Instr(RS2Hi, RS2Lo).asUInt, 0.U(RegIDWidth.W))
+    //val IDU_RD  = Mux(IDU_StateOK, PipeLine_Instr(RDHi, RDLo).asUInt, 0.U(RegIDWidth.W))
 
     //val RegStateTable = Mem(RegSum, Bool())
 
-    val PipeLine_IDU_UseBuffer = Mux(IDU_StateOK, Mux(IDU_NotBusy, false.B, true.B), false.B)
+    //val PipeLine_IDU_UseBuffer = Mux(IDU_StateOK, Mux(IDU_NotBusy, false.B, true.B), false.B)
 
     val Priv = Mux(IDU_StateOK, Lookup(
             PipeLine_Instr, PR_NORM, Array(
@@ -239,7 +258,7 @@ class IDU extends Module{
     RegStateTable(ioInternal.iWriteBackAddr.asUInt) := Mux(ioInternal.iHaveWriteBack.asBool, false.B, RegStateTable(ioInternal.iWriteBackAddr.asUInt))
     IDU_NotBusy := ((!RegStateTable(IDU_RS1.asUInt).asBool) && (!RegStateTable(IDU_RS2.asUInt).asBool))*/
 
-    IDU_NotBusy := ((!IDU_SRC1_Dirty) && (!IDU_SRC2_Dirty))
+    //IDU_NotBusy := ((!IDU_SRC1_Dirty) && (!IDU_SRC2_Dirty))
 
     /*printf("[RTL] Get WBU's Did RD = %d, RD ADDR = %d\n", ioInternal.iHaveWriteBack, ioInternal.iWriteBackAddr)
     printf("[RTL] New RD is %d, Check Register State: RS1 = %d, RS2 = %d, RS1 state: %d, RS2 state: %d\n",IDU_RD, IDU_RS1, IDU_RS2, RegStateTable(IDU_RS1.asUInt), RegStateTable(IDU_RS2.asUInt))
@@ -328,21 +347,21 @@ class IDU extends Module{
 
 
 
-    val PrePare_PipeLine_ID2EX_Bundle = Mux(IDU_StateOK, Cat(Seq(PipeLine_Instr, PipeLine_PC, IDU_DecodeBundle, IDU_RD, IDU_EXU_SRC1, IDU_EXU_SRC2, IDU_LSU_SRC2)), 0.U(PipeLine_ID2EX_Width.W))
+    val PrePare_PipeLine_ID2EX_Bundle = Mux(IDU_StateOK, Cat(Seq(PipeLine_Instr, PipeLine_PC, IDU_DecodeBundle, RD, IDU_EXU_SRC1, IDU_EXU_SRC2, IDU_LSU_SRC2)), 0.U(PipeLine_ID2EX_Width.W))
     ioInternal.PipeLine_ID2EX_MsgBundle := PrePare_PipeLine_ID2EX_Bundle
-    ioInternal.PipeLine_ID2EX_ChangeReg := (IDU_StateOK && IDU_NotBusy)
+    ioInternal.PipeLine_ID2EX_ChangeReg := (IDU_StateOK && (!RSRegistersDirty))
      
-    ioInternal.oRS1 := IDU_RS1
+    /*ioInternal.oRS1 := IDU_RS1
     ioInternal.oRS2 := IDU_RS2
-    ioInternal.oRD := IDU_RD
+    ioInternal.oRD := IDU_RD*/
 
-    ioInternal.oFeedBackPCChanged := IDU_JudgePCJump && ((!IDU_SRC1_Dirty) && (!IDU_SRC2_Dirty))
+    ioInternal.oFeedBackPCChanged := IDU_JudgePCJump && (!RSRegistersDirty)
     ioInternal.oFeedBackNewPCVal := IDU_JumpPCAddr
 
     ioInternal.oCSR_ZicsrWSCIdx := IDU_ZicsrWSCIdx
     ioInternal.oCSR_ZicsrNewVal := IDU_ZicsrNewVal
 
     // Connect Pipline Signals
-    ioInternal.oMasterValid := (IDU_NotBusy.asBool && ioInternal.iSlaveValid) && ((!IDU_SRC1_Dirty) && (!IDU_SRC2_Dirty))
-    ioInternal.oSlaveReady := (IDU_NotBusy.asBool && ioInternal.iMasterReady) && ((!IDU_SRC1_Dirty) && (!IDU_SRC2_Dirty))
+    ioInternal.oMasterValid := ((!RSRegistersDirty) && ioInternal.iSlaveValid)
+    ioInternal.oSlaveReady := ((!RSRegistersDirty) && ioInternal.iMasterReady)
 }
