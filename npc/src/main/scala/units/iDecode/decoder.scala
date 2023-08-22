@@ -80,25 +80,39 @@ class iDecodeInternal extends Bundle{
 class IDU extends Module{
     val ioInternal = IO(new iDecodeInternal)
 
-    //val PipeLine_Instr = ioInternal.PipeLine_IF2ID_MsgBundle(95, 64)
-    //val PipeLine_PC = ioInternal.PipeLine_IF2ID_MsgBundle(63, 0)
+    val IDU_StateOK = (ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool)
+    val IDU_NotBusy = RegInit(true.B)
 
-    // TODO: solve the bug of decoding the next inst when IDU hazard blocked
+    val IDU_SRC1 = Mux(IDU_StateOK, ioInternal.iSRC1, 0.U(DataWidth.W))
+    val IDU_SRC2 = Mux(IDU_StateOK, ioInternal.iSRC2, 0.U(DataWidth.W))
 
-    val PipeLine_ID2ID_Bundle = new Bundle{
+    val IDU_SRC1_Dirty = Mux(IDU_StateOK, ioInternal.iSRC1Dirty, false.B)
+    val IDU_SRC2_Dirty = Mux(IDU_StateOK, ioInternal.iSRC2Dirty, false.B)
+
+    IDU_NotBusy := (!(IDU_SRC1_Dirty) && !(IDU_SRC2_Dirty))
+
+    val PipeLine_IF2ID_MsgBuffer = RegInit(0.U(PipeLine_IF2ID_Width.W))
+    PipeLine_IF2ID_MsgBuffer := Mux(IDU_NotBusy, ioInternal.PipeLine_IF2ID_MsgBundle, PipeLine_IF2ID_MsgBuffer)
+
+    val IDU_Message2Process = Mux(IDU_NotBusy, ioInternal.PipeLine_IF2ID_MsgBundle, PipeLine_IF2ID_MsgBuffer)
+
+    val PipeLine_IF2ID_Bundle = new Bundle{
         val Instr = UInt(InstWidth.W)
         val PC = UInt(AddrWidth.W)
     }
 
-    val IF2ID_Msg = ioInternal.PipeLine_IF2ID_MsgBundle.asTypeOf(PipeLine_ID2ID_Bundle)
+    val IF2ID_Msg = IDU_Message2Process.asTypeOf(PipeLine_IF2ID_Bundle)
 
     val PipeLine_Instr = IF2ID_Msg.Instr
     val PipeLine_PC = IF2ID_Msg.PC
 
-    val IDU_NotBusy = RegInit(true.B)
+    val IDU_RS1 = Mux(IDU_StateOK, PipeLine_Instr(RS1Hi, RS1Lo).asUInt, 0.U(RegIDWidth.W))
+    val IDU_RS2 = Mux(IDU_StateOK, PipeLine_Instr(RS2Hi, RS2Lo).asUInt, 0.U(RegIDWidth.W))
+    val IDU_RD  = Mux(IDU_StateOK, PipeLine_Instr(RDHi, RDLo).asUInt, 0.U(RegIDWidth.W))
+
     //val RegStateTable = Mem(RegSum, Bool())
 
-    val IDU_StateOK = (ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool)
+    val PipeLine_IDU_UseBuffer = Mux(IDU_StateOK, Mux(IDU_NotBusy, false.B, true.B), false.B)
 
     val Priv = Mux(IDU_StateOK, Lookup(
             PipeLine_Instr, PR_NORM, Array(
@@ -220,16 +234,6 @@ class IDU extends Module{
     ImmGenerator.ioSubmodule.iInst := PipeLine_Instr
     ImmGenerator.ioSubmodule.iType := IDU_InstructionType
     val IDU_Imm = Mux(IDU_StateOK, ImmGenerator.ioSubmodule.oImm, 0.U(DataWidth.W))
-
-    val IDU_RS1 = Mux(IDU_StateOK, PipeLine_Instr(RS1Hi, RS1Lo).asUInt, 0.U(RegIDWidth.W))
-    val IDU_RS2 = Mux(IDU_StateOK, PipeLine_Instr(RS2Hi, RS2Lo).asUInt, 0.U(RegIDWidth.W))
-    val IDU_RD  = Mux(IDU_StateOK, PipeLine_Instr(RDHi, RDLo).asUInt, 0.U(RegIDWidth.W))
-
-    val IDU_SRC1 = Mux(IDU_StateOK, ioInternal.iSRC1, 0.U(DataWidth.W))
-    val IDU_SRC2 = Mux(IDU_StateOK, ioInternal.iSRC2, 0.U(DataWidth.W))
-
-    val IDU_SRC1_Dirty = Mux(IDU_StateOK, ioInternal.iSRC1Dirty, false.B)
-    val IDU_SRC2_Dirty = Mux(IDU_StateOK, ioInternal.iSRC2Dirty, false.B)
 
     /*RegStateTable(IDU_RD.asUInt) := Mux(IDU_RD.asUInt === 0.U, 0.U(1.W), 1.U(1.W))
     RegStateTable(ioInternal.iWriteBackAddr.asUInt) := Mux(ioInternal.iHaveWriteBack.asBool, false.B, RegStateTable(ioInternal.iWriteBackAddr.asUInt))
