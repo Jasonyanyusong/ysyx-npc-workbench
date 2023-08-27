@@ -68,6 +68,8 @@ void init_monitor(int argc, char* argv[]){
     assert(diff_so_file != NULL);
     assert(img_size > 0);
     difftest_init(diff_so_file, img_size);
+    #else
+    printf("[monitor] difftest not enabled, to enable difftest, unannotate the CONFIG_DIFFTEST macro in difftest.h\n");
     #endif
 
     printf("[monitor] monitor initialized\n");
