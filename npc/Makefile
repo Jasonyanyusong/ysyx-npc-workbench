@@ -40,8 +40,8 @@ BIN				:= $(OBJ_DIR)/V$(TOP_NAME)
 
 IMG				?= ../am-kernels/tests/cpu-tests/build/dummy-riscv64-npc.bin
 
-RUN_FLAGS		:= --diff=${DIFFTEST}
-#RUN_FLAGS		:= --img=${IMG} --diff=${DIFFTEST}
+#RUN_FLAGS		:= --diff=${DIFFTEST}
+RUN_FLAGS		:= --img=${IMG} --diff=${DIFFTEST}
 NPC_EXEC		:= ${BIN} ${RUN_FLAGS}
 
 .PHONY:run gdb wave clean
