@@ -76,7 +76,8 @@ class NPCIODebug extends Bundle{
     val GPR30 = Output(UInt(DataWidth.W))
     val GPR31 = Output(UInt(DataWidth.W))
 
-    val PC    = Output(UInt(AddrWidth.W))
+    val PC_COMMIT = Output(UInt(AddrWidth.W))
+    val PC_DYNAMIC = Output(UInt(AddrWidth.W))
 
     val MSTATUS = Output(UInt(DataWidth.W))
     val MTVEC = Output(UInt(DataWidth.W))
@@ -278,7 +279,9 @@ class NPC extends Module{
     ioNPCDebug.GPR30 := GPR_Read(30.U)
     ioNPCDebug.GPR31 := GPR_Read(31.U)
 
-    ioNPCDebug.PC := NPC_WBU.ioInternal.oPC
+    ioNPCDebug.PC_COMMIT := NPC_WBU.ioInternal.oPC
+    ioNPCDebug.PC_DYNAMIC := ShiftRegister(PC, 3)
+
     ioNPCDebug.Worked := RegNext(NPC_WBU.ioInternal.oWorked)
     ioNPCDebug.Halt := (NPC_WBU.ioInternal.oStopped)
 
