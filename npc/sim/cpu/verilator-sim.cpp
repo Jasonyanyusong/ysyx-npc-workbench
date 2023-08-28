@@ -84,7 +84,7 @@ void sim_exit(){
     assert(top);
 
     printf("[simulation] simulation exitted\n");
-    //step_and_dump_wave();
+    step_and_dump_wave();
 
     #ifdef CONFIG_VCD_OUTPUT
     tfp -> close();
