@@ -21,7 +21,7 @@
 void get_regs(){
     assert(top);
 
-    cpu.pc = top -> ioNPCDebug_PC;
+    cpu.pc = top -> ioNPCDebug_PC_DYNAMIC;
 
     cpu.csr[0] = top -> ioNPCDebug_MSTATUS;
     cpu.csr[1] = top -> ioNPCDebug_MTVEC;
