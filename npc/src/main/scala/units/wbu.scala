@@ -46,7 +46,7 @@ class iWriteBackInternal extends Bundle{
 class WBU extends Module{
     val ioInternal = IO(new iWriteBackInternal)
 
-    val WBU_NotBusy = RegInit(true.B)
+    //val WBU_NotBusy = RegInit(true.B)
 
     val PipeLine_LS2WB_Bundle = new Bundle{
         val Instr = UInt(InstWidth.W)
@@ -96,5 +96,5 @@ class WBU extends Module{
     ioInternal.oStopped := (LS2WB_Msg.Instr === "h100073".U)
 
     // Pipeline shake hand implementation
-    ioInternal.oSlaveReady := WBU_NotBusy.asBool
+    ioInternal.oSlaveReady := true.B
 }
