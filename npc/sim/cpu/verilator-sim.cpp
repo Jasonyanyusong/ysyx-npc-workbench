@@ -113,12 +113,12 @@ void sim_one_cycle(){
     get_regs(); // used as print registers or difftest
 
     if(top -> ioNPCDebug_Worked){
-        printf("[verilator-sim] NPC commited an instruction at pc = 0x%x\n", cpu.pc);
+        printf("[verilator-sim : sim_one_cycle] NPC commited an instruction at pc = 0x%x\n", cpu.pc);
     }
 
     #ifdef CONFIG_DIFFTEST
     if(top -> ioNPCDebug_Worked){
-        printf("[verilator-sim] WBU indicated it worked, so do a difftest at pc = 0x%x\n", cpu.pc);
+        printf("[verilator-sim : sim_one_cycle] WBU indicated it worked, so do a difftest at pc = 0x%x\n", cpu.pc);
         difftest_one_exec();
         if(!difftest_check_reg()){
             npc_state.state = NPC_ABORT;
