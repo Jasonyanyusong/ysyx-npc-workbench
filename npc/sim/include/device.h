@@ -17,6 +17,9 @@
 //#include <common.h>
 #include<difftest.h>
 
+#define COFIG_DEVICES
+
+#ifdef COFIG_DEVICES
 #define CONFIG_I8042_DATA_MMIO 0xa0000060
 
 #define CONFIG_SERIAL_MMIO 0xa00003f8
@@ -25,6 +28,7 @@
 
 #define CONFIG_VGA_CTL_MMIO 0xa0000100
 #define CONFIG_FB_ADDR 0xa1000000
+#endif
 
 typedef void(*io_callback_t)(uint32_t, int, bool);
 uint8_t* new_space(int size);
