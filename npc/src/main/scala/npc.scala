@@ -173,7 +173,8 @@ class NPC extends Module{
     NPC_IDU.ioInternal.iSRC2 := GPR_Read(NPC_IDU.ioInternal.oRS2.asUInt)
     NPC_IDU.ioInternal.iSRC1Dirty := GPR_getStatus(NPC_IDU.ioInternal.oRS1.asUInt)
     NPC_IDU.ioInternal.iSRC2Dirty := GPR_getStatus(NPC_IDU.ioInternal.oRS2.asUInt)
-    NPC_IDU.ioInternal.iCSR_ZicsrOldVal := CSR_Read(NPC_IDU.ioInternal.oCSR_ZicsrWSCIdx.asUInt)
+    val CSR_index = NPC_IDU.ioInternal.oCSR_ZicsrWSCIdx.asUInt
+    NPC_IDU.ioInternal.iCSR_ZicsrOldVal := CSR_Read(CSR_index)
     val NPC_PipeLine_ID2EX_Bundle = new Bundle{
         val Instr = UInt(InstWidth.W)
         val PC = UInt(AddrWidth.W)
@@ -188,18 +189,18 @@ class NPC extends Module{
     val isZicsr = PrivDecode === PR_ZICSR
     val isECALL = PrivDecode === PR_ECALL
     mstatus := MuxCase(mstatus, Array(
-        isZicsr -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
+        (isZicsr && CSR_index === CSR_MSTATUS) -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
         isECALL -> "ha00001800".asUInt
     ))
     mtvec := MuxCase(mtvec, Array(
-        isZicsr -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
+        (isZicsr && CSR_index === CSR_MTVEC) -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
     ))
     mepc := MuxCase(mepc, Array(
-        isZicsr -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
+        (isZicsr && CSR_index === CSR_MEPC) -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
         isECALL -> NPC_ID2EX_Msg.PC
     ))
     mcause := MuxCase(mcause, Array(
-        isZicsr -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
+        (isZicsr && CSR_index === CSR_MCAUSE) -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
         isECALL -> 11.U(DataWidth.W)
     ))
     NPC_IDU.ioInternal.iCSR_mtvec := mtvec
