@@ -16,6 +16,7 @@
 
 #include <common.h>
 #include <mem.h>
+#include <device.h>
 
 static uint8_t *pmem = NULL;
 
@@ -40,12 +41,35 @@ void out_of_bound(word_t addr){
 }
 
 word_t pmem_read(word_t addr, int len) {
-  word_t ret = host_read(guest_to_host(addr), len);
-  //printf("[mem : pmem_read] read mem @ 0x%lx with len %d get data 0x%lx\n", addr, len, ret);
-  return ret;
+  if(in_pmem(addr)){
+    // this is inside pmem, just call guest_to_host and host_read
+    word_t pmem_ret = host_read(guest_to_host(addr), len);
+    return pmem_ret;
+  }else{
+    // this is outside pmem, call device mmio read
+    word_t mmio_ret = mmio_read(addr, len);
+    return mmio_ret;
+  }
+
+  // should not reach here
+  printf("[memory] should not reach here, check implementation!\n");
+  assert(0);
+  return -1;
 }
 
 void pmem_write(word_t addr, int len, word_t data) {
-  //printf("[mem : pmem_write] write mem @ 0x%lx with len %d and data 0x%lx\n", addr, len, data);
-  host_write(guest_to_host(addr), len, data);
+  if(in_pmem(addr)){
+    // this is inside pmem, just call guest_to_host and host_write
+    host_write(guest_to_host(addr), len, data);
+    return;
+  }else{
+    // this is outside pmem, call device mmio read
+    mmio_write(addr, len, data);
+    return;
+  }
+  
+  // should not reach here
+  printf("[memory] should not reach here, check implementation!\n");
+  assert(0);
+  return;
 }
