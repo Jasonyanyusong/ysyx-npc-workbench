@@ -84,8 +84,6 @@ class NPCIODebug extends Bundle{
     val MEPC = Output(UInt(DataWidth.W))
     val MCAUSE = Output(UInt(DataWidth.W))
 
-    //val DecodeBundleDebug = Output(UInt(DecodeWidth.W))
-
     val Worked = Output(Bool())
     val Halt = Output(Bool())
 }
@@ -232,10 +230,6 @@ class NPC extends Module{
     ioNPC.iLoadStore_oMemoryLen    := NPC_LSU.ioExternal.oMemoryLen
     ioNPC.iLoadStore_oMemoryWrite  := NPC_LSU.ioExternal.oMemoryWrite
     NPC_LSU.ioExternal.iMemoryRead := ioNPC.iLoadStore_iMemoryRead
-
-    // NPC Inside Logic: WBU -> IDU
-    //NPC_IDU.ioInternal.iHaveWriteBack := NPC_WBU.ioInternal.oWriteGPREnable
-    //NPC_IDU.ioInternal.iWriteBackAddr := NPC_WBU.ioInternal.oWriteGPRAddr
 
     // NPC Inside Logic: WBU <-> Top
     GPR(NPC_WBU.ioInternal.oWriteGPRAddr.asUInt) := 
