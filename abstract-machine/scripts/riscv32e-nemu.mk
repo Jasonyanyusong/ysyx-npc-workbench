@@ -7,4 +7,9 @@ LDFLAGS       += -melf32lriscv                     # overwrite
 AM_SRCS += riscv/nemu/start.S \
            riscv/nemu/cte.c \
            riscv/nemu/trap.S \
-           riscv/nemu/vme.c
+           riscv/nemu/vme.c \
+           riscv/npc/libgcc/div.S \
+           riscv/npc/libgcc/muldi3.S \
+           riscv/npc/libgcc/multi3.c \
+           riscv/npc/libgcc/ashldi3.c \
+           riscv/npc/libgcc/unused.c
