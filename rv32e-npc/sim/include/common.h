@@ -21,8 +21,8 @@
 #include <assert.h>
 #include <stdlib.h>
 
-typedef int64_t sword_t;
-typedef uint64_t word_t;
+typedef int32_t sword_t;
+typedef uint32_t word_t;
 
 #define BITMASK(bits) ((1ull << (bits)) - 1)
 #define BITS(x, hi, lo) (((x) >> (lo)) & BITMASK((hi) - (lo) + 1)) // similar to x[hi:lo] in verilog
