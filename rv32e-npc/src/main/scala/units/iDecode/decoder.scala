@@ -91,9 +91,9 @@ class IDU extends Module{
 
     // Get RS1, RS2 and RD
     // In RV32-E we add 1 so that the first bit will not be included, and will not affect Zicsr's uimm
-    val RS1 = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RS1Hi + 1, RS1Lo), 0.U(RegIDWidth.W))
-    val RS2 = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RS2Hi + 1, RS2Lo), 0.U(RegIDWidth.W))
-    val RD  = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RDHi + 1 , RDLo ), 0.U(RegIDWidth.W))
+    val RS1 = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RS1Hi, RS1Lo), 0.U(RegIDWidth.W))
+    val RS2 = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RS2Hi, RS2Lo), 0.U(RegIDWidth.W))
+    val RD  = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RDHi , RDLo ), 0.U(RegIDWidth.W))
 
     ioInternal.oRS1 := RS1
     ioInternal.oRS2 := RS2
@@ -156,6 +156,8 @@ class IDU extends Module{
             )
         ), 0.U(iDecLSfuncValLen.W)
     )
+
+    printf("[RTL : IDU] LSU_OP_FUNC = %d\n", LSU_OP_FUNC)
 
     val WBU_OP = Mux(IDU_StateOK, Lookup(
             PipeLine_Instr, WB_EXU, Array(

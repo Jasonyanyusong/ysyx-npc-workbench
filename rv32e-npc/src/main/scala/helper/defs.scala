@@ -32,7 +32,7 @@ object Base{
     
     val AddrWidth = 32
 
-    val RegIDWidth = 4
+    val RegIDWidth = 5
     val RegSum = 16
     val CSRIDWidth = 12
 

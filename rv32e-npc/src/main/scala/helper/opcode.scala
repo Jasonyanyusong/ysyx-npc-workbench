@@ -32,24 +32,6 @@ object OpEXU{
     def EX_SRL    =  9.U(7.W)
     def EX_SRA    = 10.U(7.W)
     def EX_SUB    = 11.U(7.W)
-    /*def EX_ADDW   = 12.U(7.W)
-    def EX_SLLW   = 13.U(7.W)
-    def EX_SRLW   = 14.U(7.W)
-    def EX_SRAW   = 15.U(7.W)
-    def EX_MUL    = 16.U(7.W)
-    def EX_MULH   = 17.U(7.W)
-    def EX_MULHSU = 18.U(7.W)
-    def EX_MULHU  = 19.U(7.W)
-    def EX_DIV    = 20.U(7.W)
-    def EX_DIVU   = 21.U(7.W)
-    def EX_REM    = 22.U(7.W)
-    def EX_REMU   = 23.U(7.W)
-    def EX_MULW   = 24.U(7.W)
-    def EX_DIVW   = 25.U(7.W)
-    def EX_DIVUW  = 26.U(7.W)
-    def EX_REMW   = 27.U(7.W)
-    def EX_REMUW  = 28.U(7.W)
-    def EX_SUBW   = 29.U(7.W)*/
 }
 
 object OpLSULen{
