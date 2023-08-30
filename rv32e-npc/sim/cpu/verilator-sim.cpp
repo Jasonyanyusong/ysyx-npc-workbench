@@ -182,7 +182,7 @@ void sim_mem(int delay_cycle){
 
     word_t LS_MemAddr = (uint32_t)top -> ioNPC_iLoadStore_oMemoryAddr;
     int LS_MemLen = (int)pow(2, top -> ioNPC_iLoadStore_oMemoryLen);
-    printf("[verilator-sim : sim_mem] LS_MemAddr is 0x%x, len = %d\n", LS_MemAddr, LS_MemLen);
+    printf("[verilator-sim : sim_mem] LS_MemAddr is 0x%x, len = %d, op = %d\n", LS_MemAddr, LS_MemLen, top -> ioNPC_iLoadStore_oMemoryOP);
 
     assert(LS_MemLen >= 1 && LS_MemLen <= 8);
     
