@@ -34,11 +34,11 @@ CFLAGS			+= -g -I$(INC_PATH)
 CFLAGS			+= -I$(INC_PATH)
 LDFLAGS			+= -lreadline -lSDL2 -ldl
 
-DIFFTEST		:= $(NEMU_HOME)/build/riscv64-nemu-interpreter-so
+DIFFTEST		:= $(NEMU_HOME)/build/riscv32-nemu-interpreter-so
 OBJ_DIR			:= ./obj_dir
 BIN				:= $(OBJ_DIR)/V$(TOP_NAME)
 
-IMG				?= ../am-kernels/tests/cpu-tests/build/dummy-riscv64-npc.bin
+IMG				?= ../am-kernels/tests/cpu-tests/build/dummy-riscv32e-npc.bin
 
 #RUN_FLAGS		:= --diff=${DIFFTEST}
 RUN_FLAGS		:= --img=${IMG} --diff=${DIFFTEST}
