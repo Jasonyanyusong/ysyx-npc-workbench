@@ -17,6 +17,7 @@
 #include <common.h>
 #include <mem.h>
 #include <device.h>
+#include <verilator-sim.h>
 
 #define PAGE_SHIFT        12
 #define PAGE_SIZE         (1ul << PAGE_SHIFT)
@@ -50,20 +51,27 @@ void init_map() {
   assert(p_space);
 }
 
-static void check_bound(IOMap *map, word_t addr) {
+static bool check_bound(IOMap *map, word_t addr) {
   if (map == NULL) {
     printf("[device] address = 0x%x is out of bound\n", addr);
-    assert(0);
+    npc_state.state = NPC_ABORT;
+    return false;
   } else {
     if(addr <= map->high && addr >= map->low){
         printf("[device] address = 0x%x is out of bound %s@[0x%x, 0x%x]\n", addr, map -> name, map -> low, map -> high);
-        assert(0);
+        npc_state.state = NPC_ABORT;
+        return false;
     }
   }
 }
 
 word_t map_read(word_t addr, int len, IOMap *map) {
   assert(len >= 1 && len <= 8);
+
+  if(!check_bound(map, addr)){
+    return -1;
+  }
+
   check_bound(map, addr);
   word_t offset = addr - map->low;
   invoke_callback(map->callback, offset, len, false); // prepare data to read
@@ -73,6 +81,11 @@ word_t map_read(word_t addr, int len, IOMap *map) {
 
 void map_write(word_t addr, int len, word_t data, IOMap *map) {
   assert(len >= 1 && len <= 8);
+
+  if(!check_bound(map, addr)){
+    return;
+  }
+
   check_bound(map, addr);
   word_t offset = addr - map->low;
   host_write(map->space + offset, len, data);

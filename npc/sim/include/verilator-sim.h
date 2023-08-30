@@ -31,7 +31,7 @@ typedef struct {
 
 extern rtl_CPU_State cpu;
 
-typedef struct {
+extern typedef struct {
   int state;
   word_t halt_pc;
   uint32_t halt_ret;
