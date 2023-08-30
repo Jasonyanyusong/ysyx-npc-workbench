@@ -63,6 +63,7 @@ object Base{
 }
 
 object PipeLineDefs{
+    // New: add dynamic next PC to stages after iDecode, so can easily difftest PC
     val PipeLine_IF2ID_Width = Base.InstWidth + Base.AddrWidth
     val PipeLine_ID2EX_Width = Base.InstWidth + Base.AddrWidth + Base.DecodeWidth + Base.RegIDWidth + (3 * Base.DataWidth) // EX have 2 SRC, LS have 1 SRC
     val PipeLine_EX2LS_Width = Base.InstWidth + Base.AddrWidth + Base.DecodeWidth + Base.RegIDWidth + (2 * Base.DataWidth) // EX_RET and LS_SRC
