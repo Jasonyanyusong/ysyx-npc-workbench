@@ -278,9 +278,9 @@ class NPC extends Module{
     ioNPCDebug.GPR31 := GPR_Read(31.U)
 
     ioNPCDebug.PC_COMMIT := NPC_WBU.ioInternal.oPC
-    ioNPCDebug.PC_DYNAMIC := ShiftRegister(PC, 3)
+    ioNPCDebug.PC_DYNAMIC := ShiftRegister(PC, 4)
 
-    ioNPCDebug.Worked := RegNext(NPC_WBU.ioInternal.oWorked)
+    ioNPCDebug.Worked := RegNext(RegNext(NPC_WBU.ioInternal.oWorked))
     ioNPCDebug.Halt := NPC_WBU.ioInternal.oStopped
 
     // CSR: since it was written in IDU, need to shift for EXU -> LSU -> WBU, 3 cycles
