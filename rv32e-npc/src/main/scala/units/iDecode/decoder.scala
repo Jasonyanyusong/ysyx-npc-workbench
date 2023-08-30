@@ -23,7 +23,7 @@ import npc.helper.defs.Base._
 import npc.helper.defs.InstType._
 import npc.helper.defs.PipeLineDefs._
 
-import npc.helper.rv64im.Inst._
+import npc.helper.rv32e.Inst._
 import npc.helper.opcode.OpEXU._
 import npc.helper.opcode.OpLSULen._
 import npc.helper.opcode.OpLSUFunc._
@@ -90,9 +90,10 @@ class IDU extends Module{
     val IDU_ProcessMsg = Mux(IDU_Busy, PipeLine_IF2ID_MsgBuffer, ioInternal.PipeLine_IF2ID_MsgBundle).asTypeOf(PipeLine_IF2ID_Bundle)
 
     // Get RS1, RS2 and RD
-    val RS1 = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RS1Hi, RS1Lo), 0.U(RegIDWidth.W))
-    val RS2 = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RS2Hi, RS2Lo), 0.U(RegIDWidth.W))
-    val RD  = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RDHi , RDLo ), 0.U(RegIDWidth.W))
+    // In RV32-E we add 1 so that the first bit will not be included, and will not affect Zicsr's uimm
+    val RS1 = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RS1Hi + 1, RS1Lo), 0.U(RegIDWidth.W))
+    val RS2 = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RS2Hi + 1, RS2Lo), 0.U(RegIDWidth.W))
+    val RD  = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RDHi + 1 , RDLo ), 0.U(RegIDWidth.W))
 
     ioInternal.oRS1 := RS1
     ioInternal.oRS2 := RS2
@@ -123,32 +124,15 @@ class IDU extends Module{
                 LUI -> EX_PS1, CSRRW -> EX_PS1, CSRRS -> EX_PS1, CSRRC -> EX_PS1, CSRRWI -> EX_PS1, CSRRCI -> EX_PS1, CSRRSI -> EX_PS1,
 
                 AUIPC -> EX_ADD, SB -> EX_ADD, SH -> EX_ADD, SW -> EX_ADD, SD -> EX_ADD, ADD -> EX_ADD, ADDI -> EX_ADD,
-                LB -> EX_ADD, LBU -> EX_ADD, LH -> EX_ADD, LHU -> EX_ADD, LW -> EX_ADD, LWU -> EX_ADD, LD -> EX_ADD,
-                ADDW -> EX_ADDW, ADDIW -> EX_ADDW,
+                LB -> EX_ADD, LBU -> EX_ADD, LH -> EX_ADD, LHU -> EX_ADD, LW -> EX_ADD,
 
-                SUB -> EX_SUB, SUBW -> EX_SUBW,
+                SUB -> EX_SUB,
 
-                AND -> EX_AND, ANDI -> EX_AND,
+                AND -> EX_AND, ANDI -> EX_AND, OR -> EX_OR, ORI -> EX_OR, XOR -> EX_XOR, XORI -> EX_XOR,
 
-                OR -> EX_OR, ORI -> EX_OR,
+                SLT -> EX_SLT, SLTI -> EX_SLT, SLTU -> EX_SLTU, SLTIU -> EX_SLTU,
 
-                XOR -> EX_XOR, XORI -> EX_XOR,
-
-                SLT -> EX_SLT, SLTI -> EX_SLT,
-
-                SLTU -> EX_SLTU, SLTIU -> EX_SLTU,
-
-                SLL -> EX_SLL, SLLI -> EX_SLL, SLLW -> EX_SLLW, SLLIW -> EX_SLLW,
-
-                SRL -> EX_SRL, SRLI -> EX_SRL, SRLW -> EX_SRLW, SRLIW -> EX_SRLW,
-
-                SRA -> EX_SRA, SRAI -> EX_SRA, SRAW -> EX_SRAW, SRLIW -> EX_SRAW,
-
-                MUL -> EX_MUL, MULH -> EX_MULH, MULHSU -> EX_MULHSU, MULHU -> EX_MULHU, MULW -> EX_MULW,
-
-                DIV -> EX_DIV, DIVU -> EX_DIVU, DIVW -> EX_DIVW, DIVUW -> EX_DIVUW,
-
-                REM -> EX_REM, REMU -> EX_REMU, REMW -> EX_REMW, REMUW -> EX_REMUW,
+                SLL -> EX_SLL, SLLI -> EX_SLL, SRL -> EX_SRL, SRLI -> EX_SRL, SRA -> EX_SRA, SRAI -> EX_SRA,
 
                 //JAL -> EX_NOP, JALR -> EX_NOP, BEQ -> EX_NOP, BNE -> EX_NOP, BLT -> EX_NOP, BLTU -> EX_NOP, BGE -> EX_NOP, BGEU -> EX_NOP,
             )
@@ -159,24 +143,23 @@ class IDU extends Module{
             PipeLine_Instr, 0.U(2.W), Array(
                 LB -> LS_B, LBU -> LS_B, SB -> LS_B,
                 LH -> LS_H, LHU -> LS_H, SH -> LS_H,
-                LW -> LS_W, LWU -> LS_W, SW -> LS_W,
-                LD -> LS_D,              SD -> LS_D
+                LW -> LS_W,              SW -> LS_W,
             )
         ), 0.U(iDecLSlenValLen.W)
     )
 
     val LSU_OP_FUNC = Mux(IDU_StateOK, Lookup(
             PipeLine_Instr, LS_NOP, Array(
-                LB  -> LS_LD ,  LH -> LS_LD ,  LW -> LS_LD ,  LD -> LS_LD ,
-                SB  -> LS_ST ,  SH -> LS_ST ,  SW -> LS_ST ,  SD -> LS_ST ,
-                LBU -> LS_LDU, LHU -> LS_LDU, LWU -> LS_LDU
+                LB  -> LS_LD ,  LH -> LS_LD ,  LW -> LS_LD ,
+                SB  -> LS_ST ,  SH -> LS_ST ,  SW -> LS_ST ,
+                LBU -> LS_LDU, LHU -> LS_LDU, 
             )
         ), 0.U(iDecLSfuncValLen.W)
     )
 
     val WBU_OP = Mux(IDU_StateOK, Lookup(
             PipeLine_Instr, WB_EXU, Array(
-                SB -> WB_NOP, SH -> WB_NOP, SW -> WB_NOP, SD -> WB_NOP,
+                SB -> WB_NOP, SH -> WB_NOP, SW -> WB_NOP,
                 ECALL -> WB_NOP, EBREAK -> WB_NOP, MRET -> WB_NOP,
                 BEQ -> WB_NOP, BNE -> WB_NOP, BGE -> WB_NOP, BGEU -> WB_NOP, BLT -> WB_NOP, BLTU -> WB_NOP,
 
@@ -206,18 +189,14 @@ class IDU extends Module{
                 JAL -> instJ,
 
                 JALR -> instI,
-                LB -> instI, LH -> instI, LW -> instI, LBU -> instI, LHU -> instI, LWU -> instI, LD -> instI,
+                LB -> instI, LH -> instI, LW -> instI, LBU -> instI, LHU -> instI,
                 ADDI -> instI, SLTI -> instI, SLTIU -> instI, XORI -> instI, ORI -> instI, ANDI -> instI, SLLI -> instI, SRLI -> instI, SRAI -> instI,
-                ADDIW -> instI, SLLIW -> instI, SRLIW -> instI, SRAIW -> instI,
 
                 CSRRW -> instI, CSRRS -> instI, CSRRC -> instI, CSRRWI -> instI, CSRRSI -> instI, CSRRCI -> instI,
 
                 ADD -> instR, SUB -> instR, SLL -> instR, SLT -> instR, SLTU -> instR, XOR -> instR, SRL -> instR, SRA -> instR, OR -> instR, AND -> instR,
-                ADDW -> instR, SUBW -> instR, SLLW -> instR, SRLW -> instR, SRAW -> instR,
-                MUL -> instR, MULH -> instR, MULHSU -> instR, MULHU -> instR, DIV -> instR, DIVU -> instR, REM -> instR, REMU -> instR,
-                MULW -> instR, DIVW -> instR, DIVUW -> instR, REMW -> instR, REMUW -> instR,
 
-                SB -> instS, SH -> instS, SW -> instS, SD -> instS,
+                SB -> instS, SH -> instS, SW -> instS,
 
                 BEQ -> instB, BNE -> instB, BLT -> instB, BGE -> instB, BLTU -> instB, BGEU -> instB,
             )

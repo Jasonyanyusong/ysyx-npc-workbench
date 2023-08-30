@@ -20,9 +20,9 @@ import chisel3._
 import chisel3.util._
 
 object Base{
-    val NR_GPR = 32
+    //val NR_GPR = 16
     
-    val DataWidth = 64
+    val DataWidth = 32
     val WordWidth = 32
     val HalfWidth = 16
     val ByteWidth = 8
@@ -30,10 +30,10 @@ object Base{
     val InstWidth = 32
     val InstSize = 4
     
-    val AddrWidth = 64
+    val AddrWidth = 32
 
-    val RegIDWidth = 5
-    val RegSum = 32
+    val RegIDWidth = 4
+    val RegSum = 16
     val CSRIDWidth = 12
 
     val iDecPrivValLen = 2

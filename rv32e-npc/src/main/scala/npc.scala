@@ -59,22 +59,6 @@ class NPCIODebug extends Bundle{
     val GPR13 = Output(UInt(DataWidth.W))
     val GPR14 = Output(UInt(DataWidth.W))
     val GPR15 = Output(UInt(DataWidth.W))
-    val GPR16 = Output(UInt(DataWidth.W))
-    val GPR17 = Output(UInt(DataWidth.W))
-    val GPR18 = Output(UInt(DataWidth.W))
-    val GPR19 = Output(UInt(DataWidth.W))
-    val GPR20 = Output(UInt(DataWidth.W))
-    val GPR21 = Output(UInt(DataWidth.W))
-    val GPR22 = Output(UInt(DataWidth.W))
-    val GPR23 = Output(UInt(DataWidth.W))
-    val GPR24 = Output(UInt(DataWidth.W))
-    val GPR25 = Output(UInt(DataWidth.W))
-    val GPR26 = Output(UInt(DataWidth.W))
-    val GPR27 = Output(UInt(DataWidth.W))
-    val GPR28 = Output(UInt(DataWidth.W))
-    val GPR29 = Output(UInt(DataWidth.W))
-    val GPR30 = Output(UInt(DataWidth.W))
-    val GPR31 = Output(UInt(DataWidth.W))
 
     val PC_COMMIT = Output(UInt(AddrWidth.W))
     val PC_DYNAMIC = Output(UInt(AddrWidth.W))
@@ -191,7 +175,7 @@ class NPC extends Module{
     val isECALL = PrivDecode === PR_ECALL
     mstatus := MuxCase(mstatus, Array(
         (isZicsr && CSR_index === CSR_MSTATUS) -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
-        isECALL -> "ha00001800".asUInt
+        isECALL -> "h1800".asUInt
     ))
     mtvec := MuxCase(mtvec, Array(
         (isZicsr && CSR_index === CSR_MTVEC) -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
@@ -260,22 +244,6 @@ class NPC extends Module{
     ioNPCDebug.GPR13 := GPR_Read(13.U)
     ioNPCDebug.GPR14 := GPR_Read(14.U)
     ioNPCDebug.GPR15 := GPR_Read(15.U)
-    ioNPCDebug.GPR16 := GPR_Read(16.U)
-    ioNPCDebug.GPR17 := GPR_Read(17.U)
-    ioNPCDebug.GPR18 := GPR_Read(18.U)
-    ioNPCDebug.GPR19 := GPR_Read(19.U)
-    ioNPCDebug.GPR20 := GPR_Read(20.U)
-    ioNPCDebug.GPR21 := GPR_Read(21.U)
-    ioNPCDebug.GPR22 := GPR_Read(22.U)
-    ioNPCDebug.GPR23 := GPR_Read(23.U)
-    ioNPCDebug.GPR24 := GPR_Read(24.U)
-    ioNPCDebug.GPR25 := GPR_Read(25.U)
-    ioNPCDebug.GPR26 := GPR_Read(26.U)
-    ioNPCDebug.GPR27 := GPR_Read(27.U)
-    ioNPCDebug.GPR28 := GPR_Read(28.U)
-    ioNPCDebug.GPR29 := GPR_Read(29.U)
-    ioNPCDebug.GPR30 := GPR_Read(30.U)
-    ioNPCDebug.GPR31 := GPR_Read(31.U)
 
     ioNPCDebug.PC_COMMIT := NPC_WBU.ioInternal.oPC
     ioNPCDebug.PC_DYNAMIC := ShiftRegister(PC, 4)

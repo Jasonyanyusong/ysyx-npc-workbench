@@ -59,9 +59,6 @@ class EXU extends Module{
     val SRC1 = ID2EX_Msg.EXU_SRC1
     val SRC2 = ID2EX_Msg.EXU_SRC2
 
-    def WordSignExt(WordVal : UInt) = Cat(Fill(WordWidth, WordVal(WordWidth - 1).asUInt), WordVal (WordWidth - 1, 0))
-    def WordCut(DoubleVal : UInt) = DoubleVal(WordWidth - 1, 0)
-
     val EXU_StateOK = (ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool)
 
     val EXU_Compute_Result = Mux(EXU_StateOK, MuxCase(0.U(DataWidth.W), Array(
@@ -77,27 +74,6 @@ class EXU extends Module{
             (iExecuteOPcode === EX_SRL) -> (SRC1.asUInt >> SRC2(5, 0)).asUInt,
             (iExecuteOPcode === EX_SRA) -> (SRC1.asSInt >> SRC2(5, 0)).asUInt,
             (iExecuteOPcode === EX_SUB) -> (SRC1 - SRC2).asUInt,
-
-            (iExecuteOPcode === EX_ADDW) -> (WordSignExt(WordCut(WordCut(SRC1) + WordCut(SRC2)))).asUInt,
-            (iExecuteOPcode === EX_SUBW) -> (WordSignExt(WordCut(WordCut(SRC1) - WordCut(SRC2)))).asUInt,
-            (iExecuteOPcode === EX_SLLW) -> (WordSignExt(WordCut(WordCut(SRC1).asUInt << SRC2(4, 0)))).asUInt,
-            (iExecuteOPcode === EX_SRLW) -> (WordSignExt(WordCut(WordCut(SRC1).asUInt >> SRC2(4, 0)))).asUInt,
-            (iExecuteOPcode === EX_SRAW) -> (WordSignExt(WordCut((WordCut(SRC1).asSInt >> SRC2(4, 0)).asUInt))).asUInt,
-
-            (iExecuteOPcode === EX_MUL) -> (SRC1 * SRC2)(DataWidth - 1, 0).asUInt,
-            (iExecuteOPcode === EX_MULH) -> (SRC1.asSInt * SRC2.asSInt)(2 * DataWidth - 1, DataWidth).asUInt,
-            (iExecuteOPcode === EX_MULHSU) -> (SRC1.asSInt * SRC2.asUInt)(2 * DataWidth - 1, DataWidth).asUInt,
-            (iExecuteOPcode === EX_MULHU) -> (SRC1.asUInt * SRC2.asUInt)(2 * DataWidth - 1, DataWidth).asUInt,
-            (iExecuteOPcode === EX_DIV) -> (SRC1 / SRC2).asUInt,
-            (iExecuteOPcode === EX_DIVU) -> (SRC1.asUInt / SRC2.asUInt).asUInt,
-            (iExecuteOPcode === EX_REM) -> (SRC1 % SRC2).asUInt,
-            (iExecuteOPcode === EX_REMU) -> (SRC1.asUInt % SRC2.asUInt).asUInt,
-
-            (iExecuteOPcode === EX_MULW) -> (WordSignExt(WordCut(WordCut(SRC1) * WordCut(SRC2)))).asUInt,
-            (iExecuteOPcode === EX_DIVW) -> (WordSignExt(WordCut((WordCut(SRC1).asSInt / WordCut(SRC2).asSInt).asUInt))).asUInt,
-            (iExecuteOPcode === EX_DIVUW) -> (WordSignExt(WordCut(WordCut(SRC1).asUInt / WordCut(SRC2).asUInt))).asUInt,
-            (iExecuteOPcode === EX_REMW) -> (WordSignExt(WordCut((WordCut(SRC1).asSInt % WordCut(SRC2).asSInt).asUInt))).asUInt,
-            (iExecuteOPcode === EX_REMUW) -> (WordSignExt(WordCut(WordCut(SRC1).asUInt % WordCut(SRC2).asUInt))).asUInt
         )), 0.U(DataWidth.W))
 
     val PrePare_PipeLine_EX2LS_Bundle = Mux(EXU_StateOK, Cat(Seq(

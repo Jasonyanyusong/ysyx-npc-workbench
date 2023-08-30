@@ -75,11 +75,9 @@ class LSU extends Module{
     val EXU_RET = EX2LS_Msg.EX_RET
     val LSU_SRC = EX2LS_Msg.LS_SRC2
 
-    def WordSignExt(WordVal : UInt) = Cat(Fill(DataWidth - WordWidth, WordVal(WordWidth - 1).asUInt), WordVal(WordWidth - 1, 0))
     def HalfSignExt(HalfVal : UInt) = Cat(Fill(DataWidth - HalfWidth, HalfVal(HalfWidth - 1).asUInt), HalfVal(HalfWidth - 1, 0))
     def ByteSignExt(ByteVal : UInt) = Cat(Fill(DataWidth - ByteWidth, ByteVal(ByteWidth - 1).asUInt), ByteVal(ByteWidth - 1, 0))
 
-    def WordZeroExt(WordVal : UInt) = Cat(Fill(DataWidth - WordWidth, 0.U(1.W)), WordVal (WordWidth - 1, 0))
     def HalfZeroExt(HalfVal : UInt) = Cat(Fill(DataWidth - HalfWidth, 0.U(1.W)), HalfVal (HalfWidth - 1, 0))
     def ByteZeroExt(ByteVal : UInt) = Cat(Fill(DataWidth - ByteWidth, 0.U(1.W)), ByteVal (ByteWidth - 1, 0))
 
@@ -108,13 +106,11 @@ class LSU extends Module{
             (LSU_FUNC === LS_LD) -> (MuxCase(0.U(DataWidth.W), Array(
                 (LSU_LEN === LS_B) -> ByteSignExt(MEM_READ_RET.asUInt),
                 (LSU_LEN === LS_H) -> HalfSignExt(MEM_READ_RET.asUInt),
-                (LSU_LEN === LS_W) -> WordSignExt(MEM_READ_RET.asUInt),
-                (LSU_LEN === LS_D) -> MEM_READ_RET
+                (LSU_LEN === LS_W) -> MEM_READ_RET.asUInt
             ))),
             (LSU_FUNC === LS_LDU) -> (MuxCase(0.U(DataWidth.W), Array(
                 (LSU_LEN === LS_B) -> ByteZeroExt(MEM_READ_RET.asUInt),
                 (LSU_LEN === LS_H) -> HalfZeroExt(MEM_READ_RET.asUInt),
-                (LSU_LEN === LS_W) -> WordZeroExt(MEM_READ_RET.asUInt)
             )))
         )), 0.U(DataWidth.W))
 
