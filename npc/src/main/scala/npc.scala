@@ -86,6 +86,9 @@ class NPCIODebug extends Bundle{
 
     val Worked = Output(Bool())
     val Halt = Output(Bool())
+
+    val LS_Taken = Output(Bool())
+    val LS_Addr = Output(UInt(AddrWidth.W))
 }
 
 class NPC extends Module{
@@ -278,7 +281,7 @@ class NPC extends Module{
     ioNPCDebug.PC_DYNAMIC := ShiftRegister(PC, 3)
 
     ioNPCDebug.Worked := RegNext(NPC_WBU.ioInternal.oWorked)
-    ioNPCDebug.Halt := (NPC_WBU.ioInternal.oStopped)
+    ioNPCDebug.Halt := NPC_WBU.ioInternal.oStopped
 
     // CSR: since it was written in IDU, need to shift for EXU -> LSU -> WBU, 3 cycles
     ioNPCDebug.MSTATUS := ShiftRegister(mstatus, 3)
@@ -286,5 +289,7 @@ class NPC extends Module{
     ioNPCDebug.MEPC := ShiftRegister(mepc, 3)
     ioNPCDebug.MCAUSE := ShiftRegister(mcause, 3)
 
-    //ioNPCDebug.DecodeBundleDebug := NPC_WBU.ioInternal.oDecodeBundleDebug
+    // Memory: to help simulation environemnt judge the addr is in pmem
+    ioNPCDebug.LS_Taken := ShiftRegister(NPC_LSU.ioDebug.oLoadStoreTaken, 1)
+    ioNPCDebug.LS_Addr := ShiftRegister(NPC_LSU.ioDebug.oLoadStoreAddress, 1)
 }
