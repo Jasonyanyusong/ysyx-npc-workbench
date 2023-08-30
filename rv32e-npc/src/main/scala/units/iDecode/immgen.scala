@@ -71,7 +71,7 @@ class immGen extends Module{
             (InstType === instI) -> Cat(Fill(DataWidth - immILen, immI(immILen - 1)), immI),
             (InstType === instS) -> Cat(Fill(DataWidth - immSLen, immS(immSLen - 1)), immS),
             (InstType === instB) -> Cat(Fill(DataWidth - immBLen, immB(immBLen - 1)), immB),
-            (InstType === instU) -> Cat(Fill(DataWidth - immULen, immU(immULen - 1)), immU),
+            (InstType === instU) -> immU,
             (InstType === instJ) -> Cat(Fill(DataWidth - immJLen, immJ(immJLen - 1)), immJ),
         )
     )
