@@ -84,10 +84,6 @@ class IDU extends Module{
     val IDU_StateOK = (ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool)
 
     PipeLine_IF2ID_MsgBuffer := Mux(IDU_Busy, PipeLine_IF2ID_MsgBuffer, ioInternal.PipeLine_IF2ID_MsgBundle)
-    /*val PipeLine_IF2ID_Bundle = new Bundle{
-        val Instr = UInt(InstWidth.W)
-        val PC = UInt(AddrWidth.W)
-    }*/
     val IDU_ProcessMsg = Mux(IDU_Busy, PipeLine_IF2ID_MsgBuffer, ioInternal.PipeLine_IF2ID_MsgBundle).asTypeOf(PipeLine_IF2ID_Bundle)
 
     // Get RS1, RS2 and RD
