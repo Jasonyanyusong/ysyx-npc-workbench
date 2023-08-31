@@ -61,15 +61,6 @@ class LSU extends Module{
 
     val LSU_NotBusy = RegInit(true.B)
 
-    /*val PipeLine_EX2LS_Bundle = new Bundle{
-        val Instr = UInt(InstWidth.W)
-        val PC = UInt(AddrWidth.W)
-        val DecodeVal = UInt(DecodeWidth.W)
-        val RD = UInt(RegIDWidth.W)
-        val EX_RET = UInt(DataWidth.W)
-        val LS_SRC2 = UInt(DataWidth.W)
-    }*/
-
     val EX2LS_Msg = ioInternal.PipeLine_EX2LS_MsgBundle.asTypeOf(PipeLine_EX2LS_Bundle)
 
     val DecodeBundle = EX2LS_Msg.DecodeVal
