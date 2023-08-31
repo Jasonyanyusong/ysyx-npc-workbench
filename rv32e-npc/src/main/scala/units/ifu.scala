@@ -62,7 +62,7 @@ class IFU extends Module{
 
     val PrePare_PipeLine_IF2ID_Bundle = Cat(Seq(Inst, PC))
     ioInternal.PipeLine_IF2ID_MsgBundle := PrePare_PipeLine_IF2ID_Bundle
-    ioInternal.PipeLine_IF2ID_ChangeReg := (IFU_NotBusy && (IFU_StateOK || ioInternal.iPC === "h80000000".U))
+    ioInternal.PipeLine_IF2ID_ChangeReg := (IFU_NotBusy && (IFU_StateOK))
     
     /*
 
