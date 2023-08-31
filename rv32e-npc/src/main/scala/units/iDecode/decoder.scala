@@ -286,8 +286,6 @@ class IDU extends Module{
         (IDU_InstructionType === instJ) -> 0.U(DataWidth.W)
     )), 0.U(DataWidth.W))
 
-
-
     val PrePare_PipeLine_ID2EX_Bundle = Mux(IDU_StateOK, Cat(Seq(PipeLine_Instr, PipeLine_PC, IDU_DecodeBundle, RD, IDU_EXU_SRC1, IDU_EXU_SRC2, IDU_LSU_SRC2)), 0.U(PipeLine_ID2EX_Width.W))
     ioInternal.PipeLine_ID2EX_MsgBundle := PrePare_PipeLine_ID2EX_Bundle
     ioInternal.PipeLine_ID2EX_ChangeReg := (IDU_StateOK && (!RSRegistersDirty))
