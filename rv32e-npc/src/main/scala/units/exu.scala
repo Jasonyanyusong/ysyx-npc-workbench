@@ -70,7 +70,7 @@ class EXU extends Module{
         )), 0.U(DataWidth.W))
 
     val PrePare_PipeLine_EX2LS_Bundle = Mux(EXU_StateOK, Cat(Seq(
-        ID2EX_Msg.Instr.asUInt, ID2EX_Msg.PC.asUInt, ID2EX_Msg.DecodeVal.asUInt, ID2EX_Msg.RD.asUInt, EXU_Compute_Result(DataWidth - 1, 0).asUInt, ID2EX_Msg.LSU_SRC2.asUInt
+        ID2EX_Msg.Instr.asUInt, ID2EX_Msg.PC.asUInt, ID2EX_Msg.DNPC, ID2EX_Msg.DecodeVal.asUInt, ID2EX_Msg.RD.asUInt, EXU_Compute_Result(DataWidth - 1, 0).asUInt, ID2EX_Msg.LSU_SRC2.asUInt
     )), 0.U(PipeLine_EX2LS_Width.W))
 
     ioInternal.PipeLine_EX2LS_MsgBundle := PrePare_PipeLine_EX2LS_Bundle

@@ -110,7 +110,7 @@ class LSU extends Module{
         )), 0.U(DataWidth.W))
 
     val PrePare_PipeLine_LS2WB_Bundle = Mux(LSU_StateOK, Cat(Seq(
-        EX2LS_Msg.Instr, EX2LS_Msg.PC, EX2LS_Msg.DecodeVal, EX2LS_Msg.RD, EX2LS_Msg.EX_RET, LSU_Compute_Result
+        EX2LS_Msg.Instr, EX2LS_Msg.PC, EX2LS_Msg.DNPC, EX2LS_Msg.DecodeVal, EX2LS_Msg.RD, EX2LS_Msg.EX_RET, LSU_Compute_Result
     )), 0.U(PipeLine_LS2WB_Width.W))
 
     ioDebug.oLoadStoreTaken := Mux(LSU_StateOK, Mux((LSU_MEMOP === MEM_READ) || (LSU_MEMOP === MEM_WRITE), true.B, false.B), false.B)

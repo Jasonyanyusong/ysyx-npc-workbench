@@ -64,9 +64,9 @@ object Base{
 
 object PipeLineDefs{
     val PipeLine_IF2ID_Width = Base.InstWidth + Base.AddrWidth
-    val PipeLine_ID2EX_Width = Base.InstWidth + Base.AddrWidth + Base.DecodeWidth + Base.RegIDWidth + (3 * Base.DataWidth) // EX have 2 SRC, LS have 1 SRC
-    val PipeLine_EX2LS_Width = Base.InstWidth + Base.AddrWidth + Base.DecodeWidth + Base.RegIDWidth + (2 * Base.DataWidth) // EX_RET and LS_SRC
-    val PipeLine_LS2WB_Width = Base.InstWidth + Base.AddrWidth + Base.DecodeWidth + Base.RegIDWidth + (2 * Base.DataWidth) // EX_RET and LS_RET
+    val PipeLine_ID2EX_Width = Base.InstWidth + 2 * Base.AddrWidth + Base.DecodeWidth + Base.RegIDWidth + (3 * Base.DataWidth) // EX have 2 SRC, LS have 1 SRC
+    val PipeLine_EX2LS_Width = Base.InstWidth + 2 * Base.AddrWidth + Base.DecodeWidth + Base.RegIDWidth + (2 * Base.DataWidth) // EX_RET and LS_SRC
+    val PipeLine_LS2WB_Width = Base.InstWidth + 2 * Base.AddrWidth + Base.DecodeWidth + Base.RegIDWidth + (2 * Base.DataWidth) // EX_RET and LS_RET
 }
 
 object CSR_LUT{
@@ -94,7 +94,7 @@ object PipeLine_Bundle{
     val PipeLine_ID2EX_Bundle = new Bundle{
         val Instr = UInt(Base.InstWidth.W)
         val PC = UInt(Base.AddrWidth.W)
-        //val DNPC = UInt(Base.AddrWidth.W)
+        val DNPC = UInt(Base.AddrWidth.W)
         val DecodeVal = UInt(Base.DecodeWidth.W)
         val RD = UInt(Base.RegIDWidth.W)
         val EXU_SRC1 = UInt(Base.DataWidth.W)
@@ -105,7 +105,7 @@ object PipeLine_Bundle{
     val PipeLine_EX2LS_Bundle = new Bundle{
         val Instr = UInt(Base.InstWidth.W)
         val PC = UInt(Base.AddrWidth.W)
-        //val DNPC = UInt(Base.AddrWidth.W)
+        val DNPC = UInt(Base.AddrWidth.W)
         val DecodeVal = UInt(Base.DecodeWidth.W)
         val RD = UInt(Base.RegIDWidth.W)
         val EX_RET = UInt(Base.DataWidth.W)
@@ -115,7 +115,7 @@ object PipeLine_Bundle{
     val PipeLine_LS2WB_Bundle = new Bundle{
         val Instr = UInt(Base.InstWidth.W)
         val PC = UInt(Base.AddrWidth.W)
-        //val DNPC = UInt(Base.AddrWidth.W)
+        val DNPC = UInt(Base.AddrWidth.W)
         val DecodeVal = UInt(Base.DecodeWidth.W)
         val RD = UInt(Base.RegIDWidth.W)
         val EX_RET = UInt(Base.DataWidth.W)

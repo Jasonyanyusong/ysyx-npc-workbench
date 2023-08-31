@@ -33,6 +33,7 @@ class iWriteBackInternal extends Bundle{
     val PipeLine_LS2WB_MsgBundle = Input(UInt(PipeLine_LS2WB_Width.W))
 
     val oPC = Output(UInt(AddrWidth.W))
+    val oDNPC = Output(UInt(AddrWidth.W))
 
     val oWorked = Output(Bool()) // Debug signal, used for difftest
     val oStopped = Output(Bool())
@@ -79,6 +80,7 @@ class WBU extends Module{
     ioInternal.oWriteGPRAddr := WBU_GPR_ADDR
     ioInternal.oWriteGPRVal := WBU_GPR_WRITE_DATA
     ioInternal.oPC := LS2WB_Msg.PC
+    ioInternal.oDNPC := LS2WB_Msg.DNPC
 
     // Connect IO for debug
     ioInternal.oWorked := WBU_StateOK
