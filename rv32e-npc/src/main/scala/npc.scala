@@ -238,9 +238,9 @@ class NPC extends Module{
     ioNPCDebug.GPR14 := GPR_Read(14.U)
     ioNPCDebug.GPR15 := GPR_Read(15.U)
 
-    ioNPCDebug.PC_COMMIT := NPC_WBU.ioInternal.oPC
+    ioNPCDebug.PC_COMMIT := RegNext(NPC_WBU.ioInternal.oPC)
     //ioNPCDebug.PC_DYNAMIC := ShiftRegister(PC, 4)
-    ioNPCDebug.PC_DYNAMIC := NPC_WBU.ioInternal.oDNPC
+    ioNPCDebug.PC_DYNAMIC := RegNext(NPC_WBU.ioInternal.oDNPC)
 
     ioNPCDebug.Worked := RegNext(RegNext(NPC_WBU.ioInternal.oWorked))
     ioNPCDebug.Halt := NPC_WBU.ioInternal.oStopped
