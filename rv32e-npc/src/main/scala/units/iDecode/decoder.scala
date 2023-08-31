@@ -214,7 +214,7 @@ class IDU extends Module{
     val IDU_DNPC = Mux(IDU_StateOK, Lookup(
             PipeLine_Instr, PipeLine_PC + InstSize.U, Array(
                 JAL  -> (PipeLine_PC.asUInt + IDU_Imm.asUInt),
-                JALR -> ((IDU_SRC1.asUInt + IDU_Imm.asUInt) & Cat(Fill(63, 1.U(1.W)), Fill(1, 0.U(1.W)))),
+                JALR -> ((IDU_SRC1.asUInt + IDU_Imm.asUInt) & Cat(Fill(AddrWidth - 1, 1.U(1.W)), Fill(1, 0.U(1.W)))),
 
                 BEQ  -> Mux(IDU_SRC1.asUInt === IDU_SRC2.asUInt, PipeLine_PC.asUInt + IDU_Imm.asUInt, PipeLine_PC.asUInt + InstSize.U),
                 BNE  -> Mux(IDU_SRC1.asUInt =/= IDU_SRC2.asUInt, PipeLine_PC.asUInt + IDU_Imm.asUInt, PipeLine_PC.asUInt + InstSize.U),
