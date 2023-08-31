@@ -162,15 +162,6 @@ class NPC extends Module{
     NPC_IDU.ioInternal.iSRC2Dirty := GPR_getStatus(NPC_IDU.ioInternal.oRS2.asUInt)
     val CSR_index = NPC_IDU.ioInternal.oCSR_ZicsrWSCIdx.asUInt
     NPC_IDU.ioInternal.iCSR_ZicsrOldVal := CSR_Read(CSR_index)
-    /*val NPC_PipeLine_ID2EX_Bundle = new Bundle{
-        val Instr = UInt(InstWidth.W)
-        val PC = UInt(AddrWidth.W)
-        val DecodeVal = UInt(DecodeWidth.W)
-        val RD = UInt(RegIDWidth.W)
-        val EXU_SRC1 = UInt(DataWidth.W)
-        val EXU_SRC2 = UInt(DataWidth.W)
-        val LSU_SRC2 = UInt(DataWidth.W)
-    }*/
     val NPC_ID2EX_Msg = PipeLine_ID2EX.asTypeOf(PipeLine_ID2EX_Bundle)
     val PrivDecode = NPC_ID2EX_Msg.DecodeVal(15, 14)
     val isZicsr = PrivDecode === PR_ZICSR
