@@ -21,6 +21,7 @@ import chisel3.util._
 
 import npc.helper.defs.Base._
 import npc.helper.defs.PipeLineDefs._
+import npc.helper.defs.PipeLine_Bundle._
 
 import npc.helper.opcode.OpEXU._
 
@@ -42,7 +43,7 @@ class EXU extends Module{
 
     val EXU_NotBusy = RegInit(true.B)
 
-    val PipeLine_ID2EX_Bundle = new Bundle{
+    /*val PipeLine_ID2EX_Bundle = new Bundle{
         val Instr = UInt(InstWidth.W)
         val PC = UInt(AddrWidth.W)
         val DecodeVal = UInt(DecodeWidth.W)
@@ -50,7 +51,7 @@ class EXU extends Module{
         val EXU_SRC1 = UInt(DataWidth.W)
         val EXU_SRC2 = UInt(DataWidth.W)
         val LSU_SRC2 = UInt(DataWidth.W)
-    }
+    }*/
 
     val ID2EX_Msg = ioInternal.PipeLine_ID2EX_MsgBundle.asTypeOf(PipeLine_ID2EX_Bundle)
 
