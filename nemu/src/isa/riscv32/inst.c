@@ -162,6 +162,7 @@ int isa_exec_once(Decode *s) {
 #ifdef CONFIG_ShowInstInfo
   printf("********************************************************************************************************************************\n");
 #endif
+  Log("Execute instruction 0x%x", s->isa.inst.val);
   s->isa.inst.val = inst_fetch(&s->snpc, 4);
   return decode_exec(s);
 }

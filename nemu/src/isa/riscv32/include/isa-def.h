@@ -19,7 +19,12 @@
 #include <common.h>
 
 typedef struct {
+  #ifndef CONFIG_RVE
   word_t gpr[32];
+  #else
+  word_t gpr[16];
+  #endif
+  
   IFDEF(CONFIG_RV_Privileged, word_t csr[4096]);
   vaddr_t pc;
 } riscv32_CPU_state;

@@ -74,6 +74,9 @@ config TARGET_AM
 endchoice
 
 menu "RISCV Unprivileged Settings"
+config RVE
+  bool "E (16 registers), default 32"
+  default y
 config RV64M
   bool "M   Standard Extension for Integer Multiplication and Division"
   default y
