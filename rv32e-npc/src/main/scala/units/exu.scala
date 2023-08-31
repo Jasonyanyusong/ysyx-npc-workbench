@@ -43,16 +43,6 @@ class EXU extends Module{
 
     val EXU_NotBusy = RegInit(true.B)
 
-    /*val PipeLine_ID2EX_Bundle = new Bundle{
-        val Instr = UInt(InstWidth.W)
-        val PC = UInt(AddrWidth.W)
-        val DecodeVal = UInt(DecodeWidth.W)
-        val RD = UInt(RegIDWidth.W)
-        val EXU_SRC1 = UInt(DataWidth.W)
-        val EXU_SRC2 = UInt(DataWidth.W)
-        val LSU_SRC2 = UInt(DataWidth.W)
-    }*/
-
     val ID2EX_Msg = ioInternal.PipeLine_ID2EX_MsgBundle.asTypeOf(PipeLine_ID2EX_Bundle)
 
     printf("[RTL : EXU] DecodeBundle = %d\n", ID2EX_Msg.DecodeVal)
