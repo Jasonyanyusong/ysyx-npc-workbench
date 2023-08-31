@@ -47,17 +47,6 @@ class iWriteBackInternal extends Bundle{
 class WBU extends Module{
     val ioInternal = IO(new iWriteBackInternal)
 
-    //val WBU_NotBusy = RegInit(true.B)
-
-    /*val PipeLine_LS2WB_Bundle = new Bundle{
-        val Instr = UInt(InstWidth.W)
-        val PC = UInt(AddrWidth.W)
-        val DecodeVal = UInt(DecodeWidth.W)
-        val RD = UInt(RegIDWidth.W)
-        val EX_RET = UInt(DataWidth.W)
-        val LS_RET = UInt(DataWidth.W)
-    }*/
-
     val LS2WB_Msg = ioInternal.PipeLine_LS2WB_MsgBundle.asTypeOf(PipeLine_LS2WB_Bundle)
 
     val EX_RETVal = LS2WB_Msg.EX_RET
