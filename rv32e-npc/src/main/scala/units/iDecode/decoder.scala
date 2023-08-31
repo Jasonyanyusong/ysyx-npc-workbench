@@ -184,6 +184,8 @@ class IDU extends Module{
         )), 0.U(DecodeWidth.W)
     )
 
+    printf("[RTL : IDU] DecodeBundle = %d\n", IDU_DecodeBundle)
+
     val IDU_InstructionType = Mux(IDU_StateOK, Lookup(
             PipeLine_Instr, instR, Array(
                 LUI -> instU, AUIPC -> instU,
