@@ -61,6 +61,7 @@ void difftest_init(char* ref_so_file, word_t img_size){
     assert(ref_difftest_init);
 
     cpu.pc = 0x80000000;
+    printf("[difftest] initialized PC = 0x%x\n", cpu.pc);
 
     ref_difftest_init(1234);
     ref_difftest_memcpy(MEM_START, guest_to_host(MEM_START), img_size, DIFFTEST_TO_REF);
