@@ -40,6 +40,8 @@ static void restart() {
 
 void init_isa() {
   /* Load built-in image. */
+  Log("PC = 0x%x", cpu.pc);
+
   memcpy(guest_to_host(RESET_VECTOR), img, sizeof(img));
 
   /* Initialize this virtual computer system. */
