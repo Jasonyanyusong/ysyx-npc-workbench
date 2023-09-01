@@ -97,10 +97,15 @@ class NPC extends Module{
     // PC Maintain and Manipulation
     val PC = RegInit("h80000000".U(AddrWidth.W))
 
-    PC := Mux(RegNext(NPC_IFU.ioInternal.oMasterValid) && NPC_IDU.ioInternal.oMasterValid, Mux(NPC_IDU.ioInternal.oFeedBackPCChanged.asBool,
+    /*PC := Mux(/*RegNext(NPC_IFU.ioInternal.oMasterValid) &&*/ NPC_IDU.ioInternal.oMasterValid, Mux(NPC_IDU.ioInternal.oFeedBackPCChanged.asBool,
         NPC_IDU.ioInternal.oFeedBackNewPCVal,
         PC + 4.U
-    ), PC)
+    ), PC)*/
+
+    PC := Mux((RegNext(NPC_IFU.ioInternal.oMasterValid) && NPC_IDU.ioInternal.oMasterValid) || PC === "h80000000".U, Mux(NPC_IDU.ioInternal.oMasterValid, Mux(NPC_IDU.ioInternal.oFeedBackPCChanged.asBool,
+        NPC_IDU.ioInternal.oFeedBackNewPCVal,
+        PC + 4.U
+    ), PC + 4.U), PC)
 
     val PC_Changed = RegNext(NPC_IFU.ioInternal.oMasterValid) && NPC_IDU.ioInternal.oMasterValid
     //NPC_IFU.ioInternal.iPCHaveWB := PC_Changed
