@@ -49,20 +49,18 @@ class IFU extends Module{
 
     // Non-AXI, pipelined Version IFU
 
-    val IFU_NotBusy = RegInit(true.B)
-
     val IFU_StateOK = ioInternal.iMasterReady.asBool
 
     ioExternal.oMemEnable := (IFU_StateOK) && (!ioInternal.iFeedBackPCChanged)
     ioExternal.oPC := ioInternal.iPC
-    ioInternal.oMasterValid := (IFU_NotBusy.asBool && (!ioInternal.iFeedBackPCChanged) && ioInternal.iPC =/= 0.U)
+    ioInternal.oMasterValid := ((!ioInternal.iFeedBackPCChanged) && ioInternal.iPC =/= 0.U)
 
     val Inst = Mux(IFU_StateOK, ioExternal.iInst, 0.U(InstWidth.W))
     val PC = ioInternal.iPC
 
     val PrePare_PipeLine_IF2ID_Bundle = Cat(Seq(Inst, PC))
     ioInternal.PipeLine_IF2ID_MsgBundle := PrePare_PipeLine_IF2ID_Bundle
-    ioInternal.PipeLine_IF2ID_ChangeReg := (IFU_NotBusy && (IFU_StateOK))
+    ioInternal.PipeLine_IF2ID_ChangeReg := ((IFU_StateOK))
     
     /*
 
