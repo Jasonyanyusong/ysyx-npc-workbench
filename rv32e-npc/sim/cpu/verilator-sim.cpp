@@ -20,6 +20,10 @@
 #include <math.h>
 #include <difftest.h>
 
+#ifdef CONFIG_DIFFTEST
+word_t last_diff_pc = 0;
+#endif
+
 //VerilatedContext* contextp = NULL;
 //VerilatedVcdC* tfp = NULL;
 //static VNPC* top;
@@ -100,12 +104,12 @@ void sim_one_cycle(){
 
     top -> clock = 0;
     top -> eval();
-    //sim_mem(0);
+    sim_mem(0);
     step_and_dump_wave();
 
     top -> clock = 1;
     top -> eval();
-    sim_mem(0);
+    //sim_mem(0);
     step_and_dump_wave();
 
     //cycle = cycle + 1;
@@ -117,12 +121,13 @@ void sim_one_cycle(){
     }
 
     #ifdef CONFIG_DIFFTEST
-    if(top -> ioNPCDebug_Worked){
+    if(top -> ioNPCDebug_Worked && top -> ioNPCDebug_PC_COMMIT != last_diff_pc){
         printf("[verilator-sim : sim_one_cycle] WBU indicated it worked, so do a difftest at pc = 0x%x\n", cpu.pc);
         difftest_one_exec();
         if(!difftest_check_reg()){
             npc_state.state = NPC_ABORT;
         }
+        last_diff_pc = top -> ioNPCDebug_PC_COMMIT;
     }
     #endif
 
