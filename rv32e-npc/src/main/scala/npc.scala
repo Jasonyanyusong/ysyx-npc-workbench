@@ -97,10 +97,13 @@ class NPC extends Module{
     // PC Maintain and Manipulation
     val PC = RegInit("h80000000".U(AddrWidth.W))
 
-    PC := Mux(NPC_IDU.ioInternal.oMasterValid, Mux(NPC_IDU.ioInternal.oFeedBackPCChanged.asBool,
+    PC := Mux(RegNext(NPC_IFU.ioInternal.oMasterValid) && NPC_IDU.ioInternal.oMasterValid, Mux(NPC_IDU.ioInternal.oFeedBackPCChanged.asBool,
         NPC_IDU.ioInternal.oFeedBackNewPCVal,
         PC + 4.U
     ), PC)
+
+    val PC_Changed = RegNext(NPC_IFU.ioInternal.oMasterValid) && NPC_IDU.ioInternal.oMasterValid
+    //NPC_IFU.ioInternal.iPCHaveWB := PC_Changed
 
     // GPR Maintain and Manipulation
     val GPR = Mem(RegSum, UInt(DataWidth.W))
@@ -138,7 +141,7 @@ class NPC extends Module{
     NPC_IDU.ioInternal.iSlaveValid  := RegNext(NPC_IFU.ioInternal.oMasterValid)
     NPC_IDU.ioInternal.PipeLine_IF2ID_MsgBundle := PipeLine_IF2ID
     // The PC change feedback need to do at the same time, not using RegNext
-    NPC_IFU.ioInternal.iFeedBackPCChanged := (NPC_IDU.ioInternal.oFeedBackPCChanged)
+    NPC_IFU.ioInternal.iFeedBackPCChanged := NPC_IDU.ioInternal.oFeedBackPCChanged
 
     // NPC Outside Logic: IFU <-> IO
     ioNPC.iFetch_oPC := NPC_IFU.ioExternal.oPC
