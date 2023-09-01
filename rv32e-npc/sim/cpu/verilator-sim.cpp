@@ -66,13 +66,13 @@ void sim_init(){
     top -> eval();
     top -> reset = 1;
     top -> eval();
-    //step_and_dump_wave();
+    step_and_dump_wave();
     
     top -> clock = 1;
     top -> eval();
     top -> reset = 0;
     top -> eval();
-    //step_and_dump_wave();
+    step_and_dump_wave();
 
     cycle = cycle + 1;
 
@@ -96,19 +96,19 @@ void sim_exit(){
 void sim_one_cycle(){
     assert(top);
 
-    //sim_mem(0); // iFetch
+    cycle = cycle + 1;
 
     top -> clock = 0;
+    top -> eval();
+    //sim_mem(0);
+    step_and_dump_wave();
+
+    top -> clock = 1;
     top -> eval();
     sim_mem(0);
     step_and_dump_wave();
 
-    top -> clock = 1;
-    //top -> eval();
-    //sim_mem(0);
-    step_and_dump_wave();
-
-    cycle = cycle + 1;
+    //cycle = cycle + 1;
 
     get_regs(); // used as print registers or difftest
 
