@@ -298,5 +298,5 @@ class IDU extends Module{
 
     // Connect Pipline Signals
     ioInternal.oMasterValid := ((!RSRegistersDirty) && ioInternal.iSlaveValid)
-    ioInternal.oSlaveReady := ((!RSRegistersDirty) && ioInternal.iMasterReady)
+    ioInternal.oSlaveReady := ((!RSRegistersDirty) && ioInternal.iMasterReady) && !IDU_JudgePCJump
 }

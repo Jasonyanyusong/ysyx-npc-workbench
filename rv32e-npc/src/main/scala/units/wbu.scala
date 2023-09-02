@@ -83,7 +83,7 @@ class WBU extends Module{
     ioInternal.oDNPC := LS2WB_Msg.DNPC
 
     // Connect IO for debug
-    ioInternal.oWorked := WBU_StateOK
+    ioInternal.oWorked := WBU_StateOK && LS2WB_Msg.Instr =/= 0.U
     ioInternal.oDecodeBundleDebug := LS2WB_Msg.DecodeVal
     ioInternal.oStopped := (LS2WB_Msg.Instr === "h100073".U)
 
