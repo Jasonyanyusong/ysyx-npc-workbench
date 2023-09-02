@@ -86,11 +86,39 @@ class IDU extends Module{
     PipeLine_IF2ID_MsgBuffer := Mux(IDU_Busy, PipeLine_IF2ID_MsgBuffer, ioInternal.PipeLine_IF2ID_MsgBundle)
     val IDU_ProcessMsg = Mux(IDU_Busy, PipeLine_IF2ID_MsgBuffer, ioInternal.PipeLine_IF2ID_MsgBundle).asTypeOf(PipeLine_IF2ID_Bundle)
 
+    val PipeLine_Instr = IDU_ProcessMsg.Instr
+    val PipeLine_PC = IDU_ProcessMsg.PC
+
+    val IDU_InstructionType = Mux(IDU_StateOK, Lookup(
+            PipeLine_Instr, instR, Array(
+                LUI -> instU, AUIPC -> instU,
+
+                JAL -> instJ,
+
+                JALR -> instI,
+                LB -> instI, LH -> instI, LW -> instI, LBU -> instI, LHU -> instI,
+                ADDI -> instI, SLTI -> instI, SLTIU -> instI, XORI -> instI, ORI -> instI, ANDI -> instI, SLLI -> instI, SRLI -> instI, SRAI -> instI,
+
+                CSRRW -> instI, CSRRS -> instI, CSRRC -> instI, CSRRWI -> instI, CSRRSI -> instI, CSRRCI -> instI,
+
+                ADD -> instR, SUB -> instR, SLL -> instR, SLT -> instR, SLTU -> instR, XOR -> instR, SRL -> instR, SRA -> instR, OR -> instR, AND -> instR,
+
+                SB -> instS, SH -> instS, SW -> instS,
+
+                BEQ -> instB, BNE -> instB, BLT -> instB, BGE -> instB, BLTU -> instB, BGEU -> instB,
+            )
+        ), instR
+    )
+
+    val RS1 = Mux(IDU_StateOK, Mux(IDU_InstructionType === instU || IDU_InstructionType === instJ, 0.U(RegIDWidth.W), IDU_ProcessMsg.Instr(RS1Hi, RS1Lo)), 0.U(RegIDWidth.W))
+    val RS2 = Mux(IDU_StateOK, Mux(IDU_InstructionType === instI || IDU_InstructionType === instU || IDU_InstructionType === instJ, 0.U(RegIDWidth.W), IDU_ProcessMsg.Instr(RS2Hi, RS2Lo)), 0.U(RegIDWidth.W))
+    val RD  = Mux(IDU_StateOK, Mux(IDU_InstructionType === instS || IDU_InstructionType === instB, 0.U(RegIDWidth.W), IDU_ProcessMsg.Instr(RDHi , RDLo )), 0.U(RegIDWidth.W))
+
     // Get RS1, RS2 and RD
     // In RV32-E we add 1 so that the first bit will not be included, and will not affect Zicsr's uimm
-    val RS1 = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RS1Hi, RS1Lo), 0.U(RegIDWidth.W))
-    val RS2 = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RS2Hi, RS2Lo), 0.U(RegIDWidth.W))
-    val RD  = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RDHi , RDLo ), 0.U(RegIDWidth.W))
+    //val RS1 = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RS1Hi, RS1Lo), 0.U(RegIDWidth.W))
+    //val RS2 = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RS2Hi, RS2Lo), 0.U(RegIDWidth.W))
+    //val RD  = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RDHi , RDLo ), 0.U(RegIDWidth.W))
 
     ioInternal.oRS1 := RS1
     ioInternal.oRS2 := RS2
@@ -104,8 +132,8 @@ class IDU extends Module{
     val IDU_SRC1 = Mux(IDU_StateOK, ioInternal.iSRC1, 0.U(DataWidth.W))
     val IDU_SRC2 = Mux(IDU_StateOK, ioInternal.iSRC2, 0.U(DataWidth.W))
 
-    val PipeLine_Instr = IDU_ProcessMsg.Instr
-    val PipeLine_PC = IDU_ProcessMsg.PC
+    //val PipeLine_Instr = IDU_ProcessMsg.Instr
+    //val PipeLine_PC = IDU_ProcessMsg.PC
 
     val Priv = Mux(IDU_StateOK, Lookup(
             PipeLine_Instr, PR_NORM, Array(
@@ -183,7 +211,7 @@ class IDU extends Module{
 
     printf("[RTL : IDU] DecodeBundle = %d\n", IDU_DecodeBundle)
 
-    val IDU_InstructionType = Mux(IDU_StateOK, Lookup(
+    /*val IDU_InstructionType = Mux(IDU_StateOK, Lookup(
             PipeLine_Instr, instR, Array(
                 LUI -> instU, AUIPC -> instU,
 
@@ -202,7 +230,7 @@ class IDU extends Module{
                 BEQ -> instB, BNE -> instB, BLT -> instB, BGE -> instB, BLTU -> instB, BGEU -> instB,
             )
         ), instR
-    )
+    )*/
 
     // Connect imm-generator
     val ImmGenerator = Module(new immGen)
