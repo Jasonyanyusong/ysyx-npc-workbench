@@ -51,6 +51,8 @@ class iDecodeInternal extends Bundle{
     val oFeedBackPCChanged = Output(Bool())
     val oFeedBackNewPCVal = Output(UInt(AddrWidth.W))
 
+    val oFeedBackDecodingJumpInstr = Output(Bool())
+
     val PipeLine_IF2ID_MsgBundle = Input(UInt(PipeLine_IF2ID_Width.W))
     val PipeLine_ID2EX_MsgBundle = Output(UInt(PipeLine_ID2EX_Width.W))
     val PipeLine_ID2EX_ChangeReg = Output(Bool())
@@ -81,13 +83,21 @@ class IDU extends Module{
     val IDU_Busy = RegInit(false.B)
     val PipeLine_IF2ID_MsgBuffer = RegInit(0.U(PipeLine_IF2ID_Width.W))
 
-    val IDU_StateOK = (ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool)
+    val IDU_StateOK = (ioInternal.iSlaveValid.asBool && ioInternal.iMasterReady.asBool) || IDU_Busy
 
     PipeLine_IF2ID_MsgBuffer := Mux(IDU_Busy, PipeLine_IF2ID_MsgBuffer, ioInternal.PipeLine_IF2ID_MsgBundle)
     val IDU_ProcessMsg = Mux(IDU_Busy, PipeLine_IF2ID_MsgBuffer, ioInternal.PipeLine_IF2ID_MsgBundle).asTypeOf(PipeLine_IF2ID_Bundle)
 
     val PipeLine_Instr = IDU_ProcessMsg.Instr
     val PipeLine_PC = IDU_ProcessMsg.PC
+
+    val DecodingJumpInstr = Lookup(
+        PipeLine_Instr, false.B, Array(
+            JAL -> true.B, JALR -> true.B,
+            BEQ -> true.B, BNE -> true.B, BLT -> true.B, BGE -> true.B, BLTU -> true.B, BGEU -> true.B,
+            ECALL -> true.B, MRET -> true.B
+        )
+    )
 
     val IDU_InstructionType = Mux(IDU_StateOK, Lookup(
             PipeLine_Instr, instR, Array(
@@ -321,10 +331,12 @@ class IDU extends Module{
     ioInternal.oFeedBackPCChanged := IDU_JudgePCJump && (!RSRegistersDirty)
     ioInternal.oFeedBackNewPCVal := IDU_JumpPCAddr
 
+    ioInternal.oFeedBackDecodingJumpInstr := (DecodingJumpInstr && IDU_Busy)
+
     ioInternal.oCSR_ZicsrWSCIdx := IDU_ZicsrWSCIdx
     ioInternal.oCSR_ZicsrNewVal := IDU_ZicsrNewVal
 
     // Connect Pipline Signals
-    ioInternal.oMasterValid := ((!RSRegistersDirty) && ioInternal.iSlaveValid)
+    ioInternal.oMasterValid := ((!RSRegistersDirty) && ioInternal.iSlaveValid) || ((DecodingJumpInstr && IDU_Busy && (!RSRegistersDirty)))
     ioInternal.oSlaveReady := ((!RSRegistersDirty) && ioInternal.iMasterReady) && !IDU_JudgePCJump
 }

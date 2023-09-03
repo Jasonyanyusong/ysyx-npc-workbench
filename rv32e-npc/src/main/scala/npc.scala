@@ -147,6 +147,7 @@ class NPC extends Module{
     NPC_IDU.ioInternal.PipeLine_IF2ID_MsgBundle := PipeLine_IF2ID
     // The PC change feedback need to do at the same time, not using RegNext
     NPC_IFU.ioInternal.iFeedBackPCChanged := NPC_IDU.ioInternal.oFeedBackPCChanged
+    NPC_IFU.ioInternal.iFeedBackDecodingJumpInstr := NPC_IDU.ioInternal.oFeedBackDecodingJumpInstr
 
     // NPC Outside Logic: IFU <-> IO
     ioNPC.iFetch_oPC := NPC_IFU.ioExternal.oPC
