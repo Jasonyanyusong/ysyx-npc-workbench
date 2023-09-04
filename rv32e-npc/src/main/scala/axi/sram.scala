@@ -44,5 +44,7 @@ class SRAM extends Module{
     // External IO: connect with NPC's IO for verilating
     val ExternalIO = IO(new SRAM_External_IO)
 
+    val LoadStoreDelay = 5
+
     // TODO: Logic for Memory manipulations
 }
