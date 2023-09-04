@@ -19,18 +19,30 @@ package npc.axi.sram
 import chisel2._
 import chisel3.uitl._
 
+import npc.axi.master
+import npc.axi.slave
+
 import npc.helper.defs.Base._
 
-class SRAM_Internal_IO extends Bundle{
-    // TODO: add internal IO (connect LSU for AW W B and Arbiter for LSU/IFU AR and R)
-}
-
 class SRAM_External_IO extends Bundle{
-    // TODO: add external IO (connect NPC or Debug Environment)
+    val SRAM_Addr = Output(UInt(AddrWidth.W))
+    val SRAM_R_Data = Input(UInt(AddrWidth.W))
+    val SRAM_W_Data = Output(UInt(AddrWidth.W))
+    val SRAM_R_Enable = Output(Bool())
+    val SRAM_W_Enable = Output(Bool())
+    val SRAM_Host_Valid = Input(Bool())
 }
 
 class SRAM extends Module{
-    // TODO: add functional
-    val InternalIO = IO(new SRAM_Internal_IO)
+    // Internal IO: connect with Master at arbiter
+    val Slave_AW = IO(new AXISlaveAW)
+    val Slave_W = IO(new AXISlaveW)
+    val Slave_B = IO(new AXISlaveB)
+    val Slave_AR = IO(new AXISlaveAR)
+    val Slave_R = IO(new AXISlaveR)
+
+    // External IO: connect with NPC's IO for verilating
     val ExternalIO = IO(new SRAM_External_IO)
+
+    // TODO: Logic for Memory manipulations
 }

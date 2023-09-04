@@ -33,6 +33,8 @@ class AXIArbiter extends Module{
     val ArbitAR = IO(new AXIMasterAR)
     val ArbitR  = IO(new AXIMasterR)
 
+    // TODO: not sequential/cycle accurate
+
     if(IFU_AR.oMasterARvalid.litToBoolean && LSU_AR.oMasterARvalid.litToBoolean){
         // Both LSU and IFU send read request, satisfy LSU first
         LSU_AR <> ArbitAR
