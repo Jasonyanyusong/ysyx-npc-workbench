@@ -79,6 +79,7 @@ class SRAM extends Module{
     ))
 
     // III: issue memory read and write
+    val ReadResponse = ExternalIO.SRAM_R_Data
 
     // IV: delay data writeback, using ShiftRegister API to create register delay
 }
