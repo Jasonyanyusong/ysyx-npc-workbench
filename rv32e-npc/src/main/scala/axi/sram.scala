@@ -50,7 +50,7 @@ class SRAM extends Module{
 
     // I: maintain SRAM_Addr
     ExternalIO.SRAM_Addr := Mux(
-        /*AW or AR is valid*/,
+        (Slave_AR.iSlaveARvalid && Slave_R.iSlaveRready) || (Slave_AW.iSlaveAWvalid && Slave_W.iSlaveWvalid && Slave_B.iSlaveBready),
         /*True: send address (using Mux distinguish R or W)*/,
         /*False: send a NULL addr (simulation need to ignore)*/
     ) // TODO: implement in Chisel HCL
