@@ -26,7 +26,6 @@ import npc.axi.params.Base._
 import npc.helper.defs.Base._
 
 class SRAM_External_IO extends Bundle{
-    //val SRAM_Addr = Output(UInt(AddrWidth.W))
     val SRAM_R_Addr = Output(UInt(AddrWidth.W))
     val SRAM_W_Addr = Output(UInt(AddrWidth.W))
     val SRAM_R_Data = Input(UInt(AddrWidth.W))
@@ -66,6 +65,12 @@ class SRAM extends Module{
     ))
 
     // II: maintain SRAM_W signals
+    ExternalIO.SRAM_W_Addr := Mux(
+        // TODO: add data write address assigning
+    )
+    ExternalIO.SRAM_W_Enable := // TODO: add judge for write enable
+    ExternalIO.SRAM_W_Data := // TODO: get write data from slave's input
+    ExternalIO.SRAM_W_Mask := // TODO: assign mask for write data mask
 
     // III: issue memory read and write
 
