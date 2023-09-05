@@ -59,9 +59,9 @@ class SRAM extends Module{
     )
     ExternalIO.SRAM_R_Enable := (Slave_AR.iSlaveARvalid && Slave_R.iSlaveRready)
     ExternalIO.SRAM_R_Mask := MuxCase(0.U(DataWidth.W), Seq(
-        AxSIZE_1B -> Cat(Fill(DataWidth - ByteWidth, 0.U(1.W)), Fill(ByteWidth, 1.U(1.W))),
-        AxSIZE_2B -> Cat(Fill(DataWidth - HalfWidth, 0.U(1.W)), Fill(HalfWidth, 1.U(1.W))),
-        AxSIZE_4B -> Cat(Fill(WordWidth, 1.U(1.W))),
+        Slave_AR.iSlaveARsize === AxSIZE_1B -> Cat(Fill(DataWidth - ByteWidth, 0.U(1.W)), Fill(ByteWidth, 1.U(1.W))),
+        Slave_AR.iSlaveARsize === AxSIZE_2B -> Cat(Fill(DataWidth - HalfWidth, 0.U(1.W)), Fill(HalfWidth, 1.U(1.W))),
+        Slave_AR.iSlaveARsize === AxSIZE_4B -> Cat(Fill(WordWidth, 1.U(1.W))),
     ))
 
     // II: maintain SRAM_W signals
@@ -73,9 +73,9 @@ class SRAM extends Module{
     ExternalIO.SRAM_W_Enable := (Slave_AW.iSlaveAWvalid && Slave_W.iSlaveWvalid && Slave_B.iSlaveBready)
     ExternalIO.SRAM_W_Data := Slave_W.iSlaveWdata
     ExternalIO.SRAM_W_Mask := MuxCase(0.U(DataWidth.W), Seq(
-        AxSIZE_1B -> Cat(Fill(DataWidth - ByteWidth, 0.U(1.W)), Fill(ByteWidth, 1.U(1.W))),
-        AxSIZE_2B -> Cat(Fill(DataWidth - HalfWidth, 0.U(1.W)), Fill(HalfWidth, 1.U(1.W))),
-        AxSIZE_4B -> Cat(Fill(WordWidth, 1.U(1.W))),
+        Slave_AW.iSlaveARsize === AxSIZE_1B -> Cat(Fill(DataWidth - ByteWidth, 0.U(1.W)), Fill(ByteWidth, 1.U(1.W))),
+        Slave_AW.iSlaveARsize === AxSIZE_2B -> Cat(Fill(DataWidth - HalfWidth, 0.U(1.W)), Fill(HalfWidth, 1.U(1.W))),
+        Slave_AW.iSlaveARsize === AxSIZE_4B -> Cat(Fill(WordWidth, 1.U(1.W))),
     ))
 
     // III: issue memory read and write
