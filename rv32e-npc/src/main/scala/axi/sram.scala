@@ -25,11 +25,15 @@ import npc.axi.slave
 import npc.helper.defs.Base._
 
 class SRAM_External_IO extends Bundle{
-    val SRAM_Addr = Output(UInt(AddrWidth.W))
+    //val SRAM_Addr = Output(UInt(AddrWidth.W))
+    val SRAM_R_Addr = Output(UInt(AddrWidth.W))
+    val SRAM_W_Addr = Output(UInt(AddrWidth.W))
     val SRAM_R_Data = Input(UInt(AddrWidth.W))
     val SRAM_W_Data = Output(UInt(AddrWidth.W))
     val SRAM_R_Enable = Output(Bool())
     val SRAM_W_Enable = Output(Bool())
+    val SRAM_R_Mask = Output(UInt(DataWidth.W))
+    val SRAM_W_Mask = Output(UInt(DataWidth.W))
     val SRAM_Host_Valid = Input(Bool())
 }
 
@@ -44,26 +48,21 @@ class SRAM extends Module{
     // External IO: connect with NPC's IO for verilating
     val ExternalIO = IO(new SRAM_External_IO)
 
+    // Configurable paramater to set how many cycle delay after memory manipulation is OK
     val LoadStoreDelay = 5
 
-    // TODO: Logic for Memory manipulations
+    // I: maintain SRAM_R signals
+    ExternalIO.SRAM_R_Addr := Mux(
+        (Slave_AR.iSlaveARvalid && Slave_R.iSlaveRready),
+        (Slave_AR.iSlaveARaddr),
+        (0.U(AddrWidth.W)) // To trigger error if AXI went wrong
+    )
+    ExternalIO.SRAM_R_Enable := (Slave_AR.iSlaveARvalid && Slave_R.iSlaveRready)
+    ExternalIO.SRAM_R_Mask := // TODO: Write read mask according to defs of AXI4
 
-    // I: maintain SRAM_Addr
-    ExternalIO.SRAM_Addr := Mux(
-        (Slave_AR.iSlaveARvalid && Slave_R.iSlaveRready) || (Slave_AW.iSlaveAWvalid && Slave_W.iSlaveWvalid && Slave_B.iSlaveBready),
-        /*True: send address (using Mux distinguish R or W)*/,
-        /*False: send a NULL addr (simulation need to ignore)*/
-    ) // TODO: implement in Chisel HCL
+    // II: maintain SRAM_W signals
 
-    // I: maintain SRAM_R_Enable & SRAM_W_Enable
-    ExternalIO.SRAM_R_Enable := // TODO: Using Mux logic
-    ExternalIO.SRAM_W_Enable := // TODO: Using Mux logic
+    // III: issue memory read and write
 
-    // I: maintain SRAM_W_Data
-    ExternalIO.SRAM_W_Data := // TODO: Using Mux send AXI-Addr
-
-    // II: Tansfer data bundles back
-
-    // III: Initialize 5 slave signal bundles
-
+    // IV: delay data writeback, using ShiftRegister API to create register delay
 }
