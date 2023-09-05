@@ -66,11 +66,17 @@ class SRAM extends Module{
 
     // II: maintain SRAM_W signals
     ExternalIO.SRAM_W_Addr := Mux(
-        // TODO: add data write address assigning
+        (Slave_AW.iSlaveAWvalid && Slave_W.iSlaveWvalid && Slave_B.iSlaveBready),
+        (Slave_AW.iSlaveAWaddr),
+        (0.U(AddrWidth.W))
     )
-    ExternalIO.SRAM_W_Enable := // TODO: add judge for write enable
-    ExternalIO.SRAM_W_Data := // TODO: get write data from slave's input
-    ExternalIO.SRAM_W_Mask := // TODO: assign mask for write data mask
+    ExternalIO.SRAM_W_Enable := (Slave_AW.iSlaveAWvalid && Slave_W.iSlaveWvalid && Slave_B.iSlaveBready)
+    ExternalIO.SRAM_W_Data := Slave_W.iSlaveWdata
+    ExternalIO.SRAM_W_Mask := MuxCase(0.U(DataWidth.W), Seq(
+        AxSIZE_1B -> Cat(Fill(DataWidth - ByteWidth, 0.U(1.W)), Fill(ByteWidth, 1.U(1.W))),
+        AxSIZE_2B -> Cat(Fill(DataWidth - HalfWidth, 0.U(1.W)), Fill(HalfWidth, 1.U(1.W))),
+        AxSIZE_4B -> Cat(Fill(WordWidth, 1.U(1.W))),
+    ))
 
     // III: issue memory read and write
 
