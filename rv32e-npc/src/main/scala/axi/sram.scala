@@ -47,4 +47,23 @@ class SRAM extends Module{
     val LoadStoreDelay = 5
 
     // TODO: Logic for Memory manipulations
+
+    // I: maintain SRAM_Addr
+    ExternalIO.SRAM_Addr := Mux(
+        /*AW or AR is valid*/,
+        /*True: send address (using Mux distinguish R or W)*/,
+        /*False: send a NULL addr (simulation need to ignore)*/
+    ) // TODO: implement in Chisel HCL
+
+    // I: maintain SRAM_R_Enable & SRAM_W_Enable
+    ExternalIO.SRAM_R_Enable := // TODO: Using Mux logic
+    ExternalIO.SRAM_W_Enable := // TODO: Using Mux logic
+
+    // I: maintain SRAM_W_Data
+    ExternalIO.SRAM_W_Data := // TODO: Using Mux send AXI-Addr
+
+    // II: Tansfer data bundles back
+
+    // III: Initialize 5 slave signal bundles
+
 }
