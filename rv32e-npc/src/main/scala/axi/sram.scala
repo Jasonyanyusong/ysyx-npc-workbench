@@ -16,11 +16,12 @@
 
 package npc.axi.sram
 
-import chisel2._
+import chisel3._
 import chisel3.uitl._
 
 import npc.axi.master
 import npc.axi.slave
+import npc.axi.params.Base._
 
 import npc.helper.defs.Base._
 
@@ -58,7 +59,11 @@ class SRAM extends Module{
         (0.U(AddrWidth.W)) // To trigger error if AXI went wrong
     )
     ExternalIO.SRAM_R_Enable := (Slave_AR.iSlaveARvalid && Slave_R.iSlaveRready)
-    ExternalIO.SRAM_R_Mask := // TODO: Write read mask according to defs of AXI4
+    ExternalIO.SRAM_R_Mask := MuxCase(0.U(DataWidth.W), Seq(
+        AxSIZE_1B -> Cat(Fill(DataWidth - ByteWidth, 0.U(1.W)), Fill(ByteWidth, 1.U(1.W))),
+        AxSIZE_2B -> Cat(Fill(DataWidth - HalfWidth, 0.U(1.W)), Fill(HalfWidth, 1.U(1.W))),
+        AxSIZE_4B -> Cat(Fill(WordWidth, 1.U(1.W))),
+    ))
 
     // II: maintain SRAM_W signals
 
