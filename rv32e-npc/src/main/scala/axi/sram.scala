@@ -34,7 +34,6 @@ class SRAM_External_IO extends Bundle{
     val SRAM_W_Enable = Output(Bool())
     val SRAM_R_Mask = Output(UInt(DataWidth.W))
     val SRAM_W_Mask = Output(UInt(DataWidth.W))
-    //val SRAM_Host_Valid = Input(Bool())
     val SRAM_R_Valid = Input(Bool())
     val SRAM_W_Valid = Input(Bool())
 }
