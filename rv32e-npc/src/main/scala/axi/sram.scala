@@ -59,9 +59,9 @@ class SRAM extends Module{
     )
     ExternalIO.SRAM_R_Enable := (Slave_AR.iSlaveARvalid && Slave_R.iSlaveRready)
     ExternalIO.SRAM_R_Mask := MuxCase(0.U(DataWidth.W), Seq(
-        Slave_AR.iSlaveARsize === AxSIZE_1B -> Cat(Fill(DataWidth - ByteWidth, 0.U(1.W)), Fill(ByteWidth, 1.U(1.W))),
-        Slave_AR.iSlaveARsize === AxSIZE_2B -> Cat(Fill(DataWidth - HalfWidth, 0.U(1.W)), Fill(HalfWidth, 1.U(1.W))),
-        Slave_AR.iSlaveARsize === AxSIZE_4B -> Cat(Fill(WordWidth, 1.U(1.W))),
+        (Slave_AR.iSlaveARsize === AxSIZE_1B) -> Cat(Fill(DataWidth - ByteWidth, 0.U(1.W)), Fill(ByteWidth, 1.U(1.W))),
+        (Slave_AR.iSlaveARsize === AxSIZE_2B) -> Cat(Fill(DataWidth - HalfWidth, 0.U(1.W)), Fill(HalfWidth, 1.U(1.W))),
+        (Slave_AR.iSlaveARsize === AxSIZE_4B) -> Cat(Fill(WordWidth, 1.U(1.W))),
     ))
 
     // II: maintain SRAM_W signals
@@ -73,13 +73,32 @@ class SRAM extends Module{
     ExternalIO.SRAM_W_Enable := (Slave_AW.iSlaveAWvalid && Slave_W.iSlaveWvalid && Slave_B.iSlaveBready)
     ExternalIO.SRAM_W_Data := Slave_W.iSlaveWdata
     ExternalIO.SRAM_W_Mask := MuxCase(0.U(DataWidth.W), Seq(
-        Slave_AW.iSlaveARsize === AxSIZE_1B -> Cat(Fill(DataWidth - ByteWidth, 0.U(1.W)), Fill(ByteWidth, 1.U(1.W))),
-        Slave_AW.iSlaveARsize === AxSIZE_2B -> Cat(Fill(DataWidth - HalfWidth, 0.U(1.W)), Fill(HalfWidth, 1.U(1.W))),
-        Slave_AW.iSlaveARsize === AxSIZE_4B -> Cat(Fill(WordWidth, 1.U(1.W))),
+        (Slave_AW.iSlaveARsize === AxSIZE_1B) -> Cat(Fill(DataWidth - ByteWidth, 0.U(1.W)), Fill(ByteWidth, 1.U(1.W))),
+        (Slave_AW.iSlaveARsize === AxSIZE_2B) -> Cat(Fill(DataWidth - HalfWidth, 0.U(1.W)), Fill(HalfWidth, 1.U(1.W))),
+        (Slave_AW.iSlaveARsize === AxSIZE_4B) -> Cat(Fill(WordWidth, 1.U(1.W))),
     ))
 
     // III: issue memory read and write
     val ReadResponse = ExternalIO.SRAM_R_Data
 
     // IV: delay data writeback, using ShiftRegister API to create register delay
+    // ready: Depends on state of SRAM
+    // valid: ShiftRegister()
+    // other: ShiftRegister()
+
+    Slave_AW.oSlaveAWready := // TODO: hand-shaking signals
+    
+    Slave_W.oSlaveWready := // TODO: hand-shaking signals
+
+    Slave_B.oSlaveBvalid := // TODO: hand-shaking signals
+    Slave_B.oSlaveBresp := // TODO: write response
+    Slave_B.oSlaveBid := // TODO: misc signals
+
+    Slave_AR.oSlaveARready := // TODO: hand-shaking signals
+
+    Slave_R.oSlaveRvalid := // TODO: hand-shaking signals
+    Slave_R.oSlaveRresp := // TODO: read response
+    Slave_R.oSlaveRdata := // TODO: read data
+    Slave_R.oSlaveRlast := // TODO: last read signal
+    Slave_R.oSlaveRid := // TODO: misc signals
 }
