@@ -26,3 +26,11 @@ object Base{
     val AxSIZE_2B = 1.U(3.W)
     val AxSIZE_4B = 2.U(3.W)
 }
+
+object AXI2Lable{
+    // B
+    val BRESP_OKAY = 0.U(3.W)
+
+    // R
+    val RRESP_OKAY = 0.U(3.W)
+}

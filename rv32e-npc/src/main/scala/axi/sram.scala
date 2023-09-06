@@ -22,6 +22,7 @@ import chisel3.uitl._
 import npc.axi.master
 import npc.axi.slave
 import npc.axi.params.Base._
+import npc.axi.params.AXI2Lable._
 
 import npc.helper.defs.Base._
 
@@ -92,13 +93,13 @@ class SRAM extends Module{
     Slave_W.oSlaveWready := true.B
 
     Slave_B.oSlaveBvalid := ShiftRegister(ExternalIO.SRAM_W_Valid, LoadStoreDelay)
-    Slave_B.oSlaveBresp := // TODO: write response
+    Slave_B.oSlaveBresp := ShiftRegister(BRESP_OKAY, LoadStoreDelay)
     Slave_B.oSlaveBid := ShiftRegister(Slave_AW.iSlaveAWid, LoadStoreDelay)
 
     Slave_AR.oSlaveARready := true.B
 
     Slave_R.oSlaveRvalid := ShiftRegister(ExternalIO.SRAM_R_Valid, LoadStoreDelay)
-    Slave_R.oSlaveRresp := // TODO: read response
+    Slave_R.oSlaveRresp := ShiftRegister(RRESP_OKAY, LoadStoreDelay)
     Slave_R.oSlaveRdata := ShiftRegister(ReadResponse, LoadStoreDelay)
     Slave_R.oSlaveRlast := ShiftRegister(true.B, LoadStoreDelay)
     Slave_R.oSlaveRid := ShiftRegister(Slave_AR.iSlaveARid, LoadStoreDelay)
