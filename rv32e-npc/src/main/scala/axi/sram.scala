@@ -34,7 +34,9 @@ class SRAM_External_IO extends Bundle{
     val SRAM_W_Enable = Output(Bool())
     val SRAM_R_Mask = Output(UInt(DataWidth.W))
     val SRAM_W_Mask = Output(UInt(DataWidth.W))
-    val SRAM_Host_Valid = Input(Bool())
+    //val SRAM_Host_Valid = Input(Bool())
+    val SRAM_R_Valid = Input(Bool())
+    val SRAM_W_Valid = Input(Bool())
 }
 
 class SRAM extends Module{
@@ -86,19 +88,19 @@ class SRAM extends Module{
     // valid: ShiftRegister()
     // other: ShiftRegister()
 
-    Slave_AW.oSlaveAWready := // TODO: hand-shaking signals
+    Slave_AW.oSlaveAWready := true.B
     
-    Slave_W.oSlaveWready := // TODO: hand-shaking signals
+    Slave_W.oSlaveWready := true.B
 
-    Slave_B.oSlaveBvalid := // TODO: hand-shaking signals
+    Slave_B.oSlaveBvalid := ShiftRegister(ExternalIO.SRAM_W_Valid, LoadStoreDelay)
     Slave_B.oSlaveBresp := // TODO: write response
-    Slave_B.oSlaveBid := // TODO: misc signals
+    Slave_B.oSlaveBid := ShiftRegister(Slave_AW.iSlaveAWid, LoadStoreDelay)
 
-    Slave_AR.oSlaveARready := // TODO: hand-shaking signals
+    Slave_AR.oSlaveARready := true.B
 
-    Slave_R.oSlaveRvalid := // TODO: hand-shaking signals
+    Slave_R.oSlaveRvalid := ShiftRegister(ExternalIO.SRAM_R_Valid, LoadStoreDelay)
     Slave_R.oSlaveRresp := // TODO: read response
-    Slave_R.oSlaveRdata := // TODO: read data
-    Slave_R.oSlaveRlast := // TODO: last read signal
-    Slave_R.oSlaveRid := // TODO: misc signals
+    Slave_R.oSlaveRdata := ShiftRegister(ReadResponse, LoadStoreDelay)
+    Slave_R.oSlaveRlast := ShiftRegister(true.B, LoadStoreDelay)
+    Slave_R.oSlaveRid := ShiftRegister(Slave_AR.iSlaveARid, LoadStoreDelay)
 }
