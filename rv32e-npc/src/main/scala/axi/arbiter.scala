@@ -74,6 +74,9 @@ class AXIArbiter extends Module{
         (  IFU_AR.iSlaveARvalid  &&   LSU_AR.iSlaveARvalid ) -> (Arbiter_BOTH_REQUEST)
     )), ArbiterState)
 
+    // ArbiterBusy indicating it is working
+    ArbiterBusy := !(IFU_AR.iSlaveARvalid && LSU_AR.iSlaveARvalid )
+
     // II: According to ArbiterState, forward signals to IFU and LSU
 
 }
