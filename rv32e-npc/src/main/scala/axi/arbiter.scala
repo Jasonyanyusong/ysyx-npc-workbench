@@ -20,11 +20,14 @@ import chisel3._
 import chisel3.util._
 
 import npc.axi.master._
+import npc.axi.slave._
+import npc.axi.params.ArbiterDefs._
 
 class AXIArbiter extends Module{
     // Rule: LSU Read > IFU iFetch
     // This is the interface between the "module parts external" to "SoC/simulation external"
 
+    /*
     val IFU_AR = IO(Flipped(new AXIMasterAR))
     val IFU_R  = IO(Flipped(new AXIMasterR))
     val LSU_AR = IO(Flipped(new AXIMasterAR))
@@ -52,4 +55,25 @@ class AXIArbiter extends Module{
         ArbitAR.oMasterARvalid := false.B
         ArbitR.oMasterRready   := false.B
     }
+    */
+
+    val IFU_AR = IO(new AXISlaveAR)
+    val IFU_R = IO(new AXISlaveR)
+
+    val LSU_AR = IO(new AXISlaveAR)
+    val LSU_R = IO(new AXISlaveR)
+
+    val ArbiterState = RegInit(0.U(2.W))
+    val ArbiterBusy = RegInit(false.B)
+
+    // I: Update State if Arbiter's Job has finished
+    ArbiterState := MuxCase(Arbiter_NO_REQUEST, Array(
+        ((!IFU_AR.iSlaveARvalid) && (!LSU_AR.iSlaveARvalid)) -> (Arbiter_NO_REQUEST),
+        (  IFU_AR.iSlaveARvalid  && (!LSU_AR.iSlaveARvalid)) -> (Arbiter_IFU_ONLY),
+        ((!IFU_AR.iSlaveARvalid) &&   LSU_AR.iSlaveARvalid ) -> (Arbiter_LSU_ONLY),
+        (  IFU_AR.iSlaveARvalid  &&   LSU_AR.iSlaveARvalid ) -> (Arbiter_BOTH_REQUEST)
+    ))
+
+    // II: According to ArbiterState, forward signals to IFU and LSU
+
 }

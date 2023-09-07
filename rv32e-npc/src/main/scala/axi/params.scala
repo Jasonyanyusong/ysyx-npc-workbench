@@ -34,3 +34,10 @@ object AXI2Lable{
     // R
     val RRESP_OKAY = 0.U(3.W)
 }
+
+object ArbiterDefs{
+    val Arbiter_NO_REQUEST = 0.U(2.W)
+    val Arbiter_IFU_ONLY = 1.U(2.W)
+    val Arbiter_LSU_ONLY = 2.U(2.W)
+    val Arbiter_BOTH_REQUEST = 3.U(2.W)
+}
