@@ -25,6 +25,14 @@ object Base{
     val AxSIZE_1B = 0.U(3.W)
     val AxSIZE_2B = 1.U(3.W)
     val AxSIZE_4B = 2.U(3.W)
+
+    val AXI_ADDR_LEN = 32
+    val AXI_ID_LEN = 4
+    val AXI_LEN_LEN = 8
+    val AXI_SIZE_LEN = 3
+    val AXI_BURST_LEN = 2
+    val AXI_RESP_LEN = 2
+    val AXI_DATA_LEN = 64
 }
 
 object AXI2Lable{
