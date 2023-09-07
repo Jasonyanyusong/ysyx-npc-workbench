@@ -67,12 +67,12 @@ class AXIArbiter extends Module{
     val ArbiterBusy = RegInit(false.B)
 
     // I: Update State if Arbiter's Job has finished
-    ArbiterState := MuxCase(Arbiter_NO_REQUEST, Array(
+    ArbiterState := Mux(!ArbiterBusy, MuxCase(Arbiter_NO_REQUEST, Array(
         ((!IFU_AR.iSlaveARvalid) && (!LSU_AR.iSlaveARvalid)) -> (Arbiter_NO_REQUEST),
         (  IFU_AR.iSlaveARvalid  && (!LSU_AR.iSlaveARvalid)) -> (Arbiter_IFU_ONLY),
         ((!IFU_AR.iSlaveARvalid) &&   LSU_AR.iSlaveARvalid ) -> (Arbiter_LSU_ONLY),
         (  IFU_AR.iSlaveARvalid  &&   LSU_AR.iSlaveARvalid ) -> (Arbiter_BOTH_REQUEST)
-    ))
+    )), ArbiterState)
 
     // II: According to ArbiterState, forward signals to IFU and LSU
 
