@@ -207,7 +207,7 @@ class IDU extends Module{
         ), 0.U(iDecLSfuncValLen.W)
     )
 
-    printf("[RTL : IDU] LSU_OP_FUNC = %d\n", LSU_OP_FUNC)
+    //printf("[RTL : IDU] LSU_OP_FUNC = %d\n", LSU_OP_FUNC)
 
     val WBU_OP = Mux(IDU_StateOK, Lookup(
             PipeLine_Instr, WB_EXU, Array(
@@ -234,7 +234,7 @@ class IDU extends Module{
         )), 0.U(DecodeWidth.W)
     )
 
-    printf("[RTL : IDU] DecodeBundle = %d\n", IDU_DecodeBundle)
+    //printf("[RTL : IDU] DecodeBundle = %d\n", IDU_DecodeBundle)
 
     /*val IDU_InstructionType = Mux(IDU_StateOK, Lookup(
             PipeLine_Instr, instR, Array(
