@@ -53,6 +53,9 @@ class iDecodeInternal extends Bundle{
 
     val oFeedBackDecodingJumpInstr = Output(Bool())
 
+    val oIsDecodingBranch = Output(Bool())
+    val oBranchDecodeOK = Output(Bool())
+
     val PipeLine_IF2ID_MsgBundle = Input(UInt(PipeLine_IF2ID_Width.W))
     val PipeLine_ID2EX_MsgBundle = Output(UInt(PipeLine_ID2EX_Width.W))
     val PipeLine_ID2EX_ChangeReg = Output(Bool())
@@ -130,11 +133,23 @@ class IDU extends Module{
     //val RS2 = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RS2Hi, RS2Lo), 0.U(RegIDWidth.W))
     //val RD  = Mux(IDU_StateOK, IDU_ProcessMsg.Instr(RDHi , RDLo ), 0.U(RegIDWidth.W))
 
-    ioInternal.oRS1 := RS1
-    ioInternal.oRS2 := RS2
-    ioInternal.oRD := RD
+    ioInternal.oRS1 := RS1 & "b01111".U
+    ioInternal.oRS2 := RS2 & "b01111".U
+    ioInternal.oRD := RD & "b01111".U
 
     val RSRegistersDirty = (ioInternal.iSRC1Dirty || ioInternal.iSRC2Dirty)
+
+    ioInternal.oIsDecodingBranch := Lookup(
+        PipeLine_Instr, false.B, Array(
+            BEQ -> true.B, BNE -> true.B, BLT -> true.B, BGE -> true.B, BLTU -> true.B, BGEU -> true.B
+        )
+    ) && RSRegistersDirty
+
+    ioInternal.oBranchDecodeOK := Lookup(
+        PipeLine_Instr, false.B, Array(
+            BEQ -> true.B, BNE -> true.B, BLT -> true.B, BGE -> true.B, BLTU -> true.B, BGEU -> true.B
+        )
+    ) && !RSRegistersDirty
 
     // judge IDU's Busy state
     IDU_Busy := RSRegistersDirty

@@ -102,10 +102,21 @@ class NPC extends Module{
         PC + 4.U
     ), PC)*/
 
-    PC := Mux((RegNext(NPC_IFU.ioInternal.oMasterValid) && NPC_IDU.ioInternal.oMasterValid) || PC === "h80000000".U, Mux(NPC_IDU.ioInternal.oMasterValid, Mux(NPC_IDU.ioInternal.oFeedBackPCChanged.asBool,
+    /*PC := Mux((RegNext(NPC_IFU.ioInternal.oMasterValid) && NPC_IDU.ioInternal.oMasterValid) || PC === "h80000000".U, Mux(NPC_IDU.ioInternal.oMasterValid, Mux(NPC_IDU.ioInternal.oFeedBackPCChanged.asBool,
         NPC_IDU.ioInternal.oFeedBackNewPCVal,
         PC + 4.U
     ), PC + 4.U), PC)
+
+    PC := Mux(( NPC_IDU.ioInternal.oMasterValid && 
+                NPC_IDU.ioInternal.oFeedBackPCChanged && 
+                NPC_IDU.ioInternal.oIsBranch), 
+        NPC_IDU.ioInternal.oFeedBackNewPCVal, PC)*/
+
+    PC := Mux((NPC_IDU.ioInternal.oMasterValid && NPC_IDU.ioInternal.oFeedBackPCChanged && NPC_IDU.ioInternal.oBranchDecodeOK), 
+        NPC_IDU.ioInternal.oFeedBackNewPCVal, Mux((RegNext(NPC_IFU.ioInternal.oMasterValid) && NPC_IDU.ioInternal.oMasterValid) || PC === "h80000000".U, Mux(NPC_IDU.ioInternal.oMasterValid, Mux(NPC_IDU.ioInternal.oFeedBackPCChanged.asBool,
+        NPC_IDU.ioInternal.oFeedBackNewPCVal,
+        PC + 4.U
+    ), PC + 4.U), PC))
 
     val PC_Changed = RegNext(NPC_IFU.ioInternal.oMasterValid) && NPC_IDU.ioInternal.oMasterValid
     //NPC_IFU.ioInternal.iPCHaveWB := PC_Changed
@@ -148,6 +159,7 @@ class NPC extends Module{
     // The PC change feedback need to do at the same time, not using RegNext
     NPC_IFU.ioInternal.iFeedBackPCChanged := NPC_IDU.ioInternal.oFeedBackPCChanged
     NPC_IFU.ioInternal.iFeedBackDecodingJumpInstr := NPC_IDU.ioInternal.oFeedBackDecodingJumpInstr
+    NPC_IFU.ioInternal.iIDUDecodingBranch := NPC_IDU.ioInternal.oIsDecodingBranch
 
     // NPC Outside Logic: IFU <-> IO
     ioNPC.iFetch_oPC := NPC_IFU.ioExternal.oPC
