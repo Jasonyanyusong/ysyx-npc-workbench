@@ -63,9 +63,9 @@ class EXU extends Module{
             (iExecuteOPcode === EX_XOR) -> (SRC1 ^ SRC2).asUInt,
             (iExecuteOPcode === EX_OR) -> (SRC1 | SRC2).asUInt,
             (iExecuteOPcode === EX_AND) -> (SRC1 & SRC2).asUInt,
-            (iExecuteOPcode === EX_SLL) -> (SRC1.asUInt << SRC2(5, 0)).asUInt,
-            (iExecuteOPcode === EX_SRL) -> (SRC1.asUInt >> SRC2(5, 0)).asUInt,
-            (iExecuteOPcode === EX_SRA) -> (SRC1.asSInt >> SRC2(5, 0)).asUInt,
+            (iExecuteOPcode === EX_SLL) -> (SRC1.asUInt << SRC2(4, 0)).asUInt,
+            (iExecuteOPcode === EX_SRL) -> (SRC1.asUInt >> SRC2(4, 0)).asUInt,
+            (iExecuteOPcode === EX_SRA) -> (SRC1.asSInt >> SRC2(4, 0)).asUInt,
             (iExecuteOPcode === EX_SUB) -> (SRC1 - SRC2).asUInt,
         )), 0.U(DataWidth.W))
 
