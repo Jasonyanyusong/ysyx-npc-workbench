@@ -17,12 +17,18 @@
 package npc.axi.sram
 
 import chisel3._
-import chisel3.uitl._
+import chisel3.util._
 
 import npc.axi.master
 import npc.axi.slave
 import npc.axi.params.Base._
 import npc.axi.params.AXI2Lable._
+
+import npc.axi.slave.AXISlaveAW
+import npc.axi.slave.AXISlaveW
+import npc.axi.slave.AXISlaveB
+import npc.axi.slave.AXISlaveAR
+import npc.axi.slave.AXISlaveR
 
 import npc.helper.defs.Base._
 
@@ -75,9 +81,9 @@ class SRAM extends Module{
     ExternalIO.SRAM_W_Enable := (Slave_AW.iSlaveAWvalid && Slave_W.iSlaveWvalid && Slave_B.iSlaveBready)
     ExternalIO.SRAM_W_Data := Slave_W.iSlaveWdata
     ExternalIO.SRAM_W_Mask := MuxCase(0.U(DataWidth.W), Seq(
-        (Slave_AW.iSlaveARsize === AxSIZE_1B) -> Cat(Fill(DataWidth - ByteWidth, 0.U(1.W)), Fill(ByteWidth, 1.U(1.W))),
-        (Slave_AW.iSlaveARsize === AxSIZE_2B) -> Cat(Fill(DataWidth - HalfWidth, 0.U(1.W)), Fill(HalfWidth, 1.U(1.W))),
-        (Slave_AW.iSlaveARsize === AxSIZE_4B) -> Cat(Fill(WordWidth, 1.U(1.W))),
+        (Slave_AW.iSlaveAWsize === AxSIZE_1B) -> Cat(Fill(DataWidth - ByteWidth, 0.U(1.W)), Fill(ByteWidth, 1.U(1.W))),
+        (Slave_AW.iSlaveAWsize === AxSIZE_2B) -> Cat(Fill(DataWidth - HalfWidth, 0.U(1.W)), Fill(HalfWidth, 1.U(1.W))),
+        (Slave_AW.iSlaveAWsize === AxSIZE_4B) -> Cat(Fill(WordWidth, 1.U(1.W))),
     ))
 
     // III: issue memory read and write

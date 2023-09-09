@@ -19,20 +19,24 @@ package npc.axi
 import chisel3._
 import chisel3.util._
 
-import npc.axi.master._
+import npc.axi.master.AXIMasterAR
+import npc.axi.master.AXIMasterR
+
 import npc.axi.slave._
 import npc.axi.params.ArbiterDefs._
 import npc.axi.params.Base._
+
+import npc.helper.defs.Base._
 
 class AXIArbiter extends Module{
     // Rule: LSU Read > IFU iFetch
     // This is the interface between the "module parts external" to "SoC/simulation external"
 
-    val IFU_AR = IO(Filpped(new AXIMasterAR))
-    val IFU_R = IO(Filpped(new AXIMasterR))
+    val IFU_AR = IO(Flipped(new AXIMasterAR))
+    val IFU_R = IO(Flipped(new AXIMasterR))
 
-    val LSU_AR = IO(Filpped(new AXIMasterAR))
-    val LSU_R = IO(Filpped(new AXIMasterR))
+    val LSU_AR = IO(Flipped(new AXIMasterAR))
+    val LSU_R = IO(Flipped(new AXIMasterR))
 
     val Arbiter_AR = IO(new AXIMasterAR)
     val Arbiter_R = IO(new AXIMasterR)
@@ -118,28 +122,28 @@ class AXIArbiter extends Module{
         (ArbiterState === Arbiter_BOTH_REQUEST) -> (Arbiter_R.iMasterRvalid)
     ))
 
-    IFU_R.iMasterRresp := MuxCase(0.U(AXI_RESP_LEN), Array(
-        (ArbiterState === Arbiter_NO_REQUEST)   -> (0.U(AXI_RESP_LEN)),
+    IFU_R.iMasterRresp := MuxCase(0.U(AXI_RESP_LEN.W), Array(
+        (ArbiterState === Arbiter_NO_REQUEST)   -> (0.U(AXI_RESP_LEN.W)),
         (ArbiterState === Arbiter_IFU_ONLY)     -> (Arbiter_R.iMasterRresp),
-        (ArbiterState === Arbiter_LSU_ONLY)     -> (0.U(AXI_RESP_LEN)),
-        (ArbiterState === Arbiter_BOTH_REQUEST) -> (0.U(AXI_RESP_LEN))
+        (ArbiterState === Arbiter_LSU_ONLY)     -> (0.U(AXI_RESP_LEN.W)),
+        (ArbiterState === Arbiter_BOTH_REQUEST) -> (0.U(AXI_RESP_LEN.W))
     ))
-    LSU_R.iMasterRresp := MuxCase(0.U(AXI_RESP_LEN), Array(
-        (ArbiterState === Arbiter_NO_REQUEST)   -> (0.U(AXI_RESP_LEN)),
-        (ArbiterState === Arbiter_IFU_ONLY)     -> (0.U(AXI_RESP_LEN)),
+    LSU_R.iMasterRresp := MuxCase(0.U(AXI_RESP_LEN.W), Array(
+        (ArbiterState === Arbiter_NO_REQUEST)   -> (0.U(AXI_RESP_LEN.W)),
+        (ArbiterState === Arbiter_IFU_ONLY)     -> (0.U(AXI_RESP_LEN.W)),
         (ArbiterState === Arbiter_LSU_ONLY)     -> (Arbiter_R.iMasterRresp),
         (ArbiterState === Arbiter_BOTH_REQUEST) -> (Arbiter_R.iMasterRresp)
     ))
 
-    IFU_R.iMasterRdata := MuxCase(0.U(AXI_DATA_LEN), Array(
-        (ArbiterState === Arbiter_NO_REQUEST)   -> (0.U(AXI_DATA_LEN)),
+    IFU_R.iMasterRdata := MuxCase(0.U(AXI_DATA_LEN.W), Array(
+        (ArbiterState === Arbiter_NO_REQUEST)   -> (0.U(AXI_DATA_LEN.W)),
         (ArbiterState === Arbiter_IFU_ONLY)     -> (Arbiter_R.iMasterRdata),
-        (ArbiterState === Arbiter_LSU_ONLY)     -> (0.U(AXI_DATA_LEN)),
-        (ArbiterState === Arbiter_BOTH_REQUEST) -> (0.U(AXI_DATA_LEN))
+        (ArbiterState === Arbiter_LSU_ONLY)     -> (0.U(AXI_DATA_LEN.W)),
+        (ArbiterState === Arbiter_BOTH_REQUEST) -> (0.U(AXI_DATA_LEN.W))
     ))
-    LSU_R.iMasterRdata := MuxCase(0.U(AXI_DATA_LEN), Array(
-        (ArbiterState === Arbiter_NO_REQUEST)   -> (0.U(AXI_DATA_LEN)),
-        (ArbiterState === Arbiter_IFU_ONLY)     -> (0.U(AXI_DATA_LEN)),
+    LSU_R.iMasterRdata := MuxCase(0.U(AXI_DATA_LEN.W), Array(
+        (ArbiterState === Arbiter_NO_REQUEST)   -> (0.U(AXI_DATA_LEN.W)),
+        (ArbiterState === Arbiter_IFU_ONLY)     -> (0.U(AXI_DATA_LEN.W)),
         (ArbiterState === Arbiter_LSU_ONLY)     -> (Arbiter_R.iMasterRdata),
         (ArbiterState === Arbiter_BOTH_REQUEST) -> (Arbiter_R.iMasterRdata)
     ))
@@ -157,15 +161,15 @@ class AXIArbiter extends Module{
         (ArbiterState === Arbiter_BOTH_REQUEST) -> (Arbiter_R.iMasterRlast)
     ))
 
-    IFU_R.iMasterRid := MuxCase(0.U(AXI_ID_LEN), Array(
-        (ArbiterState === Arbiter_NO_REQUEST)   -> (0.U(AXI_ID_LEN)),
+    IFU_R.iMasterRid := MuxCase(0.U(AXI_ID_LEN.W), Array(
+        (ArbiterState === Arbiter_NO_REQUEST)   -> (0.U(AXI_ID_LEN.W)),
         (ArbiterState === Arbiter_IFU_ONLY)     -> (Arbiter_R.iMasterRid),
-        (ArbiterState === Arbiter_LSU_ONLY)     -> (0.U(AXI_ID_LEN)),
-        (ArbiterState === Arbiter_BOTH_REQUEST) -> (0.U(AXI_ID_LEN))
+        (ArbiterState === Arbiter_LSU_ONLY)     -> (0.U(AXI_ID_LEN.W)),
+        (ArbiterState === Arbiter_BOTH_REQUEST) -> (0.U(AXI_ID_LEN.W))
     ))
-    LSU_R.iMasterRid := MuxCase(0.U(AXI_ID_LEN), Array(
-        (ArbiterState === Arbiter_NO_REQUEST)   -> (0.U(AXI_ID_LEN)),
-        (ArbiterState === Arbiter_IFU_ONLY)     -> (0.U(AXI_ID_LEN)),
+    LSU_R.iMasterRid := MuxCase(0.U(AXI_ID_LEN.W), Array(
+        (ArbiterState === Arbiter_NO_REQUEST)   -> (0.U(AXI_ID_LEN.W)),
+        (ArbiterState === Arbiter_IFU_ONLY)     -> (0.U(AXI_ID_LEN.W)),
         (ArbiterState === Arbiter_LSU_ONLY)     -> (Arbiter_R.iMasterRid),
         (ArbiterState === Arbiter_BOTH_REQUEST) -> (Arbiter_R.iMasterRid)
     ))
