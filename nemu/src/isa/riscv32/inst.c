@@ -151,7 +151,12 @@ static int decode_exec(Decode *s) {
 #ifdef CONFIG_ShowInstInfo
   printf("Inst: %s (0x%8x)\n", instruction_bin_string, s->isa.inst.val);
   printf("rs1 = 0x%x (%d), rs2 = 0x%x (%d), rd = 0x%x (%d)\n", rs1, rs1, rs2, rs2, rd, rd);
-  printf("src1 = 0x%8lx (%ld), src2 = 0x%8lx (%ld), R(rd) = 0x%8lx (%ld), imm = 0x%8lx (%ld)\n", src1, src1, src2, src2, R(rd), R(rd), imm, imm);
+  if(rd >= 0 && rd < 16)
+  {
+    printf("src1 = 0x%8lx (%ld), src2 = 0x%8lx (%ld), R(rd) = 0x%8lx (%ld), imm = 0x%8lx (%ld)\n", src1, src1, src2, src2, R(rd), R(rd), imm, imm);
+  }else{
+    printf("src1 = 0x%8lx (%ld), src2 = 0x%8lx (%ld), R(rd) = 0x%8lx (%ld), imm = 0x%8lx (%ld)\n", src1, src1, src2, src2, 0, 0, imm, imm);
+  }
   printf("pc = 0x%lx, dnpc = 0x%lx, snpc = 0x%lx\n", s -> pc, s -> dnpc, s -> snpc);
 #endif
 
