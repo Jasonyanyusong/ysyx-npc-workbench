@@ -57,6 +57,8 @@ class WBU extends Module{
     val DecodeBundle = LS2WB_Msg.DecodeVal
     val WBDecode = DecodeBundle(2, 1)
 
+    val LastWriteBackPC = RegInit(0.U(AddrWidth.W))
+
     val WBU_StateOK = (ioInternal.iSlaveValid.asBool)
 
     val WBU_GPR_ADDR = Mux(WBU_StateOK, LS2WB_Msg.RD, 0.U(RegIDWidth.W))
@@ -75,8 +77,10 @@ class WBU extends Module{
         )), 0.U(DataWidth.W)
     )
 
+    LastWriteBackPC := RegNext(LS2WB_Msg.PC) // Use RegNext so current cycle Register WB will not be blocked
+
     // Connect IO Internal
-    ioInternal.oWriteGPREnable := WBU_GPR_WRITE_ENABLE
+    ioInternal.oWriteGPREnable := WBU_GPR_WRITE_ENABLE && (LastWriteBackPC =/= LS2WB_Msg.PC)
     ioInternal.oWriteGPRAddr := WBU_GPR_ADDR
     ioInternal.oWriteGPRVal := WBU_GPR_WRITE_DATA
     ioInternal.oPC := LS2WB_Msg.PC
