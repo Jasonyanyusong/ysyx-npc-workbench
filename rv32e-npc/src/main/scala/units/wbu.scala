@@ -45,8 +45,18 @@ class iWriteBackInternal extends Bundle{
     val oWriteGPRVal = Output(UInt(DataWidth.W))
 }
 
+class iLoadStoreDebug extends Bundle{
+    val oLoadStoreTaken = Output(Bool())
+    val oLoadStoreAddress = Output(UInt(AddrWidth.W))
+}
+
 class WBU extends Module{
     val ioInternal = IO(new iWriteBackInternal)
+
+    // Connect Datapath for LSU debug, help to skip device difftest address
+    val iLoadStoreDebugInput = IO(Flipped(new iLoadStoreDebug))
+    val iLoadStoreDebugOutput = IO(new iLoadStoreDebug)
+    iLoadStoreDebugOutput <> iLoadStoreDebugInput
 
     val LS2WB_Msg = ioInternal.PipeLine_LS2WB_MsgBundle.asTypeOf(PipeLine_LS2WB_Bundle)
 

@@ -224,6 +224,9 @@ class NPC extends Module{
     NPC_LSU.ioInternal.iMasterReady := RegNext(NPC_WBU.ioInternal.oSlaveReady)
     NPC_WBU.ioInternal.iSlaveValid  := RegNext(NPC_LSU.ioInternal.oMasterValid)
     NPC_WBU.ioInternal.PipeLine_LS2WB_MsgBundle := PipeLine_LS2WB
+    // Debug datapath from LSU to WBU
+    NPC_WBU.iLoadStoreDebugInput.oLoadStoreTaken := RegNext(NPC_LSU.ioDebug.oLoadStoreTaken)
+    NPC_WBU.iLoadStoreDebugInput.oLoadStoreAddress := RegNext(NPC_LSU.ioDebug.oLoadStoreAddress)
 
     // NPC Outside Logic: LSU <-> IO
     ioNPC.iLoadStore_oMemoryOP     := NPC_LSU.ioExternal.oMemoryOP
