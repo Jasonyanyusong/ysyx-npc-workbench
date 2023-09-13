@@ -190,6 +190,10 @@ config ShowInstName
   bool "Show informations name every execution (will be bad for input/output cases)"
   default n
 
+config ShowExecuteStep
+  bool "Show ISA execution steps (used mostly for difftest)"
+  default n
+
 config NPCDiffTest
   bool "DiffTest NPC by comparing with NEMU's result"
 
