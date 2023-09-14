@@ -19,6 +19,7 @@
 #include <common.h>
 #include <math.h>
 #include <difftest.h>
+#include <device.h>
 
 #ifdef CONFIG_DIFFTEST
 word_t last_diff_pc = 0;
@@ -129,6 +130,10 @@ void sim_one_cycle(){
         #ifdef CONFIG_RUNTIME_MESSAGE
         printf("[verilator-sim : sim_one_cycle] WBU indicated it worked, so do a difftest at pc = 0x%x\n", cpu.pc);
         #endif
+
+        if(top -> ioNPCDebug_LS_Taken && (!in_pmem(top -> ioNPCDebug_LS_Addr))){
+            difftest_skip_ref();
+        }
 
         difftest_one_exec();
         if(!difftest_check_reg()){
