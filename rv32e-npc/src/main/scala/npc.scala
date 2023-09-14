@@ -276,6 +276,8 @@ class NPC extends Module{
     ioNPCDebug.MCAUSE := ShiftRegister(mcause, 3)
 
     // Memory: to help simulation environemnt judge the addr is in pmem
-    ioNPCDebug.LS_Taken := ShiftRegister(NPC_LSU.ioDebug.oLoadStoreTaken, 1)
-    ioNPCDebug.LS_Addr := ShiftRegister(NPC_LSU.ioDebug.oLoadStoreAddress, 1)
+    //ioNPCDebug.LS_Taken := ShiftRegister(NPC_LSU.ioDebug.oLoadStoreTaken, 1)
+    //ioNPCDebug.LS_Addr := ShiftRegister(NPC_LSU.ioDebug.oLoadStoreAddress, 1)
+    ioNPCDebug.LS_Taken := RegNext(NPC_WBU.iLoadStoreDebugOutput.oLoadStoreTaken)
+    ioNPCDebug.LS_Addr := RegNext(NPC_WBU.iLoadStoreDebugOutput.oLoadStoreAddress)
 }
