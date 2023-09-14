@@ -53,6 +53,7 @@ class iDecodeInternal extends Bundle{
 
     val oFeedBackDecodingJumpInstr = Output(Bool())
 
+    val oIsDecodingJump = Output(Bool())
     val oIsDecodingBranch = Output(Bool())
     val oBranchDecodeOK = Output(Bool())
 
@@ -101,6 +102,8 @@ class IDU extends Module{
             ECALL -> true.B, MRET -> true.B
         )
     )
+
+    ioInternal.oIsDecodingJump := DecodingJumpInstr
 
     val IDU_InstructionType = Mux(IDU_StateOK, Lookup(
             PipeLine_Instr, instR, Array(

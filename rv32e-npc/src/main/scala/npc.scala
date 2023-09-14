@@ -112,13 +112,19 @@ class NPC extends Module{
                 NPC_IDU.ioInternal.oIsBranch), 
         NPC_IDU.ioInternal.oFeedBackNewPCVal, PC)*/
 
-    PC := Mux((NPC_IDU.ioInternal.oMasterValid && NPC_IDU.ioInternal.oFeedBackPCChanged && NPC_IDU.ioInternal.oBranchDecodeOK), 
+    /*PC := Mux((NPC_IDU.ioInternal.oMasterValid && NPC_IDU.ioInternal.oFeedBackPCChanged && NPC_IDU.ioInternal.oBranchDecodeOK), 
         NPC_IDU.ioInternal.oFeedBackNewPCVal, Mux((RegNext(NPC_IFU.ioInternal.oMasterValid) && NPC_IDU.ioInternal.oMasterValid) || PC === "h80000000".U, Mux(NPC_IDU.ioInternal.oMasterValid, Mux(NPC_IDU.ioInternal.oFeedBackPCChanged.asBool,
         NPC_IDU.ioInternal.oFeedBackNewPCVal,
         PC + 4.U
-    ), PC + 4.U), PC))
+    ), PC + 4.U), PC))*/
 
-    val PC_Changed = RegNext(NPC_IFU.ioInternal.oMasterValid) && NPC_IDU.ioInternal.oMasterValid
+    PC := MuxCase(PC, Array(
+        (PC === "h80000000".U) -> (PC + InstSize.U), // finished fetch of 1st inst
+        (RegNext(NPC_IFU.ioInternal.oMasterValid) && NPC_IDU.ioInternal.oMasterValid && !NPC_IDU.ioInternal.oIsDecodingJump) -> (PC + InstSize.U), // shake hand success, not jump
+        (NPC_IDU.ioInternal.oMasterValid &&  NPC_IDU.ioInternal.oIsDecodingJump) -> (NPC_IDU.ioInternal.oFeedBackNewPCVal), // jump judge complete
+    ))
+
+    //val PC_Changed = RegNext(NPC_IFU.ioInternal.oMasterValid) && NPC_IDU.ioInternal.oMasterValid
     //NPC_IFU.ioInternal.iPCHaveWB := PC_Changed
 
     // GPR Maintain and Manipulation
@@ -160,6 +166,7 @@ class NPC extends Module{
     NPC_IFU.ioInternal.iFeedBackPCChanged := NPC_IDU.ioInternal.oFeedBackPCChanged
     NPC_IFU.ioInternal.iFeedBackDecodingJumpInstr := NPC_IDU.ioInternal.oFeedBackDecodingJumpInstr
     NPC_IFU.ioInternal.iIDUDecodingBranch := NPC_IDU.ioInternal.oIsDecodingBranch
+    NPC_IFU.ioInternal.iIDUDecodingJump := NPC_IDU.ioInternal.oIsDecodingJump
 
     // NPC Outside Logic: IFU <-> IO
     ioNPC.iFetch_oPC := NPC_IFU.ioExternal.oPC

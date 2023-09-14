@@ -34,6 +34,7 @@ class iFetchInternal extends Bundle{
     val iFeedBackPCChanged = Input(Bool())
     val iFeedBackDecodingJumpInstr = Input(Bool())
     val iIDUDecodingBranch = Input(Bool())
+    val iIDUDecodingJump = Input(Bool())
     //val iPCHaveWB = Input(Bool())
 
     val PipeLine_IF2ID_MsgBundle = Output(UInt(PipeLine_IF2ID_Width.W))
@@ -54,9 +55,9 @@ class IFU extends Module{
 
     val IFU_StateOK = ioInternal.iMasterReady.asBool
 
-    ioExternal.oMemEnable := (IFU_StateOK) && (!ioInternal.iIDUDecodingBranch) && (!ioInternal.iFeedBackPCChanged) && (!ioInternal.iFeedBackDecodingJumpInstr)// && ioInternal.iPCHaveWB
+    ioExternal.oMemEnable := (IFU_StateOK) && (!ioInternal.iIDUDecodingBranch) && (!ioInternal.iFeedBackPCChanged) && (!ioInternal.iFeedBackDecodingJumpInstr) && (!ioInternal.iIDUDecodingJump)// && ioInternal.iPCHaveWB
     ioExternal.oPC := ioInternal.iPC
-    ioInternal.oMasterValid := ((!ioInternal.iFeedBackPCChanged) && (!ioInternal.iIDUDecodingBranch) && ioInternal.iPC =/= 0.U) && (!ioInternal.iFeedBackDecodingJumpInstr)// && ioInternal.iPCHaveWB
+    ioInternal.oMasterValid := ((!ioInternal.iFeedBackPCChanged) && (!ioInternal.iIDUDecodingBranch) && ioInternal.iPC =/= 0.U) && (!ioInternal.iFeedBackDecodingJumpInstr) && (!ioInternal.iIDUDecodingJump)// && ioInternal.iPCHaveWB
 
     val Inst = Mux(IFU_StateOK, ioExternal.iInst, 0.U(InstWidth.W))
     val PC = ioInternal.iPC
