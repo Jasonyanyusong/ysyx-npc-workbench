@@ -58,6 +58,8 @@ static bool check_bound(IOMap *map, word_t addr) {
     return false;
   } else {
     if(addr <= map->high && addr >= map->low){
+        return true;
+    }else{
         printf("[device] address = 0x%x is out of bound %s@[0x%x, 0x%x]\n", addr, map -> name, map -> low, map -> high);
         npc_state.state = NPC_ABORT;
         return false;
