@@ -90,7 +90,7 @@ void sim_init(){
 void sim_exit(){
     assert(top);
 
-    printf("[simulation] simulation exitted\n");
+    printf("[simulation] simulation exitted, total cycles = %d\n", cycle);
     step_and_dump_wave();
 
     #ifdef CONFIG_VCD_OUTPUT
