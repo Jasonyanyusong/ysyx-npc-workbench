@@ -97,42 +97,17 @@ class NPC extends Module{
     // PC Maintain and Manipulation
     val PC = RegInit("h80000000".U(AddrWidth.W))
 
-    /*PC := Mux(/*RegNext(NPC_IFU.ioInternal.oMasterValid) &&*/ NPC_IDU.ioInternal.oMasterValid, Mux(NPC_IDU.ioInternal.oFeedBackPCChanged.asBool,
-        NPC_IDU.ioInternal.oFeedBackNewPCVal,
-        PC + 4.U
-    ), PC)*/
-
-    /*PC := Mux((RegNext(NPC_IFU.ioInternal.oMasterValid) && NPC_IDU.ioInternal.oMasterValid) || PC === "h80000000".U, Mux(NPC_IDU.ioInternal.oMasterValid, Mux(NPC_IDU.ioInternal.oFeedBackPCChanged.asBool,
-        NPC_IDU.ioInternal.oFeedBackNewPCVal,
-        PC + 4.U
-    ), PC + 4.U), PC)
-
-    PC := Mux(( NPC_IDU.ioInternal.oMasterValid && 
-                NPC_IDU.ioInternal.oFeedBackPCChanged && 
-                NPC_IDU.ioInternal.oIsBranch), 
-        NPC_IDU.ioInternal.oFeedBackNewPCVal, PC)*/
-
-    /*PC := Mux((NPC_IDU.ioInternal.oMasterValid && NPC_IDU.ioInternal.oFeedBackPCChanged && NPC_IDU.ioInternal.oBranchDecodeOK), 
-        NPC_IDU.ioInternal.oFeedBackNewPCVal, Mux((RegNext(NPC_IFU.ioInternal.oMasterValid) && NPC_IDU.ioInternal.oMasterValid) || PC === "h80000000".U, Mux(NPC_IDU.ioInternal.oMasterValid, Mux(NPC_IDU.ioInternal.oFeedBackPCChanged.asBool,
-        NPC_IDU.ioInternal.oFeedBackNewPCVal,
-        PC + 4.U
-    ), PC + 4.U), PC))*/
-
     PC := MuxCase(PC, Array(
         (PC === "h80000000".U) -> (PC + InstSize.U), // finished fetch of 1st inst
         (RegNext(NPC_IFU.ioInternal.oMasterValid) && NPC_IDU.ioInternal.oMasterValid && !NPC_IDU.ioInternal.oIsDecodingJump) -> (PC + InstSize.U), // shake hand success, not jump
         (NPC_IDU.ioInternal.oMasterValid &&  NPC_IDU.ioInternal.oIsDecodingJump) -> (NPC_IDU.ioInternal.oFeedBackNewPCVal), // jump judge complete
     ))
 
-    //val PC_Changed = RegNext(NPC_IFU.ioInternal.oMasterValid) && NPC_IDU.ioInternal.oMasterValid
-    //NPC_IFU.ioInternal.iPCHaveWB := PC_Changed
-
     // GPR Maintain and Manipulation
     val GPR = Mem(RegSum, UInt(DataWidth.W))
     val GPR_Status = Mem(RegSum, Bool())
 
     GPR_Status(NPC_IDU.ioInternal.oRD) := Mux(NPC_IDU.ioInternal.oMasterValid, true.B, GPR_Status(NPC_IDU.ioInternal.oRD))
-    //GPR_Status(NPC_WBU.ioInternal.oWriteGPRAddr) := Mux(NPC_WBU.ioInternal.oWorked, false.B, GPR_Status(NPC_WBU.ioInternal.oWriteGPRAddr))
 
     GPR_Status(NPC_WBU.ioInternal.oWriteGPRAddr) := Mux(
         NPC_WBU.ioInternal.oWorked,
@@ -278,7 +253,6 @@ class NPC extends Module{
     ioNPCDebug.GPR15 := GPR_Read(15.U)
 
     ioNPCDebug.PC_COMMIT := RegNext(NPC_WBU.ioInternal.oPC)
-    //ioNPCDebug.PC_DYNAMIC := ShiftRegister(PC, 4)
     ioNPCDebug.PC_DYNAMIC := RegNext(NPC_WBU.ioInternal.oDNPC)
 
     ioNPCDebug.Worked := RegNext(NPC_WBU.ioInternal.oWorked)
@@ -291,8 +265,6 @@ class NPC extends Module{
     ioNPCDebug.MCAUSE := ShiftRegister(mcause, 3)
 
     // Memory: to help simulation environemnt judge the addr is in pmem
-    //ioNPCDebug.LS_Taken := ShiftRegister(NPC_LSU.ioDebug.oLoadStoreTaken, 1)
-    //ioNPCDebug.LS_Addr := ShiftRegister(NPC_LSU.ioDebug.oLoadStoreAddress, 1)
     ioNPCDebug.LS_Taken := RegNext(NPC_WBU.iLoadStoreDebugOutput.oLoadStoreTaken)
     ioNPCDebug.LS_Addr := RegNext(NPC_WBU.iLoadStoreDebugOutput.oLoadStoreAddress)
 }
