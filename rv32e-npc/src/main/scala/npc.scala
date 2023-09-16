@@ -132,7 +132,15 @@ class NPC extends Module{
     val GPR_Status = Mem(RegSum, Bool())
 
     GPR_Status(NPC_IDU.ioInternal.oRD) := Mux(NPC_IDU.ioInternal.oMasterValid, true.B, GPR_Status(NPC_IDU.ioInternal.oRD))
-    GPR_Status(NPC_WBU.ioInternal.oWriteGPRAddr) := Mux(NPC_WBU.ioInternal.oWorked, false.B, GPR_Status(NPC_WBU.ioInternal.oWriteGPRAddr))
+    //GPR_Status(NPC_WBU.ioInternal.oWriteGPRAddr) := Mux(NPC_WBU.ioInternal.oWorked, false.B, GPR_Status(NPC_WBU.ioInternal.oWriteGPRAddr))
+
+    GPR_Status(NPC_WBU.ioInternal.oWriteGPRAddr) := Mux(
+        NPC_WBU.ioInternal.oWorked,
+        Mux(NPC_WBU.ioInternal.oWriteGPRAddr === NPC_IDU.ioInternal.oRD && NPC_IDU.ioInternal.oMasterValid,
+            true.B,
+            false.B),
+        GPR_Status(NPC_WBU.ioInternal.oWriteGPRAddr)
+    )
 
     def GPR_Read(index : UInt) = Mux(index === 0.U, 0.U(DataWidth.W), GPR(index))
     def GPR_getStatus(index : UInt) = Mux(index === 0.U, false.B, GPR_Status(index))
