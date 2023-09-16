@@ -87,7 +87,7 @@ class WBU extends Module{
         )), 0.U(DataWidth.W)
     )
 
-    LastWriteBackPC := RegNext(LS2WB_Msg.PC) // Use RegNext so current cycle Register WB will not be blocked
+    LastWriteBackPC := LS2WB_Msg.PC
 
     // Connect IO Internal
     ioInternal.oWriteGPREnable := WBU_GPR_WRITE_ENABLE && (LastWriteBackPC =/= LS2WB_Msg.PC)
