@@ -55,11 +55,9 @@ class IFU extends Module{
 
     val IFU_StateOK = ioInternal.iMasterReady.asBool
 
-    ioExternal.oMemEnable := (IFU_StateOK) && (!ioInternal.iIDUDecodingBranch) && (!ioInternal.iFeedBackPCChanged) 
-            && (!ioInternal.iFeedBackDecodingJumpInstr) && (!ioInternal.iIDUDecodingJump)// && ioInternal.iPCHaveWB
+    ioExternal.oMemEnable := (IFU_StateOK) && (!ioInternal.iIDUDecodingBranch) && (!ioInternal.iFeedBackPCChanged) && (!ioInternal.iFeedBackDecodingJumpInstr) && (!ioInternal.iIDUDecodingJump)// && ioInternal.iPCHaveWB
     ioExternal.oPC := ioInternal.iPC
-    ioInternal.oMasterValid := ((!ioInternal.iFeedBackPCChanged) && (!ioInternal.iIDUDecodingBranch) && ioInternal.iPC =/= 0.U) 
-            && (!ioInternal.iFeedBackDecodingJumpInstr) && (!ioInternal.iIDUDecodingJump)// && ioInternal.iPCHaveWB
+    ioInternal.oMasterValid := ((!ioInternal.iFeedBackPCChanged) && (!ioInternal.iIDUDecodingBranch) && ioInternal.iPC =/= 0.U) && (!ioInternal.iFeedBackDecodingJumpInstr) && (!ioInternal.iIDUDecodingJump)// && ioInternal.iPCHaveWB
 
     val Inst = Mux(IFU_StateOK, ioExternal.iInst, 0.U(InstWidth.W))
     val PC = ioInternal.iPC
