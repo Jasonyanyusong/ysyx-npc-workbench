@@ -14,7 +14,7 @@
 
 #if defined(__ISA_AM_NATIVE__)
 # define EXPECT_TYPE EM_X86_64
-#elif defined(__ISA_RISCV32__) || defined(__ISA_RISCV64__)
+#else
 # define EXPECT_TYPE EM_RISCV
 #endif
 
