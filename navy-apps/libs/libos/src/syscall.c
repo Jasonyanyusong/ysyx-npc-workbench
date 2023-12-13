@@ -29,8 +29,12 @@
 # define ARGS_ARRAY ("int $0x80", "eax", "ebx", "ecx", "edx", "eax")
 #elif defined(__ISA_MIPS32__)
 # define ARGS_ARRAY ("syscall", "v0", "a0", "a1", "a2", "v0")
-#elif defined(__ISA_RISCV32__) || defined(__ISA_RISCV64__)
-# define ARGS_ARRAY ("ecall", "a7", "a0", "a1", "a2", "a0")
+#elif defined(__riscv)
+ #ifdef __riscv_e
+ # define ARGS_ARRAY ("ecall", "a5", "a0", "a1", "a2", "a0")
+ #else
+ # define ARGS_ARRAY ("ecall", "a7", "a0", "a1", "a2", "a0")
+#endif
 #elif defined(__ISA_AM_NATIVE__)
 # define ARGS_ARRAY ("call *0x100000", "rdi", "rsi", "rdx", "rcx", "rax")
 #elif defined(__ISA_X86_64__)

@@ -7,8 +7,8 @@
 !*.[cSh]
 !*.cpp
 !scripts/*.mk
+!scripts/riscv/*.mk
 build/
-repo/
 libs/libc/
 !/fsimg/share/files/num
 !/fsimg/share/fonts/Courier-*.bdf
