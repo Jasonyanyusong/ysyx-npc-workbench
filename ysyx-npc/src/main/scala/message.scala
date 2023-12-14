@@ -6,6 +6,9 @@ import chisel3.util._
 class IF2ID_Msg extends Bundle {
     val instr = Output(UInt(32.W))
     val pc = Output(UInt(32.W))
+    
+    val valid = Output(Bool())
+    val ready = Input(Bool())
 }
 
 class ID2EX_Msg extends Bundle {
