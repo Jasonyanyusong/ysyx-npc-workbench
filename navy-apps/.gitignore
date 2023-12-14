@@ -1,6 +1,7 @@
 *.*
 *
 !*/
+!/tests/bj101-logo/logo.txt
 !Makefile
 !README.md
 !.gitignore
