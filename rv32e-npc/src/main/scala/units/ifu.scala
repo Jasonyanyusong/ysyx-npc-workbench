@@ -55,6 +55,10 @@ class IFU extends Module{
 
     val IFU_StateOK = ioInternal.iMasterReady.asBool
 
+    // garantee that the same instruction will not be executed twice
+    val LastFetchSuccessPC = RegInit("h80000000".U(AddrWidth.W))
+    LastFetchSuccessPC := Mux(ioExternal.iInst =/= 0.U, ioInternal.iPC, LastFetchSuccessPC)
+
     ioExternal.oMemEnable := (IFU_StateOK) && (!ioInternal.iIDUDecodingBranch) && (!ioInternal.iFeedBackPCChanged) && (!ioInternal.iFeedBackDecodingJumpInstr) && (!ioInternal.iIDUDecodingJump)// && ioInternal.iPCHaveWB
     ioExternal.oPC := ioInternal.iPC
     ioInternal.oMasterValid := ((!ioInternal.iFeedBackPCChanged) && (!ioInternal.iIDUDecodingBranch) && ioInternal.iPC =/= 0.U) && (!ioInternal.iFeedBackDecodingJumpInstr) && (!ioInternal.iIDUDecodingJump)// && ioInternal.iPCHaveWB

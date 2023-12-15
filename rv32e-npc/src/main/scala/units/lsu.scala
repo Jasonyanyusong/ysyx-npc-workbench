@@ -90,7 +90,13 @@ class LSU extends Module{
     //printf("[RTL : LSU] LSU_FUNC = %d, LSU_MEMOP = %d\n", LSU_FUNC, LSU_MEMOP)
 
     // Connect IO External
-    ioExternal.oMemoryOP := LSU_MEMOP
+    //ioExternal.oMemoryOP := LSU_MEMOP
+    ioExternal.oMemoryOP := MuxCase(LS_NOP, Array(
+        (LSU_ADDR >= "h80000000".U && LSU_ADDR <= "h8fffffff".U) -> LSU_MEMOP,
+        (LSU_ADDR >= "ha0000048".U && LSU_ADDR <= "ha000004f".U) -> LSU_MEMOP,
+        (LSU_ADDR >= "ha00003f8".U && LSU_ADDR <= "ha00003ff".U) -> LSU_MEMOP,
+        (LSU_ADDR >= "ha0000060".U && LSU_ADDR <= "ha0000063".U) -> LSU_MEMOP,
+    ))
     ioExternal.oMemoryAddr := LSU_ADDR
     ioExternal.oMemoryWrite := LSU_WRITE_SRC
     ioExternal.oMemoryLen := LSU_LEN
