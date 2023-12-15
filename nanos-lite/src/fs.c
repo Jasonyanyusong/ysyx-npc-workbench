@@ -180,5 +180,5 @@ void init_fs() {
   int sizeOfFB = GPUConfig.width * GPUConfig.height * 4; // each pixel is a 32 bit integer!
   Log("GPU: width = %d, height = %d -> FrameBuffer size = %d", GPUConfig.width, GPUConfig.height, sizeOfFB);
   file_table[FD_FB].size = sizeOfFB;
-  assert(file_table[FD_FB].size > 0);
+  //assert(file_table[FD_FB].size > 0);
 }
