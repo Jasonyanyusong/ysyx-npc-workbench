@@ -43,7 +43,7 @@ VerilatedContext* contextp;
 VerilatedVcdC* tfp;
 VNPC* top;
 
-word_t cycle;
+uint64_t cycle;
 word_t instruction;
 word_t time_of_exec;
 

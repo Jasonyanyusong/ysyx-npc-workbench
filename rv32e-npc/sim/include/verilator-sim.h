@@ -52,7 +52,7 @@ extern VerilatedContext* contextp;
 extern VerilatedVcdC* tfp;
 extern VNPC* top;
 
-extern word_t cycle;
+extern uint64_t cycle;
 extern word_t instruction;
 extern word_t time_of_exec;
 
