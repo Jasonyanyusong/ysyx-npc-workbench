@@ -144,7 +144,7 @@ void sim_one_cycle(){
     #endif
 
     if(top -> ioNPCDebug_Halt){
-        printf("NPC simulation finished at cycle = %d, a0 = %d, ", cycle - 1, top -> ioNPCDebug_GPR10);
+        printf("NPC simulation finished at cycle = %ld, a0 = %d, ", cycle - 1, top -> ioNPCDebug_GPR10);
         if(top -> ioNPCDebug_GPR10 == 0){
             printf("HIT GOOD TRAP\n");
         }else{
