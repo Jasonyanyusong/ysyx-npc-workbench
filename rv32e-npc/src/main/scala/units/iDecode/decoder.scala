@@ -280,6 +280,10 @@ class IDU extends Module{
         ), 0.U(DataWidth.W)
     )
 
+    when (PipeLine_Instr === "h73".U) {
+        printf("[NPC IDU] is ecall\n")
+    }
+
     val IDU_EXU_SRC1 = Mux(IDU_StateOK, MuxCase(0.U(DataWidth.W), Array(
         (IDU_InstructionType === instR) -> IDU_SRC1.asUInt,
         (IDU_InstructionType === instI) -> Lookup(PipeLine_Instr, IDU_SRC1.asUInt, Array(
