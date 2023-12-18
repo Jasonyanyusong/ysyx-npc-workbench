@@ -23,11 +23,6 @@ void get_regs(){
 
     cpu.pc = top -> ioNPCDebug_PC_DYNAMIC;
 
-    cpu.csr[0] = top -> ioNPCDebug_MSTATUS;
-    cpu.csr[1] = top -> ioNPCDebug_MTVEC;
-    cpu.csr[2] = top -> ioNPCDebug_MEPC;
-    cpu.csr[3] = top -> ioNPCDebug_MCAUSE;
-
     if(NR_GPRs == 16 || NR_GPRs == 32){
         cpu.gpr[0]  = top -> ioNPCDebug_GPR00;
         cpu.gpr[1]  = top -> ioNPCDebug_GPR01;
@@ -65,15 +60,6 @@ void display_regs(){
             printf("\n");
         }
     }
-
-    //printf("CSR: mstatus mtvec mepc macuse\n");
-
-    /*for(int i = 0; i < NR_CSRs; i = i + 1){
-        printf("CSR[%d] = 0x%lx\t", i, cpu.csr[i]);
-        if((i + 1) % 8 == 0){
-            printf("\n");
-        }
-    }*/
 
     printf("\n");
 

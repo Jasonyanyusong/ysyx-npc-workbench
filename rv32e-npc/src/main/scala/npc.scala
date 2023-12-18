@@ -65,11 +65,6 @@ class NPCIODebug extends Bundle{
     val PC_COMMIT = Output(UInt(AddrWidth.W))
     val PC_DYNAMIC = Output(UInt(AddrWidth.W))
 
-    val MSTATUS = Output(UInt(DataWidth.W))
-    val MTVEC = Output(UInt(DataWidth.W))
-    val MEPC = Output(UInt(DataWidth.W))
-    val MCAUSE = Output(UInt(DataWidth.W))
-
     val Worked = Output(Bool())
     val Halt = Output(Bool())
 
@@ -120,19 +115,6 @@ class NPC extends Module{
     def GPR_Read(index : UInt) = Mux(index === 0.U, 0.U(DataWidth.W), GPR(index))
     def GPR_getStatus(index : UInt) = Mux(index === 0.U, false.B, GPR_Status(index))
 
-    // CSR Maintain and Manipulation
-    val mstatus = RegInit(0.U(DataWidth.W))
-    val mepc = RegInit(0.U(DataWidth.W))
-    val mtvec = RegInit(0.U(DataWidth.W))
-    val mcause = RegInit(0.U(DataWidth.W))
-
-    def CSR_Read(index : UInt) = MuxCase(0.U(DataWidth.W), Array(
-        (index === CSR_MSTATUS) -> (mstatus.asUInt), // mstatus
-        (index === CSR_MTVEC) -> (mtvec.asUInt  ), // mtvec
-        (index === CSR_MEPC) -> (mepc.asUInt   ), // mepc
-        (index === CSR_MCAUSE) -> (mcause.asUInt )  // mcause
-    ))
-
     // NPC Inside Logic: Top -> IFU
     NPC_IFU.ioInternal.iPC := PC
 
@@ -171,35 +153,10 @@ class NPC extends Module{
     NPC_IDU.ioInternal.iSRC2 := GPR_Read(NPC_IDU.ioInternal.oRS2.asUInt)
     NPC_IDU.ioInternal.iSRC1Dirty := GPR_getStatus(NPC_IDU.ioInternal.oRS1.asUInt)
     NPC_IDU.ioInternal.iSRC2Dirty := GPR_getStatus(NPC_IDU.ioInternal.oRS2.asUInt)
-    val CSR_index = NPC_IDU.ioInternal.oCSR_ZicsrWSCIdx.asUInt
-    NPC_IDU.ioInternal.iCSR_ZicsrOldVal := CSR_Read(CSR_index)
     val NPC_ID2EX_Msg = PipeLine_ID2EX.asTypeOf(PipeLine_ID2EX_Bundle)
     val PrivDecode = NPC_ID2EX_Msg.DecodeVal(15, 14)
     val isZicsr = PrivDecode === PR_ZICSR
     val isECALL = PrivDecode === PR_ECALL
-    mstatus := MuxCase(mstatus, Array(
-        (isZicsr && CSR_index === CSR_MSTATUS) -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
-        isECALL -> "h1800".asUInt
-    ))
-    mtvec := MuxCase(mtvec, Array(
-        (isZicsr && CSR_index === CSR_MTVEC) -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
-    ))
-    mepc := MuxCase(mepc, Array(
-        (isZicsr && CSR_index === CSR_MEPC) -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
-        isECALL -> NPC_ID2EX_Msg.PC
-    ))
-    mcause := MuxCase(mcause, Array(
-        (isZicsr && CSR_index === CSR_MCAUSE) -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
-        isECALL -> 11.U(DataWidth.W)
-    ))
-
-    /*when (isZicsr) {
-        printf("[NPC] IDU state (valid) = %d\n", NPC_IDU.ioInternal.oMasterValid)
-        printf("[NPC] CSR idx = 0x%x, data = 0x%x\n", CSR_index, NPC_IDU.ioInternal.oCSR_ZicsrNewVal)
-    }*/
-
-    NPC_IDU.ioInternal.iCSR_mtvec := mtvec
-    NPC_IDU.ioInternal.iCSR_mepc  := mepc
 
     // NPC Pipeline Logic: EXU <-> LSU
     PipeLine_EX2LS := Mux(
@@ -263,12 +220,6 @@ class NPC extends Module{
 
     ioNPCDebug.Worked := RegNext(NPC_WBU.ioInternal.oWorked)
     ioNPCDebug.Halt := NPC_WBU.ioInternal.oStopped
-
-    // CSR: since it was written in IDU, need to shift for EXU -> LSU -> WBU, 3 cycles
-    ioNPCDebug.MSTATUS := ShiftRegister(mstatus, 3)
-    ioNPCDebug.MTVEC := ShiftRegister(mtvec, 3)
-    ioNPCDebug.MEPC := ShiftRegister(mepc, 3)
-    ioNPCDebug.MCAUSE := ShiftRegister(mcause, 3)
 
     // Memory: to help simulation environemnt judge the addr is in pmem
     ioNPCDebug.LS_Taken := RegNext(NPC_WBU.iLoadStoreDebugOutput.oLoadStoreTaken)

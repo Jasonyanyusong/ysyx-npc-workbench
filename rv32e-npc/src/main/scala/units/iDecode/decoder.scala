@@ -73,13 +73,6 @@ class iDecodeInternal extends Bundle{
 
     val iSRC1Dirty = Input(Bool())
     val iSRC2Dirty = Input(Bool())
-
-    val iCSR_ZicsrOldVal = Input(UInt(DataWidth.W))
-    val oCSR_ZicsrNewVal = Output(UInt(DataWidth.W))
-    val oCSR_ZicsrWSCIdx = Output(UInt(CSRIDWidth.W))
-
-    val iCSR_mtvec = Input(UInt(DataWidth.W))
-    val iCSR_mepc = Input(UInt(DataWidth.W))
 }
 
 class IDU extends Module{
@@ -208,8 +201,6 @@ class IDU extends Module{
         ), 0.U(iDecLSfuncValLen.W)
     )
 
-    //printf("[RTL : IDU] LSU_OP_FUNC = %d\n", LSU_OP_FUNC)
-
     val WBU_OP = Mux(IDU_StateOK, Lookup(
             PipeLine_Instr, WB_EXU, Array(
                 SB -> WB_NOP, SH -> WB_NOP, SW -> WB_NOP,
@@ -272,8 +263,6 @@ class IDU extends Module{
         ), 0.U(CSRIDWidth.W)
     )
 
-    //val IDU_OldCSR = Mux(IDU_StateOK, ioInternal.iCSR_ZicsrOldVal, 0.U(DataWidth.W))
-
     // read old CSR values from registers inside IDU
     val IDU_OldCSR = Mux(IDU_StateOK, MuxCase(0.U(DataWidth.W), Array(
         (IDU_ZicsrWSCIdx === CSR_MSTATUS) -> (CSR_mstatus),
@@ -315,15 +304,6 @@ class IDU extends Module{
         (Priv === PR_ECALL) -> 11.U(DataWidth.W)
     )), CSR_mcause)
 
-    /*when (IDU_ZicsrWSCIdx =/= 0.U) {
-        printf("[NPC IDU] trigger zicsr change value\n")
-        printf("[NPC IDU] index = 0x%x, val = 0x%x\n", IDU_ZicsrWSCIdx, IDU_ZicsrNewVal)
-    }
-
-    when (PipeLine_Instr === "h73".U) {
-        printf("[NPC IDU] is ecall\n")
-    }*/
-
     val IDU_EXU_SRC1 = Mux(IDU_StateOK, MuxCase(0.U(DataWidth.W), Array(
         (IDU_InstructionType === instR) -> IDU_SRC1.asUInt,
         (IDU_InstructionType === instI) -> Lookup(PipeLine_Instr, IDU_SRC1.asUInt, Array(
@@ -362,13 +342,6 @@ class IDU extends Module{
     ioInternal.oFeedBackNewPCVal := IDU_JumpPCAddr
 
     ioInternal.oFeedBackDecodingJumpInstr := (DecodingJumpInstr && IDU_Busy)
-
-    ioInternal.oCSR_ZicsrWSCIdx := Mux(IDU_StateOK, IDU_ZicsrWSCIdx, 0.U(CSRIDWidth.W))
-    ioInternal.oCSR_ZicsrNewVal := Mux(IDU_StateOK, IDU_ZicsrNewVal, 0.U(DataWidth.W))
-
-    /*when (IDU_StateOK && ioInternal.oCSR_ZicsrWSCIdx =/= 0.U) {
-        printf("Send write data = 0x%x\n", ioInternal.oCSR_ZicsrNewVal)
-    }*/
 
     // Connect Pipline Signals
     ioInternal.oMasterValid := ((!RSRegistersDirty) && ioInternal.iSlaveValid) || ((DecodingJumpInstr && IDU_Busy && (!RSRegistersDirty)))
