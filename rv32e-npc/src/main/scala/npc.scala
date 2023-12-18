@@ -192,6 +192,12 @@ class NPC extends Module{
         (isZicsr && CSR_index === CSR_MCAUSE) -> NPC_IDU.ioInternal.oCSR_ZicsrNewVal,
         isECALL -> 11.U(DataWidth.W)
     ))
+
+    /*when (isZicsr) {
+        printf("[NPC] IDU state (valid) = %d\n", NPC_IDU.ioInternal.oMasterValid)
+        printf("[NPC] CSR idx = 0x%x, data = 0x%x\n", CSR_index, NPC_IDU.ioInternal.oCSR_ZicsrNewVal)
+    }*/
+
     NPC_IDU.ioInternal.iCSR_mtvec := mtvec
     NPC_IDU.ioInternal.iCSR_mepc  := mepc
 

@@ -20,6 +20,7 @@ import chisel3._
 import chisel3.util._
 
 import npc.helper.defs.Base._
+import npc.helper.defs.CSR_LUT._
 import npc.helper.defs.InstType._
 import npc.helper.defs.PipeLineDefs._
 import npc.helper.defs.PipeLine_Bundle._
@@ -94,6 +95,12 @@ class IDU extends Module{
 
     val PipeLine_Instr = IDU_ProcessMsg.Instr
     val PipeLine_PC = IDU_ProcessMsg.PC
+
+    // RISC-V M state Control and State Registers
+    val CSR_mcause  = RegInit(0.U(DataWidth.W))
+    val CSR_mepc    = RegInit(0.U(DataWidth.W))
+    val CSR_mstatus = RegInit(0.U(DataWidth.W))
+    val CSR_mtvec   = RegInit(0.U(DataWidth.W))
 
     val DecodingJumpInstr = Lookup(
         PipeLine_Instr, false.B, Array(
@@ -247,9 +254,9 @@ class IDU extends Module{
                 BLTU -> Mux(IDU_SRC1.asUInt  <  IDU_SRC2.asUInt, PipeLine_PC.asUInt + IDU_Imm.asUInt, PipeLine_PC.asUInt + InstSize.U),
                 BGEU -> Mux(IDU_SRC1.asUInt  >= IDU_SRC2.asUInt, PipeLine_PC.asUInt + IDU_Imm.asUInt, PipeLine_PC.asUInt + InstSize.U),
 
-                ECALL -> ioInternal.iCSR_mtvec.asUInt,
+                ECALL -> CSR_mtvec,
                 EBREAK -> PipeLine_PC,
-                MRET  -> ioInternal.iCSR_mepc.asUInt
+                MRET  -> CSR_mepc
             )
         ), 0.U(AddrWidth.W)
     )
@@ -265,7 +272,16 @@ class IDU extends Module{
         ), 0.U(CSRIDWidth.W)
     )
 
-    val IDU_OldCSR = Mux(IDU_StateOK, ioInternal.iCSR_ZicsrOldVal, 0.U(DataWidth.W))
+    //val IDU_OldCSR = Mux(IDU_StateOK, ioInternal.iCSR_ZicsrOldVal, 0.U(DataWidth.W))
+
+    // read old CSR values from registers inside IDU
+    val IDU_OldCSR = Mux(IDU_StateOK, MuxCase(0.U(DataWidth.W), Array(
+        (IDU_ZicsrWSCIdx === CSR_MSTATUS) -> (CSR_mstatus),
+        (IDU_ZicsrWSCIdx === CSR_MTVEC)   -> (CSR_mtvec),
+        (IDU_ZicsrWSCIdx === CSR_MEPC)    -> (CSR_mepc),
+        (IDU_ZicsrWSCIdx === CSR_MCAUSE)  -> (CSR_mcause)
+    )), 0.U(DataWidth.W))
+
     val IDU_Zicsr_uimm = Mux(IDU_StateOK, PipeLine_Instr(RS1Hi, RS1Lo), 0.U(5.W))
 
     val IDU_ZicsrNewVal = Mux(IDU_StateOK, Lookup(
@@ -280,9 +296,33 @@ class IDU extends Module{
         ), 0.U(DataWidth.W)
     )
 
+    CSR_mstatus := Mux(IDU_StateOK, MuxCase(CSR_mstatus, Array(
+        (Priv === PR_ZICSR && IDU_ZicsrWSCIdx === CSR_MSTATUS) -> IDU_ZicsrNewVal,
+        (Priv === PR_ECALL) -> "h1800".asUInt
+    )), CSR_mstatus)
+
+    CSR_mtvec := Mux(IDU_StateOK, MuxCase(CSR_mtvec, Array(
+        (Priv === PR_ZICSR && IDU_ZicsrWSCIdx === CSR_MTVEC) -> IDU_ZicsrNewVal,
+    )), CSR_mtvec)
+
+    CSR_mepc := Mux(IDU_StateOK, MuxCase(CSR_mepc, Array(
+        (Priv === PR_ZICSR && IDU_ZicsrWSCIdx === CSR_MEPC) -> IDU_ZicsrNewVal,
+        (Priv === PR_ECALL) -> PipeLine_PC
+    )), CSR_mepc)
+
+    CSR_mcause := Mux(IDU_StateOK, MuxCase(CSR_mcause, Array(
+        (Priv === PR_ZICSR && IDU_ZicsrWSCIdx === CSR_MCAUSE) -> IDU_ZicsrNewVal,
+        (Priv === PR_ECALL) -> 11.U(DataWidth.W)
+    )), CSR_mcause)
+
+    /*when (IDU_ZicsrWSCIdx =/= 0.U) {
+        printf("[NPC IDU] trigger zicsr change value\n")
+        printf("[NPC IDU] index = 0x%x, val = 0x%x\n", IDU_ZicsrWSCIdx, IDU_ZicsrNewVal)
+    }
+
     when (PipeLine_Instr === "h73".U) {
         printf("[NPC IDU] is ecall\n")
-    }
+    }*/
 
     val IDU_EXU_SRC1 = Mux(IDU_StateOK, MuxCase(0.U(DataWidth.W), Array(
         (IDU_InstructionType === instR) -> IDU_SRC1.asUInt,
@@ -323,8 +363,12 @@ class IDU extends Module{
 
     ioInternal.oFeedBackDecodingJumpInstr := (DecodingJumpInstr && IDU_Busy)
 
-    ioInternal.oCSR_ZicsrWSCIdx := IDU_ZicsrWSCIdx
-    ioInternal.oCSR_ZicsrNewVal := IDU_ZicsrNewVal
+    ioInternal.oCSR_ZicsrWSCIdx := Mux(IDU_StateOK, IDU_ZicsrWSCIdx, 0.U(CSRIDWidth.W))
+    ioInternal.oCSR_ZicsrNewVal := Mux(IDU_StateOK, IDU_ZicsrNewVal, 0.U(DataWidth.W))
+
+    /*when (IDU_StateOK && ioInternal.oCSR_ZicsrWSCIdx =/= 0.U) {
+        printf("Send write data = 0x%x\n", ioInternal.oCSR_ZicsrNewVal)
+    }*/
 
     // Connect Pipline Signals
     ioInternal.oMasterValid := ((!RSRegistersDirty) && ioInternal.iSlaveValid) || ((DecodingJumpInstr && IDU_Busy && (!RSRegistersDirty)))
