@@ -14,10 +14,7 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-package npc.axi.master
-
-import chisel3._
-import chisel3.util._
+package npc.helper.axi
 
 class AXIMasterAW extends Bundle{
     val iMasterAWready = Input(Bool())

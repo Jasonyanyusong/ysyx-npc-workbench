@@ -14,38 +14,28 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-package npc.axi.params
+package npc.arbiter
 
 import chisel3._
 import chisel3.util._
 
-object Base{
-    val AXI_DataWidth = 64
+import npc.helper.axi._
 
-    val AxSIZE_1B = 0.U(3.W)
-    val AxSIZE_2B = 1.U(3.W)
-    val AxSIZE_4B = 2.U(3.W)
-
-    val AXI_ADDR_LEN = 32
-    val AXI_ID_LEN = 4
-    val AXI_LEN_LEN = 8
-    val AXI_SIZE_LEN = 3
-    val AXI_BURST_LEN = 2
-    val AXI_RESP_LEN = 2
-    val AXI_DATA_LEN = 64
+object ArbiterMode {
+    val ArbiterFree = 0.U(2.W)
+    val ArbiterIFOn = 1.U(2.W)
+    val ArbiterLSOn = 2.U(2.W)
 }
 
-object AXI2Lable{
-    // B
-    val BRESP_OKAY = 0.U(3.W)
+class Arbiter extends Module {
+    // IFU read channels
+    val ifu_ar_b = IO(Flipped(new AXIMasterAR))
+    val ifu_r_b  = IO(Flipped(new AXIMasterR))
 
-    // R
-    val RRESP_OKAY = 0.U(3.W)
-}
+    // LSU read channels
+    val lsu_ar_b = IO(Flipped(new AXIMasterAR))
+    val lsu_r_b  = IO(Flipped(new AXIMasterR))
 
-object ArbiterDefs{
-    val Arbiter_NO_REQUEST = 0.U(2.W)
-    val Arbiter_IFU_ONLY = 1.U(2.W)
-    val Arbiter_LSU_ONLY = 2.U(2.W)
-    val Arbiter_BOTH_REQUEST = 3.U(2.W)
+    // Arbiter mode
+    val mode = RegInit(ArbiterMode.ArbiterFree)
 }

@@ -22,8 +22,6 @@ import chisel3.util._
 import npc.helper.defs.Base._
 import npc.helper.defs.PipeLineDefs._
 
-import npc.axi.master._
-
 class iFetchInternal extends Bundle{
     // ON-PIPELINE VALUES
     val iMasterReady = Input(Bool())
@@ -35,7 +33,6 @@ class iFetchInternal extends Bundle{
     val iFeedBackDecodingJumpInstr = Input(Bool())
     val iIDUDecodingBranch = Input(Bool())
     val iIDUDecodingJump = Input(Bool())
-    //val iPCHaveWB = Input(Bool())
 
     val PipeLine_IF2ID_MsgBundle = Output(UInt(PipeLine_IF2ID_Width.W))
     val PipeLine_IF2ID_ChangeReg = Output(Bool())

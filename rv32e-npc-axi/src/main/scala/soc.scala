@@ -14,19 +14,31 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-package npc.axi.io
+package soc
 
 import chisel3._
 import chisel3.util._
 
-object Master{
-    val AXIMasterAW = new Bundle{
-        val iMasterAWready = Input(Bool())
-        val oMasterAWvalid = Output(Bool())
-        val oMasterAWaddr = Output(UInt(32.W))
-        val oMasterAWid = Output(UInt(4.W))
-        val oMasterAWlen = Output(UInt(8.W))
-        val oMasterAWsize = Output(UInt(3.W))
-        val oMasterAWburst = Output(UInt(2.W))
-    }
+import npc._
+
+class SOCIO extends Bundle {
+    // Memory Write Channel
+    val sram_waddr_o = Output(UInt(32.W))
+    val sram_wdata_o = Output(UInt(32.W))
+    val sram_wsize_o = Output(UInt(2.W))
+
+    // Memory Read Channel
+    val sram_raddr_o = Output(UInt(32.W))
+    val sram_rdata_i = Input (UInt(32.W))
+    val sram_rsize_o = Output(UInt(2.W))
+}
+
+class SOC extends Module {
+    // SOC level IO
+    val io = IO(new SOCIO)
+
+    // Processor core
+    val core = Module(new NPC)
+
+    
 }
