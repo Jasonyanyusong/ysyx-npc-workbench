@@ -45,8 +45,6 @@ class EXU extends Module{
 
     val ID2EX_Msg = ioInternal.PipeLine_ID2EX_MsgBundle.asTypeOf(PipeLine_ID2EX_Bundle)
 
-    //printf("[RTL : EXU] DecodeBundle = %d\n", ID2EX_Msg.DecodeVal)
-
     val iExecuteOPcode = ID2EX_Msg.DecodeVal(13, 7)
 
     val SRC1 = ID2EX_Msg.EXU_SRC1

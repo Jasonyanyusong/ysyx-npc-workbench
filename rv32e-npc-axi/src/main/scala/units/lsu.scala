@@ -86,11 +86,7 @@ class LSU extends Module{
     )
     val LSU_WRITE_SRC = Mux(LSU_StateOK, LSU_SRC, 0.U(DataWidth.W))
 
-    //printf("[RTL : LSU] DecodeBundle = %d\n", DecodeBundle)
-    //printf("[RTL : LSU] LSU_FUNC = %d, LSU_MEMOP = %d\n", LSU_FUNC, LSU_MEMOP)
-
     // Connect IO External
-    //ioExternal.oMemoryOP := LSU_MEMOP
     ioExternal.oMemoryOP := MuxCase(LS_NOP, Array(
         (LSU_ADDR >= "h80000000".U && LSU_ADDR <= "h8fffffff".U) -> LSU_MEMOP,
         (LSU_ADDR >= "ha0000048".U && LSU_ADDR <= "ha000004f".U) -> LSU_MEMOP,
