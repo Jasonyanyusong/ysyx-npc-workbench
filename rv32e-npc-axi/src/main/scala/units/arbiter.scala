@@ -95,8 +95,43 @@ class Arbiter extends Module {
         (mode === ArbiterIFOn) -> ifu_r_b.oMasterRready
     ))
 
-    // inputs
-    
+    // inputs - ifu
+    ifu_ar_b.iMasterARready := Mux(mode === ArbiterIFOn, 
+        out_ar_b.iMasterARready, false.B)
+
+    ifu_r_b.iMasterRvalid := Mux(mode === ArbiterIFOn,
+        out_r_b.iMasterRvalid, false.B)
+
+    ifu_r_b.iMasterRresp := Mux(mode === ArbiterIFOn,
+        out_r_b.iMasterRresp, 0.U(2.W))
+
+    ifu_r_b.iMasterRdata := Mux(mode === ArbiterIFOn,
+        out_r_b.iMasterRdata, 0.U(64.W))
+
+    ifu_r_b.iMasterRlast := Mux(mode === ArbiterIFOn,
+        out_r_b.iMasterRlast, false.B)
+        
+    ifu_r_b.iMasterRid := Mux(mode === ArbiterIFOn,
+        out_r_b.iMasterRid, 0.U(4.W))
+
+    // inputs - lsu
+    lsu_ar_b.iMasterARready := Mux(mode === ArbiterLSOn, 
+        out_ar_b.iMasterARready, false.B)
+
+    lsu_r_b.iMasterRvalid := Mux(mode === ArbiterLSOn,
+        out_r_b.iMasterRvalid, false.B)
+
+    lsu_r_b.iMasterRresp := Mux(mode === ArbiterLSOn,
+        out_r_b.iMasterRresp, 0.U(2.W))
+
+    lsu_r_b.iMasterRdata := Mux(mode === ArbiterLSOn,
+        out_r_b.iMasterRdata, 0.U(64.W))
+
+    lsu_r_b.iMasterRlast := Mux(mode === ArbiterLSOn,
+        out_r_b.iMasterRlast, false.B)
+
+    lsu_r_b.iMasterRid := Mux(mode === ArbiterLSOn,
+        out_r_b.iMasterRid, 0.U(4.W))
 
     // TODO: update mode according to read response
 }
