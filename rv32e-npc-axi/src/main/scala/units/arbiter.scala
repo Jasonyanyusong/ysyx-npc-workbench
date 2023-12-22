@@ -90,7 +90,7 @@ class Arbiter extends Module {
         (mode === ArbiterIFOn) -> ifu_ar_b.oMasterARburst
     ))
 
-    out_r_b.oMasterRready := MuxCase(0.U(2.W), Array(
+    out_r_b.oMasterRready := MuxCase(false.B, Array(
         (mode === ArbiterLSOn) -> lsu_r_b.oMasterRready,
         (mode === ArbiterIFOn) -> ifu_r_b.oMasterRready
     ))
