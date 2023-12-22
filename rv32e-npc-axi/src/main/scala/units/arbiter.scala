@@ -58,7 +58,6 @@ class Arbiter extends Module {
         )
     ), mode) // don't change the mode if it's not free
 
-    // TODO: connect datapath according to arbiter's mode
     // outputs
     out_ar_b.oMasterARvalid := MuxCase(false.B, Array(
         (mode === ArbiterLSOn) -> lsu_ar_b.oMasterARvalid,
@@ -133,5 +132,11 @@ class Arbiter extends Module {
     lsu_r_b.iMasterRid := Mux(mode === ArbiterLSOn,
         out_r_b.iMasterRid, 0.U(4.W))
 
-    // TODO: update mode according to read response
+    // update mode according to read response
+    mode := Mux(mode === ArbiterMode.ArbiterFree, mode, MuxCase(mode,
+        Array(
+            (mode === ArbiterMode.ArbiterIFOn && ifu_r_b.oMasterRready && out_r_b.iMasterRvalid) -> ArbiterMode.ArbiterFree,
+            (mode === ArbiterMode.ArbiterLSOn && lsu_r_b.oMasterRready && out_r_b.iMasterRvalid) -> ArbiterMode.ArbiterFree
+        )
+    ))
 }
