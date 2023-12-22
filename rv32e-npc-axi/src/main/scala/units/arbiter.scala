@@ -59,6 +59,44 @@ class Arbiter extends Module {
     ), mode) // don't change the mode if it's not free
 
     // TODO: connect datapath according to arbiter's mode
+    // outputs
+    out_ar_b.oMasterARvalid := MuxCase(false.B, Array(
+        (mode === ArbiterLSOn) -> lsu_ar_b.oMasterARvalid,
+        (mode === ArbiterIFOn) -> ifu_ar_b.oMasterARvalid
+    ))
+
+    out_ar_b.oMasterARaddr := MuxCase(0.U(32.W), Array(
+        (mode === ArbiterLSOn) -> lsu_ar_b.oMasterARaddr,
+        (mode === ArbiterIFOn) -> ifu_ar_b.oMasterARaddr
+    ))
+
+    out_ar_b.oMasterARid := MuxCase(0.U(4.W), Array(
+        (mode === ArbiterLSOn) -> lsu_ar_b.oMasterARid,
+        (mode === ArbiterIFOn) -> ifu_ar_b.oMasterARid
+    ))
+
+    out_ar_b.oMasterARlen := MuxCase(0.U(8.W), Array(
+        (mode === ArbiterLSOn) -> lsu_ar_b.oMasterARlen,
+        (mode === ArbiterIFOn) -> ifu_ar_b.oMasterARlen
+    ))
+
+    out_ar_b.oMasterARsize := MuxCase(0.U(3.W), Array(
+        (mode === ArbiterLSOn) -> lsu_ar_b.oMasterARsize,
+        (mode === ArbiterIFOn) -> ifu_ar_b.oMasterARsize
+    ))
+
+    out_ar_b.oMasterARburst := MuxCase(0.U(2.W), Array(
+        (mode === ArbiterLSOn) -> lsu_ar_b.oMasterARburst,
+        (mode === ArbiterIFOn) -> ifu_ar_b.oMasterARburst
+    ))
+
+    out_r_b.oMasterRready := MuxCase(0.U(2.W), Array(
+        (mode === ArbiterLSOn) -> lsu_r_b.oMasterRready,
+        (mode === ArbiterIFOn) -> ifu_r_b.oMasterRready
+    ))
+
+    // inputs
+    
 
     // TODO: update mode according to read response
 }
