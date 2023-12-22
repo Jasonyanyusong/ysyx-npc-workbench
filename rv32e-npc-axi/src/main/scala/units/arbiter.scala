@@ -60,76 +60,76 @@ class Arbiter extends Module {
 
     // outputs
     out_ar_b.oMasterARvalid := MuxCase(false.B, Array(
-        (mode === ArbiterLSOn) -> lsu_ar_b.oMasterARvalid,
-        (mode === ArbiterIFOn) -> ifu_ar_b.oMasterARvalid
+        (mode === ArbiterMode.ArbiterLSOn) -> lsu_ar_b.oMasterARvalid,
+        (mode === ArbiterMode.ArbiterIFOn) -> ifu_ar_b.oMasterARvalid
     ))
 
     out_ar_b.oMasterARaddr := MuxCase(0.U(32.W), Array(
-        (mode === ArbiterLSOn) -> lsu_ar_b.oMasterARaddr,
-        (mode === ArbiterIFOn) -> ifu_ar_b.oMasterARaddr
+        (mode === ArbiterMode.ArbiterLSOn) -> lsu_ar_b.oMasterARaddr,
+        (mode === ArbiterMode.ArbiterIFOn) -> ifu_ar_b.oMasterARaddr
     ))
 
     out_ar_b.oMasterARid := MuxCase(0.U(4.W), Array(
-        (mode === ArbiterLSOn) -> lsu_ar_b.oMasterARid,
-        (mode === ArbiterIFOn) -> ifu_ar_b.oMasterARid
+        (mode === ArbiterMode.ArbiterLSOn) -> lsu_ar_b.oMasterARid,
+        (mode === ArbiterMode.ArbiterIFOn) -> ifu_ar_b.oMasterARid
     ))
 
     out_ar_b.oMasterARlen := MuxCase(0.U(8.W), Array(
-        (mode === ArbiterLSOn) -> lsu_ar_b.oMasterARlen,
-        (mode === ArbiterIFOn) -> ifu_ar_b.oMasterARlen
+        (mode === ArbiterMode.ArbiterLSOn) -> lsu_ar_b.oMasterARlen,
+        (mode === ArbiterMode.ArbiterIFOn) -> ifu_ar_b.oMasterARlen
     ))
 
     out_ar_b.oMasterARsize := MuxCase(0.U(3.W), Array(
-        (mode === ArbiterLSOn) -> lsu_ar_b.oMasterARsize,
-        (mode === ArbiterIFOn) -> ifu_ar_b.oMasterARsize
+        (mode === ArbiterMode.ArbiterLSOn) -> lsu_ar_b.oMasterARsize,
+        (mode === ArbiterMode.ArbiterIFOn) -> ifu_ar_b.oMasterARsize
     ))
 
     out_ar_b.oMasterARburst := MuxCase(0.U(2.W), Array(
-        (mode === ArbiterLSOn) -> lsu_ar_b.oMasterARburst,
-        (mode === ArbiterIFOn) -> ifu_ar_b.oMasterARburst
+        (mode === ArbiterMode.ArbiterLSOn) -> lsu_ar_b.oMasterARburst,
+        (mode === ArbiterMode.ArbiterIFOn) -> ifu_ar_b.oMasterARburst
     ))
 
     out_r_b.oMasterRready := MuxCase(false.B, Array(
-        (mode === ArbiterLSOn) -> lsu_r_b.oMasterRready,
-        (mode === ArbiterIFOn) -> ifu_r_b.oMasterRready
+        (mode === ArbiterMode.ArbiterLSOn) -> lsu_r_b.oMasterRready,
+        (mode === ArbiterMode.ArbiterIFOn) -> ifu_r_b.oMasterRready
     ))
 
     // inputs - ifu
-    ifu_ar_b.iMasterARready := Mux(mode === ArbiterIFOn, 
+    ifu_ar_b.iMasterARready := Mux(mode === ArbiterMode.ArbiterIFOn, 
         out_ar_b.iMasterARready, false.B)
 
-    ifu_r_b.iMasterRvalid := Mux(mode === ArbiterIFOn,
+    ifu_r_b.iMasterRvalid := Mux(mode === ArbiterMode.ArbiterIFOn,
         out_r_b.iMasterRvalid, false.B)
 
-    ifu_r_b.iMasterRresp := Mux(mode === ArbiterIFOn,
+    ifu_r_b.iMasterRresp := Mux(mode === ArbiterMode.ArbiterIFOn,
         out_r_b.iMasterRresp, 0.U(2.W))
 
-    ifu_r_b.iMasterRdata := Mux(mode === ArbiterIFOn,
+    ifu_r_b.iMasterRdata := Mux(mode === ArbiterMode.ArbiterIFOn,
         out_r_b.iMasterRdata, 0.U(64.W))
 
-    ifu_r_b.iMasterRlast := Mux(mode === ArbiterIFOn,
+    ifu_r_b.iMasterRlast := Mux(mode === ArbiterMode.ArbiterIFOn,
         out_r_b.iMasterRlast, false.B)
         
-    ifu_r_b.iMasterRid := Mux(mode === ArbiterIFOn,
+    ifu_r_b.iMasterRid := Mux(mode === ArbiterMode.ArbiterIFOn,
         out_r_b.iMasterRid, 0.U(4.W))
 
     // inputs - lsu
-    lsu_ar_b.iMasterARready := Mux(mode === ArbiterLSOn, 
+    lsu_ar_b.iMasterARready := Mux(mode === ArbiterMode.ArbiterLSOn, 
         out_ar_b.iMasterARready, false.B)
 
-    lsu_r_b.iMasterRvalid := Mux(mode === ArbiterLSOn,
+    lsu_r_b.iMasterRvalid := Mux(mode === ArbiterMode.ArbiterLSOn,
         out_r_b.iMasterRvalid, false.B)
 
-    lsu_r_b.iMasterRresp := Mux(mode === ArbiterLSOn,
+    lsu_r_b.iMasterRresp := Mux(mode === ArbiterMode.ArbiterLSOn,
         out_r_b.iMasterRresp, 0.U(2.W))
 
-    lsu_r_b.iMasterRdata := Mux(mode === ArbiterLSOn,
+    lsu_r_b.iMasterRdata := Mux(mode === ArbiterMode.ArbiterLSOn,
         out_r_b.iMasterRdata, 0.U(64.W))
 
-    lsu_r_b.iMasterRlast := Mux(mode === ArbiterLSOn,
+    lsu_r_b.iMasterRlast := Mux(mode === ArbiterMode.ArbiterLSOn,
         out_r_b.iMasterRlast, false.B)
 
-    lsu_r_b.iMasterRid := Mux(mode === ArbiterLSOn,
+    lsu_r_b.iMasterRid := Mux(mode === ArbiterMode.ArbiterLSOn,
         out_r_b.iMasterRid, 0.U(4.W))
 
     // update mode according to read response
