@@ -59,7 +59,6 @@ class IFU extends Module{
     val IFU_AXI_R  = IO(new AXIMasterR)
 
     val AXI_State_IFU = RegInit(IFU_AXI_State.AXI_Free)
-
     val IFU_StateOK = ioInternal.iMasterReady.asBool
 
     // axi hard wired settings
@@ -70,12 +69,13 @@ class IFU extends Module{
 
     // if we can fetch a instr
     val CanFetch = (IFU_StateOK) && (!ioInternal.iIDUDecodingBranch) && (!ioInternal.iFeedBackPCChanged) && (!ioInternal.iFeedBackDecodingJumpInstr) && (!ioInternal.iIDUDecodingJump)
-    AXI_State_IFU := Mux(AXI_State_IFU === IFU_AXI_State.AXI_Free, 
-        Mux(CanFetch, IFU_AXI_State.AXI_Sending, AXI_State_IFU), AXI_State_IFU)
 
     // update AXI status
-    AXI_State_IFU := Mux(AXI_State_IFU === IFU_AXI_State.AXI_Sending,
-        Mux(IFU_AXI_AR.iMasterARready, IFU_AXI_State.AXI_Reading, AXI_State_IFU), AXI_State_IFU)
+    AXI_State_IFU := MuxCase(AXI_State_IFU, Array(
+        (AXI_State_IFU === IFU_AXI_State.AXI_Free)    -> Mux(CanFetch,                  IFU_AXI_State.AXI_Sending, AXI_State_IFU),
+        (AXI_State_IFU === IFU_AXI_State.AXI_Sending) -> Mux(IFU_AXI_AR.iMasterARready, IFU_AXI_State.AXI_Reading, AXI_State_IFU),
+        (AXI_State_IFU === IFU_AXI_State.AXI_Reading) -> Mux(IFU_AXI_R.iMasterRvalid,   IFU_AXI_State.AXI_Free,    AXI_State_IFU)
+    ))
 
     // axi hand-shaking signals
     IFU_AXI_AR.oMasterARvalid := AXI_State_IFU === IFU_AXI_State.AXI_Sending
@@ -84,17 +84,12 @@ class IFU extends Module{
     // axi address information
     IFU_AXI_AR.oMasterARaddr := ioInternal.iPC // the memory address is current PC
 
-    // update AXI status
-    AXI_State_IFU := Mux(AXI_State_IFU === IFU_AXI_State.AXI_Reading,
-        Mux(IFU_AXI_R.iMasterRvalid, IFU_AXI_State.AXI_Free, AXI_State_IFU), AXI_State_IFU)
-
     // prepare for read response
     val InstResp = IFU_AXI_R.iMasterRdata(InstWidth, 0)
 
     ioInternal.oMasterValid := IFU_AXI_R.iMasterRvalid && ((!ioInternal.iFeedBackPCChanged) && (!ioInternal.iIDUDecodingBranch) && ioInternal.iPC =/= 0.U) && (!ioInternal.iFeedBackDecodingJumpInstr) && (!ioInternal.iIDUDecodingJump)// && ioInternal.iPCHaveWB
-    val PC = ioInternal.iPC
 
-    val PrePare_PipeLine_IF2ID_Bundle = Cat(Seq(InstResp, PC))
+    val PrePare_PipeLine_IF2ID_Bundle = Cat(Seq(InstResp, ioInternal.iPC))
     ioInternal.PipeLine_IF2ID_MsgBundle := PrePare_PipeLine_IF2ID_Bundle
     ioInternal.PipeLine_IF2ID_ChangeReg := ((IFU_StateOK))
 }
