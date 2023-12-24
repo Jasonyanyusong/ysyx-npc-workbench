@@ -21,6 +21,7 @@ import chisel3.util._
 
 import npc.helper.defs.Base._
 import npc.helper.defs.PipeLineDefs._
+import npc.helper.axi._
 
 class iFetchInternal extends Bundle{
     // ON-PIPELINE VALUES
@@ -38,30 +39,80 @@ class iFetchInternal extends Bundle{
     val PipeLine_IF2ID_ChangeReg = Output(Bool())
 }
 
-class iFetchExternal extends Bundle{
+/*class iFetchExternal extends Bundle{
     val iInst = Input(UInt(InstWidth.W))
     val oPC = Output(UInt(AddrWidth.W))
     val oMemEnable = Output(Bool())
+}*/
+
+object IFU_AXI_State {
+    val AXI_Free = 0.U(2.W)
+    val AXI_Sending = 1.U(2.W)
+    val AXI_Reading = 2.U(2.W)
+}
+
+object IFU_AXI_Defs {
+    val AXI_AR_ID = 1.U(4.W) // hard wired ID
+    val AXI_AR_LEN = 0.U(8.W) // only 1 transfer per transaction
+    val AXI_AR_SIZE = 2.U(3.W) // hard wired, inst size is 32 bit
+    val AXI_AR_BURST = 0.U(2.W) // fixed burst, 1 transfer per transaction
 }
 
 class IFU extends Module{
     val ioInternal = IO(new iFetchInternal)
-    val ioExternal = IO(new iFetchExternal)
+    //val ioExternal = IO(new iFetchExternal)
+
+    val IFU_AXI_AR = IO(new AXIMasterAR)
+    val IFU_AXI_R  = IO(new AXIMasterR)
+
+    val AXI_State_IFU = RegInit(IFU_AXI_State.AXI_Free)
 
     val IFU_StateOK = ioInternal.iMasterReady.asBool
 
-    // garantee that the same instruction will not be executed twice
-    val LastFetchSuccessPC = RegInit("h80000000".U(AddrWidth.W))
-    LastFetchSuccessPC := Mux(ioExternal.iInst =/= 0.U, ioInternal.iPC, LastFetchSuccessPC)
+    // axi hard wired settings
+    IFU_AXI_AR.oMasterARid := IFU_AXI_Defs.AXI_AR_ID
+    IFU_AXI_AR.oMasterARlen := IFU_AXI_Defs.AXI_AR_LEN
+    IFU_AXI_AR.oMasterARsize := IFU_AXI_Defs.AXI_AR_SIZE
+    IFU_AXI_AR.oMasterARburst := IFU_AXI_Defs.AXI_AR_BURST
 
-    ioExternal.oMemEnable := (IFU_StateOK) && (!ioInternal.iIDUDecodingBranch) && (!ioInternal.iFeedBackPCChanged) && (!ioInternal.iFeedBackDecodingJumpInstr) && (!ioInternal.iIDUDecodingJump)// && ioInternal.iPCHaveWB
-    ioExternal.oPC := ioInternal.iPC
-    ioInternal.oMasterValid := ((!ioInternal.iFeedBackPCChanged) && (!ioInternal.iIDUDecodingBranch) && ioInternal.iPC =/= 0.U) && (!ioInternal.iFeedBackDecodingJumpInstr) && (!ioInternal.iIDUDecodingJump)// && ioInternal.iPCHaveWB
+    // if we can fetch a instr
+    val CanFetch = (IFU_StateOK) && (!ioInternal.iIDUDecodingBranch) && (!ioInternal.iFeedBackPCChanged) && (!ioInternal.iFeedBackDecodingJumpInstr) && (!ioInternal.iIDUDecodingJump)
+    AXI_State_IFU := Mux(AXI_State_IFU === IFU_AXI_State.AXI_Free, 
+        Mux(CanFetch, IFU_AXI_State.AXI_Sending, AXI_State_IFU), AXI_State_IFU)
 
-    val Inst = Mux(IFU_StateOK, ioExternal.iInst, 0.U(InstWidth.W))
+    // update AXI status
+    AXI_State_IFU := Mux(AXI_State_IFU === IFU_AXI_State.AXI_Sending,
+        Mux(IFU_AXI_AR.iMasterARready, IFU_AXI_State.AXI_Reading, AXI_State_IFU), AXI_State_IFU)
+
+    // axi hand-shaking signals
+    IFU_AXI_AR.oMasterARvalid := AXI_State_IFU === IFU_AXI_State.AXI_Sending
+    IFU_AXI_R.oMasterRready := ioInternal.iMasterReady // IDU is ready for decoding
+
+    // axi address information
+    IFU_AXI_AR.oMasterARaddr := ioInternal.iPC // the memory address is current PC
+
+    // update AXI status
+    AXI_State_IFU := Mux(AXI_State_IFU === IFU_AXI_State.AXI_Reading,
+        Mux(IFU_AXI_R.iMasterRvalid, IFU_AXI_State.AXI_Free, AXI_State_IFU), AXI_State_IFU)
+
+    // garantee that the same instruction will not be executed twice (this part is not used)
+    /*val LastFetchSuccessPC = RegInit("h80000000".U(AddrWidth.W))
+    LastFetchSuccessPC := Mux(ioExternal.iInst =/= 0.U, ioInternal.iPC, LastFetchSuccessPC)*/
+
+    // prepare for read response
+    val InstResp = IFU_AXI_R.iMasterRdata(InstWidth, 0)
+    
+    // update AXI status
+
+
+    //ioExternal.oMemEnable := (IFU_StateOK) && (!ioInternal.iIDUDecodingBranch) && (!ioInternal.iFeedBackPCChanged) && (!ioInternal.iFeedBackDecodingJumpInstr) && (!ioInternal.iIDUDecodingJump)// && ioInternal.iPCHaveWB
+    //ioExternal.oPC := ioInternal.iPC
+    ioInternal.oMasterValid := IFU_AXI_R.iMasterRvalid && ((!ioInternal.iFeedBackPCChanged) && (!ioInternal.iIDUDecodingBranch) && ioInternal.iPC =/= 0.U) && (!ioInternal.iFeedBackDecodingJumpInstr) && (!ioInternal.iIDUDecodingJump)// && ioInternal.iPCHaveWB
+
+    //val Inst = Mux(IFU_StateOK, ioExternal.iInst, 0.U(InstWidth.W))
     val PC = ioInternal.iPC
 
-    val PrePare_PipeLine_IF2ID_Bundle = Cat(Seq(Inst, PC))
+    val PrePare_PipeLine_IF2ID_Bundle = Cat(Seq(InstResp, PC))
     ioInternal.PipeLine_IF2ID_MsgBundle := PrePare_PipeLine_IF2ID_Bundle
     ioInternal.PipeLine_IF2ID_ChangeReg := ((IFU_StateOK))
 }
