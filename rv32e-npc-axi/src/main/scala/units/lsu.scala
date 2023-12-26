@@ -23,6 +23,8 @@ import npc.helper.defs.Base._
 import npc.helper.defs.PipeLineDefs._
 import npc.helper.defs.PipeLine_Bundle._
 
+import npc.helper.axi._
+
 import npc.helper.opcode.OpLSULen._
 import npc.helper.opcode.OpLSUFunc._
 import npc.helper.opcode.MemOp._
@@ -38,6 +40,25 @@ class iLoadStoreInternal extends Bundle{
     val PipeLine_EX2LS_MsgBundle = Input(UInt(PipeLine_EX2LS_Width.W))
     val PipeLine_LS2WB_MsgBundle = Output(UInt(PipeLine_LS2WB_Width.W))
     val PipeLine_LS2WB_ChangeReg = Output(Bool())
+}
+
+object LSU_AXI_State {
+    val AXI_Free = 0.U(2.W)
+    val AXI_Sending = 1.U(2.W)
+    val AXI_Reading = 2.U(2.W)
+    val AXI_Writing = 3.U(2.W)
+}
+
+object LSU_AXI_R_Defs {
+    val AXI_AR_ID = 2.U(4.W) // hard wired ID
+    val AXI_AR_LEN = 0.U(8.W) // only 1 transfer per transaction
+    val AXI_AR_BURST = 0.U(2.W) // fixed burst, 1 transfer per transaction
+}
+
+object LSU_AXI_W_Defs {
+    val AXI_AW_ID = 2.U(4.W) // hard wired ID
+    val AXI_AW_LEN = 0.U(8.W)
+    val AXI_AW_BURST = 0.U(2.W)
 }
 
 class iLoadStoreExternal extends Bundle{
@@ -57,9 +78,19 @@ class LSU extends Module{
     val ioInternal = IO(new iLoadStoreInternal)
     val ioExternal = IO(new iLoadStoreExternal)
 
+    // AXI
+    val LSU_AXI_AW = IO(new AXIMasterAW)
+    val LSU_AXI_W  = IO(new AXIMasterW)
+    val LSU_AXI_B  = IO(new AXIMasterB)
+    val LSU_AXI_AR = IO(new AXIMasterAR)
+    val LSU_AXI_R  = IO(new AXIMasterR)
+
     val ioDebug    = IO(new iLoadStoreDebug)
 
     val LSU_NotBusy = RegInit(true.B)
+
+    // record the status of AXI
+    val AXI_State_LSU = RegInit(LSU_AXI_State.AXI_Free)
 
     val EX2LS_Msg = ioInternal.PipeLine_EX2LS_MsgBundle.asTypeOf(PipeLine_EX2LS_Bundle)
 
