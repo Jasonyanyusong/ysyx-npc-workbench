@@ -61,6 +61,12 @@ object LSU_AXI_W_Defs {
     val AXI_AW_BURST = 0.U(2.W)
 }
 
+object LSU_AxSIZE {
+    val AxSIZE_BYTE = 0.U(3.W) // lb lbu sb
+    val AxSIZE_HALF = 1.U(3.W) // lh lhu sh
+    val AxSIZE_WORD = 2.U(3.W) // lw sw
+}
+
 class iLoadStoreExternal extends Bundle{
     val oMemoryOP = Output(UInt(2.W))
     val oMemoryLen = Output(UInt(2.W))
