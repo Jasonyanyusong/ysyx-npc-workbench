@@ -59,6 +59,7 @@ object LSU_AXI_R_Defs {
 object LSU_AXI_W_Defs {
     val AXI_AW_ID = 2.U(4.W) // hard wired ID
     val AXI_AW_LEN = 0.U(8.W)
+    val AXI_AW_SIZE = 2.U(3.W) // hard wired, output size is 32b
     val AXI_AW_BURST = 0.U(2.W)
 }
 
@@ -126,7 +127,17 @@ class LSU extends Module{
     // send the size signal to aw and ar
     val LSU_SIZE = Mux(LSU_StateOK, DecodeBundle(6, 5), LS_B)
     LSU_AXI_AR.oMasterARsize := LSU_SIZE
-    LSU_AXI_AW.oMasterARsize := LSU_SIZE
+    LSU_AXI_AW.oMasterARsize := LSU_AXI_W_Defs.AXI_AW_SIZE // the size of write is in strb
+
+    // send the strb and data signal to w
+    LSU_AXI_W.oMasterWstrb := MuxCase(0.U(8.W), Array(
+        (LSU_SIZE === LS_B) ->  (1.U(8.W)), // 0000 0001
+        (LSU_SIZE === LS_H) ->  (3.U(8.W)), // 0000 0011
+        (LSU_SIZE === LS_W) -> (15.U(8.W)), // 0000 1111
+    ))
+
+    LSU_AXI_W.oMasterWdata := LSU_SRC
+    LSU_AXI_W.oMasterWlast := true.B
 
     // deterimine which axi channel to be used (read/write)
     val AXI_MEMOP := MuxCase(LS_NOP, Array(
@@ -156,6 +167,13 @@ class LSU extends Module{
         (AXI_State_LSU === LSU_AXI_State.AXI_WWriting) -> (Mux(
             LSU_AXI_B.iMasterBvalid, LSU_AXI_State.AXI_Free, AXI_State_LSU)),
     ))
+
+    // send the valid & ready signal to axi
+    LSU_AXI_AW.oMasterAWvalid := AXI_State_LSU === AXI_WSending
+    LSU_AXI_W.oMasterWvalid   := AXI_State_LSU === AXI_WSending
+    LSU_AXI_B.oMasterBready   := AXI_State_LSU === AXI_WWriting && ioInternal.iMasterReady
+    LSU_AXI_AR.oMasterARvalid := AXI_State_LSU === AXI_RSending
+    LSU_AXI_R.oMasterRready   := AXI_State_LSU === AXI_RReading && ioInternal.iMasterReady
 
     val MEM_READ_RET = Mux(LSU_StateOK, LSU_AXI_R.iMasterRdata(31, 0), 0.U(DataWidth.W))
 
