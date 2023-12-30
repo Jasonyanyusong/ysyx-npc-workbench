@@ -62,20 +62,6 @@ object LSU_AXI_W_Defs {
     val AXI_AW_BURST = 0.U(2.W)
 }
 
-/*object LSU_AxSIZE {
-    val AxSIZE_BYTE = 0.U(3.W) // lb lbu sb
-    val AxSIZE_HALF = 1.U(3.W) // lh lhu sh
-    val AxSIZE_WORD = 2.U(3.W) // lw sw
-}*/
-
-/*class iLoadStoreExternal extends Bundle{
-    val oMemoryOP = Output(UInt(2.W))
-    val oMemoryLen = Output(UInt(2.W))
-    val oMemoryAddr = Output(UInt(AddrWidth.W))
-    val oMemoryWrite = Output(UInt(DataWidth.W))
-    val iMemoryRead = Input(UInt(DataWidth.W))
-}*/
-
 class iLoadStoreDebug extends Bundle{
     val oLoadStoreTaken = Output(Bool())
     val oLoadStoreAddress = Output(UInt(AddrWidth.W))
@@ -83,7 +69,6 @@ class iLoadStoreDebug extends Bundle{
 
 class LSU extends Module{
     val ioInternal = IO(new iLoadStoreInternal)
-    //val ioExternal = IO(new iLoadStoreExternal)
 
     // AXI
     val LSU_AXI_AW = IO(new AXIMasterAW)
@@ -171,17 +156,6 @@ class LSU extends Module{
         (AXI_State_LSU === LSU_AXI_State.AXI_WWriting) -> (Mux(
             LSU_AXI_B.iMasterBvalid, LSU_AXI_State.AXI_Free, AXI_State_LSU)),
     ))
-
-    // Connect IO External
-    /*ioExternal.oMemoryOP := MuxCase(LS_NOP, Array(
-        (LSU_ADDR >= "h80000000".U && LSU_ADDR <= "h8fffffff".U) -> LSU_MEMOP,
-        (LSU_ADDR >= "ha0000048".U && LSU_ADDR <= "ha000004f".U) -> LSU_MEMOP,
-        (LSU_ADDR >= "ha00003f8".U && LSU_ADDR <= "ha00003ff".U) -> LSU_MEMOP,
-        (LSU_ADDR >= "ha0000060".U && LSU_ADDR <= "ha0000063".U) -> LSU_MEMOP,
-    ))
-    ioExternal.oMemoryAddr := LSU_ADDR
-    ioExternal.oMemoryWrite := LSU_WRITE_SRC
-    ioExternal.oMemoryLen := LSU_LEN*/
 
     val MEM_READ_RET = Mux(LSU_StateOK, LSU_AXI_R.iMasterRdata(31, 0), 0.U(DataWidth.W))
 
