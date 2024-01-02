@@ -119,6 +119,12 @@ class NPC extends Module{
     NPC_AXI_W.oMasterWstrb := NPC_LSU.LSU_AXI_W.oMasterWstrb
     NPC_AXI_W.oMasterWlast := NPC_LSU.LSU_AXI_W.oMasterWlast
 
+    // Connect with top signals: B
+    NPC_LSU.LSU_AXI_B.iMasterBvalid := NPC_AXI_B.iMasterBvalid
+    NPC_LSU.LSU_AXI_B.iMasterBresp := NPC_AXI_B.iMasterBresp
+    NPC_LSU.LSU_AXI_B.iMasterBid := NPC_AXI_B.iMasterBid
+    NPC_AXI_B.oMasterBready := NPC_LSU.LSU_AXI_B.oMasterBready
+
     // PipeLine Registers
     val PipeLine_IF2ID = RegInit(0.U(PipeLine_IF2ID_Width.W))
     val PipeLine_ID2EX = RegInit(0.U(PipeLine_ID2EX_Width.W))
