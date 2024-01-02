@@ -134,6 +134,14 @@ class NPC extends Module{
     NPC_AXI_AR.oMasterARsize := Arbiter.out_ar_b.oMasterARsize
     NPC_AXI_AR.oMasterARburst := Arbiter.out_ar_b.oMasterARburst
 
+    // Connect with top signals: R
+    NPC_AXI_R.oMasterRready := Arbiter.out_r_b.oMasterRready
+    Arbiter.out_r_b.iMasterRvalid := NPC_AXI_R.iMasterRvalid
+    Arbiter.out_r_b.iMasterRresp := NPC_AXI_R.iMasterRresp
+    Arbiter.out_r_b.iMasterRdata := NPC_AXI_R.iMasterRdata
+    Arbiter.out_r_b.iMasterRlast := NPC_AXI_R.iMasterRlast
+    Arbiter.out_r_b.iMasterRid := NPC_AXI_R.iMasterRid
+
     // PipeLine Registers
     val PipeLine_IF2ID = RegInit(0.U(PipeLine_IF2ID_Width.W))
     val PipeLine_ID2EX = RegInit(0.U(PipeLine_ID2EX_Width.W))
