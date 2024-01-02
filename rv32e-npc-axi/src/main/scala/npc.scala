@@ -32,6 +32,9 @@ import npc.units.iExecute._
 import npc.units.iLoadStore._
 import npc.units.iWriteBack._
 
+import npc.helper.axi._
+import npc.arbiter._
+
 class NPCIO extends Bundle{
     val iFetch_iInst = Input(UInt(InstWidth.W))
     val iFetch_oPC = Output(UInt(AddrWidth.W))
@@ -73,8 +76,18 @@ class NPCIODebug extends Bundle{
 }
 
 class NPC extends Module{
-    val ioNPC = IO(new NPCIO)
+    //val ioNPC = IO(new NPCIO)
     val ioNPCDebug = IO(new NPCIODebug)
+
+    // 5 AXI channels for all IO
+    val NPC_AXI_AW = IO(new AXIMasterAW)
+    val NPC_AXI_W =  IO(new AXIMasterW)
+    val NPC_AXI_B =  IO(new AXIMasterB)
+    val NPC_AXI_AR = IO(new AXIMasterAR)
+    val NPC_AXI_R =  IO(new AXIMAsterR)
+
+    // AXI Arbiter
+    val NPC_Arbiter = Module(new Arbiter)
 
     // Pipeline Components
     val NPC_IFU = Module(new IFU)
@@ -82,6 +95,22 @@ class NPC extends Module{
     val NPC_EXU = Module(new EXU)
     val NPC_LSU = Module(new LSU)
     val NPC_WBU = Module(new WBU)
+
+    // Connect arbiter
+    Arbiter.ifu_ar_b <> NPC_IFU.IFU_AXI_AR
+    Arbiter.ifu_r_b  <> NPC_IFU.IFU_AXI_R
+
+    Arbiter.lsu_ar_b <> NPC_LSU.LSU_AXI_AR
+    Arbiter.lsu_r_b  <> NPC_LSU.LSU_AXI_R
+
+    // Connect with top signals: AW
+    NPC_LSU.LSU_AXI_AW.iMasterAWready := NPC_AXI_AW.iMasterAWready
+    NPC_AXI_AW.oMasterAWvalid := NPC_LSU.LSU_AXI_AW.oMasterAWvalid
+    NPC_AXI_AW.oMasterAWaddr := NPC_LSU.LSU_AXI_AW.oMasterAWaddr
+    NPC_AXI_AW.oMasterAWid := NPC_LSU.LSU_AXI_AW.oMasterAWid
+    NPC_AXI_AW.oMasterAWlen := NPC_LSU.LSU_AXI_AW.oMasterAWlen
+    NPC_AXI_AW.oMasterAWsize := NPC_LSU.LSU_AXI_AW.oMasterAWsize
+    NPC_AXI_AW.oMasterAWburst := NPC_LSU.LSU_AXI_AW.oMasterAWburst
 
     // PipeLine Registers
     val PipeLine_IF2ID = RegInit(0.U(PipeLine_IF2ID_Width.W))
