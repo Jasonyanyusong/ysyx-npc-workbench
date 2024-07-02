@@ -93,7 +93,7 @@ class NPC extends Module{
     val PC = RegInit("h80000000".U(AddrWidth.W))
 
     PC := MuxCase(PC, Array(
-        (PC === "h80000000".U) -> (PC + InstSize.U), // finished fetch of 1st inst
+        (PC === "h80000000".U && NPC_IFU.ioInternal.oMasterValid) -> (PC + InstSize.U), // finished fetch of 1st inst, need IFU valid
         (RegNext(NPC_IFU.ioInternal.oMasterValid) && NPC_IDU.ioInternal.oMasterValid && !NPC_IDU.ioInternal.oIsDecodingJump) -> (PC + InstSize.U), // shake hand success, not jump
         (NPC_IDU.ioInternal.oMasterValid &&  NPC_IDU.ioInternal.oIsDecodingJump) -> (NPC_IDU.ioInternal.oFeedBackNewPCVal), // jump judge complete
     ))
