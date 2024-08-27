@@ -81,6 +81,32 @@ object NPC_IDU_EX_Ops {
     def EX_SUB    = 11.U(4.W)
 }
 
+object NPC_IDU_LS_Ops {
+    def LS_NOP    =  0.U(4.W)
+    def LS_LB     =  1.U(4.W)
+    def LS_LH     =  2.U(4.W)
+    def LS_LW     =  3.U(4.W)
+    def LS_LBU    =  4.U(4.W)
+    def LS_LHU    =  5.U(4.W)
+    def LS_SB     =  6.U(4.W)
+    def LS_SH     =  7.U(4.W)
+    def LS_SW     =  8.U(4.W)
+}
+
+object NPC_IDU_WB_Ops {
+    def WB_NOP    =  0.U(2.W)
+    def WB_EXU    =  1.U(2.W)
+    def WB_LSU    =  2.U(2.W)
+}
+
+object NPC_M_CSR_Num {
+    val CSR_MSTATUS = "h300".U
+    val CSR_MTVEC = "h305".U
+    val CSR_MEPC = "h341".U
+    val CSR_MCAUSE = "h342".U
+}
+
+
 class NPC_IDU_Internal_IO extends Bundle {
     val idu_internal_inst_i = Input(UInt(32.W))
     val idu_internal_work_i = Input(Bool())
@@ -172,34 +198,34 @@ class NPC_IDU extends Module {
     ))
 
     // decode - assign immediate number
-    val immI = ioSubmodule.iInst(31, 20).asUInt
+    val immI = idu_internal_io.idu_internal_inst_i(31, 20).asUInt
     val immS = Cat(
         Seq(
-            ioSubmodule.iInst(31, 25).asUInt,
-            ioSubmodule.iInst(11,  7).asUInt
+            idu_internal_io.idu_internal_inst_i(31, 25).asUInt,
+            idu_internal_io.idu_internal_inst_i(11,  7).asUInt
         )
     )
     val immB = Cat(
         Seq(
-            ioSubmodule.iInst(31, 31).asUInt,
-            ioSubmodule.iInst( 7,  7).asUInt,
-            ioSubmodule.iInst(30, 25).asUInt,
-            ioSubmodule.iInst(11,  8).asUInt,
+            idu_internal_io.idu_internal_inst_i(31, 31).asUInt,
+            idu_internal_io.idu_internal_inst_i( 7,  7).asUInt,
+            idu_internal_io.idu_internal_inst_i(30, 25).asUInt,
+            idu_internal_io.idu_internal_inst_i(11,  8).asUInt,
             Fill(1, 0.U(1.W)).asUInt
         )
     )
     val immU = Cat(
         Seq(
-            ioSubmodule.iInst(31, 12).asUInt,
+            idu_internal_io.idu_internal_inst_i(31, 12).asUInt,
             Fill(12, 0.U(1.W)).asUInt
         )
     )
     val immJ = Cat(
         Seq(
-            ioSubmodule.iInst(31, 31).asUInt,
-            ioSubmodule.iInst(19, 12).asUInt,
-            ioSubmodule.iInst(20, 20).asUInt,
-            ioSubmodule.iInst(30, 21).asUInt,
+            idu_internal_io.idu_internal_inst_i(31, 31).asUInt,
+            idu_internal_io.idu_internal_inst_i(19, 12).asUInt,
+            idu_internal_io.idu_internal_inst_i(20, 20).asUInt,
+            idu_internal_io.idu_internal_inst_i(30, 21).asUInt,
             Fill(1, 0.U(1.W)).asUInt
         )
     )
@@ -259,15 +285,22 @@ class NPC_IDU extends Module {
         NPC_IDU_Insts.SRA    -> NPC_IDU_EX_Ops.EX_SRA,
         NPC_IDU_Insts.OR     -> NPC_IDU_EX_Ops.EX_OR,
         NPC_IDU_Insts.AND    -> NPC_IDU_EX_Ops.EX_AND,
-        NPC_IDU_Insts.CSRRW  -> NPC_IDU_EX_Ops.EX_NOP,
-        NPC_IDU_Insts.CSRRS  -> NPC_IDU_EX_Ops.EX_NOP,
-        NPC_IDU_Insts.CSRRC  -> NPC_IDU_EX_Ops.EX_NOP,
-        NPC_IDU_Insts.CSRRWI -> NPC_IDU_EX_Ops.EX_NOP,
-        NPC_IDU_Insts.CSRRSI -> NPC_IDU_EX_Ops.EX_NOP,
-        NPC_IDU_Insts.CSRRCI -> NPC_IDU_EX_Ops.EX_NOP,
+        NPC_IDU_Insts.CSRRW  -> NPC_IDU_EX_Ops.EX_PS1,
+        NPC_IDU_Insts.CSRRS  -> NPC_IDU_EX_Ops.EX_PS1,
+        NPC_IDU_Insts.CSRRC  -> NPC_IDU_EX_Ops.EX_PS1,
+        NPC_IDU_Insts.CSRRWI -> NPC_IDU_EX_Ops.EX_PS1,
+        NPC_IDU_Insts.CSRRSI -> NPC_IDU_EX_Ops.EX_PS1,
+        NPC_IDU_Insts.CSRRCI -> NPC_IDU_EX_Ops.EX_PS1,
         NPC_IDU_Insts.ECALL  -> NPC_IDU_EX_Ops.EX_NOP,
         NPC_IDU_Insts.MRET   -> NPC_IDU_EX_Ops.EX_NOP,
     ))
+
+    val Old_CSR_Val = MuxCase(0.U(32.W), 
+        (imm === NPC_M_CSR_Num.CSR_MSTATUS) -> (CSR_mstatus),
+        (imm === NPC_M_CSR_Num.CSR_MTVEC)   -> (CSR_mtvec),
+        (imm === NPC_M_CSR_Num.CSR_MTVEC)   -> (CSR_mtvec),
+        (imm === NPC_M_CSR_Num.CSR_MSTATUS) -> (CSR_mstatus),
+    )
 
     idu_internal_io.idu_internal_exu_src1_o := Lookup(idu_internal_io.idu_internal_inst_i, 0.U(32.W), Array(
         NPC_IDU_Insts.LUI    -> imm,
@@ -307,12 +340,12 @@ class NPC_IDU extends Module {
         NPC_IDU_Insts.SRA    -> IDU_RS1_Val,
         NPC_IDU_Insts.OR     -> IDU_RS1_Val,
         NPC_IDU_Insts.AND    -> IDU_RS1_Val,
-        NPC_IDU_Insts.CSRRW  -> 0.U(32.W),
-        NPC_IDU_Insts.CSRRS  -> 0.U(32.W),
-        NPC_IDU_Insts.CSRRC  -> 0.U(32.W),
-        NPC_IDU_Insts.CSRRWI -> 0.U(32.W),
-        NPC_IDU_Insts.CSRRSI -> 0.U(32.W),
-        NPC_IDU_Insts.CSRRCI -> 0.U(32.W),
+        NPC_IDU_Insts.CSRRW  -> Old_CSR_Val,
+        NPC_IDU_Insts.CSRRS  -> Old_CSR_Val,
+        NPC_IDU_Insts.CSRRC  -> Old_CSR_Val,
+        NPC_IDU_Insts.CSRRWI -> Old_CSR_Val,
+        NPC_IDU_Insts.CSRRSI -> Old_CSR_Val,
+        NPC_IDU_Insts.CSRRCI -> Old_CSR_Val,
         NPC_IDU_Insts.ECALL  -> 0.U(32.W),
         NPC_IDU_Insts.MRET   -> 0.U(32.W),
     ))
@@ -320,8 +353,8 @@ class NPC_IDU extends Module {
     idu_internal_io.idu_internal_exu_src2_o := Lookup(idu_internal_io.idu_internal_inst_i, 0.U(32.W), Array(
         NPC_IDU_Insts.LUI    -> 0.U(32.W),
         NPC_IDU_Insts.AUIPC  -> imm,
-        NPC_IDU_Insts.JAL    -> 4.U(32.W),
-        NPC_IDU_Insts.JALR   -> 4.U(32.W),
+        NPC_IDU_Insts.JAL    -> 4.U(32.W), // snpc
+        NPC_IDU_Insts.JALR   -> 4.U(32.W), // snpc
         NPC_IDU_Insts.BEQ    -> 0.U(32.W),
         NPC_IDU_Insts.BNE    -> 0.U(32.W),
         NPC_IDU_Insts.BLT    -> 0.U(32.W),
@@ -366,8 +399,78 @@ class NPC_IDU extends Module {
     ))
 
     // decode - lsu
+    idu_internal_io.idu_internal_lsu_opcode_o := Lookup(idu_internal_io.idu_internal_inst_i, NPC_IDU_LS_Ops.LS_NOP, Array(
+        NPC_IDU_Insts.LB     -> NPC_IDU_LS_Ops.LS_LB,
+        NPC_IDU_Insts.LH     -> NPC_IDU_LS_Ops.LS_LH,
+        NPC_IDU_Insts.LW     -> NPC_IDU_LS_Ops.LS_LW,
+        NPC_IDU_Insts.LBU    -> NPC_IDU_LS_Ops.LS_LBU,
+        NPC_IDU_Insts.LHU    -> NPC_IDU_LS_Ops.LS_LHU,
+        NPC_IDU_Insts.SB     -> NPC_IDU_LS_Ops.LS_SB,
+        NPC_IDU_Insts.SH     -> NPC_IDU_LS_Ops.LS_SH,
+        NPC_IDU_Insts.SW     -> NPC_IDU_LS_Ops.LS_SW,
+    ))
+
+    idu_internal_io.idu_internal_lsu_wdata_o := Lookup(idu_internal_io.idu_internal_inst_i, 0.U(32.W), Array(
+        NPC_IDU_Insts.LB     -> 0.U(32.W),
+        NPC_IDU_Insts.LH     -> 0.U(32.W),
+        NPC_IDU_Insts.LW     -> 0.U(32.W),
+        NPC_IDU_Insts.LBU    -> 0.U(32.W),
+        NPC_IDU_Insts.LHU    -> 0.U(32.W),
+        NPC_IDU_Insts.SB     -> IDU_RS2_Val,
+        NPC_IDU_Insts.SH     -> IDU_RS2_Val,
+        NPC_IDU_Insts.SW     -> IDU_RS2_Val,
+    ))
 
     // decode - wbu
+    idu_internal_io.idu_internal_wbu_opcode_o := Lookup(idu_internal_io.idu_internal_inst_i, NPC_IDU_WB_Ops.WB_NOP, Array(
+        NPC_IDU_Insts.LUI    -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.AUIPC  -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.JAL    -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.JALR   -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.BEQ    -> NPC_IDU_WB_Ops.WB_NOP,
+        NPC_IDU_Insts.BNE    -> NPC_IDU_WB_Ops.WB_NOP,
+        NPC_IDU_Insts.BLT    -> NPC_IDU_WB_Ops.WB_NOP,
+        NPC_IDU_Insts.BGE    -> NPC_IDU_WB_Ops.WB_NOP,
+        NPC_IDU_Insts.BLTU   -> NPC_IDU_WB_Ops.WB_NOP,
+        NPC_IDU_Insts.BGEU   -> NPC_IDU_WB_Ops.WB_NOP,
+        NPC_IDU_Insts.LB     -> NPC_IDU_WB_Ops.WB_LSU,
+        NPC_IDU_Insts.LH     -> NPC_IDU_WB_Ops.WB_LSU,
+        NPC_IDU_Insts.LW     -> NPC_IDU_WB_Ops.WB_LSU,
+        NPC_IDU_Insts.LBU    -> NPC_IDU_WB_Ops.WB_LSU,
+        NPC_IDU_Insts.LHU    -> NPC_IDU_WB_Ops.WB_LSU,
+        NPC_IDU_Insts.SB     -> NPC_IDU_WB_Ops.WB_NOP,
+        NPC_IDU_Insts.SH     -> NPC_IDU_WB_Ops.WB_NOP,
+        NPC_IDU_Insts.SW     -> NPC_IDU_WB_Ops.WB_NOP,
+        NPC_IDU_Insts.ADDI   -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.SLTI   -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.SLTIU  -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.XORI   -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.ORI    -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.ANDI   -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.SLLI   -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.SRLI   -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.SRAI   -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.ADD    -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.SUB    -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.SLL    -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.SLT    -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.SLTU   -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.XOR    -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.SRL    -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.SRA    -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.OR     -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.AND    -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.CSRRW  -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.CSRRS  -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.CSRRC  -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.CSRRWI -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.CSRRSI -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.CSRRCI -> NPC_IDU_WB_Ops.WB_EXU,
+        NPC_IDU_Insts.ECALL  -> NPC_IDU_WB_Ops.WB_NOP,
+        NPC_IDU_Insts.MRET   -> NPC_IDU_WB_Ops.WB_NOP,
+    ))
+
+    idu_internal_io.idu_internal_wbu_rd_o := idu_internal_io.idu_internal_inst_i(10, 7)
 
     // decode - dnpc generation
     idu_internal_io.idu_internal_dnpc_o := Lookup(idu_internal_io.idu_internal_inst_i, idu_internal_io.idu_internal_pc_i + 4.U, Array(
@@ -406,7 +509,47 @@ class NPC_IDU extends Module {
         NPC_IDU_Insts.MRET   -> CSR_mepc,
     ))
 
-    // decode - csr updates - deal with zicsr instructions, not ecall or mret
+    // decode - csr updates - deal with zicsr instructions, also deal with ecall
+    NPC_IDU_Zicsr_imm = idu_internal_io.idu_internal_inst_i(19, 15)
+
+    CSR_mcause := Lookup(idu_internal_io.idu_internal_inst_i, CSR_mcause, Array(
+        NPC_IDU_Insts.CSRRW  -> Mux(imm === NPC_M_CSR_Num.CSR_MCAUSE, IDU_RS1_Val, CSR_mcause),
+        NPC_IDU_Insts.CSRRS  -> Mux(imm === NPC_M_CSR_Num.CSR_MCAUSE, IDU_RS1_Val | Old_CSR_Val, CSR_mcause),
+        NPC_IDU_Insts.CSRRC  -> Mux(imm === NPC_M_CSR_Num.CSR_MCAUSE, IDU_RS1_Val & Old_CSR_Val, CSR_mcause),
+        NPC_IDU_Insts.CSRRWI -> Mux(imm === NPC_M_CSR_Num.CSR_MCAUSE, NPC_IDU_Zicsr_imm, CSR_mcause),
+        NPC_IDU_Insts.CSRRSI -> Mux(imm === NPC_M_CSR_Num.CSR_MCAUSE, NPC_IDU_Zicsr_imm | Old_CSR_Val, CSR_mcause),
+        NPC_IDU_Insts.CSRRCI -> Mux(imm === NPC_M_CSR_Num.CSR_MCAUSE, NPC_IDU_Zicsr_imm & Old_CSR_Val, CSR_mcause),
+        NPC_IDU_Insts.ECALL  -> 11.U(32.W),
+    ))
+
+    CSR_mstatus := Lookup(idu_internal_io.idu_internal_inst_i, CSR_mstatus, Array(
+        NPC_IDU_Insts.CSRRW  -> Mux(imm === NPC_M_CSR_Num.CSR_MSTATUS, IDU_RS1_Val, CSR_mstatus),
+        NPC_IDU_Insts.CSRRS  -> Mux(imm === NPC_M_CSR_Num.CSR_MSTATUS, IDU_RS1_Val | Old_CSR_Val, CSR_mstatus),
+        NPC_IDU_Insts.CSRRC  -> Mux(imm === NPC_M_CSR_Num.CSR_MSTATUS, IDU_RS1_Val & Old_CSR_Val, CSR_mstatus),
+        NPC_IDU_Insts.CSRRWI -> Mux(imm === NPC_M_CSR_Num.CSR_MSTATUS, NPC_IDU_Zicsr_imm, CSR_mstatus),
+        NPC_IDU_Insts.CSRRSI -> Mux(imm === NPC_M_CSR_Num.CSR_MSTATUS, NPC_IDU_Zicsr_imm | Old_CSR_Val, CSR_mstatus),
+        NPC_IDU_Insts.CSRRCI -> Mux(imm === NPC_M_CSR_Num.CSR_MSTATUS, NPC_IDU_Zicsr_imm & Old_CSR_Val, CSR_mstatus),
+        NPC_IDU_Insts.ECALL  -> "h1800".asUInt,
+    ))
+
+    CSR_mtvec := Lookup(idu_internal_io.idu_internal_inst_i, CSR_mtvec, Array(
+        NPC_IDU_Insts.CSRRW  -> Mux(imm === NPC_M_CSR_Num.CSR_MTVEC, IDU_RS1_Val, CSR_mtvec),
+        NPC_IDU_Insts.CSRRS  -> Mux(imm === NPC_M_CSR_Num.CSR_MTVEC, IDU_RS1_Val | Old_CSR_Val, CSR_mtvec),
+        NPC_IDU_Insts.CSRRC  -> Mux(imm === NPC_M_CSR_Num.CSR_MTVEC, IDU_RS1_Val & Old_CSR_Val, CSR_mtvec),
+        NPC_IDU_Insts.CSRRWI -> Mux(imm === NPC_M_CSR_Num.CSR_MTVEC, NPC_IDU_Zicsr_imm, CSR_mtvec),
+        NPC_IDU_Insts.CSRRSI -> Mux(imm === NPC_M_CSR_Num.CSR_MTVEC, NPC_IDU_Zicsr_imm | Old_CSR_Val, CSR_mtvec),
+        NPC_IDU_Insts.CSRRCI -> Mux(imm === NPC_M_CSR_Num.CSR_MTVEC, NPC_IDU_Zicsr_imm & Old_CSR_Val, CSR_mtvec),
+    ))
+
+    CSR_mepc := Lookup(idu_internal_io.idu_internal_inst_i, CSR_mepc, Array(
+        NPC_IDU_Insts.CSRRW  -> Mux(imm === NPC_M_CSR_Num.CSR_MEPC, IDU_RS1_Val, CSR_mepc),
+        NPC_IDU_Insts.CSRRS  -> Mux(imm === NPC_M_CSR_Num.CSR_MEPC, IDU_RS1_Val | Old_CSR_Val, CSR_mepc),
+        NPC_IDU_Insts.CSRRC  -> Mux(imm === NPC_M_CSR_Num.CSR_MEPC, IDU_RS1_Val & Old_CSR_Val, CSR_mepc),
+        NPC_IDU_Insts.CSRRWI -> Mux(imm === NPC_M_CSR_Num.CSR_MEPC, NPC_IDU_Zicsr_imm, CSR_mepc),
+        NPC_IDU_Insts.CSRRSI -> Mux(imm === NPC_M_CSR_Num.CSR_MEPC, NPC_IDU_Zicsr_imm | Old_CSR_Val, CSR_mepc),
+        NPC_IDU_Insts.CSRRCI -> Mux(imm === NPC_M_CSR_Num.CSR_MEPC, NPC_IDU_Zicsr_imm & Old_CSR_Val, CSR_mepc),
+        NPC_IDU_Insts.ECALL  -> idu_internal_io.idu_internal_pc_i,
+    ))
 
     // connect
     idu_internal_io.idu_internal_valid_o := idu_internal_io.idu_internal_work_i // idu is comb logic only
