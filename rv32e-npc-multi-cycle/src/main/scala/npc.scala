@@ -70,8 +70,16 @@ class NPC extends Module {
 
     // Initiate modules: IFU, IDU, EXU, LSU, WBU, AXI_Arbiter
     val IFU = Module (new NPC_IFU)
+    val IDU = Module (new NPC_IDU)
 
     // Stage connection - IF -> ID
+    IF2ID_Inst = RegInit(0.U(32.W))
+    IF2ID_Inst := Mux(
+        IFU.ifu_internal_io.ifu_internal_instValid_o,
+        IFU.ifu_internal_io.ifu_internal_inst_o,
+        IF2ID_Inst
+    )
+    IDU.idu_internal_io.idu_internal_inst_i := IF2ID_Inst
 
     // Stage connection - ID -> EX
 
@@ -82,6 +90,21 @@ class NPC extends Module {
     // Internal connection - IFU (transfer PC and valid information)
     IFU.ifu_internal_io.ifu_internal_work_i := (NPC_State_Register === NPC_State.NPC_State_IF)
     IFU.ifu_internal_io.ifu_internal_pc_i := NPC_PC_Register
+
+    // Internal connection - IDU (work signal, pc input, register read)
+    IDU.idu_internal_io.idu_internal_work_i := (NPC_State_Register === NPC_State.NPC_State_ID)
+
+    val NPC_Reg1 = NPC_GPR_Read(IDU.idu_internal_io.idu_internal_rs1_o)
+    val NPC_Reg2 = NPC_GPR_Read(IDU.idu_internal_io.idu_internal_rs2_o)
+    IDU.idu_internal_io.idu_internal_rs1_val_i := NPC_Reg1
+    IDU.idu_internal_io.idu_internal_rs2_val_i := NPC_Reg2
+
+    IDU.idu_internal_io.idu_internal_pc_i := NPC_PC_Register
+    NPC_PC_Register := Mux(
+        IDU.idu_internal_io.idu_internal_valid_o,
+        IDU.idu_internal_io.idu_internal_dnpc_o,
+        NPC_PC_Register
+    )
 
     // Internal connection - LSU (transfer valid information)
 
@@ -95,14 +118,30 @@ class NPC extends Module {
         (NPC_State_Register === NPC_State.NPC_State_Idle) -> NPC_State.NPC_State_IF,
 
         // when IF is finish, continue to ID
-        (NPC_State_Register === NPC_State.NPC_State_IF) -> Mux(IFU.ifu_internal_io.ifu_internal_instValid_o, NPC_State.NPC_State_ID, NPC_State.NPC_State_IF),
+        (NPC_State_Register === NPC_State.NPC_State_IF) -> Mux(
+            IFU.ifu_internal_io.ifu_internal_instValid_o,
+            NPC_State.NPC_State_ID,
+            NPC_State.NPC_State_IF
+        ),
 
         // when ID is finish, continue to EX if is not ebreak, else just stop(ID is one-cycle only)
+        (NPC_State_Register === NPC_State.NPC_State_ID) -> Mux(
+            IDU.idu_internal_io.idu_internal_valid_o,
+            Mux(
+                IDU.idu_internal_io.idu_internal_ebreak_o,
+                NPC_State.NPC_State_Stop, // is ebreak, stop
+                NPC_State.NPC_State_EX // not ebreak
+            ),
+            NPC_State.NPC_State_ID
+        ),
 
         // when EX is finish, continue to LS (EX is one-cycle only)
 
         // when LS is finish, continue to WB
 
         // when WB is finish, set to idle, so next cycle will start (WB is one-cycle only)
+
+        // If the state is stop (ebreak), continue to ebreak and do nothing else
+        (NPC_State_Register === NPC_State.NPC_State_Stop) -> (NPC_State.NPC_State_Stop)
     )
 }
