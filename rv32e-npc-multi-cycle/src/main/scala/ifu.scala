@@ -13,7 +13,7 @@ class NPC_IFU_AXI_IO extends Bundle {
     // Address Read (AR)
     val ifu_axi_ar_ready_i = Input(Bool())
     val ifu_axi_ar_valid_o = Output(Bool())
-    val ifu_axi_ar_address_o = Output(UInt(32.W))
+    val ifu_axi_ar_addr_o = Output(UInt(32.W))
     val ifu_axi_ar_id_o = Output(UInt(4.W)) // fixed to 0b0000 for IFU
     val ifu_axi_ar_len_o = Output(UInt(8.W)) // only 1 transfer per transaction
     val ifu_axi_ar_size_o = Output(UInt(3.W)) // fixed to 32 bit, 4 bytes
@@ -49,7 +49,7 @@ class NPC_IFU extends Module {
         ifu_internal_io.ifu_internal_work_i && 
         NPC_IFU_State_Register === NPC_IFU_State_SendingReadRequest
     ) // the adress is valid when IFU is in working mode and sending the read request
-    ifu_axi_io.ifu_axi_ar_address_o := ifu_internal_io.ifu_internal_pc_i // the adress is always the PC
+    ifu_axi_io.ifu_axi_ar_addr_o := ifu_internal_io.ifu_internal_pc_i // the adress is always the PC
     ifu_axi_io.ifu_axi_ar_id_o := 0.U(4.W) // IFU's read channel is assumed to be 0000
     ifu_axi_io.ifu_axi_ar_len_o := 0.U(8.W) // only 1 data transfer per transaction
     ifu_axi_io.ifu_axi_ar_size_o := 2.U(3.W) // instruction is 32 bit, which is 4 bytes, thus size is 0b010

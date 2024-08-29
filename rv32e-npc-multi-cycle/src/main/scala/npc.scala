@@ -287,11 +287,40 @@ class NPC extends Module {
     )
 
     // Connect AXI arbiter
+    IFU.ifu_axi_io.ifu_axi_ar_ready_i := Arbiter.arbiter_ifu_axi_io.axi_slave_ar_ready_o
+    Arbiter.arbiter_ifu_axi_io.axi_slave_ar_valid_i := IFU.ifu_axi_io.ifu_axi_ar_valid_o
+    Arbiter.arbiter_ifu_axi_io.axi_slave_ar_addr_i := IFU.ifu_axi_io.ifu_axi_ar_addr_o
+    Arbiter.arbiter_ifu_axi_io.axi_slave_ar_id_i := IFU.ifu_axi_io.ifu_axi_ar_id_o
+    Arbiter.arbiter_ifu_axi_io.axi_slave_ar_len_i := IFU.ifu_axi_io.ifu_axi_ar_len_o
+    Arbiter.arbiter_ifu_axi_io.axi_slave_ar_size_i := IFU.ifu_axi_io.ifu_axi_ar_size_o
+    Arbiter.arbiter_ifu_axi_io.axi_slave_ar_burst_i := IFU.ifu_axi_io.ifu_axi_ar_burst_o
+
+    Arbiter.arbiter_ifu_axi_io.axi_slave_r_ready_i := IFU.ifu_axi_io.ifu_axi_r_ready_o
+    IFU.ifu_axi_io.ifu_axi_r_valid_i := Arbiter.arbiter_ifu_axi_io.axi_slave_r_valid_o
+    IFU.ifu_axi_io.ifu_axi_r_resp_i := Arbiter.arbiter_ifu_axi_io.axi_slave_r_resp_o
+    IFU.ifu_axi_io.ifu_axi_r_data_i := Arbiter.arbiter_ifu_axi_io.axi_slave_r_data_o
+    IFU.ifu_axi_io.ifu_axi_r_last_i := Arbiter.arbiter_ifu_axi_io.axi_slave_r_last_o
+    IFU.ifu_axi_io.ifu_axi_r_id_i := Arbiter.arbiter_ifu_axi_io.axi_slave_r_id_o
+
+    LSU.lsu_axi_io.axi_ar_ready_i := Arbiter.arbiter_lsu_axi_io.axi_slave_ar_ready_o
+    Arbiter.arbiter_lsu_axi_io.axi_slave_ar_valid_i := LSU.lsu_axi_io.axi_ar_valid_o
+    Arbiter.arbiter_lsu_axi_io.axi_slave_ar_addr_i := LSU.lsu_axi_io.axi_ar_addr_o
+    Arbiter.arbiter_lsu_axi_io.axi_slave_ar_id_i := LSU.lsu_axi_io.axi_ar_id_o
+    Arbiter.arbiter_lsu_axi_io.axi_slave_ar_len_i := LSU.lsu_axi_io.axi_ar_len_o
+    Arbiter.arbiter_lsu_axi_io.axi_slave_ar_size_i := LSU.lsu_axi_io.axi_ar_size_o
+    Arbiter.arbiter_lsu_axi_io.axi_slave_ar_burst_i := LSU.lsu_axi_io.axi_ar_burst_o
+
+    Arbiter.arbiter_lsu_axi_io.axi_slave_r_ready_i := LSU.lsu_axi_io.axi_r_ready_o
+    LSU.lsu_axi_io.axi_r_valid_i := Arbiter.arbiter_lsu_axi_io.axi_slave_r_valid_o
+    LSU.lsu_axi_io.axi_r_resp_i := Arbiter.arbiter_lsu_axi_io.axi_slave_r_resp_o
+    LSU.lsu_axi_io.axi_r_data_i := Arbiter.arbiter_lsu_axi_io.axi_slave_r_data_o
+    LSU.lsu_axi_io.axi_r_last_i := Arbiter.arbiter_lsu_axi_io.axi_slave_r_last_o
+    LSU.lsu_axi_io.axi_r_id_i := Arbiter.arbiter_lsu_axi_io.axi_slave_r_id_o
+
+    // Connect AXI channels
 
     // Stage update
     NPC_State_Register := MuxCase(NPC_State_Register,
-        // TODO: update NPC state according to each state
-
         // when state is idle, we can fetch a new instruction
         (NPC_State_Register === NPC_State.NPC_State_Idle) -> NPC_State.NPC_State_IF,
 
