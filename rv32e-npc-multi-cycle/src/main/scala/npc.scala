@@ -317,7 +317,44 @@ class NPC extends Module {
     LSU.lsu_axi_io.axi_r_last_i := Arbiter.arbiter_lsu_axi_io.axi_slave_r_last_o
     LSU.lsu_axi_io.axi_r_id_i := Arbiter.arbiter_lsu_axi_io.axi_slave_r_id_o
 
-    // Connect AXI channels
+    // Connect AXI channels - AR
+    Arbiter.arbiter_top_axi_io.axi_master_ar_ready_i := axi_io.axi_ar_ready_i
+    axi_io.axi_ar_valid_o := Arbiter.arbiter_top_axi_io.axi_master_ar_valid_o
+    axi_io.axi_ar_addr_o := Arbiter.arbiter_top_axi_io.axi_master_ar_addr_o
+    axi_io.axi_ar_id_o := Arbiter.arbiter_top_axi_io.axi_master_ar_id_o
+    axi_io.axi_ar_len_o := Arbiter.arbiter_top_axi_io.axi_master_ar_len_o
+    axi_io.axi_ar_size_o := Arbiter.arbiter_top_axi_io.axi_master_ar_size_o
+    axi_io.axi_ar_burst_o := Arbiter.arbiter_top_axi_io.axi_master_ar_burst_o
+
+    // Connect AXI channels - R
+    axi_io.axi_r_ready_o := Arbiter.arbiter_top_axi_io.axi_master_r_ready_o
+    Arbiter.arbiter_top_axi_io.axi_master_r_valid_i := axi_io.axi_r_valid_i
+    Arbiter.arbiter_top_axi_io.axi_master_r_resp_i := axi_io.axi_r_resp_i
+    Arbiter.arbiter_top_axi_io.axi_master_r_data_i := axi_io.axi_r_data_i
+    Arbiter.arbiter_top_axi_io.axi_master_r_last_i := axi_io.axi_r_last_i
+    Arbiter.arbiter_top_axi_io.axi_master_r_id_i := axi_io.axi_r_id_i
+
+    // Connect AXI channels - AW
+    LSU.lsu_axi_io.axi_aw_ready_i := axi_io.axi_aw_ready_i
+    axi_io.axi_aw_valid_o := LSU.lsu_axi_io.axi_aw_valid_o
+    axi_io.axi_aw_addr_o := LSU.lsu_axi_io.axi_aw_addr_o
+    axi_io.axi_aw_id_o := LSU.lsu_axi_io.axi_aw_id_o
+    axi_io.axi_aw_len_o := LSU.lsu_axi_io.axi_aw_len_o
+    axi_io.axi_aw_size_o := LSU.lsu_axi_io.axi_aw_size_o
+    axi_io.axi_aw_burst_o := LSU.lsu_axi_io.axi_aw_burst_o
+
+    // Connect AXI channels - W
+    LSU.lsu_axi_io.axi_w_ready_i := axi_io.axi_w_ready_i
+    axi_io.axi_w_valid_o := LSU.lsu_axi_io.axi_w_valid_o
+    axi_io.axi_w_data_o := LSU.lsu_axi_io.axi_w_data_o
+    axi_io.axi_w_strb_o := LSU.lsu_axi_io.axi_w_strb_o
+    axi_io.axi_w_last_o := LSU.lsu_axi_io.axi_w_last_o
+
+    // Connect AXI channels - B
+    axi_io.axi_b_ready_o := LSU.lsu_axi_io.axi_b_ready_o
+    LSU.axi_io.axi_b_valid_i := axi_io.axi_b_valid_i
+    LSU.axi_io.axi_b_resp_i := axi_io.axi_b_resp_i
+    LSU.axi_io.axi_b_id_i := axi_io.axi_b_id_i
 
     // Stage update
     NPC_State_Register := MuxCase(NPC_State_Register,
