@@ -108,25 +108,25 @@ class NPC_LSU extends Module {
     lsu_axi_io.axi_ar_addr_o := lsu_internal_io.lsu_internal_ex_result_o
     lsu_axi_io.axi_ar_id_o := 1.U(4.W)
     lsu_axi_io.axi_ar_len_o := 0.U(8.W)
-    lsu_axi_io.axi_ar_size_o := MuxCase(0.U(3.W),
+    lsu_axi_io.axi_ar_size_o := MuxCase(0.U(3.W), Array(
         (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_LB) -> (0.U(3.W)), // B: 1 byte
         (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_LH) -> (1.U(3.W)), // H: 2 bytes
         (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_LW) -> (2.U(3.W)), // W: 4 bytes
         (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_LBU) -> (0.U(3.W)), // BU: 1 byte
         (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_LHU) -> (1.U(3.W)), // HU: 2 bytes
-    )
+    ))
     lsu_axi_io.axi_ar_burst_o := 0.U(2.W)
 
     // connect AXI IO - R
     lsu_axi_io.axi_r_ready_o := (NPC_LSU_State_Register === NPC_LSU_State.NPC_LSU_State_WaitingReadResponse)
-    Load_Return = lsu_axi_io.axi_r_data_i(31, 0)
-    Load_Result = MuxCase(0.U(32.W),
+    val Load_Return = lsu_axi_io.axi_r_data_i(31, 0)
+    val Load_Result = MuxCase(0.U(32.W), Array(
         (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_LB)  -> (Cat(Fill(24, Load_Return(7)), Load_Return(7, 0))),
         (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_LH)  -> (Cat(Fill(16, Load_Return(15)), Load_Return(15, 0))),
         (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_LW)  -> (Load_Return),
         (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_LBU) -> (Cat(Fill(24, 0.U(1.W)), Load_Return(7, 0))),
         (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_LHU) -> (Cat(Fill(16, 0.U(1.W)), Load_Return(15, 0))),
-    )
+    ))
     lsu_internal_io.lsu_internal_ls_result_o := Load_Result
 
     val LSU_SendWRequest = NPC_LSU_State_Register === NPC_LSU_State.NPC_LSU_State_SendingWriteRequest
@@ -136,28 +136,28 @@ class NPC_LSU extends Module {
     lsu_axi_io.axi_aw_addr_o := lsu_internal_io.lsu_internal_ex_result_o
     lsu_axi_io.axi_aw_id_o := 0.U(4.W) // LSU's write channel is assumed to be 0000
     lsu_axi_io.axi_aw_len_o := 0.U(8.W) // only 1 data transfer per transaction
-    lsu_axi_io.axi_aw_size_o := MuxCase(0.U(3.W),
+    lsu_axi_io.axi_aw_size_o := MuxCase(0.U(3.W), Array(
         (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_SB) -> (0.U(3.W)), // B: 1 byte
         (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_SH) -> (1.U(3.W)), // H: 2 bytes
         (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_SW) -> (2.U(3.W)), // W: 4 bytes
-    )
+    ))
     lsu_axi_io.axi_aw_burst_o := 0.U(2.W)
 
     // connect AXI IO - W
-    lsu_axi_io.axi_w_valid_o := (LSU_SendWRequest && NPC_LSU_WState_Register === NPC_LSU_WState.NPC_LSU_WState_SendingW)
+    lsu_axi_io.axi_w_valid_o := (LSU_SendWRequest && NPC_LSU_WState_Register === NPC_LSU_WState.NPC_LSU_WState_Sending)
     lsu_axi_io.axi_w_data_o := Cat(Fill(32, 0.U(1.W)), lsu_internal_io.lsu_internal_ls_wdata_i)
-    lsu_axi_io.axi_w_strb_o := MuxCase(0.U(3.W),
+    lsu_axi_io.axi_w_strb_o := MuxCase(0.U(3.W), Array(
         (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_SB) -> ("b00000001".asUInt), // B: last 1 byte
         (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_SH) -> ("b00000011".asUInt), // H: last 2 bytes
         (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_SW) -> ("b00001111".asUInt), // W: last 4 bytes
-    )
+    ))
     lsu_axi_io.axi_w_last_o := true.B // only 1 data transfer per transaction, so always true
 
     // connect AXI IO - B
     lsu_axi_io.axi_b_ready_o := (NPC_LSU_State_Register === NPC_LSU_State.NPC_LSU_State_WaitingWriteResponse)
 
     // connect internal signals
-    lsu_internal_io.lsu_internal_valid_o := lsu_internal_io.lsu_internal_work_i && MuxCase(false.B,
+    lsu_internal_io.lsu_internal_valid_o := lsu_internal_io.lsu_internal_work_i && MuxCase(false.B, Array(
         // Case 1: LSU does not have to work in this cycle
         (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_NOP) -> (true.B),
 
@@ -166,12 +166,16 @@ class NPC_LSU extends Module {
 
         // Case 3: Waiting for write response and B channel get write response (later will need to consider successed write resp)
         (NPC_LSU_State_Register === NPC_LSU_State.NPC_LSU_State_WaitingWriteResponse && lsu_axi_io.axi_b_valid_i) -> (true.B)
-    )
+    ))
+
+    lsu_internal_io.lsu_internal_ex_result_o := lsu_internal_io.lsu_internal_ex_result_i
+    lsu_internal_io.lsu_internal_wb_opcode_o := lsu_internal_io.lsu_internal_wb_opcode_i
+    lsu_internal_io.lsu_internal_wb_rd_o := lsu_internal_io.lsu_internal_wb_rd_i
 
     // update state registers - overall state register
-    NPC_LSU_State_Register := Mux(lsu_internal_io.lsu_internal_work_i, MuxCase(NPC_LSU_State_Register,
+    NPC_LSU_State_Register := Mux(lsu_internal_io.lsu_internal_work_i, MuxCase(NPC_LSU_State_Register, Array(
         // Case 1: LSU in idle state
-        (NPC_LSU_State_Register === NPC_LSU_State.NPC_LSU_State_Idle) -> (MuxCase(NPC_LSU_State_Register,
+        (NPC_LSU_State_Register === NPC_LSU_State.NPC_LSU_State_Idle) -> (MuxCase(NPC_LSU_State_Register, Array(
             // Sub-case 1: Still need to be in idle state
             (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_NOP) -> (NPC_LSU_State.NPC_LSU_State_Idle),
 
@@ -186,7 +190,7 @@ class NPC_LSU extends Module {
             (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_SB)  -> (NPC_LSU_State.NPC_LSU_State_SendingWriteRequest),
             (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_SH)  -> (NPC_LSU_State.NPC_LSU_State_SendingWriteRequest),
             (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_SW)  -> (NPC_LSU_State.NPC_LSU_State_SendingWriteRequest),
-        )),
+        ))),
 
         // Case 2: LSU in Sending Read Request mode
         (NPC_LSU_State_Register === NPC_LSU_State.NPC_LSU_State_SendingReadRequest) -> (Mux(
@@ -216,12 +220,12 @@ class NPC_LSU extends Module {
             NPC_LSU_State.NPC_LSU_State_Idle, // transaction finished, switch back to idle mode
             NPC_LSU_State.NPC_LSU_State_WaitingWriteResponse // transaction not finished, continue to wait for response
         )),
-    ), NPC_LSU_State_Register)
+    )), NPC_LSU_State_Register)
 
     // update state registers - update write address channel register
-    NPC_LSU_AWState_Register := Mux(lsu_internal_work_i, MuxCase(NPC_LSU_AWState_Register,
+    NPC_LSU_AWState_Register := Mux(lsu_internal_io.lsu_internal_work_i, MuxCase(NPC_LSU_AWState_Register, Array(
         // Case 1: Not in writing mode
-        (NPC_LSU_AWState_Register === NPC_LSU_AWState.NPC_LSU_NotWriting) -> (MuxCase(NPC_LSU_AWState_Register,
+        (NPC_LSU_AWState_Register === NPC_LSU_AWState.NPC_LSU_NotWriting) -> (MuxCase(NPC_LSU_AWState_Register, Array(
             // Sub-case 1: Still need not to be in writing mode because not LS instruction
             (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_NOP) -> (NPC_LSU_AWState.NPC_LSU_NotWriting),
 
@@ -236,7 +240,7 @@ class NPC_LSU extends Module {
             (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_SB)  -> (NPC_LSU_AWState.NPC_LSU_AWState_Sending),
             (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_SH)  -> (NPC_LSU_AWState.NPC_LSU_AWState_Sending),
             (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_SW)  -> (NPC_LSU_AWState.NPC_LSU_AWState_Sending),
-        )),
+        ))),
 
         // Case 2: In sending AW mode
         (NPC_LSU_AWState_Register === NPC_LSU_AWState.NPC_LSU_AWState_Sending) -> (Mux(
@@ -251,12 +255,12 @@ class NPC_LSU extends Module {
             NPC_LSU_AWState.NPC_LSU_NotWriting, // transaction finished
             NPC_LSU_AWState.NPC_LSU_AWState_SendDone // still waiting
         )),
-    ))
+    )), NPC_LSU_AWState_Register)
 
     // update state registers - update write data channel register
-    NPC_LSU_WState_Register := Mux(lsu_internal_work_i, MuxCase(NPC_LSU_WState_Register,
+    NPC_LSU_WState_Register := Mux(lsu_internal_io.lsu_internal_work_i, MuxCase(NPC_LSU_WState_Register, Array(
         // Case 1: Not in writing mode
-        (NPC_LSU_WState_Register === NPC_LSU_WState.NPC_LSU_NotWriting) -> (MuxCase(NPC_LSU_WState_Register,
+        (NPC_LSU_WState_Register === NPC_LSU_WState.NPC_LSU_NotWriting) -> (MuxCase(NPC_LSU_WState_Register, Array(
             // Sub-case 1: Still need not to be in writing mode because not LS instruction
             (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_NOP) -> (NPC_LSU_WState.NPC_LSU_NotWriting),
 
@@ -271,7 +275,7 @@ class NPC_LSU extends Module {
             (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_SB)  -> (NPC_LSU_WState.NPC_LSU_WState_Sending),
             (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_SH)  -> (NPC_LSU_WState.NPC_LSU_WState_Sending),
             (lsu_internal_io.lsu_internal_ls_op_i === NPC_LSU_LS_Ops.LS_SW)  -> (NPC_LSU_WState.NPC_LSU_WState_Sending),
-        )),
+        ))),
 
         // Case 2: In sending W mode
         (NPC_LSU_WState_Register === NPC_LSU_WState.NPC_LSU_WState_Sending) -> (Mux(
@@ -286,5 +290,5 @@ class NPC_LSU extends Module {
             NPC_LSU_WState.NPC_LSU_NotWriting, // transaction finished
             NPC_LSU_WState.NPC_LSU_WState_SendDone // still waiting
         )),
-    ))
+    )), NPC_LSU_WState_Register)
 }

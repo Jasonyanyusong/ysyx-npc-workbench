@@ -64,7 +64,7 @@ class NPC_EXU extends Module {
     ))
 
     // connect
-    exu_internal_io.exu_internal_valid_o := exu_internal_work_i
+    exu_internal_io.exu_internal_valid_o := exu_internal_io.exu_internal_work_i
 
     exu_internal_io.exu_internal_result_o := EXU_Result
 

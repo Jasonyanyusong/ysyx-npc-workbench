@@ -28,7 +28,7 @@ class NPC_WBU extends Module {
     val wbu_internal_io = IO(new NPC_WBU_Internal_IO)
 
     // connect
-    wbu_internal_io.wbu_internal_wdata_o := MuxCase(0.U(32.W),
+    wbu_internal_io.wbu_internal_wdata_o := MuxCase(0.U(32.W), Array(
         // Case 1: No Write back
         (wbu_internal_io.wbu_internal_opcode_i === NPC_WBU_WB_Ops.WB_NOP) -> (0.U(32.W)),
 
@@ -37,7 +37,7 @@ class NPC_WBU extends Module {
 
         // Case 3: Write back LSU result
         (wbu_internal_io.wbu_internal_opcode_i === NPC_WBU_WB_Ops.WB_LSU) -> (wbu_internal_io.wbu_internal_ls_ret_i),
-    )
+    ))
 
     wbu_internal_io.wbu_internal_rd_o := Mux(
         wbu_internal_io.wbu_internal_opcode_i === NPC_WBU_WB_Ops.WB_NOP, // check if there is no wb, if no, then let rd = 0

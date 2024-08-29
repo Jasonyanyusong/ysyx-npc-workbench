@@ -97,11 +97,11 @@ class NPC extends Module {
     val axi_io = IO(new NPC_AXI_IO)
 
     // State register
-    NPC_State_Register = RegInit(NPC_State.NPC_State_Idle) // start with idle state
+    val NPC_State_Register = RegInit(NPC_State.NPC_State_Idle) // start with idle state
 
     // GPR and PC
-    NPC_GPR_Registers = Mem(16, UInt(32.W)) // A total of 16 RV32 32 bit registers
-    NPC_PC_Register   = RegInit("h80000000".U(32.W)) // start with PC 0x80000000
+    val NPC_GPR_Registers = Mem(16, UInt(32.W)) // A total of 16 RV32 32 bit registers
+    val NPC_PC_Register   = RegInit("h80000000".U(32.W)) // start with PC 0x80000000
 
     // Read GPR function, ensure x0 is always 0
     def NPC_GPR_Read(index : UInt) = Mux(index === 0.U, 0.U(32.W), NPC_GPR_Registers(index))
@@ -116,7 +116,7 @@ class NPC extends Module {
     val Arbiter = Module (new NPC_Arbiter)
 
     // Stage connection - IF -> ID
-    IF2ID_Inst = RegInit(0.U(32.W))
+    val IF2ID_Inst = RegInit(0.U(32.W))
     IF2ID_Inst := Mux(
         IFU.ifu_internal_io.ifu_internal_instValid_o,
         IFU.ifu_internal_io.ifu_internal_inst_o,
@@ -125,13 +125,13 @@ class NPC extends Module {
     IDU.idu_internal_io.idu_internal_inst_i := IF2ID_Inst
 
     // Stage connection - ID -> EX
-    ID2EX_EXU_OPCODE = RegInit(0.U(4.W))
-    ID2EX_EXU_SRC1 = RegInit(0.U(32.W))
-    ID2EX_EXU_SRC2 = RegInit(0.U(32.W))
-    ID2EX_LSU_OPCODE = RegInit(0.U(4.W))
-    ID2EX_LSU_WDATA = RegInit(0.U(32.W))
-    ID2EX_WBU_OPCODE = RegInit(0.U(2.W))
-    ID2EX_WBU_RD = RegInit(0.U(4.W))
+    val ID2EX_EXU_OPCODE = RegInit(0.U(4.W))
+    val ID2EX_EXU_SRC1 = RegInit(0.U(32.W))
+    val ID2EX_EXU_SRC2 = RegInit(0.U(32.W))
+    val ID2EX_LSU_OPCODE = RegInit(0.U(4.W))
+    val ID2EX_LSU_WDATA = RegInit(0.U(32.W))
+    val ID2EX_WBU_OPCODE = RegInit(0.U(2.W))
+    val ID2EX_WBU_RD = RegInit(0.U(4.W))
 
     ID2EX_EXU_OPCODE := Mux(
         IDU.idu_internal_io.idu_internal_valid_o,
@@ -178,11 +178,11 @@ class NPC extends Module {
     EXU.exu_internal_io.exu_internal_wb_rd_i := ID2EX_WBU_RD
 
     // Stage connection - EX -> LS
-    EX2LS_RESULT = RegInit(0.U(32.W))
-    EX2LS_LSOPCODE = RegInit(0.U(4.W))
-    EX2LS_LSWDATA = RegInit(0.U(32.W))
-    EX2LS_WBOPCODE = RegInit(0.U(2.W))
-    EX2LS_WBRD = RegInit(0.U(4.W))
+    val EX2LS_RESULT = RegInit(0.U(32.W))
+    val EX2LS_LSOPCODE = RegInit(0.U(4.W))
+    val EX2LS_LSWDATA = RegInit(0.U(32.W))
+    val EX2LS_WBOPCODE = RegInit(0.U(2.W))
+    val EX2LS_WBRD = RegInit(0.U(4.W))
 
     EX2LS_RESULT := Mux(
         EXU.exu_internal_io.exu_internal_valid_o,
@@ -217,10 +217,10 @@ class NPC extends Module {
     LSU.lsu_internal_io.lsu_internal_wb_rd_i := EX2LS_WBRD
 
     // Stage connection - LS -> WB
-    LS2WB_LSRESULT = RegInit(0.U(32.W))
-    LS2WB_EXRESULT = RegInit(0.U(32.W))
-    LS2WB_WBOPCODE = RegInit(0.U(2.W))
-    LS2WB_WBRD = RegInit(0.U(4.W))
+    val LS2WB_LSRESULT = RegInit(0.U(32.W))
+    val LS2WB_EXRESULT = RegInit(0.U(32.W))
+    val LS2WB_WBOPCODE = RegInit(0.U(2.W))
+    val LS2WB_WBRD = RegInit(0.U(4.W))
 
     LS2WB_LSRESULT := Mux(
         LSU.lsu_internal_io.lsu_internal_valid_o,
@@ -352,12 +352,12 @@ class NPC extends Module {
 
     // Connect AXI channels - B
     axi_io.axi_b_ready_o := LSU.lsu_axi_io.axi_b_ready_o
-    LSU.axi_io.axi_b_valid_i := axi_io.axi_b_valid_i
-    LSU.axi_io.axi_b_resp_i := axi_io.axi_b_resp_i
-    LSU.axi_io.axi_b_id_i := axi_io.axi_b_id_i
+    LSU.lsu_axi_io.axi_b_valid_i := axi_io.axi_b_valid_i
+    LSU.lsu_axi_io.axi_b_resp_i := axi_io.axi_b_resp_i
+    LSU.lsu_axi_io.axi_b_id_i := axi_io.axi_b_id_i
 
     // Stage update
-    NPC_State_Register := MuxCase(NPC_State_Register,
+    NPC_State_Register := MuxCase(NPC_State_Register, Array(
         // when state is idle, we can fetch a new instruction
         (NPC_State_Register === NPC_State.NPC_State_Idle) -> NPC_State.NPC_State_IF,
 
@@ -395,12 +395,12 @@ class NPC extends Module {
 
         // when WB is finish, set to idle, so next cycle will start (WB is one-cycle only)
         (NPC_State_Register === NPC_State.NPC_State_WB) -> Mux(
-            WBU.lsu_internal_io.lsu_internal_valid_o,
+            WBU.wbu_internal_io.wbu_internal_valid_o,
             NPC_State.NPC_State_Idle,
             NPC_State.NPC_State_WB
         ),
 
         // If the state is stop (ebreak), continue to ebreak and do nothing else
         (NPC_State_Register === NPC_State.NPC_State_Stop) -> (NPC_State.NPC_State_Stop)
-    )
+    ))
 }

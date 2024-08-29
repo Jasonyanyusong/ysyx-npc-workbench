@@ -49,13 +49,13 @@ object NPC_Arbiter_State {
 
 class NPC_Arbiter extends Module {
     // IO - Initiate 2 slave and 1 master
-    arbiter_ifu_axi_io = IO(new NPC_Arbiter_AXI_IO_Slave)
-    arbiter_lsu_axi_io = IO(new NPC_Arbiter_AXI_IO_Slave)
+    val arbiter_ifu_axi_io = IO(new NPC_Arbiter_AXI_IO_Slave)
+    val arbiter_lsu_axi_io = IO(new NPC_Arbiter_AXI_IO_Slave)
 
-    arbiter_top_axi_io = IO(new NPC_Arbiter_AXI_IO_Master)
+    val arbiter_top_axi_io = IO(new NPC_Arbiter_AXI_IO_Master)
 
     // Initiate Arbiter state register
-    NPC_Arbiter_State_Register = RegInit(NPC_Arbiter_State.NPC_Arbiter_State_Idle)
+    val NPC_Arbiter_State_Register = RegInit(NPC_Arbiter_State.NPC_Arbiter_State_Idle)
 
     // Connect to IFU - AR
     arbiter_ifu_axi_io.axi_slave_ar_ready_o := Mux(
@@ -134,7 +134,7 @@ class NPC_Arbiter extends Module {
     )
 
     // Connect to Top - AR
-    arbiter_top_axi_io.axi_master_ar_valid_o := MuxCase(false.B,
+    arbiter_top_axi_io.axi_master_ar_valid_o := MuxCase(false.B, Array(
         // Case 1: Not connected
         (NPC_Arbiter_State_Register === NPC_Arbiter_State.NPC_Arbiter_State_Idle) -> (false.B),
 
@@ -143,9 +143,9 @@ class NPC_Arbiter extends Module {
 
         // Case 3: Connected to LSU
         (NPC_Arbiter_State_Register === NPC_Arbiter_State.NPC_Arbiter_State_ConnectToLSU) -> (arbiter_lsu_axi_io.axi_slave_ar_valid_i),
-    )
+    ))
 
-    arbiter_top_axi_io.axi_master_ar_addr_o := MuxCase(0.U(32.W),
+    arbiter_top_axi_io.axi_master_ar_addr_o := MuxCase(0.U(32.W), Array(
         // Case 1: Not connected
         (NPC_Arbiter_State_Register === NPC_Arbiter_State.NPC_Arbiter_State_Idle) -> (0.U(32.W)),
 
@@ -154,9 +154,9 @@ class NPC_Arbiter extends Module {
 
         // Case 3: Connected to LSU
         (NPC_Arbiter_State_Register === NPC_Arbiter_State.NPC_Arbiter_State_ConnectToLSU) -> (arbiter_lsu_axi_io.axi_slave_ar_addr_i),
-    )
+    ))
 
-    arbiter_top_axi_io.axi_master_ar_id_o := MuxCase(0.U(4.W),
+    arbiter_top_axi_io.axi_master_ar_id_o := MuxCase(0.U(4.W), Array(
         // Case 1: Not connected
         (NPC_Arbiter_State_Register === NPC_Arbiter_State.NPC_Arbiter_State_Idle) -> (0.U(4.W)),
 
@@ -165,9 +165,9 @@ class NPC_Arbiter extends Module {
 
         // Case 3: Connected to LSU
         (NPC_Arbiter_State_Register === NPC_Arbiter_State.NPC_Arbiter_State_ConnectToLSU) -> (arbiter_lsu_axi_io.axi_slave_ar_id_i),
-    )
+    ))
 
-    arbiter_top_axi_io.axi_master_ar_len_o := MuxCase(0.U(8.W),
+    arbiter_top_axi_io.axi_master_ar_len_o := MuxCase(0.U(8.W), Array(
         // Case 1: Not connected
         (NPC_Arbiter_State_Register === NPC_Arbiter_State.NPC_Arbiter_State_Idle) -> (0.U(8.W)),
 
@@ -176,9 +176,9 @@ class NPC_Arbiter extends Module {
 
         // Case 3: Connected to LSU
         (NPC_Arbiter_State_Register === NPC_Arbiter_State.NPC_Arbiter_State_ConnectToLSU) -> (arbiter_lsu_axi_io.axi_slave_ar_len_i),
-    )
+    ))
 
-    arbiter_top_axi_io.axi_master_ar_size_o := MuxCase(0.U(3.W),
+    arbiter_top_axi_io.axi_master_ar_size_o := MuxCase(0.U(3.W), Array(
         // Case 1: Not connected
         (NPC_Arbiter_State_Register === NPC_Arbiter_State.NPC_Arbiter_State_Idle) -> (0.U(3.W)),
 
@@ -187,9 +187,9 @@ class NPC_Arbiter extends Module {
 
         // Case 3: Connected to LSU
         (NPC_Arbiter_State_Register === NPC_Arbiter_State.NPC_Arbiter_State_ConnectToLSU) -> (arbiter_lsu_axi_io.axi_slave_ar_size_i),
-    )
+    ))
 
-    arbiter_top_axi_io.axi_master_ar_burst_o := MuxCase(0.U(2.W),
+    arbiter_top_axi_io.axi_master_ar_burst_o := MuxCase(0.U(2.W), Array(
         // Case 1: Not connected
         (NPC_Arbiter_State_Register === NPC_Arbiter_State.NPC_Arbiter_State_Idle) -> (0.U(2.W)),
 
@@ -198,10 +198,10 @@ class NPC_Arbiter extends Module {
 
         // Case 3: Connected to LSU
         (NPC_Arbiter_State_Register === NPC_Arbiter_State.NPC_Arbiter_State_ConnectToLSU) -> (arbiter_lsu_axi_io.axi_slave_ar_burst_i),
-    )
+    ))
 
     // Connect to Top - R
-    arbiter_top_axi_io.axi_master_r_ready_o := MuxCase(false.B,
+    arbiter_top_axi_io.axi_master_r_ready_o := MuxCase(false.B, Array(
         // Case 1: Not connected
         (NPC_Arbiter_State_Register === NPC_Arbiter_State.NPC_Arbiter_State_Idle) -> (false.B),
 
@@ -210,12 +210,12 @@ class NPC_Arbiter extends Module {
 
         // Case 3: Connected to LSU
         (NPC_Arbiter_State_Register === NPC_Arbiter_State.NPC_Arbiter_State_ConnectToLSU) -> (arbiter_lsu_axi_io.axi_slave_r_ready_i),
-    )
+    ))
 
     // Arbiter State management
-    NPC_Arbiter_State_Register := MuxCase(NPC_Arbiter_State_Register,
+    NPC_Arbiter_State_Register := MuxCase(NPC_Arbiter_State_Register, Array(
         // Case 1: Still in idle
-        (NPC_Arbiter_State_Register === NPC_Arbiter_State.NPC_Arbiter_State_Idle) -> (MuxCase(NPC_Arbiter_State_Register,
+        (NPC_Arbiter_State_Register === NPC_Arbiter_State.NPC_Arbiter_State_Idle) -> (MuxCase(NPC_Arbiter_State_Register, Array(
             // Sub-case 1: no request
             ((!arbiter_ifu_axi_io.axi_slave_ar_valid_i) && (!arbiter_lsu_axi_io.axi_slave_ar_valid_i)) -> (NPC_Arbiter_State.NPC_Arbiter_State_Idle),
 
@@ -227,14 +227,14 @@ class NPC_Arbiter extends Module {
 
             // Sub-case 4: IFU and LSU request (should be wrong for a multi cycle without pipeline) - connect to LSU to avoid starvation
             ((arbiter_ifu_axi_io.axi_slave_ar_valid_i) && (arbiter_lsu_axi_io.axi_slave_ar_valid_i))   -> (NPC_Arbiter_State.NPC_Arbiter_State_ConnectToLSU),
-        )),
+        ))),
 
         // Case 2: Connected to IFU
         (NPC_Arbiter_State_Register === NPC_Arbiter_State.NPC_Arbiter_State_ConnectToIFU) -> (Mux(
             (arbiter_ifu_axi_io.axi_slave_r_ready_i && arbiter_top_axi_io.axi_master_r_valid_i),
             NPC_Arbiter_State.NPC_Arbiter_State_ConnectToIFU, // shake hand not completed, still connected
             NPC_Arbiter_State.NPC_Arbiter_State_Idle // shake hand complete, disconnect
-        ))
+        )),
 
         // Case 3: Connected to LSU
         (NPC_Arbiter_State_Register === NPC_Arbiter_State.NPC_Arbiter_State_ConnectToLSU) -> (Mux(
@@ -242,5 +242,5 @@ class NPC_Arbiter extends Module {
             NPC_Arbiter_State.NPC_Arbiter_State_ConnectToLSU, // shake hand not completed, still connected
             NPC_Arbiter_State.NPC_Arbiter_State_Idle // shake hand complete, disconnect
         ))
-    )
+    ))
 }

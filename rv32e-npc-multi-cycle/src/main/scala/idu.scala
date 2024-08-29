@@ -295,12 +295,12 @@ class NPC_IDU extends Module {
         NPC_IDU_Insts.MRET   -> NPC_IDU_EX_Ops.EX_NOP,
     ))
 
-    val Old_CSR_Val = MuxCase(0.U(32.W), 
+    val Old_CSR_Val = MuxCase(0.U(32.W), Array(
         (imm === NPC_M_CSR_Num.CSR_MSTATUS) -> (CSR_mstatus),
         (imm === NPC_M_CSR_Num.CSR_MTVEC)   -> (CSR_mtvec),
         (imm === NPC_M_CSR_Num.CSR_MTVEC)   -> (CSR_mtvec),
         (imm === NPC_M_CSR_Num.CSR_MSTATUS) -> (CSR_mstatus),
-    )
+    ))
 
     idu_internal_io.idu_internal_exu_src1_o := Lookup(idu_internal_io.idu_internal_inst_i, 0.U(32.W), Array(
         NPC_IDU_Insts.LUI    -> imm,
@@ -510,7 +510,7 @@ class NPC_IDU extends Module {
     ))
 
     // decode - csr updates - deal with zicsr instructions, also deal with ecall
-    NPC_IDU_Zicsr_imm = idu_internal_io.idu_internal_inst_i(19, 15)
+    val NPC_IDU_Zicsr_imm = idu_internal_io.idu_internal_inst_i(19, 15)
 
     CSR_mcause := Lookup(idu_internal_io.idu_internal_inst_i, CSR_mcause, Array(
         NPC_IDU_Insts.CSRRW  -> Mux(imm === NPC_M_CSR_Num.CSR_MCAUSE, IDU_RS1_Val, CSR_mcause),

@@ -42,12 +42,12 @@ class NPC_IFU extends Module {
     val ifu_internal_io = IO(new NPC_IFU_Internal_IO)
 
     // IFU state register
-    NPC_IFU_State_Register = RegInit(NPC_IFU_State.NPC_IFU_State_Idle) // start with idle state
+    val NPC_IFU_State_Register = RegInit(NPC_IFU_State.NPC_IFU_State_Idle) // start with idle state
 
     // connect to AXI IO - AR
     ifu_axi_io.ifu_axi_ar_valid_o := (
         ifu_internal_io.ifu_internal_work_i && 
-        NPC_IFU_State_Register === NPC_IFU_State_SendingReadRequest
+        NPC_IFU_State_Register === NPC_IFU_State.NPC_IFU_State_SendingReadRequest
     ) // the adress is valid when IFU is in working mode and sending the read request
     ifu_axi_io.ifu_axi_ar_addr_o := ifu_internal_io.ifu_internal_pc_i // the adress is always the PC
     ifu_axi_io.ifu_axi_ar_id_o := 0.U(4.W) // IFU's read channel is assumed to be 0000
@@ -58,19 +58,19 @@ class NPC_IFU extends Module {
     // connect to AXI IO - R
     ifu_axi_io.ifu_axi_r_ready_o := (
         ifu_internal_io.ifu_internal_work_i &&
-        NPC_IFU_State_Register === NPC_IFU_State_WaitingReadResponse
+        NPC_IFU_State_Register === NPC_IFU_State.NPC_IFU_State_WaitingReadResponse
     ) // IFU can accept read response when it is working and in the wait response state
 
     // connect to internal IO
     ifu_internal_io.ifu_internal_instValid_o := (
-        NPC_IFU_State_Register === NPC_IFU_State_WaitingReadResponse && // the ifu is waiting for instr
+        NPC_IFU_State_Register === NPC_IFU_State.NPC_IFU_State_WaitingReadResponse && // the ifu is waiting for instr
         ifu_internal_io.ifu_internal_work_i && // the ifu is working
         ifu_axi_io.ifu_axi_r_valid_i // read response channel is valid signal
     ) // the instruction is valid when 1) wait for read-resp 2) working 3) read resp valid
     ifu_internal_io.ifu_internal_inst_o := ifu_axi_io.ifu_axi_r_data_i(31, 0) // lower 32 bit is valid
 
     // Update IFU state register
-    NPC_IFU_State_Register := MuxCase(NPC_IFU_State_Register,
+    NPC_IFU_State_Register := MuxCase(NPC_IFU_State_Register, Array(
         (NPC_IFU_State_Register === NPC_IFU_State.NPC_IFU_State_Idle) -> (
             Mux(ifu_internal_io.ifu_internal_work_i,
                 NPC_IFU_State.NPC_IFU_State_SendingReadRequest,
@@ -91,5 +91,5 @@ class NPC_IFU extends Module {
                 NPC_IFU_State.NPC_IFU_State_WaitingReadResponse
             )
         ), // state management if IFU is waiting read response
-    )
+    ))
 }
