@@ -41,7 +41,7 @@ word_t pmem_read(word_t, int);
 
 VerilatedContext* contextp;
 VerilatedVcdC* tfp;
-VNPC* top;
+VYSYX_TOP* top;
 
 uint64_t cycle;
 word_t instruction;
@@ -55,7 +55,7 @@ void sim_init(){
     tfp = new VerilatedVcdC;
     #endif
 
-    top = new VNPC;
+    top = new VYSYX_TOP;
 
     #ifdef CONFIG_VCD_OUTPUT
     contextp -> traceEverOn(true);
@@ -100,6 +100,54 @@ void sim_exit(){
     return;
 }
 
+#define TOP_MEM_B 0
+#define TOP_MEM_H 1
+#define TOP_MEM_W 2
+
+void sim_mem_top() {
+    // TODO: implement this function
+    assert(top);
+
+    // Read
+    if (top -> mem_io_mem_r_enable_o) {
+        // mem read enabled
+        if (top -> mem_io_mem_r_size_o == TOP_MEM_B) {
+            top -> mem_io_mem_r_valid_i = 0b1;
+            top -> mem_io_mem_r_data_i = pmem_read(top -> mem_io_mem_r_addr_o, 1);
+        } else if (top -> mem_io_mem_r_size_o == TOP_MEM_H) {
+            top -> mem_io_mem_r_valid_i = 0b1;
+            top -> mem_io_mem_r_data_i = pmem_read(top -> mem_io_mem_r_addr_o, 2);
+        } else if (top -> mem_io_mem_r_size_o == TOP_MEM_W) {
+            top -> mem_io_mem_r_valid_i = 0b1;
+            top -> mem_io_mem_r_data_i = pmem_read(top -> mem_io_mem_r_addr_o, 4);
+        } else {
+            top -> mem_io_mem_r_valid_i = 0b0;
+            printf("Invalid mem read size\n");
+            assert(0);
+        }
+    } else {
+        top -> mem_io_mem_r_valid_i = 0b0;
+    }
+
+    // Write
+    if (top -> mem_io_mem_w_enable_o) {
+        if (top -> mem_io_mem_w_size_o == TOP_MEM_B) {
+            top -> mem_io_mem_w_valid_i = 0b1;
+            pmem_write(top -> mem_io_mem_w_addr_o, 1, top -> mem_io_mem_w_data_o);
+        } else if (top -> mem_io_mem_w_size_o == TOP_MEM_H) {
+            top -> mem_io_mem_w_valid_i = 0b1;
+            pmem_write(top -> mem_io_mem_w_addr_o, 2, top -> mem_io_mem_w_data_o);
+        } else if (top -> mem_io_mem_w_size_o == TOP_MEM_W) {
+            top -> mem_io_mem_w_valid_i = 0b1;
+            pmem_write(top -> mem_io_mem_w_addr_o, 4, top -> mem_io_mem_w_data_o);
+        } else {
+            top -> mem_io_mem_r_valid_i = 0b0;
+            printf("Invalid mem write size\n");
+            assert(0);
+        }
+    }
+}
+
 void sim_one_cycle(){
     assert(top);
 
@@ -107,7 +155,7 @@ void sim_one_cycle(){
 
     top -> clock = 0;
     top -> eval();
-    sim_mem(0);
+    sim_mem_top();
     step_and_dump_wave();
 
     top -> clock = 1;
@@ -117,13 +165,15 @@ void sim_one_cycle(){
 
     //cycle = cycle + 1;
 
+    #ifdef CONFIG_DIFFTEST
     get_regs(); // used as print registers or difftest
+    #endif
 
-    if(top -> ioNPCDebug_Worked){
+    /*if(top -> ioNPCDebug_Worked){
         #ifdef CONFIG_RUNTIME_MESSAGE
         printf("[verilator-sim : sim_one_cycle] NPC commited an instruction at pc = 0x%x\n", top -> ioNPCDebug_PC_COMMIT);
         #endif
-    }
+    }*/
 
     #ifdef CONFIG_DIFFTEST
     if(top -> ioNPCDebug_Worked && top -> ioNPCDebug_PC_COMMIT != last_diff_pc){
@@ -143,7 +193,7 @@ void sim_one_cycle(){
     }
     #endif
 
-    if(top -> ioNPCDebug_Halt){
+    /*if(top -> ioNPCDebug_Halt){
         printf("NPC simulation finished at cycle = %ld, a0 = %d, ", cycle - 1, top -> ioNPCDebug_GPR10);
         if(top -> ioNPCDebug_GPR10 == 0){
             printf("HIT GOOD TRAP\n");
@@ -155,7 +205,7 @@ void sim_one_cycle(){
         #ifdef CONFIG_DIFFTEST
         difftest_one_exec();
         #endif
-    }
+    }*/
 
     #ifdef CONFIG_RUNTIME_MESSAGE
     printf("\n\n");
@@ -190,11 +240,11 @@ double compute_ipc(){
     return ans;
 }
 
-#define MEM_NOP 0b00
-#define MEM_READ 0b01
-#define MEM_WRITE 0b10
+// #define MEM_NOP 0b00
+// #define MEM_READ 0b01
+// #define MEM_WRITE 0b10
 
-void sim_mem(int delay_cycle){
+/*void sim_mem(int delay_cycle){
     #ifdef CONFIG_RUNTIME_MESSAGE
     printf("[verilator-sim : sim-mem] at cycle %d\n", cycle);
     #endif
@@ -270,4 +320,4 @@ void sim_mem(int delay_cycle){
     top -> eval();
 
     return;
-}
+}*/

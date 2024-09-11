@@ -232,15 +232,15 @@ class NPC_Arbiter extends Module {
         // Case 2: Connected to IFU
         (NPC_Arbiter_State_Register === NPC_Arbiter_State.NPC_Arbiter_State_ConnectToIFU) -> (Mux(
             (arbiter_ifu_axi_io.axi_slave_r_ready_i && arbiter_top_axi_io.axi_master_r_valid_i),
-            NPC_Arbiter_State.NPC_Arbiter_State_ConnectToIFU, // shake hand not completed, still connected
-            NPC_Arbiter_State.NPC_Arbiter_State_Idle // shake hand complete, disconnect
+            NPC_Arbiter_State.NPC_Arbiter_State_Idle, // shake hand not completed, still connected
+            NPC_Arbiter_State.NPC_Arbiter_State_ConnectToIFU // shake hand complete, disconnect
         )),
 
         // Case 3: Connected to LSU
         (NPC_Arbiter_State_Register === NPC_Arbiter_State.NPC_Arbiter_State_ConnectToLSU) -> (Mux(
             (arbiter_lsu_axi_io.axi_slave_r_ready_i && arbiter_top_axi_io.axi_master_r_valid_i),
-            NPC_Arbiter_State.NPC_Arbiter_State_ConnectToLSU, // shake hand not completed, still connected
-            NPC_Arbiter_State.NPC_Arbiter_State_Idle // shake hand complete, disconnect
+            NPC_Arbiter_State.NPC_Arbiter_State_Idle, // shake hand not completed, still connected
+            NPC_Arbiter_State.NPC_Arbiter_State_ConnectToLSU // shake hand complete, disconnect
         ))
     ))
 }

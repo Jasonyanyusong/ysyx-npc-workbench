@@ -5,7 +5,7 @@ import chisel3.util._
 
 object TOP_Defs {
     // This is how many cycle there will be delay for 
-    val TOP_AXI_DELAY_CYCLES = 64
+    val TOP_AXI_DELAY_CYCLES = 4
 }
 
 class TOP_MEM_IO extends Bundle {
@@ -24,7 +24,7 @@ class TOP_MEM_IO extends Bundle {
     val mem_w_valid_i = Input(Bool())
 }
 
-class TOP extends Module {
+class YSYX_TOP extends Module {
     // IO (direct/atomic memory operations)
     val mem_io = IO(new TOP_MEM_IO)
 

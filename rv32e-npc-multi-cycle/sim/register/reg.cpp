@@ -18,7 +18,7 @@
 
 // CSR list: mstatus mtvec mepc macuse
 
-void get_regs(){
+/*void get_regs(){
     assert(top);
 
     cpu.pc = top -> ioNPCDebug_PC_DYNAMIC;
@@ -46,7 +46,7 @@ void get_regs(){
     }
 
     return;
-}
+}*/
 
 void display_regs(){
     assert(top);

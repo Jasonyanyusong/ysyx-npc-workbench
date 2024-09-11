@@ -18,7 +18,7 @@
 
 #include "verilated.h"
 #include "verilated_vcd_c.h"
-#include "../../obj_dir/VNPC.h"
+#include "../../obj_dir/VYSYX_TOP.h"
 
 #define NR_GPRs 16
 #define NR_CSRs 4096
@@ -50,7 +50,7 @@ void get_regs();
 
 extern VerilatedContext* contextp;
 extern VerilatedVcdC* tfp;
-extern VNPC* top;
+extern VYSYX_TOP* top;
 
 extern uint64_t cycle;
 extern word_t instruction;

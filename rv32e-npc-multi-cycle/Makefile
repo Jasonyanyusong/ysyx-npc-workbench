@@ -15,10 +15,10 @@
 #**************************************************************************************/
 
 CSRC += $(shell find $(abspath ./sim) -name "*.cpp")
-VSRC += $(shell find $(abspath ./generated/npc) -name "*.v")
+VSRC += $(shell find $(abspath ./generated/top) -name "*.v")
 HSRC += $(shell find $(abspath ./sim) -name "*.h")
-TOP_NAME := NPC
-SEARCHPATH := $(NPC_HOME)/generated/npc
+TOP_NAME := YSYX_TOP
+SEARCHPATH := $(NPC_HOME)/generated/top
 
 VERILATOR_FLAGS += -I$(SEARCHPATH)
 VERILATOR_FLAGS += --top $(TOP_NAME)
