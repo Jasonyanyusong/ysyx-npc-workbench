@@ -133,7 +133,7 @@ void sim_mem_top() {
     // Write
     if (top -> mem_io_mem_w_enable_o) {
         printf("[verilator-sim : sim_mem_top] received memory write, size = ");
-        printf("%d, addr = 0x%x, data = 0x%x\n", top -> mem_io_mem_w_size_o, top -> mem_io_mem_w_addr_o, top -> mem_io_mem_w_data_o);
+        printf("%d, addr = 0x%x, data = 0x%x at pc = 0x%x\n", top -> mem_io_mem_w_size_o, top -> mem_io_mem_w_addr_o, top -> mem_io_mem_w_data_o, cpu.pc);
 
         if (top -> mem_io_mem_w_size_o == TOP_MEM_B) {
             top -> mem_io_mem_w_valid_i = 0b1;
@@ -191,10 +191,19 @@ void sim_one_cycle(){
         }*/
 
         difftest_one_exec();
+
         if(!difftest_check_reg()){
+            printf("[verilator-sim : sim_one_cycle] Difftest failed at 0x%x, reason: REG\n", cpu.pc);
             npc_state.state = NPC_ABORT;
         } else {
-            printf("[verilator-sim : sim_one_cycle] Difftest success at 0x%x\n", cpu.pc);
+            //printf("[verilator-sim : sim_one_cycle] Difftest success at 0x%x\n", cpu.pc);
+        }
+
+        if(!difftest_check_mem()){
+            printf("[verilator-sim : sim_one_cycle] Difftest failed at 0x%x, reason: MEM\n", cpu.pc);
+            npc_state.state = NPC_ABORT;
+        } else {
+            //printf("[verilator-sim : sim_one_cycle] Difftest success at 0x%x\n", cpu.pc);
         }
         //last_diff_pc = top -> ioNPCDebug_PC_COMMIT;
     }

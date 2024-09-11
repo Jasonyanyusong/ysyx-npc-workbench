@@ -143,6 +143,10 @@ class NPC_LSU extends Module {
     ))
     lsu_axi_io.axi_aw_burst_o := 0.U(2.W)
 
+    when (LSU_SendWRequest === true.B) {
+        printf("{NPC LSU}: sending W request, addr = 0x%x, data = 0x%x\n", lsu_internal_io.lsu_internal_ex_result_o, lsu_internal_io.lsu_internal_ls_wdata_i)
+    }
+
     // connect AXI IO - W
     lsu_axi_io.axi_w_valid_o := (LSU_SendWRequest && NPC_LSU_WState_Register === NPC_LSU_WState.NPC_LSU_WState_Sending)
     lsu_axi_io.axi_w_data_o := Cat(Fill(32, 0.U(1.W)), lsu_internal_io.lsu_internal_ls_wdata_i)

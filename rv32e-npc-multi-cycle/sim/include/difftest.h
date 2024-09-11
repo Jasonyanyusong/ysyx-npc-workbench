@@ -24,6 +24,7 @@ enum { DIFFTEST_TO_DUT, DIFFTEST_TO_REF };
 void difftest_init(char* ref_so_file, word_t img_size);
 void difftest_one_exec();
 bool difftest_check_reg();
+bool difftest_check_mem();
 void difftest_skip_ref();
 
 extern void (*ref_difftest_memcpy)(word_t addr, void *buf, word_t n, bool direction);

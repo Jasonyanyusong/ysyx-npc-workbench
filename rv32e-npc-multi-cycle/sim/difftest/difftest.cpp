@@ -24,6 +24,7 @@
 rtl_CPU_State cpu;
 
 void (*ref_difftest_memcpy)(word_t addr, void *buf, word_t n, bool direction) = NULL;
+unsigned int (*ref_difftest_getmem)(unsigned int addr) = NULL;
 void (*ref_difftest_regcpy)(void *dut, bool direction) = NULL;
 void (*ref_difftest_exec)(word_t n) = NULL;
 void (*ref_difftest_raise_intr)(word_t NO) = NULL;
@@ -53,6 +54,9 @@ void difftest_init(char* ref_so_file, word_t img_size){
 
     ref_difftest_exec = (void (*)(word_t)) dlsym(handle, "difftest_exec");
     assert(ref_difftest_exec);
+
+    ref_difftest_getmem = (unsigned int(*)(unsigned int)) dlsym(handle, "difftest_getmem");
+    assert(ref_difftest_getmem);
 
     ref_difftest_raise_intr = (void (*)(word_t)) dlsym(handle, "difftest_raise_intr"); // Not implemented in NEMU
     assert(ref_difftest_raise_intr);
@@ -89,6 +93,24 @@ void difftest_one_exec(){
     }
     ref_difftest_exec(1);
     return;
+}
+
+bool difftest_check_mem() {
+    if (is_skip_ref) {
+        return true;
+    }
+
+    for (unsigned int addr = MEM_START; addr < MEM_END; addr = addr + 4) {
+        unsigned int dut_val = pmem_read(addr, 4);
+        unsigned int ref_val = ref_difftest_getmem(addr);
+
+        if (dut_val != ref_val) {
+            printf("[difftest] ERROR: At PC = 0x%x, addr = 0x%x, DUT MEM = 0x%x, REF MEM = 0x%x\n", cpu.pc, addr, dut_val, ref_val);
+            return false;
+        }
+    }
+
+    return true;
 }
 
 bool difftest_check_reg(){
