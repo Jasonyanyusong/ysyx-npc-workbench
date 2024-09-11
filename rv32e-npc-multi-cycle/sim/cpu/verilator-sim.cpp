@@ -132,6 +132,9 @@ void sim_mem_top() {
 
     // Write
     if (top -> mem_io_mem_w_enable_o) {
+        printf("[verilator-sim : sim_mem_top] received memory write, size = ");
+        printf("%d, addr = 0x%x, data = 0x%x\n", top -> mem_io_mem_w_size_o, top -> mem_io_mem_w_addr_o, top -> mem_io_mem_w_data_o);
+
         if (top -> mem_io_mem_w_size_o == TOP_MEM_B) {
             top -> mem_io_mem_w_valid_i = 0b1;
             pmem_write(top -> mem_io_mem_w_addr_o, 1, top -> mem_io_mem_w_data_o);
