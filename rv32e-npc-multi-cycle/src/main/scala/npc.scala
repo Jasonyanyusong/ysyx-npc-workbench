@@ -92,9 +92,36 @@ class NPC_AXI_IO extends Bundle {
     val axi_b_id_i = Input(UInt(4.W))
 }
 
+class NPC_DEBUG_IO extends Bundle {
+    val debug_gpr_00_o = Output(UInt(32.W))
+    val debug_gpr_01_o = Output(UInt(32.W))
+    val debug_gpr_02_o = Output(UInt(32.W))
+    val debug_gpr_03_o = Output(UInt(32.W))
+    val debug_gpr_04_o = Output(UInt(32.W))
+    val debug_gpr_05_o = Output(UInt(32.W))
+    val debug_gpr_06_o = Output(UInt(32.W))
+    val debug_gpr_07_o = Output(UInt(32.W))
+    val debug_gpr_08_o = Output(UInt(32.W))
+    val debug_gpr_09_o = Output(UInt(32.W))
+    val debug_gpr_10_o = Output(UInt(32.W))
+    val debug_gpr_11_o = Output(UInt(32.W))
+    val debug_gpr_12_o = Output(UInt(32.W))
+    val debug_gpr_13_o = Output(UInt(32.W))
+    val debug_gpr_14_o = Output(UInt(32.W))
+    val debug_gpr_15_o = Output(UInt(32.W))
+
+    val debug_pc_o = Output(UInt(32.W))
+
+    val debug_commit_o = Output(Bool())
+    val debug_ebreak_o = Output(Bool())
+}
+
 class NPC extends Module {
     // IO (outer AXI 4)
     val axi_io = IO(new NPC_AXI_IO)
+
+    // debug io, used for send PC related informations (difftest)
+    val debug_io = IO(new NPC_DEBUG_IO)
 
     // State register
     val NPC_State_Register = RegInit(NPC_State.NPC_State_Idle) // start with idle state
@@ -403,4 +430,28 @@ class NPC extends Module {
         // If the state is stop (ebreak), continue to ebreak and do nothing else
         (NPC_State_Register === NPC_State.NPC_State_Stop) -> (NPC_State.NPC_State_Stop)
     ))
+
+    // debug ports, used for difftest
+    debug_io.debug_commit_o := RegNext(WBU.wbu_internal_io.wbu_internal_valid_o)
+
+    debug_io.debug_pc_o := NPC_PC_Register
+
+    debug_io.debug_gpr_00_o := NPC_GPR_Read(0.U)
+    debug_io.debug_gpr_01_o := NPC_GPR_Read(1.U)
+    debug_io.debug_gpr_02_o := NPC_GPR_Read(2.U)
+    debug_io.debug_gpr_03_o := NPC_GPR_Read(3.U)
+    debug_io.debug_gpr_04_o := NPC_GPR_Read(4.U)
+    debug_io.debug_gpr_05_o := NPC_GPR_Read(5.U)
+    debug_io.debug_gpr_06_o := NPC_GPR_Read(6.U)
+    debug_io.debug_gpr_07_o := NPC_GPR_Read(7.U)
+    debug_io.debug_gpr_08_o := NPC_GPR_Read(8.U)
+    debug_io.debug_gpr_09_o := NPC_GPR_Read(9.U)
+    debug_io.debug_gpr_10_o := NPC_GPR_Read(10.U)
+    debug_io.debug_gpr_11_o := NPC_GPR_Read(11.U)
+    debug_io.debug_gpr_12_o := NPC_GPR_Read(12.U)
+    debug_io.debug_gpr_13_o := NPC_GPR_Read(13.U)
+    debug_io.debug_gpr_14_o := NPC_GPR_Read(14.U)
+    debug_io.debug_gpr_15_o := NPC_GPR_Read(15.U)
+
+    debug_io.debug_ebreak_o := NPC_State_Register === NPC_State.NPC_State_Stop
 }

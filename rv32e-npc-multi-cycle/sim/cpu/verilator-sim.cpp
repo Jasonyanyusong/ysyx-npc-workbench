@@ -127,6 +127,7 @@ void sim_mem_top() {
         }
     } else {
         top -> mem_io_mem_r_valid_i = 0b0;
+        top -> mem_io_mem_r_data_i = 0;
     }
 
     // Write
@@ -176,26 +177,29 @@ void sim_one_cycle(){
     }*/
 
     #ifdef CONFIG_DIFFTEST
-    if(top -> ioNPCDebug_Worked && top -> ioNPCDebug_PC_COMMIT != last_diff_pc){
+    if(top -> top_debug_io_debug_commit_o){
         #ifdef CONFIG_RUNTIME_MESSAGE
         printf("[verilator-sim : sim_one_cycle] WBU indicated it worked, so do a difftest at pc = 0x%x\n", cpu.pc);
         #endif
 
-        if(top -> ioNPCDebug_LS_Taken && (!in_pmem(top -> ioNPCDebug_LS_Addr))){
+        // TODO: support device difftest
+        /*if(top -> ioNPCDebug_LS_Taken && (!in_pmem(top -> ioNPCDebug_LS_Addr))){
             difftest_skip_ref();
-        }
+        }*/
 
         difftest_one_exec();
         if(!difftest_check_reg()){
             npc_state.state = NPC_ABORT;
+        } else {
+            printf("[verilator-sim : sim_one_cycle] Difftest success at 0x%x\n", cpu.pc);
         }
-        last_diff_pc = top -> ioNPCDebug_PC_COMMIT;
+        //last_diff_pc = top -> ioNPCDebug_PC_COMMIT;
     }
     #endif
 
-    /*if(top -> ioNPCDebug_Halt){
-        printf("NPC simulation finished at cycle = %ld, a0 = %d, ", cycle - 1, top -> ioNPCDebug_GPR10);
-        if(top -> ioNPCDebug_GPR10 == 0){
+    if(top -> top_debug_io_debug_ebreak_o){
+        printf("NPC simulation finished at cycle = %ld, a0 = %d, ", cycle - 1, top -> top_debug_io_debug_gpr_10_o);
+        if(top -> top_debug_io_debug_gpr_10_o == 0){
             printf("HIT GOOD TRAP\n");
         }else{
             printf("HIT BAD  TRAP\n");
@@ -205,7 +209,7 @@ void sim_one_cycle(){
         #ifdef CONFIG_DIFFTEST
         difftest_one_exec();
         #endif
-    }*/
+    }
 
     #ifdef CONFIG_RUNTIME_MESSAGE
     printf("\n\n");

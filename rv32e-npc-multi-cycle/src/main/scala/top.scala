@@ -24,9 +24,36 @@ class TOP_MEM_IO extends Bundle {
     val mem_w_valid_i = Input(Bool())
 }
 
+class TOP_DEBUG_IO extends Bundle {
+    val debug_gpr_00_o = Output(UInt(32.W))
+    val debug_gpr_01_o = Output(UInt(32.W))
+    val debug_gpr_02_o = Output(UInt(32.W))
+    val debug_gpr_03_o = Output(UInt(32.W))
+    val debug_gpr_04_o = Output(UInt(32.W))
+    val debug_gpr_05_o = Output(UInt(32.W))
+    val debug_gpr_06_o = Output(UInt(32.W))
+    val debug_gpr_07_o = Output(UInt(32.W))
+    val debug_gpr_08_o = Output(UInt(32.W))
+    val debug_gpr_09_o = Output(UInt(32.W))
+    val debug_gpr_10_o = Output(UInt(32.W))
+    val debug_gpr_11_o = Output(UInt(32.W))
+    val debug_gpr_12_o = Output(UInt(32.W))
+    val debug_gpr_13_o = Output(UInt(32.W))
+    val debug_gpr_14_o = Output(UInt(32.W))
+    val debug_gpr_15_o = Output(UInt(32.W))
+
+    val debug_pc_o = Output(UInt(32.W))
+
+    val debug_commit_o = Output(Bool())
+    val debug_ebreak_o = Output(Bool())
+}
+
 class YSYX_TOP extends Module {
     // IO (direct/atomic memory operations)
     val mem_io = IO(new TOP_MEM_IO)
+
+    // IO debug (difftest)
+    val top_debug_io = IO(new TOP_DEBUG_IO)
 
     // Initiate NPC
     val Core_0 = Module(new NPC)
@@ -64,4 +91,25 @@ class YSYX_TOP extends Module {
     mem_io.mem_w_size_o := Core_0.axi_io.axi_aw_size_o
     mem_io.mem_w_data_o := Core_0.axi_io.axi_w_data_o(31, 0)
     mem_io.mem_w_enable_o := Core_0.axi_io.axi_aw_valid_o && Core_0.axi_io.axi_w_valid_o
+
+    // IO for debugging
+    top_debug_io.debug_commit_o := Core_0.debug_io.debug_commit_o
+    top_debug_io.debug_ebreak_o := Core_0.debug_io.debug_ebreak_o
+    top_debug_io.debug_pc_o := Core_0.debug_io.debug_pc_o
+    top_debug_io.debug_gpr_00_o := Core_0.debug_io.debug_gpr_00_o
+    top_debug_io.debug_gpr_01_o := Core_0.debug_io.debug_gpr_01_o
+    top_debug_io.debug_gpr_02_o := Core_0.debug_io.debug_gpr_02_o
+    top_debug_io.debug_gpr_03_o := Core_0.debug_io.debug_gpr_03_o
+    top_debug_io.debug_gpr_04_o := Core_0.debug_io.debug_gpr_04_o
+    top_debug_io.debug_gpr_05_o := Core_0.debug_io.debug_gpr_05_o
+    top_debug_io.debug_gpr_06_o := Core_0.debug_io.debug_gpr_06_o
+    top_debug_io.debug_gpr_07_o := Core_0.debug_io.debug_gpr_07_o
+    top_debug_io.debug_gpr_08_o := Core_0.debug_io.debug_gpr_08_o
+    top_debug_io.debug_gpr_09_o := Core_0.debug_io.debug_gpr_09_o
+    top_debug_io.debug_gpr_10_o := Core_0.debug_io.debug_gpr_10_o
+    top_debug_io.debug_gpr_11_o := Core_0.debug_io.debug_gpr_11_o
+    top_debug_io.debug_gpr_12_o := Core_0.debug_io.debug_gpr_12_o
+    top_debug_io.debug_gpr_13_o := Core_0.debug_io.debug_gpr_13_o
+    top_debug_io.debug_gpr_14_o := Core_0.debug_io.debug_gpr_14_o
+    top_debug_io.debug_gpr_15_o := Core_0.debug_io.debug_gpr_15_o
 }

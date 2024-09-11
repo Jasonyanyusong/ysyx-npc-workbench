@@ -476,7 +476,7 @@ class NPC_IDU extends Module {
     idu_internal_io.idu_internal_dnpc_o := Lookup(idu_internal_io.idu_internal_inst_i, idu_internal_io.idu_internal_pc_i + 4.U, Array(
         // unconditional jump
         NPC_IDU_Insts.JAL    -> (idu_internal_io.idu_internal_pc_i + imm),
-        NPC_IDU_Insts.JALR   -> ((idu_internal_io.idu_internal_pc_i + IDU_RS1_Val) & Cat(Fill(31, 1.U(1.W)), Fill(1, 0.U(1.W)))),
+        NPC_IDU_Insts.JALR   -> ((imm + IDU_RS1_Val) & Cat(Fill(31, 1.U(1.W)), Fill(1, 0.U(1.W)))),
         
         // conditional jump
         NPC_IDU_Insts.BEQ    -> Mux(IDU_RS1_Val === IDU_RS2_Val,

@@ -18,35 +18,35 @@
 
 // CSR list: mstatus mtvec mepc macuse
 
-/*void get_regs(){
+void get_regs(){
     assert(top);
 
-    cpu.pc = top -> ioNPCDebug_PC_DYNAMIC;
+    cpu.pc = top -> top_debug_io_debug_pc_o;
 
     if(NR_GPRs == 16 || NR_GPRs == 32){
-        cpu.gpr[0]  = top -> ioNPCDebug_GPR00;
-        cpu.gpr[1]  = top -> ioNPCDebug_GPR01;
-        cpu.gpr[2]  = top -> ioNPCDebug_GPR02;
-        cpu.gpr[3]  = top -> ioNPCDebug_GPR03;
-        cpu.gpr[4]  = top -> ioNPCDebug_GPR04;
-        cpu.gpr[5]  = top -> ioNPCDebug_GPR05;
-        cpu.gpr[6]  = top -> ioNPCDebug_GPR06;
-        cpu.gpr[7]  = top -> ioNPCDebug_GPR07;
-        cpu.gpr[8]  = top -> ioNPCDebug_GPR08;
-        cpu.gpr[9]  = top -> ioNPCDebug_GPR09;
-        cpu.gpr[10] = top -> ioNPCDebug_GPR10;
-        cpu.gpr[11] = top -> ioNPCDebug_GPR11;
-        cpu.gpr[12] = top -> ioNPCDebug_GPR12;
-        cpu.gpr[13] = top -> ioNPCDebug_GPR13;
-        cpu.gpr[14] = top -> ioNPCDebug_GPR14;
-        cpu.gpr[15] = top -> ioNPCDebug_GPR15;
+        cpu.gpr[0]  = top -> top_debug_io_debug_gpr_00_o;
+        cpu.gpr[1]  = top -> top_debug_io_debug_gpr_01_o;
+        cpu.gpr[2]  = top -> top_debug_io_debug_gpr_02_o;
+        cpu.gpr[3]  = top -> top_debug_io_debug_gpr_03_o;
+        cpu.gpr[4]  = top -> top_debug_io_debug_gpr_04_o;
+        cpu.gpr[5]  = top -> top_debug_io_debug_gpr_05_o;
+        cpu.gpr[6]  = top -> top_debug_io_debug_gpr_06_o;
+        cpu.gpr[7]  = top -> top_debug_io_debug_gpr_07_o;
+        cpu.gpr[8]  = top -> top_debug_io_debug_gpr_08_o;
+        cpu.gpr[9]  = top -> top_debug_io_debug_gpr_09_o;
+        cpu.gpr[10] = top -> top_debug_io_debug_gpr_10_o;
+        cpu.gpr[11] = top -> top_debug_io_debug_gpr_11_o;
+        cpu.gpr[12] = top -> top_debug_io_debug_gpr_12_o;
+        cpu.gpr[13] = top -> top_debug_io_debug_gpr_13_o;
+        cpu.gpr[14] = top -> top_debug_io_debug_gpr_14_o;
+        cpu.gpr[15] = top -> top_debug_io_debug_gpr_15_o;
     }else{
         printf("[register] wrong GPR number\n");
         assert(0);
     }
 
     return;
-}*/
+}
 
 void display_regs(){
     assert(top);
